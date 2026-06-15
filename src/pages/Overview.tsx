@@ -126,9 +126,9 @@ export function Overview({ setTab }: OverviewProps) {
         {/* Row 1 */}
         <div className="lg:col-span-1 h-full">
           <WinRateDonut 
-            wins={uniqueMatchesResults.wins || totalWins} 
-            draws={uniqueMatchesResults.draws || totalDraws} 
-            losses={uniqueMatchesResults.losses || totalLosses} 
+            wins={donutStats.wins || totalWins} 
+            draws={donutStats.draws || totalDraws} 
+            losses={donutStats.losses || totalLosses} 
           />
         </div>
         <div className="lg:col-span-2 h-full">
