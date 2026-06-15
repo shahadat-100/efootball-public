@@ -53,7 +53,7 @@ export function Compare() {
               <div className="p-1 rounded-full border border-white/10 mb-3 bg-background" style={{ borderColor: `${accentColor}80` }}>
                 <Avatar name={p.name} src={p.imageUrl} size={64} />
               </div>
-              <h3 className="text-white font-black text-lg tracking-wide leading-none mb-1">{p.short.toUpperCase()}</h3>
+              <h3 className="text-foreground font-black text-lg tracking-wide leading-none mb-1">{p.short.toUpperCase()}</h3>
               <span className="text-[10px] font-bold text-muted-foreground bg-white/5 px-2 py-0.5 rounded-full">
                 {p.team} · #{p.jerseyNumber}
               </span>
