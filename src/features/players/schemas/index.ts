@@ -55,6 +55,7 @@ export const playerSchema = z.object({
   jerseyNumber: z.number().optional(),
   playerRoles: z.array(z.string()).default([]),
   customTags: z.array(z.string()).default([]),
+  customStringTags: z.array(z.string()).default([]),
   createdAt: z.string(),
   seasons: z.array(seasonSchema).default([]),
   email: z.string().email('Valid email is required'),
