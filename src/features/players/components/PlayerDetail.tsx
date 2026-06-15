@@ -57,6 +57,28 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     { label: 'Losses', value: monthlyEntries.filter(e => e.result === 'loss').length, color: '#ef4444' }
   ];
 
+  const getFormStatus = () => {
+    const recent10 = historyEntries.slice(0, 10);
+    if (recent10.length < 10) {
+      return { text: 'STABLE / N/A', color: '#9ca3af', icon: '➖' };
+    }
+    
+    const calcPoints = (entries: typeof historyEntries) => 
+      entries.reduce((sum, e) => sum + (e.result === 'win' ? 3 : e.result === 'draw' ? 1 : 0), 0) / entries.length;
+
+    const first5Avg = calcPoints(recent10.slice(0, 5)); // newer
+    const last5Avg = calcPoints(recent10.slice(5, 10)); // older
+
+    if (first5Avg > last5Avg) {
+      return { text: 'IN FORM', color: '#10b981', icon: '📈' };
+    } else if (first5Avg < last5Avg) {
+      return { text: 'OUT OF FORM', color: '#ef4444', icon: '📉' };
+    } else {
+      return { text: 'STABLE', color: '#f59e0b', icon: '➖' };
+    }
+  };
+  const formStatus = getFormStatus();
+
   // Points calculation helper (matching PointsLeaderboard)
   const calcSeasonPoints = (s: any) =>
     (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks;
@@ -155,6 +177,20 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                               );
                             });
                           })()}
+                        </div>
+                      </div>
+
+                      {/* Form Status */}
+                      <div>
+                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Form Trend</h4>
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm border flex items-center gap-1.5" 
+                            style={{ backgroundColor: `${formStatus.color}15`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
+                          >
+                            <span>{formStatus.icon}</span>
+                            {formStatus.text}
+                          </span>
                         </div>
                       </div>
 
