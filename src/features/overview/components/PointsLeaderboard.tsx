@@ -54,6 +54,19 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
   // ── Overall filter ──
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
 
+  // পাবলিক সাইটের লিডারবোর্ড বা টপ XI এর জন্য ফাস্ট কোড
+  const fetchLeaderboard = async () => {
+    const { supabase } = await import('@/lib/supabase');
+    const { data, error } = await supabase.rpc('get_player_stats_period', {
+      p_start_date: '2024-01-01', // আপনার ইচ্ছামতো ডেট দিতে পারেন
+      p_end_date: '2024-12-31'
+    });
+    if (data) {
+      console.log("Fast Leaderboard Data:", data);
+      // data গুলোকে আপনার স্টেটে সেভ করে দিন
+    }
+  };
+
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
     // Current week bucket
     let activeWeekStart = 1, activeWeekEnd = 7, activeWeekName = 'Week 1';

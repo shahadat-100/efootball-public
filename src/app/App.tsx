@@ -20,17 +20,7 @@ export function AppShell() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    state.fetchPlayers();
-    state.fetchSeasons().then(() => {
-      state.fetchPlayerSeasonStats();
-      state.fetchCompetitions();
-    });
-    state.fetchMatches();
-    state.fetchMatchEntries();
-    state.fetchNews();
-    state.fetchHallOfFame();
-    state.fetchAvailableRoles();
-    state.fetchAvailableTags();
+    state.initializeData();
   }, []);
 
   // Close mobile menu on route change
