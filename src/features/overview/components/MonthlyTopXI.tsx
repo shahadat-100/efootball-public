@@ -141,11 +141,11 @@ export function MonthlyTopXI({ players, matchEntries }: MonthlyTopXIProps) {
                     {/* Bottom Badges */}
                     <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
                       <div className="bg-[#1a1a1a] text-white flex items-center gap-1 px-2 py-0.5 rounded-full shadow-md">
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="opacity-80"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span className="text-[9px] font-semibold opacity-70">MP</span>
                         <span className="text-[10px] font-bold">{pd.matches}</span>
                       </div>
                       <div className="bg-[#1a1a1a] text-white flex items-center gap-1 px-2 py-0.5 rounded-full shadow-md">
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="opacity-80"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span className="text-[9px] font-semibold opacity-70">Pts</span>
                         <span className="text-[10px] font-bold">{pd.points}</span>
                       </div>
                     </div>
