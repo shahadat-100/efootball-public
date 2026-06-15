@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { router } from './routes';
 
 export function AppProvider() {  const [queryClient] = useState(() => new QueryClient({
@@ -14,6 +15,7 @@ export function AppProvider() {  const [queryClient] = useState(() => new QueryC
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <SpeedInsights />
     </QueryClientProvider>
   );
 }
