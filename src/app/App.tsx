@@ -19,9 +19,11 @@ export function AppShell() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const initializeData = useFootballStore(state => state.initializeData);
+
   useEffect(() => {
-    state.initializeData();
-  }, []);
+    initializeData();
+  }, [initializeData]);
 
   // Close mobile menu on route change
   useEffect(() => {

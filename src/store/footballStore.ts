@@ -175,7 +175,7 @@ interface FootballStore {
 
 export const useFootballStore = create<FootballStore>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       players: [],
       matches: [],
       matchEntries: [],
@@ -256,12 +256,12 @@ export const useFootballStore = create<FootballStore>()(
             createdAt: p.createdat || '',
             seasons: [],
           }));
-          set({ players: mappedPlayers });
+          set({ players: mappedPlayers as Player[] });
         } catch (error) {
           console.error('Error fetching players:', error);
         }
       },
-      setPlayers: (players) => set({ players }),
+      setPlayers: (players: Player[]) => set({ players }),
       
       fetchMatches: async () => {
         const { data, error } = await supabase.from('matches').select('*, competitions(name)');
@@ -270,7 +270,7 @@ export const useFootballStore = create<FootballStore>()(
         }
         if (error) console.error('Error fetching matches:', error);
       },
-      setMatches: (matches) => set({ matches }),
+      setMatches: (matches: Match[]) => set({ matches }),
       
       fetchMatchEntries: async () => {
         const { data, error } = await supabase.from('match_entries').select('*, matches(date)');
@@ -279,13 +279,13 @@ export const useFootballStore = create<FootballStore>()(
         }
         if (error) console.error('Error fetching match entries:', error);
       },
-      setMatchEntries: (matchEntries) => set({ matchEntries }),
+      setMatchEntries: (matchEntries: MatchEntry[]) => set({ matchEntries }),
       fetchNews: async () => {
         const { data, error } = await supabase.from('news').select('*');
         if (data) set({ news: data as NewsArticle[] });
         if (error) console.error('Error fetching news:', error);
       },
-      setNews: (news) => set({ news }),
+      setNews: (news: NewsArticle[]) => set({ news }),
       fetchSeasons: async () => {
         const { data, error } = await supabase.from('season').select('*').order('name', { ascending: true });
         if (data) {
@@ -391,6 +391,6 @@ export const useFootballStore = create<FootballStore>()(
       },
 
     }),
-    { enabled: process.env.NODE_ENV !== 'production' }
+    { enabled: import.meta.env.MODE !== 'production' }
   )
 );
