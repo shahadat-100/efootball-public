@@ -63,27 +63,27 @@ export function Overview({ setTab }: OverviewProps) {
   ];
 
   // ── 2. Win / Draw / Loss Data ──
-  // Use unique match IDs to calculate actual team W/D/L, not per-player entries
+  // Source: playerSeasonStats (authoritative Supabase DB totals).
+  // Sum across ALL players then divide by player count to get per-match team record,
+  // OR just show aggregate individual player record from match entries directly.
   const uniqueMatchesResults = useMemo(() => {
-    // If we have actual match result status we would use `matches`, 
-    // but right now matches table doesn't store outcome explicitly in the schema shown.
-    // Instead we derive team win/draw/loss from matchEntries. 
-    // Just looking at one player's result per match gives the team result.
-    const matchResultsMap = new Map();
+    // Build matchResultsMap for the Recent Matches list (needs matchId → result lookup)
+    const matchResultsMap = new Map<string, string>();
     matchEntries.forEach(e => {
       if (e.matchId && !matchResultsMap.has(e.matchId) && e.result) {
         matchResultsMap.set(e.matchId, e.result);
       }
     });
-    
-    let w = 0, d = 0, l = 0;
-    matchResultsMap.forEach(res => {
-      if (res === 'win') w++;
-      if (res === 'draw') d++;
-      if (res === 'loss') l++;
-    });
-    return { wins: w, draws: d, losses: l, matchResultsMap };
+    return { matchResultsMap };
   }, [matchEntries]);
+
+  // Win/Draw/Loss for the donut — sum directly from playerSeasonStats (real DB data)
+  const donutStats = useMemo(() => {
+    const wins   = playerSeasonStats.reduce((s, e) => s + (e.wins   || 0), 0);
+    const draws  = playerSeasonStats.reduce((s, e) => s + (e.draws  || 0), 0);
+    const losses = playerSeasonStats.reduce((s, e) => s + (e.losses || 0), 0);
+    return { wins, draws, losses };
+  }, [playerSeasonStats]);
 
   // ── 3. Awards Data (MOTM / Clean Sheets / Hat-tricks) ──
   // topScorers is now computed inside TopScorersBars with season filter support

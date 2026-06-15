@@ -58,7 +58,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   ];
 
   // Points calculation helper (matching PointsLeaderboard)
-  const calcSeasonPoints = (s: any) => 
+  const calcSeasonPoints = (s: any) =>
     (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks;
 
   // Compute Leaderboard Rank based on total points
@@ -67,7 +67,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     const totalPoints = pStats.reduce((acc, s) => acc + calcSeasonPoints(s), 0);
     return { id: p.id, points: totalPoints };
   }).sort((a, b) => b.points - a.points);
-  
+
   const rankIndex = playerRanks.findIndex(r => r.id === player.id);
   const currentRank = rankIndex !== -1 ? rankIndex + 1 : undefined;
 
@@ -116,8 +116,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                       {player.email && (
                         <>
                           <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Email</span>
-                              <span className="text-foreground font-semibold">{player.email}</span>
+                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Email</span>
+                            <span className="text-foreground font-semibold">{player.email}</span>
                           </div>
                           <div className="w-px h-4 bg-border hidden sm:block"></div>
                         </>
@@ -139,10 +139,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                             if (recent10.length === 0) return <span className="text-[11px] text-muted-foreground">No matches yet</span>;
                             return recent10.map((entry, i) => {
                               const result = entry.result || 'draw';
-                              const isWin  = result === 'win';
+                              const isWin = result === 'win';
                               const isDraw = result === 'draw';
                               const bg = isWin ? '#14532d' : isDraw ? '#78350f' : '#7f1d1d';
-                              const c  = isWin ? '#4ade80' : isDraw ? '#fcd34d' : '#f87171';
+                              const c = isWin ? '#4ade80' : isDraw ? '#fcd34d' : '#f87171';
                               return (
                                 <div
                                   key={entry.id || i}
@@ -185,15 +185,15 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               </div>
             </div>
           </div>
-          
+
           <div className="w-full lg:w-auto lg:min-w-[250px] border-t lg:border-t-0 lg:border-l border-border pt-4 lg:pt-0 lg:pl-8 flex justify-center">
-             <PlayerRadarChart stats={{
-               goals: stats.totalGoals,
-               cleanSheets: stats.totalCleanSheets,
-               motm: stats.totalMOTM,
-               wins: stats.totalWins,
-               matches: stats.totalMatches
-             }} />
+            <PlayerRadarChart stats={{
+              goals: stats.totalGoals,
+              cleanSheets: stats.totalCleanSheets,
+              motm: stats.totalMOTM,
+              wins: stats.totalWins,
+              matches: stats.totalMatches
+            }} />
           </div>
         </div>
       </div>
@@ -202,15 +202,15 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         <h3 className="font-semibold text-[14px] mb-4 border-b border-border pb-2">Career Stats</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
           {[
-            { label: 'Matches',       value: stats.totalMatches,      color: '#6366f1', bg: 'rgba(99,102,241,0.10)',  icon: '🎮' },
-            { label: 'Goals',         value: stats.totalGoals,        color: '#10b981', bg: 'rgba(16,185,129,0.10)', icon: '⚽' },
-            { label: 'Goals Conceded',value: stats.totalGoalsConceded,color: '#ef4444', bg: 'rgba(239,68,68,0.10)',  icon: '🥅' },
-            { label: 'Wins',          value: stats.totalWins,         color: '#22c55e', bg: 'rgba(34,197,94,0.10)',  icon: '🏆' },
-            { label: 'Draws',         value: stats.totalDraws,        color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', icon: '🤝' },
-            { label: 'Losses',        value: stats.totalLosses,       color: '#f87171', bg: 'rgba(248,113,113,0.10)',icon: '❌' },
-            { label: 'MOTM',          value: stats.totalMOTM,         color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: '🏅' },
-            { label: 'Clean Sheets',  value: stats.totalCleanSheets,  color: '#38bdf8', bg: 'rgba(56,189,248,0.10)', icon: '🧤' },
-            { label: 'Hat-tricks',    value: stats.totalHattricks,    color: '#a855f7', bg: 'rgba(168,85,247,0.10)', icon: '🎩' },
+            { label: 'Matches', value: stats.totalMatches, color: '#6366f1', bg: 'rgba(99,102,241,0.10)', icon: '🎮' },
+            { label: 'Goals', value: stats.totalGoals, color: '#10b981', bg: 'rgba(16,185,129,0.10)', icon: '⚽' },
+            { label: 'Goals Conceded', value: stats.totalGoalsConceded, color: '#ef4444', bg: 'rgba(239,68,68,0.10)', icon: '🥅' },
+            { label: 'Wins', value: stats.totalWins, color: '#22c55e', bg: 'rgba(34,197,94,0.10)', icon: '🏆' },
+            { label: 'Draws', value: stats.totalDraws, color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', icon: '🤝' },
+            { label: 'Losses', value: stats.totalLosses, color: '#f87171', bg: 'rgba(248,113,113,0.10)', icon: '❌' },
+            { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: '🏅' },
+            { label: 'Clean Sheets', value: stats.totalCleanSheets, color: '#38bdf8', bg: 'rgba(56,189,248,0.10)', icon: '🧤' },
+            { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', bg: 'rgba(168,85,247,0.10)', icon: '🎩' },
           ].map(({ label, value, color, bg, icon }) => (
             <div
               key={label}
@@ -246,12 +246,12 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             season: `eFootball ${sb.year}`,
             matches: sb.matches,
             appearances: sb.matches,
-            wins: sWins || Math.floor(sb.matches * (stats.totalWins/Math.max(1, stats.totalMatches))),
+            wins: sWins || Math.floor(sb.matches * (stats.totalWins / Math.max(1, stats.totalMatches))),
             draws: sDraws,
             losses: sLosses,
-            winRate: winRate || (stats.totalMatches > 0 ? (stats.totalWins/stats.totalMatches)*100 : 0),
-            drawRate: drawRate || (stats.totalMatches > 0 ? (stats.totalDraws/stats.totalMatches)*100 : 0),
-            lossRate: lossRate || (stats.totalMatches > 0 ? (stats.totalLosses/stats.totalMatches)*100 : 0),
+            winRate: winRate || (stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0),
+            drawRate: drawRate || (stats.totalMatches > 0 ? (stats.totalDraws / stats.totalMatches) * 100 : 0),
+            lossRate: lossRate || (stats.totalMatches > 0 ? (stats.totalLosses / stats.totalMatches) * 100 : 0),
             goals: sb.goals,
             goalsConceded: sGoalsConc || Math.floor(sb.matches * 0.8),
             cleanSheets: sCS,
@@ -377,7 +377,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             <table className="w-full text-[12px] text-left">
               <thead className="bg-muted text-muted-foreground border-b border-border">
                 <tr>
-                  {['Date','Goals','Conceded','Result','Flags','Notes'].map(h => (
+                  {['Date', 'Goals', 'Conceded', 'Result', 'Flags', 'Notes'].map(h => (
                     <th key={h} className="px-3 py-2.5 font-medium">{h}</th>
                   ))}
                 </tr>

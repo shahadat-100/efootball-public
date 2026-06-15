@@ -8,15 +8,15 @@ export function usePlayerStats(playerId: string) {
     // ── Source: playerSeasonStats (consolidated totals per player per season) ──
     const stats = playerSeasonStats.filter(s => s.playerId === playerId);
 
-    const totalGoals         = stats.reduce((s, e) => s + (e.goals || 0), 0);
+    const totalGoals = stats.reduce((s, e) => s + (e.goals || 0), 0);
     const totalGoalsConceded = stats.reduce((s, e) => s + (e.goalsConceded || 0), 0);
-    const totalMatches       = stats.reduce((s, e) => s + (e.appearances || 0), 0);
-    const totalWins          = stats.reduce((s, e) => s + (e.wins || 0), 0);
-    const totalLosses        = stats.reduce((s, e) => s + (e.losses || 0), 0);
-    const totalDraws         = stats.reduce((s, e) => s + (e.draws || 0), 0);
-    const totalMOTM          = stats.reduce((s, e) => s + (e.motmCount || 0), 0);
-    const totalCleanSheets   = stats.reduce((s, e) => s + (e.cleansheets || 0), 0);
-    const totalHattricks     = stats.reduce((s, e) => s + (e.hattricks || 0), 0);
+    const totalMatches = stats.reduce((s, e) => s + (e.appearances || 0), 0);
+    const totalWins = stats.reduce((s, e) => s + (e.wins || 0), 0);
+    const totalLosses = stats.reduce((s, e) => s + (e.losses || 0), 0);
+    const totalDraws = stats.reduce((s, e) => s + (e.draws || 0), 0);
+    const totalMOTM = stats.reduce((s, e) => s + (e.motmCount || 0), 0);
+    const totalCleanSheets = stats.reduce((s, e) => s + (e.cleansheets || 0), 0);
+    const totalHattricks = stats.reduce((s, e) => s + (e.hattricks || 0), 0);
 
     const seasonBreakdown = stats.map(s => {
       const yearMatch = (s.seasonName ?? '').match(/\d+/);
