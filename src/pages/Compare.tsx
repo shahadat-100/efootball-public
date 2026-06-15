@@ -30,25 +30,25 @@ export function Compare() {
 
   const renderSelectorTile = (index: 1 | 2, p: ComputedPlayerStats | null, accentColor: string, accentColorClasses: string) => {
     return (
-      <div 
+      <div
         onClick={() => setSelectorTarget(index)}
         className={cn(
           "relative h-40 rounded-2xl border-2 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 overflow-hidden group",
           p ? `border-${accentColorClasses} bg-card/40` : "border-border/50 bg-card/20 hover:bg-card/40 border-dashed"
         )}
-        style={p ? { 
-          borderColor: `${accentColor}80`, 
-          boxShadow: `0 4px 20px ${accentColor}15, 0 10px 30px ${accentColor}10 inset` 
+        style={p ? {
+          borderColor: `${accentColor}80`,
+          boxShadow: `0 4px 20px ${accentColor}15, 0 10px 30px ${accentColor}10 inset`
         } : {}}
       >
         {p ? (
           <>
             <div className="absolute inset-0 bg-gradient-to-tr opacity-10" style={{ backgroundImage: `linear-gradient(to top right, transparent, ${accentColor})` }} />
-            
+
             <div className="absolute top-2 right-2 bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-black px-2 py-0.5 rounded-md tracking-widest z-10">
               RANK #{p.rank}
             </div>
-            
+
             <div className="relative z-10 flex flex-col items-center">
               <div className="p-1 rounded-full border border-white/10 mb-3 bg-background" style={{ borderColor: `${accentColor}80` }}>
                 <Avatar name={p.name} src={p.imageUrl} size={64} />
@@ -79,17 +79,17 @@ export function Compare() {
 
     // Leader Summary Logic
     let p1Points = 0, p2Points = 0;
-    if ((p1.wins/m1) > (p2.wins/m2)) p1Points++; else if ((p2.wins/m2) > (p1.wins/m1)) p2Points++;
-    if ((p1.goals/m1) > (p2.goals/m2)) p1Points++; else if ((p2.goals/m2) > (p1.goals/m1)) p2Points++;
-    if ((p1.ga/m1) < (p2.ga/m2)) p1Points++; else if ((p2.ga/m2) < (p1.ga/m1)) p2Points++; // lower is better
-    if ((p1.cleansheets/m1) > (p2.cleansheets/m2)) p1Points++; else if ((p2.cleansheets/m2) > (p1.cleansheets/m1)) p2Points++;
-    if ((p1.motm/m1) > (p2.motm/m2)) p1Points++; else if ((p2.motm/m2) > (p1.motm/m1)) p2Points++;
+    if ((p1.wins / m1) > (p2.wins / m2)) p1Points++; else if ((p2.wins / m2) > (p1.wins / m1)) p2Points++;
+    if ((p1.goals / m1) > (p2.goals / m2)) p1Points++; else if ((p2.goals / m2) > (p1.goals / m1)) p2Points++;
+    if ((p1.ga / m1) < (p2.ga / m2)) p1Points++; else if ((p2.ga / m2) < (p1.ga / m1)) p2Points++; // lower is better
+    if ((p1.cleansheets / m1) > (p2.cleansheets / m2)) p1Points++; else if ((p2.cleansheets / m2) > (p1.cleansheets / m1)) p2Points++;
+    if ((p1.motm / m1) > (p2.motm / m2)) p1Points++; else if ((p2.motm / m2) > (p1.motm / m1)) p2Points++;
 
     const p1Leading = p1Points >= p2Points;
     const winner = p1Leading ? p1 : p2;
     const leaderColor = p1Leading ? '#3b82f6' : '#ef4444';
 
-    const renderStatRow = (icon: string, label: string, val1Str: string, val2Str: string, winnerFlag: 0|1|2) => (
+    const renderStatRow = (icon: string, label: string, val1Str: string, val2Str: string, winnerFlag: 0 | 1 | 2) => (
       <div className="flex items-center gap-4 mb-6">
         <div className={cn("flex-1 text-right text-lg font-black", winnerFlag === 1 ? "text-blue-500 underline decoration-2 underline-offset-4" : "text-blue-500/70")}>
           {val1Str}
@@ -119,7 +119,7 @@ export function Compare() {
 
     return (
       <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
+
         {/* Radar & Bars Row */}
         <div className="mb-6 flex items-center gap-3">
           <div className="w-1 h-5 bg-amber-500 rounded-full" />
@@ -148,12 +148,12 @@ export function Compare() {
 
         {/* Summary Card */}
         <div className="mb-12">
-          <div 
+          <div
             className="rounded-3xl border-2 p-6 md:p-8 flex items-center gap-6"
-            style={{ 
-              borderColor: leaderColor, 
+            style={{
+              borderColor: leaderColor,
               backgroundColor: `${leaderColor}15`,
-              boxShadow: `0 10px 40px ${leaderColor}20` 
+              boxShadow: `0 10px 40px ${leaderColor}20`
             }}
           >
             <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${leaderColor}30` }}>
@@ -161,7 +161,9 @@ export function Compare() {
             </div>
             <div>
               <p className="text-[11px] font-black tracking-widest mb-1" style={{ color: leaderColor }}>SUMMARY CARD</p>
-              <h2 className="text-2xl md:text-3xl font-black text-white mb-2 uppercase leading-none">{winner.name} LEADING</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-amber-400 mb-2 uppercase leading-none">
+                {winner.name} LEADING
+              </h2>
               <p className="text-sm text-muted-foreground font-medium">
                 {winner.short} shows superior dominance in recent per-match performance metrics.
               </p>
@@ -177,13 +179,13 @@ export function Compare() {
 
         <div className="bg-card border border-border rounded-3xl p-6 md:p-10 mb-12 shadow-sm">
           {renderStatRow("🕒", "MATCH FREQUENCY", `${p1.matches}`, `${p2.matches}`, getLarger(p1.matches, p2.matches))}
-          {renderStatRow("🏆", "WIN RATE", `${(p1.wins/m1*100).toFixed(1)}%`, `${(p2.wins/m2*100).toFixed(1)}%`, getLarger(p1.wins/m1, p2.wins/m2))}
-          {renderStatRow("➖", "DRAW RATE", `${(p1.draws/m1*100).toFixed(1)}%`, `${(p2.draws/m2*100).toFixed(1)}%`, getLarger(p1.draws/m1, p2.draws/m2))}
-          {renderStatRow("✖️", "LOSS RATE", `${(p1.losses/m1*100).toFixed(1)}%`, `${(p2.losses/m2*100).toFixed(1)}%`, getLarger(p2.losses/m2, p1.losses/m1))}
-          {renderStatRow("⚽", "GOALS/MATCH", `${(p1.goals/m1).toFixed(2)}`, `${(p2.goals/m2).toFixed(2)}`, getLarger(p1.goals/m1, p2.goals/m2))}
-          {renderStatRow("🥅", "GA/MATCH", `${(p1.ga/m1).toFixed(2)}`, `${(p2.ga/m2).toFixed(2)}`, getLarger(p2.ga/m2, p1.ga/m1))}
-          {renderStatRow("🛡️", "CS RATE", `${(p1.cleansheets/m1*100).toFixed(1)}%`, `${(p2.cleansheets/m2*100).toFixed(1)}%`, getLarger(p1.cleansheets/m1, p2.cleansheets/m2))}
-          {renderStatRow("🎖️", "MOTM RATE", `${(p1.motm/m1*100).toFixed(1)}%`, `${(p2.motm/m2*100).toFixed(1)}%`, getLarger(p1.motm/m1, p2.motm/m2))}
+          {renderStatRow("🏆", "WIN RATE", `${(p1.wins / m1 * 100).toFixed(1)}%`, `${(p2.wins / m2 * 100).toFixed(1)}%`, getLarger(p1.wins / m1, p2.wins / m2))}
+          {renderStatRow("➖", "DRAW RATE", `${(p1.draws / m1 * 100).toFixed(1)}%`, `${(p2.draws / m2 * 100).toFixed(1)}%`, getLarger(p1.draws / m1, p2.draws / m2))}
+          {renderStatRow("✖️", "LOSS RATE", `${(p1.losses / m1 * 100).toFixed(1)}%`, `${(p2.losses / m2 * 100).toFixed(1)}%`, getLarger(p2.losses / m2, p1.losses / m1))}
+          {renderStatRow("⚽", "GOALS/MATCH", `${(p1.goals / m1).toFixed(2)}`, `${(p2.goals / m2).toFixed(2)}`, getLarger(p1.goals / m1, p2.goals / m2))}
+          {renderStatRow("🥅", "GA/MATCH", `${(p1.ga / m1).toFixed(2)}`, `${(p2.ga / m2).toFixed(2)}`, getLarger(p2.ga / m2, p1.ga / m1))}
+          {renderStatRow("🛡️", "CS RATE", `${(p1.cleansheets / m1 * 100).toFixed(1)}%`, `${(p2.cleansheets / m2 * 100).toFixed(1)}%`, getLarger(p1.cleansheets / m1, p2.cleansheets / m2))}
+          {renderStatRow("🎖️", "MOTM RATE", `${(p1.motm / m1 * 100).toFixed(1)}%`, `${(p2.motm / m2 * 100).toFixed(1)}%`, getLarger(p1.motm / m1, p2.motm / m2))}
         </div>
 
         {/* Raw Stats */}
@@ -221,7 +223,7 @@ export function Compare() {
         <div className="flex-1">
           {renderSelectorTile(1, p1, '#3b82f6', 'blue-500')}
         </div>
-        
+
         {/* VS Bubble */}
         <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-background border-2 border-border/80 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative z-10">
           <span className="text-amber-500 font-black italic text-sm md:text-lg tracking-tighter">VS</span>
@@ -234,7 +236,7 @@ export function Compare() {
 
       {/* Compare Button */}
       {p1 && p2 && !isComparing && (
-        <button 
+        <button
           onClick={() => setIsComparing(true)}
           className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-amber-950 font-black tracking-widest text-sm hover:from-amber-500 hover:to-amber-500 transition-all shadow-[0_5px_20px_rgba(245,158,11,0.3)] hover:-translate-y-1"
         >
@@ -247,10 +249,10 @@ export function Compare() {
 
       {/* Modal */}
       {selectorTarget && (
-        <PlayerSelectModal 
-          players={computedPlayers} 
-          onSelect={handleSelect} 
-          onClose={() => setSelectorTarget(null)} 
+        <PlayerSelectModal
+          players={computedPlayers}
+          onSelect={handleSelect}
+          onClose={() => setSelectorTarget(null)}
         />
       )}
     </div>
