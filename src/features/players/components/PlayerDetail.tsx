@@ -93,17 +93,81 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const rankIndex = playerRanks.findIndex(r => r.id === player.id);
   const currentRank = rankIndex !== -1 ? rankIndex + 1 : undefined;
 
-  // Compute Current Season Rank
-  const currentSeason = seasons.find(s => s.is_current) || seasons[seasons.length - 1];
-  let currentSeasonRank: number | undefined = undefined;
-  if (currentSeason) {
-    const seasonRanks = players.map(p => {
-      const pStats = playerSeasonStats.find(s => s.playerId === p.id && s.seasonId === currentSeason.id);
-      return { id: p.id, points: pStats ? calcSeasonPoints(pStats) : 0 };
+  // Compute Ranks for all seasons
+  const seasonRanksList = seasons.map(s => {
+    // Check if player played in this season (has stats and >0 appearances, or has any stats)
+    const pStats = playerSeasonStats.find(ps => ps.playerId === player.id && ps.seasonId === s.id);
+    if (!pStats || pStats.appearances === 0) return null; // Didn't play
+
+    const ranksForSeason = players.map(p => {
+      const pS = playerSeasonStats.find(ps => ps.playerId === p.id && ps.seasonId === s.id);
+      return { id: p.id, points: pS ? calcSeasonPoints(pS) : 0 };
     }).sort((a, b) => b.points - a.points);
-    const sRankIndex = seasonRanks.findIndex(r => r.id === player.id);
-    if (sRankIndex !== -1) currentSeasonRank = sRankIndex + 1;
-  }
+    
+    const sRankIndex = ranksForSeason.findIndex(r => r.id === player.id);
+    return {
+      seasonName: s.name,
+      rank: sRankIndex !== -1 ? sRankIndex + 1 : undefined,
+    };
+  }).filter(Boolean);
+
+  // Compute Recent Week and Recent Month Ranks
+  const currentDay = new Date().getDate();
+  const currentMonthIndex = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  let activeWeekStart = 1, activeWeekEnd = 7;
+  if (currentDay >= 8  && currentDay <= 14) { activeWeekStart = 8;  activeWeekEnd = 14; }
+  else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; }
+  else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; }
+
+  const calcEntryPoints = (e: any) => {
+    let pts = 0;
+    if (e.result === 'win') pts += 3;
+    else if (e.result === 'draw') pts += 1;
+    else if (e.result === 'loss') pts -= 1;
+    pts += (e.goals || 0);
+    pts -= (e.goalsConceded || 0);
+    pts += (e.motm ? 2 : 0);
+    pts += (e.hattricks || 0);
+    return pts;
+  };
+
+  const weeklyMap = new Map<string, number>();
+  const monthlyMap = new Map<string, number>();
+  players.forEach(p => { weeklyMap.set(p.id, 0); monthlyMap.set(p.id, 0); });
+
+  matchEntries.forEach(entry => {
+    if (!entry.date) return;
+    const d = new Date(entry.date);
+    const pts = calcEntryPoints(entry);
+
+    // Week
+    const isCurrentWeek =
+      d.getFullYear() === currentYear &&
+      d.getMonth() === currentMonthIndex &&
+      d.getDate() >= activeWeekStart &&
+      d.getDate() <= activeWeekEnd;
+    if (isCurrentWeek && weeklyMap.has(entry.playerId)) {
+      weeklyMap.set(entry.playerId, weeklyMap.get(entry.playerId)! + pts);
+    }
+
+    // Month
+    const isMonthMatch = d.getMonth() === currentMonthIndex && d.getFullYear() === currentYear;
+    if (isMonthMatch && monthlyMap.has(entry.playerId)) {
+      monthlyMap.set(entry.playerId, monthlyMap.get(entry.playerId)! + pts);
+    }
+  });
+
+  const getRankFromMap = (map: Map<string, number>, pId: string) => {
+    // Only rank players who actually have points or consider all? We'll rank all and just find index
+    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+    const idx = sorted.findIndex(([id]) => id === pId);
+    return idx !== -1 ? idx + 1 : undefined;
+  };
+
+  const recentWeekRank = getRankFromMap(weeklyMap, player.id);
+  const recentMonthRank = getRankFromMap(monthlyMap, player.id);
 
   return (
     <div>
@@ -205,16 +269,40 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                         </div>
                       </div>
 
-                      {/* Current Season Rank */}
+                      {/* Recent Month Rank */}
                       <div>
-                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Season Rank</h4>
+                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Month Rank</h4>
                         <div className="flex items-center gap-2">
-                          <span className="bg-blue-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
-                            #{currentSeasonRank || '-'}
+                          <span className="bg-emerald-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
+                            #{recentMonthRank || '-'}
                           </span>
-                          <span className="text-[11px] text-muted-foreground font-medium">{currentSeason?.name?.replace('Season ', '') || 'Current'}</span>
+                          <span className="text-[11px] text-muted-foreground font-medium">This Month</span>
                         </div>
                       </div>
+
+                      {/* Recent Week Rank */}
+                      <div>
+                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Week Rank</h4>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-purple-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
+                            #{recentWeekRank || '-'}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground font-medium">This Week</span>
+                        </div>
+                      </div>
+
+                      {/* Season Ranks */}
+                      {seasonRanksList.map((sr: any) => (
+                        <div key={sr.seasonName}>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">{sr.seasonName} Rank</h4>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-blue-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
+                              #{sr.rank || '-'}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground font-medium">Season</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
