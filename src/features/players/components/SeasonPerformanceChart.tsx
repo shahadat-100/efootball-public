@@ -53,12 +53,6 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
   const gridCount = 4;
   const gridVals = Array.from({ length: gridCount + 1 }, (_, i) => (yMax / gridCount) * i);
 
-  const BARS = [
-    { key: 'goals',         color: '#3b82f6', glow: '#3b82f620', label: 'Goals For',   offset: 0 },
-    { key: 'goalsConceded', color: '#f43f5e', glow: '#f43f5e20', label: 'Conceded',     offset: 1 },
-    { key: 'winRate',       color: '#10b981', glow: '#10b98120', label: 'Win Rate %',   offset: 2 },
-  ] as const;
-
   return (
     <div className="bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-5 shadow-xl shadow-black/5 h-full flex flex-col relative overflow-hidden">
       {/* Decorative glows */}
