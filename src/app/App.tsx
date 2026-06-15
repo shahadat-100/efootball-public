@@ -9,6 +9,7 @@ const NAV = [
   { id: 'players', label: 'Players', icon: Users },
   { id: 'entries', label: 'Match entries', icon: ClipboardList },
   { id: 'matches', label: 'Matches', icon: Trophy },
+  { id: 'compare', label: 'Compare', icon: Users },
   { id: 'news', label: 'News', icon: Newspaper },
   { id: 'hall-of-fame', label: 'Hall of Fame', icon: Award },
 ];
