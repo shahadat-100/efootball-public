@@ -9,6 +9,7 @@ import { WinRateDonut } from '@/features/overview/components/WinRateDonut';
 import { TopScorersBars } from '@/features/overview/components/TopScorersBars';
 import { AwardsLeaderboard } from '@/features/overview/components/AwardsLeaderboard';
 import { ActivityTimeline } from '@/features/overview/components/ActivityTimeline';
+import { PlayerSpotlights } from '@/features/overview/components/PlayerSpotlights';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 
@@ -86,17 +87,24 @@ export function Overview({ setTab }: OverviewProps) {
   const awardsData = useMemo(() => {
     return players.map(p => {
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
+      const entries = matchEntries.filter(e => e.playerId === p.id);
+      
+      const histMotm = stats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
+      const histCS = stats.reduce((acc, s) => acc + (s.cleansheets || 0), 0);
+      const histHT = stats.reduce((acc, s) => acc + (s.hattricks || 0), 0);
+
+      const liveMotm = entries.filter(e => e.motm).length;
+      const liveCS = entries.filter(e => e.cleanSheet).length;
+      const liveHT = entries.reduce((acc, e) => acc + (e.hattricks || 0), 0);
+
       return {
         player: p,
-        goals: stats.reduce((acc, s) => acc + (s.goals || 0), 0),
-        conceded: stats.reduce((acc, s) => acc + (s.goalsConceded || 0), 0),
-        motm: stats.reduce((acc, s) => acc + (s.motmCount || 0), 0),
-        cleanSheets: stats.reduce((acc, s) => acc + (s.cleansheets || 0), 0),
-        hattricks: stats.reduce((acc, s) => acc + (s.hattricks || 0), 0),
-        form: [] as string[],
+        motm: histMotm + liveMotm,
+        cleanSheets: histCS + liveCS,
+        hattricks: histHT + liveHT,
       };
     });
-  }, [players, playerSeasonStats]);
+  }, [players, playerSeasonStats, matchEntries]);
 
   // ── 4. Activity Timeline Data ──
   const matchDates = useMemo(() => {
@@ -138,6 +146,13 @@ export function Overview({ setTab }: OverviewProps) {
           />
         ))}
       </div>
+
+      {/* Player Spotlights */}
+      <PlayerSpotlights 
+        players={players} 
+        matchEntries={matchEntries} 
+        playerSeasonStats={playerSeasonStats} 
+      />
 
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 stagger-children" style={{ animationDelay: '0.6s' }}>
