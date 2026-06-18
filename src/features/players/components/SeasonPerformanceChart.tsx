@@ -37,17 +37,13 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
   const yMax = Math.ceil(maxGoal * 1.25 / 5) * 5;
 
   const getY = (val: number) => padT + innerH - (val / yMax) * innerH;
-  const getH = (val: number) => Math.max(2, (val / yMax) * innerH);
 
   // Win rate scaled to same axis
   const getWRY = (pct: number) => getY((pct / 100) * yMax);
-  const getWRH = (pct: number) => getH((pct / 100) * yMax);
 
   const n = data.length;
   const slotW = innerW / n;
   const groupW = slotW * 0.72;
-  const gap = 2;
-  const barW = (groupW - gap * 2) / 3;
   const getSlotX = (i: number) => padL + slotW * i + (slotW - groupW) / 2;
 
   const gridCount = 4;
