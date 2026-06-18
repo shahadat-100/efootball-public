@@ -39,7 +39,7 @@ export function Compare() {
     }).filter(p => p.player);
   }, [selectedIds, players, matchEntries]);
 
-  const MetricRow = ({ label, key1, key2, value1, value2, better }: { label: string, key1: string, key2: string, value1: number, value2: number, better: 'higher' | 'lower' }) => {
+  const MetricRow = ({ label, value1, value2, better }: { label: string, value1: number, value2: number, better: 'higher' | 'lower' }) => {
     let p1Better = false;
     let p2Better = false;
     
@@ -188,19 +188,19 @@ export function Compare() {
                 <ChevronDown className="w-5 h-5 text-muted-foreground" />
               </h4>
               <div className="bg-muted/10 rounded-2xl border border-border p-2">
-                <MetricRow label="Matches Played" key1="matches" key2="matches" value1={selectedPlayers[0].stats.matches} value2={selectedPlayers[1].stats.matches} better="higher" />
-                <MetricRow label="Goals Scored" key1="goals" key2="goals" value1={selectedPlayers[0].stats.goals} value2={selectedPlayers[1].stats.goals} better="higher" />
-                <MetricRow label="Win Rate" key1="winRate" key2="winRate" 
+                <MetricRow label="Matches Played" value1={selectedPlayers[0].stats.matches} value2={selectedPlayers[1].stats.matches} better="higher" />
+                <MetricRow label="Goals Scored" value1={selectedPlayers[0].stats.goals} value2={selectedPlayers[1].stats.goals} better="higher" />
+                <MetricRow label="Win Rate" 
                   value1={selectedPlayers[0].stats.matches > 0 ? Math.round((selectedPlayers[0].stats.wins / selectedPlayers[0].stats.matches) * 100) : 0} 
                   value2={selectedPlayers[1].stats.matches > 0 ? Math.round((selectedPlayers[1].stats.wins / selectedPlayers[1].stats.matches) * 100) : 0} 
                   better="higher" />
-                <MetricRow label="Wins" key1="wins" key2="wins" value1={selectedPlayers[0].stats.wins} value2={selectedPlayers[1].stats.wins} better="higher" />
-                <MetricRow label="Draws" key1="draws" key2="draws" value1={selectedPlayers[0].stats.draws} value2={selectedPlayers[1].stats.draws} better="higher" />
-                <MetricRow label="Losses" key1="losses" key2="losses" value1={selectedPlayers[0].stats.losses} value2={selectedPlayers[1].stats.losses} better="lower" />
-                <MetricRow label="Goals Conceded" key1="conceded" key2="conceded" value1={selectedPlayers[0].stats.conceded} value2={selectedPlayers[1].stats.conceded} better="lower" />
-                <MetricRow label="Clean Sheets" key1="cleanSheets" key2="cleanSheets" value1={selectedPlayers[0].stats.cleanSheets} value2={selectedPlayers[1].stats.cleanSheets} better="higher" />
-                <MetricRow label="MOTM Awards" key1="motm" key2="motm" value1={selectedPlayers[0].stats.motm} value2={selectedPlayers[1].stats.motm} better="higher" />
-                <MetricRow label="Hat-tricks" key1="hattricks" key2="hattricks" value1={selectedPlayers[0].stats.hattricks} value2={selectedPlayers[1].stats.hattricks} better="higher" />
+                <MetricRow label="Wins" value1={selectedPlayers[0].stats.wins} value2={selectedPlayers[1].stats.wins} better="higher" />
+                <MetricRow label="Draws" value1={selectedPlayers[0].stats.draws} value2={selectedPlayers[1].stats.draws} better="higher" />
+                <MetricRow label="Losses" value1={selectedPlayers[0].stats.losses} value2={selectedPlayers[1].stats.losses} better="lower" />
+                <MetricRow label="Goals Conceded" value1={selectedPlayers[0].stats.conceded} value2={selectedPlayers[1].stats.conceded} better="lower" />
+                <MetricRow label="Clean Sheets" value1={selectedPlayers[0].stats.cleanSheets} value2={selectedPlayers[1].stats.cleanSheets} better="higher" />
+                <MetricRow label="MOTM Awards" value1={selectedPlayers[0].stats.motm} value2={selectedPlayers[1].stats.motm} better="higher" />
+                <MetricRow label="Hat-tricks" value1={selectedPlayers[0].stats.hattricks} value2={selectedPlayers[1].stats.hattricks} better="higher" />
               </div>
             </div>
           </div>
