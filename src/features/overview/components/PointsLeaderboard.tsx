@@ -9,6 +9,7 @@ interface PointsLeaderboardProps {
   matchEntries: MatchEntry[];
   seasons: SeasonDb[];
   playerSeasonStats: PlayerSeasonStat[];
+  limit?: number;
 }
 
 interface RankedPlayer {
@@ -46,7 +47,7 @@ const currentMonthIndex = today.getMonth(); // 0-indexed
 const currentYear = today.getFullYear();
 const currentDay = today.getDate();
 
-export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats }: PointsLeaderboardProps) {
+export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, limit }: PointsLeaderboardProps) {
   // ── Monthly filters ──
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth]       = useState<number>(currentMonthIndex); // 0-indexed
@@ -190,7 +191,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
               </div>
             </div>
           ) : (
-            weeklyRanking.list.slice(0, 15).map((r, i) => renderRow(r, i))
+            weeklyRanking.list.slice(0, limit).map((r, i) => renderRow(r, i))
           )}
         </div>
       </CardWrapper>
@@ -234,7 +235,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
               </div>
             </div>
           ) : (
-            monthlyRanking.list.slice(0, 15).map((r, i) => renderRow(r, i))
+            monthlyRanking.list.slice(0, limit).map((r, i) => renderRow(r, i))
           )}
         </div>
       </CardWrapper>
@@ -263,7 +264,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
               </div>
             </div>
           ) : (
-            overallRanking.list.slice(0, 15).map((r, i) => renderRow(r, i))
+            overallRanking.list.slice(0, limit).map((r, i) => renderRow(r, i))
           )}
         </div>
       </CardWrapper>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
-import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3 } from 'lucide-react';
+import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3, Medal } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
 const NAV = [
@@ -10,6 +10,7 @@ const NAV = [
   { id: 'entries', label: 'Match entries', icon: ClipboardList },
   { id: 'matches', label: 'Matches', icon: Trophy },
   { id: 'compare', label: 'Compare', icon: BarChart3 },
+  { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
   { id: 'news', label: 'News', icon: Newspaper },
   { id: 'hall-of-fame', label: 'Hall of Fame', icon: Award },
 ];
@@ -20,7 +21,7 @@ const BOTTOM_NAV = [
   { id: 'players', label: 'Players', icon: Users },
   { id: 'matches', label: 'Matches', icon: Trophy },
   { id: 'compare', label: 'Compare', icon: BarChart3 },
-  { id: 'entries', label: 'Entries', icon: ClipboardList },
+  { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
 ];
 
 // Page title map
@@ -30,6 +31,7 @@ const PAGE_TITLES: Record<string, string> = {
   entries: 'Match Entries',
   matches: 'Matches',
   compare: 'Compare',
+  leaderboard: 'Leaderboard',
   news: 'News',
   'hall-of-fame': 'Hall of Fame',
 };

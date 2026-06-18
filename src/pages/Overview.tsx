@@ -155,6 +155,7 @@ export function Overview({ setTab }: OverviewProps) {
           matchEntries={matchEntries}
           seasons={seasons}
           playerSeasonStats={playerSeasonStats}
+          limit={5}
         />
       </div>
 
