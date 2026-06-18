@@ -66,7 +66,7 @@ export function PlayerSelectModal({ players, onSelect, onClose }: PlayerSelectMo
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-[10px] font-bold text-emerald-500">{p.team}</span>
                     <span className="text-muted-foreground text-[10px]">·</span>
-                    <span className="text-[10px] text-muted-foreground">#{p.jerseyNumber}</span>
+                    <span className="text-[10px] text-muted-foreground">👕 {p.jerseyNumber}</span>
                   </div>
                 </div>
               </button>

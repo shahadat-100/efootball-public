@@ -77,7 +77,7 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
         
         <div className="relative z-10 flex-1 min-w-0">
           <p className="font-heading font-bold text-[18px] text-white tracking-wide truncate">{player.name}</p>
-          <p className="text-white/50 text-[12px] font-bold">#{player.jerseyNumber || '—'}</p>
+          <p className="text-white/50 text-[12px] font-bold">👕 {player.jerseyNumber || '—'}</p>
           
           {/* Form streak */}
           {form.length > 0 && (

@@ -125,7 +125,7 @@ export function Compare() {
                   )}
                   <Avatar name={p.name} size={48} src={p.profileImageUrl} className={cn("mb-3 shadow-sm transition-transform duration-300", isSelected && "scale-110 ring-2 ring-primary ring-offset-2 ring-offset-card")} />
                   <span className={cn("text-[13px] font-bold text-center leading-tight", isSelected ? "text-primary" : "text-foreground")}>{p.name}</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold mt-1">#{p.jerseyNumber}</span>
+                  <span className="text-[10px] text-muted-foreground font-semibold mt-1">👕 {p.jerseyNumber}</span>
                 </button>
               );
             })}
@@ -157,7 +157,7 @@ export function Compare() {
               )}>
                 <Avatar name={p.player.name} size={96} src={p.player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl mb-4" />
                 <h3 className="font-heading font-bold text-[28px] text-white tracking-wide text-center leading-none mb-2">{p.player.name}</h3>
-                <p className="text-white/50 text-[13px] font-bold">#{p.player.jerseyNumber}</p>
+                <p className="text-white/50 text-[13px] font-bold">👕 {p.player.jerseyNumber}</p>
               </div>
             ))}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border-2 border-white/10 rounded-full w-12 h-12 flex items-center justify-center z-20 shadow-xl">

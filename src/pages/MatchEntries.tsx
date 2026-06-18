@@ -150,7 +150,7 @@ export function MatchEntries() {
                           <Avatar name={ps.player.name} size={28} src={ps.player.profileImageUrl} />
                           <div>
                             <p className="font-semibold text-foreground">{ps.player.name}</p>
-                            <p className="text-[11px] text-muted-foreground">#{ps.player.jerseyNumber}</p>
+                            <p className="text-[11px] text-muted-foreground">👕 {ps.player.jerseyNumber}</p>
                           </div>
                         </div>
                       </td>

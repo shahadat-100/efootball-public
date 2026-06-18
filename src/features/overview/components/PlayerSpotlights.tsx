@@ -160,7 +160,7 @@ export function PlayerSpotlights({ players, matchEntries, playerSeasonStats }: P
             />
             <div className="min-w-0">
               <p className="font-heading font-bold text-2xl text-foreground truncate leading-none mb-1">{data.player.name}</p>
-              <p className="text-muted-foreground text-[12px] font-bold">#{data.player.jerseyNumber || '—'}</p>
+              <p className="text-muted-foreground text-[12px] font-bold">👕 {data.player.jerseyNumber || '—'}</p>
             </div>
           </div>
 

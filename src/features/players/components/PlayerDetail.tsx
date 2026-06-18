@@ -201,7 +201,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             
             <div className="flex-1">
               <h2 className="font-heading font-bold text-[32px] md:text-[38px] text-white tracking-wide leading-none mb-1">{player.name}</h2>
-              <p className="text-white/40 text-[14px] font-bold mb-3">#{player.jerseyNumber || '—'}</p>
+              <p className="text-white/40 text-[14px] font-bold mb-3">👕 {player.jerseyNumber || '—'}</p>
               
               <div className="flex gap-1.5 flex-wrap mb-4">
                 {(player.playerRoles ?? []).map(t => (

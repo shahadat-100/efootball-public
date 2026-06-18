@@ -56,7 +56,7 @@ export function HallOfFame() {
                     </div>
                     <div>
                       <p className="font-heading font-bold text-[18px] text-foreground leading-tight tracking-wide">{player?.name ?? 'Unknown Legend'}</p>
-                      <p className="text-muted-foreground text-[11px] mt-0.5 font-bold">#{player?.jerseyNumber ?? '—'}</p>
+                      <p className="text-muted-foreground text-[11px] mt-0.5 font-bold">👕 {player?.jerseyNumber ?? '—'}</p>
                     </div>
                   </div>
                   
