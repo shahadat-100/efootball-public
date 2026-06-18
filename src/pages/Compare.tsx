@@ -6,7 +6,7 @@ import { cn } from '@/shared/lib/cn';
 import { BarChart3, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 export function Compare() {
-  const { players, matchEntries } = useFootballStore();
+  const { players, playerSeasonStats } = useFootballStore();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelecting, setIsSelecting] = useState(true);
 
@@ -21,23 +21,23 @@ export function Compare() {
   const selectedPlayers = useMemo(() => {
     return selectedIds.map(id => {
       const p = players.find(p => p.id === id);
-      const entries = matchEntries.filter(e => e.playerId === id);
+      const statsList = playerSeasonStats.filter(s => s.playerId === id);
       
       const stats = {
-        matches: entries.length,
-        goals: entries.reduce((s, e) => s + (e.goals || 0), 0),
-        conceded: entries.reduce((s, e) => s + (e.goalsConceded || 0), 0),
-        wins: entries.filter(e => e.result === 'win').length,
-        draws: entries.filter(e => e.result === 'draw').length,
-        losses: entries.filter(e => e.result === 'loss').length,
-        motm: entries.filter(e => e.motm).length,
-        cleanSheets: entries.filter(e => e.cleanSheet).length,
-        hattricks: entries.reduce((s, e) => s + (e.hattricks || 0), 0),
+        matches: statsList.reduce((s, e) => s + (e.appearances || 0), 0),
+        goals: statsList.reduce((s, e) => s + (e.goals || 0), 0),
+        conceded: statsList.reduce((s, e) => s + (e.goalsConceded || 0), 0),
+        wins: statsList.reduce((s, e) => s + (e.wins || 0), 0),
+        draws: statsList.reduce((s, e) => s + (e.draws || 0), 0),
+        losses: statsList.reduce((s, e) => s + (e.losses || 0), 0),
+        motm: statsList.reduce((s, e) => s + (e.motmCount || 0), 0),
+        cleanSheets: statsList.reduce((s, e) => s + (e.cleansheets || 0), 0),
+        hattricks: statsList.reduce((s, e) => s + (e.hattricks || 0), 0),
       };
       
       return { player: p!, stats };
     }).filter(p => p.player);
-  }, [selectedIds, players, matchEntries]);
+  }, [selectedIds, players, playerSeasonStats]);
 
   const MetricRow = ({ label, value1, value2, better }: { label: string, value1: number, value2: number, better: 'higher' | 'lower' }) => {
     let p1Better = false;

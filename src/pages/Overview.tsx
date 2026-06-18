@@ -23,38 +23,11 @@ export function Overview({ setTab }: OverviewProps) {
   const { players, matchEntries, matches, playerSeasonStats, seasons } = useFootballStore();
 
   // ── 1. Stat Cards Data ──
-  const liveGoals   = matchEntries.reduce((s, e) => s + e.goals, 0);
-  const liveMatches = matchEntries.length;
-  const liveWins    = matchEntries.filter(e => e.result === 'win').length;
-  const liveLosses  = matchEntries.filter(e => e.result === 'loss').length;
-  const liveDraws   = matchEntries.filter(e => e.result === 'draw').length;
-
-  const histGoals = players.reduce((sum, p) =>
-    sum + (p.seasons ?? [])
-      .flatMap(s => s.monthlyStats.flatMap(m => m.weeklyStats))
-      .reduce((s, w) => s + w.goalsScored, 0), 0);
-  const histMatches = players.reduce((sum, p) =>
-    sum + (p.seasons ?? [])
-      .flatMap(s => s.monthlyStats.flatMap(m => m.weeklyStats))
-      .reduce((s, w) => s + w.matches, 0), 0);
-  const histWins = players.reduce((sum, p) =>
-    sum + (p.seasons ?? [])
-      .flatMap(s => s.monthlyStats.flatMap(m => m.weeklyStats))
-      .reduce((s, w) => s + w.win, 0), 0);
-  const histLosses = players.reduce((sum, p) =>
-    sum + (p.seasons ?? [])
-      .flatMap(s => s.monthlyStats.flatMap(m => m.weeklyStats))
-      .reduce((s, w) => s + w.loss, 0), 0);
-  const histDraws = players.reduce((sum, p) =>
-    sum + (p.seasons ?? [])
-      .flatMap(s => s.monthlyStats.flatMap(m => m.weeklyStats))
-      .reduce((s, w) => s + w.draw, 0), 0);
-
-  const totalGoals   = liveGoals   + histGoals;
-  const totalMatches = liveMatches + histMatches;
-  const totalWins    = liveWins    + histWins;
-  const totalLosses  = liveLosses  + histLosses;
-  const totalDraws   = liveDraws   + histDraws;
+  const totalGoals   = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
+  const totalMatches = playerSeasonStats.reduce((s, e) => s + (e.appearances || 0), 0);
+  const totalWins    = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);
+  const totalLosses  = playerSeasonStats.reduce((s, e) => s + (e.losses || 0), 0);
+  const totalDraws   = playerSeasonStats.reduce((s, e) => s + (e.draws || 0), 0);
 
   const cards = [
     { label: 'Total Goals', value: totalGoals, tab: 'entries', color: '#c8102e', icon: <Target className="w-5 h-5" /> },
@@ -87,24 +60,19 @@ export function Overview({ setTab }: OverviewProps) {
   const awardsData = useMemo(() => {
     return players.map(p => {
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
-      const entries = matchEntries.filter(e => e.playerId === p.id);
       
       const histMotm = stats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
       const histCS = stats.reduce((acc, s) => acc + (s.cleansheets || 0), 0);
       const histHT = stats.reduce((acc, s) => acc + (s.hattricks || 0), 0);
 
-      const liveMotm = entries.filter(e => e.motm).length;
-      const liveCS = entries.filter(e => e.cleanSheet).length;
-      const liveHT = entries.reduce((acc, e) => acc + (e.hattricks || 0), 0);
-
       return {
         player: p,
-        motm: histMotm + liveMotm,
-        cleanSheets: histCS + liveCS,
-        hattricks: histHT + liveHT,
+        motm: histMotm,
+        cleanSheets: histCS,
+        hattricks: histHT,
       };
     });
-  }, [players, playerSeasonStats, matchEntries]);
+  }, [players, playerSeasonStats]);
 
   // ── 4. Activity Timeline Data ──
   const matchDates = useMemo(() => {
