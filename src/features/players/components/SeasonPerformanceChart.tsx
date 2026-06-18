@@ -26,20 +26,21 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
   const chartH = 240;
   const chartW = 480;
   const padL = 40;
-  const padR = 16;
+  const padR = 40;
   const padT = 20;
   const padB = 42;
   const innerW = chartW - padL - padR;
   const innerH = chartH - padT - padB;
 
-  // Max for left Y-axis (goals)
+  // Left Y-axis (goals)
   const maxGoal = Math.max(10, ...data.flatMap(d => [d.goals, d.goalsConceded]));
-  const yMax = Math.ceil(maxGoal * 1.25 / 5) * 5;
+  const yMaxLeft = Math.ceil(maxGoal * 1.25 / 5) * 5;
 
-  const getY = (val: number) => padT + innerH - (val / yMax) * innerH;
+  // Right Y-axis (win rate)
+  const yMaxRight = 100;
 
-  // Win rate scaled to same axis
-  const getWRY = (pct: number) => getY((pct / 100) * yMax);
+  const getYLeft = (val: number) => padT + innerH - (val / yMaxLeft) * innerH;
+  const getWRY = (pct: number) => padT + innerH - (pct / yMaxRight) * innerH;
 
   const n = data.length;
   const slotW = innerW / n;
@@ -47,7 +48,7 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
   const getSlotX = (i: number) => padL + slotW * i + (slotW - groupW) / 2;
 
   const gridCount = 4;
-  const gridVals = Array.from({ length: gridCount + 1 }, (_, i) => (yMax / gridCount) * i);
+  const gridVals = Array.from({ length: gridCount + 1 }, (_, i) => (yMaxLeft / gridCount) * i);
 
   return (
     <div className="bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-5 shadow-xl shadow-black/5 h-full flex flex-col relative overflow-hidden">
@@ -83,7 +84,8 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
 
           {/* Horizontal grid */}
           {gridVals.map((v, i) => {
-            const y = getY(v);
+            const y = getYLeft(v);
+            const vRight = (v / yMaxLeft) * yMaxRight;
             return (
               <g key={i}>
                 <line
@@ -93,9 +95,15 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
                   strokeDasharray={i === 0 ? '0' : '4 5'}
                   strokeWidth="1"
                 />
+                {/* Left axis label */}
                 <text x={padL - 6} y={y} textAnchor="end" dominantBaseline="middle"
                   className="fill-muted-foreground font-semibold" fontSize={9}>
                   {Math.round(v)}
+                </text>
+                {/* Right axis label */}
+                <text x={chartW - padR + 6} y={y} textAnchor="start" dominantBaseline="middle"
+                  className="fill-emerald-500/80 font-semibold" fontSize={9}>
+                  {Math.round(vRight)}%
                 </text>
               </g>
             );
@@ -113,7 +121,7 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
               const points = data.map((d, i) => {
                 const x = getSlotX(i) + groupW / 2;
                 const rawVal = d[s.key as keyof SeasonData] as number;
-                const y = s.isWR ? getWRY(rawVal) : getY(rawVal);
+                const y = s.isWR ? getWRY(rawVal) : getYLeft(rawVal);
                 return { x, y, rawVal };
               });
 
@@ -184,8 +192,11 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
             );
           })}
 
-          {/* Y Axis line */}
+          {/* Y Axis line Left */}
           <line x1={padL} y1={padT} x2={padL} y2={padT + innerH}
+            stroke="currentColor" className="text-border/50" strokeWidth="1" />
+          {/* Y Axis line Right */}
+          <line x1={chartW - padR} y1={padT} x2={chartW - padR} y2={padT + innerH}
             stroke="currentColor" className="text-border/50" strokeWidth="1" />
           {/* X Axis line */}
           <line x1={padL} y1={padT + innerH} x2={chartW - padR} y2={padT + innerH}
