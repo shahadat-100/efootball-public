@@ -180,6 +180,52 @@ export function Compare() {
             ))}
           </div>
 
+          {/* Winner Summary */}
+          {(() => {
+            const p1Stats = selectedPlayers[0].stats;
+            const p2Stats = selectedPlayers[1].stats;
+            const p1 = selectedPlayers[0].player;
+            const p2 = selectedPlayers[1].player;
+
+            const m1 = p1Stats.matches || 1;
+            const m2 = p2Stats.matches || 1;
+
+            let p1Points = 0, p2Points = 0;
+            if ((p1Stats.wins / m1) > (p2Stats.wins / m2)) p1Points++; else if ((p2Stats.wins / m2) > (p1Stats.wins / m1)) p2Points++;
+            if ((p1Stats.goals / m1) > (p2Stats.goals / m2)) p1Points++; else if ((p2Stats.goals / m2) > (p1Stats.goals / m1)) p2Points++;
+            if ((p1Stats.conceded / m1) < (p2Stats.conceded / m2)) p1Points++; else if ((p2Stats.conceded / m2) < (p1Stats.conceded / m1)) p2Points++;
+            if ((p1Stats.cleanSheets / m1) > (p2Stats.cleanSheets / m2)) p1Points++; else if ((p2Stats.cleanSheets / m2) > (p1Stats.cleanSheets / m1)) p2Points++;
+            if ((p1Stats.motm / m1) > (p2Stats.motm / m2)) p1Points++; else if ((p2Stats.motm / m2) > (p1Stats.motm / m1)) p2Points++;
+
+            const p1Leading = p1Points >= p2Points;
+            const winner = p1Leading ? p1 : p2;
+            const leaderColor = p1Leading ? '#3b82f6' : '#ef4444';
+
+            return (
+              <div className="px-6 md:px-8 py-8 border-b border-border bg-card/30">
+                <div 
+                  className="rounded-3xl border p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 max-w-3xl mx-auto transition-all"
+                  style={{ 
+                    borderColor: `${leaderColor}40`, 
+                    backgroundColor: `${leaderColor}08`,
+                    boxShadow: `0 10px 40px ${leaderColor}15` 
+                  }}
+                >
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${leaderColor}20` }}>
+                    <span className="text-3xl">🏆</span>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-[11px] font-black tracking-widest mb-1" style={{ color: leaderColor }}>PERFORMANCE ANALYSIS</p>
+                    <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2 uppercase leading-none">{winner.name} IS LEADING</h2>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Based on per-match statistics (Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM), <strong className="text-foreground">{winner.name}</strong> currently has the superior head-to-head performance record.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Metrics */}
           <div className="p-6 md:p-8 bg-card">
             <div className="max-w-3xl mx-auto">
