@@ -105,83 +105,86 @@ export function SeasonPerformanceChart({ data }: SeasonPerformanceChartProps) {
             );
           })}
 
-          {/* Bars per season */}
-          {data.map((d, i) => {
-            const sx = getSlotX(i);
-            const vals: [number, string, string][] = [
-              [d.goals,         'url(#spGF2)', '#3b82f6'],
-              [d.goalsConceded, 'url(#spGC2)', '#f43f5e'],
-              [d.winRate,       'url(#spWR2)', '#10b981'],
+          {/* Lines per series */}
+          {(() => {
+            const series = [
+              { key: 'goals', color: '#3b82f6', isWR: false },
+              { key: 'goalsConceded', color: '#f43f5e', isWR: false },
+              { key: 'winRate', color: '#10b981', isWR: true },
             ];
 
-            return (
-              <g key={i}>
-                {vals.map(([rawVal, fill, glowColor], bi) => {
-                  const isWR = bi === 2;
-                  const bx = sx + bi * (barW + gap);
-                  const bh = isWR ? getWRH(rawVal) : getH(rawVal);
-                  const by = isWR ? getWRY(rawVal) : getY(rawVal);
-                  const displayVal = isWR ? `${rawVal.toFixed(0)}%` : rawVal;
-                  const rx = Math.min(barW / 2, 4);
+            return series.map((s, si) => {
+              const points = data.map((d, i) => {
+                const x = getSlotX(i) + groupW / 2;
+                const rawVal = d[s.key as keyof SeasonData] as number;
+                const y = s.isWR ? getWRY(rawVal) : getY(rawVal);
+                return { x, y, rawVal };
+              });
 
-                  return (
-                    <g key={bi}>
-                      {/* Track */}
-                      <rect
-                        x={bx} y={padT} width={barW} height={innerH}
-                        fill="currentColor" className="text-muted/10" rx={rx}
-                      />
-                      {/* Glow shadow */}
-                      {mounted && bh > 4 && (
-                        <rect
-                          x={bx + 1} y={by + 2} width={barW - 2} height={bh - 2}
-                          fill={glowColor} opacity="0.25" rx={rx}
-                          style={{ filter: 'blur(4px)' }}
-                        />
-                      )}
-                      {/* Main bar */}
-                      <rect
-                        x={bx}
-                        y={mounted ? by : padT + innerH}
-                        width={barW}
-                        height={mounted ? bh : 0}
-                        fill={fill}
-                        rx={rx}
-                        className="transition-all duration-700 ease-out"
-                        style={{ transitionDelay: `${i * 80 + bi * 60}ms` }}
+              const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+              return (
+                <g key={s.key} style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease-out', transitionDelay: `${si * 100}ms` }}>
+                  {/* Line */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={s.color}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ filter: `drop-shadow(0px 4px 6px ${s.color}40)` }}
+                    className="transition-all duration-700 ease-out"
+                  />
+                  {/* Points */}
+                  {points.map((p, i) => (
+                    <g key={i}>
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r="4"
+                        fill="var(--background)"
+                        stroke={s.color}
+                        strokeWidth="2.5"
+                        className="transition-all duration-700 ease-out hover:r-6"
                       />
                       {/* Value label on top */}
-                      {rawVal > 0 && (
+                      {p.rawVal > 0 && (
                         <text
-                          x={bx + barW / 2}
-                          y={mounted ? by - 4 : padT + innerH}
+                          x={p.x}
+                          y={p.y - 10 - (si * 2)} // slightly offset to prevent overlap
                           textAnchor="middle"
-                          fontSize={bi === 2 ? 8 : 9}
+                          fontSize={s.isWR ? 8 : 9}
                           fontWeight="700"
-                          fill={glowColor}
-                          className="transition-all duration-700 ease-out"
+                          fill={s.color}
                           style={{
                             opacity: mounted ? 1 : 0,
-                            transitionDelay: `${i * 80 + bi * 60 + 300}ms`,
+                            transitionDelay: `${i * 50 + si * 100 + 300}ms`,
                           }}
                         >
-                          {displayVal}
+                          {s.isWR ? `${p.rawVal.toFixed(0)}%` : p.rawVal}
                         </text>
                       )}
                     </g>
-                  );
-                })}
+                  ))}
+                </g>
+              );
+            });
+          })()}
 
-                {/* X label */}
-                <text
-                  x={sx + groupW / 2} y={chartH - 6}
-                  textAnchor="middle" fontSize={10} fontWeight="600"
-                  className="fill-muted-foreground transition-opacity duration-700"
-                  style={{ opacity: mounted ? 1 : 0, transitionDelay: `${i * 80 + 500}ms` }}
-                >
-                  {d.season.replace('eFootball ', '')}
-                </text>
-              </g>
+          {/* X axis labels */}
+          {data.map((d, i) => {
+            const x = getSlotX(i) + groupW / 2;
+            return (
+              <text
+                key={i}
+                x={x} y={chartH - 6}
+                textAnchor="middle" fontSize={10} fontWeight="600"
+                className="fill-muted-foreground transition-opacity duration-700"
+                style={{ opacity: mounted ? 1 : 0, transitionDelay: `${i * 80 + 500}ms` }}
+              >
+                {d.season.replace('eFootball ', '')}
+              </text>
             );
           })}
 
