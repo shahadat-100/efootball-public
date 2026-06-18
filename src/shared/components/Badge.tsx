@@ -11,7 +11,7 @@ export function Badge({ className, bg = '#111111', c = '#9a9a9a', style, childre
     <span
       style={{ backgroundColor: bg, color: c, ...style }}
       className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap",
+        "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold whitespace-nowrap border border-transparent shadow-sm",
         className
       )}
       {...props}

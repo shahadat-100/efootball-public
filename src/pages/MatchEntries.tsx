@@ -3,6 +3,7 @@ import { useFootballStore } from '@/store/footballStore';
 import { Button, Input, Avatar, Badge } from '@/shared/components';
 import { Search, Trophy, Target, TrendingUp, Star, Zap, Shield } from 'lucide-react';
 import { RESULT_BADGE } from '@/shared/lib/constants';
+import { cn } from '@/shared/lib/cn';
 
 export function MatchEntries() {
   const { matchEntries, players } = useFootballStore();
@@ -58,12 +59,12 @@ export function MatchEntries() {
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const STAT_CARDS = [
-    { label: 'Total Entries', value: totals.matches, icon: Trophy, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Goals Scored', value: totals.goals, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Win Rate', value: `${winRate}%`, icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'MOTM Awards', value: totals.motm, icon: Star, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-    { label: 'Hat-tricks', value: totals.hattricks, icon: Zap, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { label: 'Clean Sheets', value: totals.cleanSheets, icon: Shield, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { label: 'Total Entries', value: totals.matches, icon: Trophy, color: '#3b82f6', bg: 'rgba(59,130,246,0.08)' },
+    { label: 'Goals Scored', value: totals.goals, icon: Target, color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+    { label: 'Win Rate', value: `${winRate}%`, icon: TrendingUp, color: '#c8102e', bg: 'rgba(200,16,46,0.08)' },
+    { label: 'MOTM Awards', value: totals.motm, icon: Star, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
+    { label: 'Hat-tricks', value: totals.hattricks, icon: Zap, color: '#a855f7', bg: 'rgba(168,85,247,0.08)' },
+    { label: 'Clean Sheets', value: totals.cleanSheets, icon: Shield, color: '#06b6d4', bg: 'rgba(6,182,212,0.08)' },
   ];
 
   return (
@@ -71,8 +72,8 @@ export function MatchEntries() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h2 className="font-bold text-[22px] mb-1">Match Entries</h2>
-          <p className="text-muted-foreground text-[13px]">
+          <h2 className="font-heading font-bold text-[28px] tracking-wide mb-1">Match Entries</h2>
+          <p className="text-muted-foreground text-[13px] font-medium">
             {totals.matches} entries · {totals.wins}W {totals.losses}L {totals.draws}D · {totals.goals} goals
           </p>
         </div>
@@ -90,30 +91,33 @@ export function MatchEntries() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6 stagger-children">
         {STAT_CARDS.map(card => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className={`${card.bg} border border-border rounded-xl p-3 flex flex-col gap-1`}>
+            <div key={card.label} className="glassmorphism rounded-2xl p-4 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all stat-glow" style={{ borderColor: `${card.color}15` }}>
               <div className="flex items-center gap-2">
-                <Icon className={`w-4 h-4 ${card.color}`} />
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{card.label}</span>
+                <div className="p-1.5 rounded-lg" style={{ backgroundColor: `${card.color}10` }}>
+                  <Icon className="w-4 h-4" style={{ color: card.color }} />
+                </div>
+                <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-black">{card.label}</span>
               </div>
-              <p className={`text-[22px] font-black ${card.color}`}>{card.value}</p>
+              <p className="text-[24px] font-heading font-bold" style={{ color: card.color }}>{card.value}</p>
             </div>
           );
         })}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 bg-muted/50 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 mb-5 bg-muted/50 rounded-xl p-1.5 w-fit border border-border/50">
         {(['overview', 'entries'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 rounded-md text-[13px] font-medium transition-colors capitalize ${
-              activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            }`}
+            className={cn(
+              "px-5 py-2 rounded-lg text-[13px] font-semibold transition-all capitalize",
+              activeTab === tab ? 'bg-white text-foreground shadow-md border border-border/50' : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             {tab === 'overview' ? '📊 Player Overview' : '📋 All Entries'}
           </button>
@@ -122,23 +126,27 @@ export function MatchEntries() {
 
       {/* OVERVIEW TAB — Per-player breakdown */}
       {activeTab === 'overview' && (
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[13px] text-left">
-              <thead className="bg-muted text-muted-foreground font-medium border-b border-border">
+              <thead className="bg-muted/50 text-muted-foreground border-b border-border">
                 <tr>
                   {['Player', 'Matches', 'W', 'L', 'D', 'Win%', 'Goals', 'Conceded', 'HT', 'MOTM', 'CS'].map(h => (
-                    <th key={h} className="px-4 py-3 whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-4 py-3 whitespace-nowrap font-bold text-[10px] uppercase tracking-widest">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/50 bg-popover">
-                {playerStats.map(ps => {
+              <tbody className="divide-y divide-border/30">
+                {playerStats.map((ps, idx) => {
                   const wr = ps.matches > 0 ? Math.round((ps.wins / ps.matches) * 100) : 0;
                   return (
-                    <tr key={ps.player.id} className="hover:bg-muted/30 transition-colors">
+                    <tr key={ps.player.id} className={cn("hover:bg-muted/30 transition-colors", idx % 2 === 0 ? "bg-white" : "bg-muted/5")}>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
+                          <span className={cn(
+                            "text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0",
+                            idx === 0 ? "medal-gold" : idx === 1 ? "medal-silver" : idx === 2 ? "medal-bronze" : "bg-muted text-muted-foreground"
+                          )}>{idx + 1}</span>
                           <Avatar name={ps.player.name} size={28} src={ps.player.profileImageUrl} />
                           <div>
                             <p className="font-semibold text-foreground">{ps.player.name}</p>
@@ -147,18 +155,18 @@ export function MatchEntries() {
                         </div>
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground">{ps.matches}</td>
-                      <td className="px-4 py-3 font-semibold text-emerald-400">{ps.wins}</td>
+                      <td className="px-4 py-3 font-semibold text-emerald-500">{ps.wins}</td>
                       <td className="px-4 py-3 font-semibold text-red-400">{ps.losses}</td>
                       <td className="px-4 py-3 text-muted-foreground">{ps.draws}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-muted rounded-full h-1.5">
-                            <div className="bg-primary h-1.5 rounded-full" style={{ width: `${wr}%` }} />
+                          <div className="w-16 bg-muted/50 rounded-full h-2 shadow-inner">
+                            <div className="bg-gradient-to-r from-primary to-red-400 h-2 rounded-full transition-all" style={{ width: `${wr}%` }} />
                           </div>
-                          <span className="text-[12px] font-semibold">{wr}%</span>
+                          <span className="text-[12px] font-bold">{wr}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-black text-[15px] text-gray-100">{ps.goals}</td>
+                      <td className="px-4 py-3 font-black text-[15px] text-foreground">{ps.goals}</td>
                       <td className="px-4 py-3 font-semibold text-red-400">{ps.conceded}</td>
                       <td className="px-4 py-3">
                         {ps.hattricks > 0 ? <Badge bg="#1a1a1a" c="#e5e5e5" className="border border-gray-500/30 text-[10px]">HT×{ps.hattricks}</Badge> : <span className="text-muted-foreground">—</span>}
@@ -174,8 +182,9 @@ export function MatchEntries() {
                 })}
                 {playerStats.length === 0 && (
                   <tr>
-                    <td colSpan={11} className="py-12 text-center text-muted-foreground">
-                      No match entries yet. Add entries manually.
+                    <td colSpan={11} className="py-16 text-center">
+                      <span className="text-4xl mb-3 block">📊</span>
+                      <p className="text-muted-foreground font-medium">No match entries yet. Add entries to get started!</p>
                     </td>
                   </tr>
                 )}
@@ -188,31 +197,32 @@ export function MatchEntries() {
       {/* ENTRIES TAB — All individual entries */}
       {activeTab === 'entries' && (
         <>
-          <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-[13px] text-left">
-                <thead className="bg-muted text-muted-foreground font-medium border-b border-border">
+                <thead className="bg-muted/50 text-muted-foreground border-b border-border">
                   <tr>
                     {['Player', 'Date', 'Goals', 'Conceded', 'Result', 'Flags', 'Notes'].map(h => (
-                      <th key={h} className="px-4 py-3 whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-4 py-3 whitespace-nowrap font-bold text-[10px] uppercase tracking-widest">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/50 bg-popover">
-                  {paginated.map(me => {
+                <tbody className="divide-y divide-border/30">
+                  {paginated.map((me, idx) => {
                     const p = getPlayer(me.playerId);
                     const rb = RESULT_BADGE[me.result as keyof typeof RESULT_BADGE] ?? RESULT_BADGE.draw;
                     const isBulk = (me as any).source === 'bulk' || me.notes?.startsWith('Generated from');
+                    const resultClass = me.result === 'win' ? 'result-bar-win' : me.result === 'loss' ? 'result-bar-loss' : 'result-bar-draw';
                     return (
-                      <tr key={me.id} className="hover:bg-muted/30 transition-colors">
+                      <tr key={me.id} className={cn("hover:bg-muted/30 transition-colors", resultClass, idx % 2 === 0 ? "bg-white" : "bg-muted/5")}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <Avatar name={p?.name ?? 'Unknown'} size={26} src={p?.profileImageUrl} />
                             <span className="font-semibold text-foreground">{p?.name ?? 'Unknown'}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{me.date}</td>
-                        <td className="px-4 py-3 font-black text-gray-100 text-[15px]">{me.goals}</td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap font-medium">{me.date}</td>
+                        <td className="px-4 py-3 font-black text-foreground text-[15px]">{me.goals}</td>
                         <td className="px-4 py-3 font-semibold text-red-400">{me.goalsConceded}</td>
                         <td className="px-4 py-3"><Badge bg={rb.bg} c={rb.c}>{me.result}</Badge></td>
                         <td className="px-4 py-3">
@@ -229,7 +239,10 @@ export function MatchEntries() {
                   })}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-muted-foreground">No entries found</td>
+                      <td colSpan={7} className="py-16 text-center">
+                        <span className="text-4xl mb-3 block">📋</span>
+                        <p className="text-muted-foreground font-medium">No entries found</p>
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -238,13 +251,13 @@ export function MatchEntries() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 bg-card border border-border p-3 rounded-xl">
-              <p className="text-[12px] text-muted-foreground">
+            <div className="flex items-center justify-between mt-4 bg-card border border-border p-4 rounded-2xl shadow-sm">
+              <p className="text-[12px] text-muted-foreground font-medium">
                 Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
               </p>
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
-                <div className="flex items-center px-3 text-[12px] font-medium border border-border rounded-md bg-muted/30">Page {page}/{totalPages}</div>
+                <div className="flex items-center px-3 text-[12px] font-bold border border-border rounded-lg bg-muted/30">Page {page}/{totalPages}</div>
                 <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</Button>
               </div>
             </div>

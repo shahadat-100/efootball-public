@@ -12,6 +12,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, name = '?', src, size = 44, ...props }, ref) => {
     const isNum = typeof size === 'number';
     const inlineStyle = isNum ? { width: size, height: size } : {};
+    const sizeNum = isNum ? (size as number) : 44;
 
     return (
       <div
@@ -21,7 +22,8 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           backgroundColor: src ? 'transparent' : avatarColor(name),
         }}
         className={cn(
-          "relative flex shrink-0 items-center justify-center rounded-full overflow-hidden text-white font-bold",
+          "relative flex shrink-0 items-center justify-center rounded-full overflow-hidden text-white font-bold shadow-sm",
+          sizeNum >= 64 && "shadow-md",
           !isNum ? size : '',
           className
         )}

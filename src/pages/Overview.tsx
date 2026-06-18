@@ -12,6 +12,8 @@ import { ActivityTimeline } from '@/features/overview/components/ActivityTimelin
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 
+import { Target, Trophy, XCircle, Users, Activity, Medal } from 'lucide-react';
+
 interface OverviewProps {
   setTab: (tab: string) => void;
 }
@@ -54,20 +56,16 @@ export function Overview({ setTab }: OverviewProps) {
   const totalDraws   = liveDraws   + histDraws;
 
   const cards = [
-    { label: 'Total Goals', value: totalGoals, tab: 'entries', color: '#c8102e' },
-    { label: 'Total Matches', value: totalMatches, tab: 'matches', color: '#1a1a1a' },
-    { label: 'Total Wins', value: totalWins, tab: 'entries', color: '#10b981' },
-    { label: 'Total Losses', value: totalLosses, tab: 'entries', color: '#ef4444' },
-    { label: 'Total Draws', value: totalDraws, tab: 'entries', color: '#f59e0b' },
-    { label: 'Players', value: players.length, tab: 'players', color: '#333333' },
+    { label: 'Total Goals', value: totalGoals, tab: 'entries', color: '#c8102e', icon: <Target className="w-5 h-5" /> },
+    { label: 'Total Matches', value: totalMatches, tab: 'matches', color: '#3b82f6', icon: <Activity className="w-5 h-5" /> },
+    { label: 'Total Wins', value: totalWins, tab: 'entries', color: '#10b981', icon: <Trophy className="w-5 h-5" /> },
+    { label: 'Total Losses', value: totalLosses, tab: 'entries', color: '#ef4444', icon: <XCircle className="w-5 h-5" /> },
+    { label: 'Total Draws', value: totalDraws, tab: 'entries', color: '#f59e0b', icon: <Medal className="w-5 h-5" /> },
+    { label: 'Players', value: players.length, tab: 'players', color: '#8b5cf6', icon: <Users className="w-5 h-5" /> },
   ];
 
   // ── 2. Win / Draw / Loss Data ──
-  // Source: playerSeasonStats (authoritative Supabase DB totals).
-  // Sum across ALL players then divide by player count to get per-match team record,
-  // OR just show aggregate individual player record from match entries directly.
   const uniqueMatchesResults = useMemo(() => {
-    // Build matchResultsMap for the Recent Matches list (needs matchId → result lookup)
     const matchResultsMap = new Map<string, string>();
     matchEntries.forEach(e => {
       if (e.matchId && !matchResultsMap.has(e.matchId) && e.result) {
@@ -77,7 +75,6 @@ export function Overview({ setTab }: OverviewProps) {
     return { matchResultsMap };
   }, [matchEntries]);
 
-  // Win/Draw/Loss for the donut — sum directly from playerSeasonStats (real DB data)
   const donutStats = useMemo(() => {
     const wins   = playerSeasonStats.reduce((s, e) => s + (e.wins   || 0), 0);
     const draws  = playerSeasonStats.reduce((s, e) => s + (e.draws  || 0), 0);
@@ -85,8 +82,7 @@ export function Overview({ setTab }: OverviewProps) {
     return { wins, draws, losses };
   }, [playerSeasonStats]);
 
-  // ── 3. Awards Data (MOTM / Clean Sheets / Hat-tricks) ──
-  // topScorers is now computed inside TopScorersBars with season filter support
+  // ── 3. Awards Data ──
   const awardsData = useMemo(() => {
     return players.map(p => {
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
@@ -109,21 +105,42 @@ export function Overview({ setTab }: OverviewProps) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="mb-10">
-        <h2 className="font-semibold text-2xl tracking-tight text-foreground mb-2">The Enigmatic Elites — Overview</h2>
-        <p className="text-muted-foreground text-sm">Complete club record — live &amp; all-time historical data combined</p>
+      
+      {/* Hero Banner Section */}
+      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl h-[300px] md:h-[350px] group">
+        <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" 
+             style={{ backgroundImage: 'url(/images/hero-banner.jpg)' }} />
+        <div className="absolute inset-0 hero-overlay" />
+        
+        <div className="relative z-10 h-full flex flex-col items-center justify-center p-6 text-center animate-slide-up">
+          <div className="p-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-6 shadow-xl shadow-black/20">
+            <img src="/images/club-logo.jpg" alt="Club Logo" className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-inner" />
+          </div>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-white tracking-wider mb-2 drop-shadow-lg">
+            THE ENIGMATIC ELITE
+          </h1>
+          <p className="text-gray-300 text-sm md:text-base font-medium tracking-[0.2em] uppercase max-w-2xl text-shadow-sm">
+            In Mystery We Reign — Dominating the Pitch Since 2023
+          </p>
+        </div>
       </div>
 
       {/* Stat Cards Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-10 stagger-children">
         {cards.map(c => (
-          <StatCard key={c.label} label={c.label} value={c.value} accent={c.color} onClick={() => setTab(c.tab)} />
+          <StatCard 
+            key={c.label} 
+            label={c.label} 
+            value={c.value} 
+            accent={c.color} 
+            icon={c.icon}
+            onClick={() => setTab(c.tab)} 
+          />
         ))}
       </div>
 
       {/* Main Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 stagger-children" style={{ animationDelay: '0.6s' }}>
         <div className="lg:col-span-1 h-full">
           <WinRateDonut 
             wins={donutStats.wins || totalWins} 
@@ -140,7 +157,6 @@ export function Overview({ setTab }: OverviewProps) {
           />
         </div>
 
-        {/* Row 3 */}
         <div className="lg:col-span-2 h-full">
           <AwardsLeaderboard data={awardsData} />
         </div>

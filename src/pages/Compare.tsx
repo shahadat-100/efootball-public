@@ -1,259 +1,210 @@
 import { useState, useMemo } from 'react';
 import { useFootballStore } from '@/store/footballStore';
-import { ComputedPlayerStats } from '@/features/compare/types';
-import { aggregatePlayerStats, getLarger } from '@/features/compare/utils';
-import { CompareRadarChart } from '@/features/compare/components/CompareRadarChart';
-import { CompareBarChartsColumn } from '@/features/compare/components/CompareBarChartsColumn';
-import { PlayerSelectModal } from '@/features/compare/components/PlayerSelectModal';
-import { Avatar } from '@/shared/components';
+import { Avatar, Badge, Button } from '@/shared/components';
+import { PlayerRadarChart } from '@/features/players/components/PlayerRadarChart';
 import { cn } from '@/shared/lib/cn';
-import { Plus } from 'lucide-react';
+import { BarChart3, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 export function Compare() {
-  const { players, playerSeasonStats } = useFootballStore();
+  const { players, matchEntries } = useFootballStore();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isSelecting, setIsSelecting] = useState(true);
 
-  const computedPlayers = useMemo(() => {
-    return aggregatePlayerStats(players, playerSeasonStats);
-  }, [players, playerSeasonStats]);
-
-  const [p1, setP1] = useState<ComputedPlayerStats | null>(null);
-  const [p2, setP2] = useState<ComputedPlayerStats | null>(null);
-  const [isComparing, setIsComparing] = useState(false);
-  const [selectorTarget, setSelectorTarget] = useState<1 | 2 | null>(null);
-
-  const handleSelect = (p: ComputedPlayerStats) => {
-    if (selectorTarget === 1) setP1(p);
-    if (selectorTarget === 2) setP2(p);
-    setIsComparing(false); // Reset comparison state when player changes
-    setSelectorTarget(null);
+  const togglePlayer = (id: string) => {
+    setSelectedIds(prev => {
+      if (prev.includes(id)) return prev.filter(p => p !== id);
+      if (prev.length >= 2) return [prev[1], id];
+      return [...prev, id];
+    });
   };
 
-  const renderSelectorTile = (index: 1 | 2, p: ComputedPlayerStats | null, accentColor: string, accentColorClasses: string) => {
-    return (
-      <div
-        onClick={() => setSelectorTarget(index)}
-        className={cn(
-          "relative h-40 rounded-2xl border-2 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 overflow-hidden group",
-          p ? `border-${accentColorClasses} bg-card/40` : "border-border/50 bg-card/20 hover:bg-card/40 border-dashed"
-        )}
-        style={p ? {
-          borderColor: `${accentColor}80`,
-          boxShadow: `0 4px 20px ${accentColor}15, 0 10px 30px ${accentColor}10 inset`
-        } : {}}
-      >
-        {p ? (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-tr opacity-10" style={{ backgroundImage: `linear-gradient(to top right, transparent, ${accentColor})` }} />
+  const selectedPlayers = useMemo(() => {
+    return selectedIds.map(id => {
+      const p = players.find(p => p.id === id);
+      const entries = matchEntries.filter(e => e.playerId === id);
+      
+      const stats = {
+        matches: entries.length,
+        goals: entries.reduce((s, e) => s + (e.goals || 0), 0),
+        conceded: entries.reduce((s, e) => s + (e.goalsConceded || 0), 0),
+        wins: entries.filter(e => e.result === 'win').length,
+        draws: entries.filter(e => e.result === 'draw').length,
+        losses: entries.filter(e => e.result === 'loss').length,
+        motm: entries.filter(e => e.motm).length,
+        cleanSheets: entries.filter(e => e.cleanSheet).length,
+        hattricks: entries.reduce((s, e) => s + (e.hattricks || 0), 0),
+      };
+      
+      return { player: p!, stats };
+    }).filter(p => p.player);
+  }, [selectedIds, players, matchEntries]);
 
-            <div className="absolute top-2 right-2 bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-black px-2 py-0.5 rounded-md tracking-widest z-10">
-              RANK #{p.rank}
-            </div>
-
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="p-1 rounded-full border border-white/10 mb-3 bg-background" style={{ borderColor: `${accentColor}80` }}>
-                <Avatar name={p.name} src={p.imageUrl} size={64} />
-              </div>
-              <h3 className="text-foreground font-black text-lg tracking-wide leading-none mb-1">{p.short.toUpperCase()}</h3>
-              <span className="text-[10px] font-bold text-muted-foreground bg-white/5 px-2 py-0.5 rounded-full">
-                {p.team} · #{p.jerseyNumber}
-              </span>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center opacity-60 group-hover:opacity-100 transition-opacity">
-            <div className="p-3 rounded-full bg-white/5 border border-white/10 mb-2">
-              <Plus className="w-6 h-6" style={{ color: accentColor }} />
-            </div>
-            <span className="text-[10px] font-black tracking-widest" style={{ color: accentColor }}>SELECT PLAYER</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderComparison = () => {
-    if (!p1 || !p2) return null;
-
-    const m1 = p1.matches || 1;
-    const m2 = p2.matches || 1;
-
-    // Leader Summary Logic
-    let p1Points = 0, p2Points = 0;
-    if ((p1.wins / m1) > (p2.wins / m2)) p1Points++; else if ((p2.wins / m2) > (p1.wins / m1)) p2Points++;
-    if ((p1.goals / m1) > (p2.goals / m2)) p1Points++; else if ((p2.goals / m2) > (p1.goals / m1)) p2Points++;
-    if ((p1.ga / m1) < (p2.ga / m2)) p1Points++; else if ((p2.ga / m2) < (p1.ga / m1)) p2Points++; // lower is better
-    if ((p1.cleansheets / m1) > (p2.cleansheets / m2)) p1Points++; else if ((p2.cleansheets / m2) > (p1.cleansheets / m1)) p2Points++;
-    if ((p1.motm / m1) > (p2.motm / m2)) p1Points++; else if ((p2.motm / m2) > (p1.motm / m1)) p2Points++;
-
-    const p1Leading = p1Points >= p2Points;
-    const winner = p1Leading ? p1 : p2;
-    const leaderColor = p1Leading ? '#3b82f6' : '#ef4444';
-
-    const renderStatRow = (icon: string, label: string, val1Str: string, val2Str: string, winnerFlag: 0 | 1 | 2) => (
-      <div className="flex items-center gap-4 mb-6">
-        <div className={cn("flex-1 text-right text-lg font-black", winnerFlag === 1 ? "text-blue-500 underline decoration-2 underline-offset-4" : "text-blue-500/70")}>
-          {val1Str}
-        </div>
-        <div className="w-32 flex flex-col items-center">
-          <span className="text-[10px] font-bold text-muted-foreground tracking-wider mb-1 text-center leading-tight">{label}</span>
-          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-lg shadow-sm">
-            {icon}
-          </div>
-        </div>
-        <div className={cn("flex-1 text-left text-lg font-black", winnerFlag === 2 ? "text-red-500 underline decoration-2 underline-offset-4" : "text-red-500/70")}>
-          {val2Str}
-        </div>
-      </div>
-    );
-
-    const rawStats = [
-      { icon: '🏆', label: 'TOTAL WINS', v1: p1.wins, v2: p2.wins, flag: getLarger(p1.wins, p2.wins) },
-      { icon: '➖', label: 'TOTAL DRAWS', v1: p1.draws, v2: p2.draws, flag: getLarger(p1.draws, p2.draws) },
-      { icon: '✖️', label: 'TOTAL LOSSES', v1: p1.losses, v2: p2.losses, flag: getLarger(p2.losses, p1.losses) }, // lower better
-      { icon: '⚽', label: 'TOTAL GOALS', v1: p1.goals, v2: p2.goals, flag: getLarger(p1.goals, p2.goals) },
-      { icon: '🥅', label: 'GOALS AGST', v1: p1.ga, v2: p2.ga, flag: getLarger(p2.ga, p1.ga) }, // lower better
-      { icon: '🛡️', label: 'CLEAN SHEETS', v1: p1.cleansheets, v2: p2.cleansheets, flag: getLarger(p1.cleansheets, p2.cleansheets) },
-      { icon: '🎖️', label: 'MOTM AWARDS', v1: p1.motm, v2: p2.motm, flag: getLarger(p1.motm, p2.motm) },
-      { icon: '🔥', label: 'HAT-TRICKS', v1: p1.hattricks, v2: p2.hattricks, flag: getLarger(p1.hattricks, p2.hattricks) },
-    ];
+  const MetricRow = ({ label, key1, key2, value1, value2, better }: { label: string, key1: string, key2: string, value1: number, value2: number, better: 'higher' | 'lower' }) => {
+    let p1Better = false;
+    let p2Better = false;
+    
+    if (value1 !== value2) {
+      if (better === 'higher') {
+        p1Better = value1 > value2;
+        p2Better = value2 > value1;
+      } else {
+        p1Better = value1 < value2;
+        p2Better = value2 < value1;
+      }
+    }
 
     return (
-      <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
-        {/* Radar & Bars Row */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="w-1 h-5 bg-amber-500 rounded-full" />
-          <h3 className="text-sm font-black tracking-widest text-foreground">PERFORMANCE ANALYSIS</h3>
+      <div className="flex items-center justify-between py-4 border-b border-border/50 hover:bg-muted/10 transition-colors">
+        <div className="w-1/3 text-center">
+          <span className={cn(
+            "text-[15px] font-black tracking-tight px-3 py-1 rounded-lg transition-all",
+            p1Better ? "bg-emerald-500/10 text-emerald-600 shadow-sm" : "text-foreground"
+          )}>
+            {value1}
+          </span>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-          <div className="lg:col-span-8 bg-card border border-border rounded-3xl p-6 shadow-sm flex items-center justify-center">
-            <CompareRadarChart p1={p1} p2={p2} color1="#3b82f6" color2="#ef4444" />
-          </div>
-          <div className="lg:col-span-4 bg-card border border-border rounded-3xl p-6 shadow-sm">
-            <CompareBarChartsColumn
-              goalsPerMatch1={p1.goals / m1}
-              goalsPerMatch2={p2.goals / m2}
-              winRate1={p1.wins / m1}
-              winRate2={p2.wins / m2}
-              drawRate1={p1.draws / m1}
-              drawRate2={p2.draws / m2}
-              lossRate1={p1.losses / m1}
-              lossRate2={p2.losses / m2}
-              csRate1={p1.cleansheets / m1}
-              csRate2={p2.cleansheets / m2}
-            />
-          </div>
+        <div className="w-1/3 text-center">
+          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 px-2 py-1 rounded-md">{label}</span>
         </div>
-
-        {/* Summary Card */}
-        <div className="mb-12">
-          <div
-            className="rounded-3xl border-2 p-6 md:p-8 flex items-center gap-6"
-            style={{
-              borderColor: leaderColor,
-              backgroundColor: `${leaderColor}15`,
-              boxShadow: `0 10px 40px ${leaderColor}20`
-            }}
-          >
-            <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${leaderColor}30` }}>
-              <span className="text-3xl">📊</span>
-            </div>
-            <div>
-              <p className="text-[11px] font-black tracking-widest mb-1" style={{ color: leaderColor }}>SUMMARY CARD</p>
-              <h2 className="text-2xl md:text-3xl font-black text-amber-400 mb-2 uppercase leading-none">
-                {winner.name} LEADING
-              </h2>
-              <p className="text-sm text-muted-foreground font-medium">
-                {winner.short} shows superior dominance in recent per-match performance metrics.
-              </p>
-            </div>
-          </div>
+        <div className="w-1/3 text-center">
+          <span className={cn(
+            "text-[15px] font-black tracking-tight px-3 py-1 rounded-lg transition-all",
+            p2Better ? "bg-emerald-500/10 text-emerald-600 shadow-sm" : "text-foreground"
+          )}>
+            {value2}
+          </span>
         </div>
-
-        {/* Performance Rates */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="w-1 h-5 bg-amber-500 rounded-full" />
-          <h3 className="text-sm font-black tracking-widest text-foreground">PERFORMANCE RATES</h3>
-        </div>
-
-        <div className="bg-card border border-border rounded-3xl p-6 md:p-10 mb-12 shadow-sm">
-          {renderStatRow("🕒", "MATCH FREQUENCY", `${p1.matches}`, `${p2.matches}`, getLarger(p1.matches, p2.matches))}
-          {renderStatRow("🏆", "WIN RATE", `${(p1.wins / m1 * 100).toFixed(1)}%`, `${(p2.wins / m2 * 100).toFixed(1)}%`, getLarger(p1.wins / m1, p2.wins / m2))}
-          {renderStatRow("➖", "DRAW RATE", `${(p1.draws / m1 * 100).toFixed(1)}%`, `${(p2.draws / m2 * 100).toFixed(1)}%`, getLarger(p1.draws / m1, p2.draws / m2))}
-          {renderStatRow("✖️", "LOSS RATE", `${(p1.losses / m1 * 100).toFixed(1)}%`, `${(p2.losses / m2 * 100).toFixed(1)}%`, getLarger(p2.losses / m2, p1.losses / m1))}
-          {renderStatRow("⚽", "GOALS/MATCH", `${(p1.goals / m1).toFixed(2)}`, `${(p2.goals / m2).toFixed(2)}`, getLarger(p1.goals / m1, p2.goals / m2))}
-          {renderStatRow("🥅", "GA/MATCH", `${(p1.ga / m1).toFixed(2)}`, `${(p2.ga / m2).toFixed(2)}`, getLarger(p2.ga / m2, p1.ga / m1))}
-          {renderStatRow("🛡️", "CS RATE", `${(p1.cleansheets / m1 * 100).toFixed(1)}%`, `${(p2.cleansheets / m2 * 100).toFixed(1)}%`, getLarger(p1.cleansheets / m1, p2.cleansheets / m2))}
-          {renderStatRow("🎖️", "MOTM RATE", `${(p1.motm / m1 * 100).toFixed(1)}%`, `${(p2.motm / m2 * 100).toFixed(1)}%`, getLarger(p1.motm / m1, p2.motm / m2))}
-        </div>
-
-        {/* Raw Stats */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="w-1 h-5 bg-amber-500 rounded-full" />
-          <h3 className="text-sm font-black tracking-widest text-foreground">LIFETIME RAW STATS</h3>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {rawStats.map((s, idx) => (
-            <div key={idx} className="bg-card border border-border rounded-2xl p-4 md:p-6 shadow-sm flex flex-col items-center text-center">
-              <span className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-3">{s.label}</span>
-              <div className="flex items-center justify-between w-full">
-                <span className={cn("text-lg font-black", s.flag === 1 ? "text-blue-500 underline decoration-2 underline-offset-4" : "text-blue-500/70")}>{s.v1}</span>
-                <span className="text-xl">{s.icon}</span>
-                <span className={cn("text-lg font-black", s.flag === 2 ? "text-red-500 underline decoration-2 underline-offset-4" : "text-red-500/70")}>{s.v2}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
       </div>
     );
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 pb-20">
-      <div className="mb-10">
-        <h2 className="font-semibold text-2xl tracking-tight text-foreground mb-2">Performance Battle</h2>
-        <p className="text-muted-foreground text-sm">Player Comparison</p>
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <BarChart3 className="w-5 h-5 text-primary" />
+            <h2 className="font-heading font-bold text-[28px] tracking-wide">Compare Players</h2>
+          </div>
+          <p className="text-muted-foreground text-[13px] font-medium">Select two players to compare their career statistics side by side</p>
+        </div>
+        {!isSelecting && (
+          <Button variant="secondary" onClick={() => setIsSelecting(true)}>Change Players</Button>
+        )}
       </div>
 
-      {/* Selection Area */}
-      <div className="flex items-center gap-4 md:gap-6 mb-10">
-        <div className="flex-1">
-          {renderSelectorTile(1, p1, '#3b82f6', 'blue-500')}
+      {isSelecting ? (
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-[16px]">Select 2 Players</h3>
+            <Badge bg="#111111" c="#ffffff" className="text-[12px] px-3 py-1 shadow-md">
+              {selectedIds.length} / 2 Selected
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-8 stagger-children">
+            {players.map(p => {
+              const isSelected = selectedIds.includes(p.id);
+              const isDisabled = selectedIds.length >= 2 && !isSelected;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => togglePlayer(p.id)}
+                  disabled={isDisabled}
+                  className={cn(
+                    "relative flex flex-col items-center p-4 rounded-xl border transition-all duration-200 group text-left w-full h-full card-hover-lift",
+                    isSelected ? "border-primary bg-primary/5 shadow-md ring-1 ring-primary/20" : 
+                    isDisabled ? "opacity-40 cursor-not-allowed border-border" : 
+                    "border-border hover:border-primary/40 hover:bg-muted/30 hover:shadow-sm"
+                  )}
+                >
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 text-primary animate-in zoom-in duration-200">
+                      <CheckCircle2 className="w-5 h-5 fill-primary/20" />
+                    </div>
+                  )}
+                  <Avatar name={p.name} size={48} src={p.profileImageUrl} className={cn("mb-3 shadow-sm transition-transform duration-300", isSelected && "scale-110 ring-2 ring-primary ring-offset-2 ring-offset-card")} />
+                  <span className={cn("text-[13px] font-bold text-center leading-tight", isSelected ? "text-primary" : "text-foreground")}>{p.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-semibold mt-1">#{p.jerseyNumber}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-end border-t border-border/50 pt-6">
+            <Button 
+              size="lg" 
+              disabled={selectedIds.length !== 2} 
+              onClick={() => setIsSelecting(false)}
+              className="w-full sm:w-auto min-w-[200px] shadow-glow-red"
+            >
+              Compare Selected Players
+            </Button>
+          </div>
         </div>
+      ) : (
+        <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden flex flex-col">
+          {/* Header Row */}
+          <div className="flex border-b border-border bg-gradient-to-br from-gray-900 to-gray-800 p-8 relative">
+            <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvc3ZnPg==')]" />
+            <div className="absolute top-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[60px] pointer-events-none" />
 
-        {/* VS Bubble */}
-        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-background border-2 border-border/80 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative z-10">
-          <span className="text-amber-500 font-black italic text-sm md:text-lg tracking-tighter">VS</span>
+            {selectedPlayers.map((p, i) => (
+              <div key={p.player.id} className={cn(
+                "flex-1 flex flex-col items-center justify-center relative z-10",
+                i === 0 ? "border-r border-white/10" : ""
+              )}>
+                <Avatar name={p.player.name} size={96} src={p.player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl mb-4" />
+                <h3 className="font-heading font-bold text-[28px] text-white tracking-wide text-center leading-none mb-2">{p.player.name}</h3>
+                <p className="text-white/50 text-[13px] font-bold">#{p.player.jerseyNumber}</p>
+              </div>
+            ))}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border-2 border-white/10 rounded-full w-12 h-12 flex items-center justify-center z-20 shadow-xl">
+              <span className="text-[12px] font-black text-primary tracking-widest">VS</span>
+            </div>
+          </div>
+
+          {/* Radar Charts */}
+          <div className="flex border-b border-border bg-card p-6">
+            {selectedPlayers.map((p, i) => (
+              <div key={p.player.id} className={cn("flex-1 flex justify-center", i === 0 ? "border-r border-border/50" : "")}>
+                <PlayerRadarChart stats={{
+                  goals: p.stats.goals,
+                  cleanSheets: p.stats.cleanSheets,
+                  motm: p.stats.motm,
+                  wins: p.stats.wins,
+                  matches: p.stats.matches
+                }} />
+              </div>
+            ))}
+          </div>
+
+          {/* Metrics */}
+          <div className="p-6 md:p-8 bg-card">
+            <div className="max-w-3xl mx-auto">
+              <h4 className="text-center font-heading font-bold text-[20px] mb-6 flex items-center justify-center gap-2">
+                Head to Head Statistics
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              </h4>
+              <div className="bg-muted/10 rounded-2xl border border-border p-2">
+                <MetricRow label="Matches Played" key1="matches" key2="matches" value1={selectedPlayers[0].stats.matches} value2={selectedPlayers[1].stats.matches} better="higher" />
+                <MetricRow label="Goals Scored" key1="goals" key2="goals" value1={selectedPlayers[0].stats.goals} value2={selectedPlayers[1].stats.goals} better="higher" />
+                <MetricRow label="Win Rate" key1="winRate" key2="winRate" 
+                  value1={selectedPlayers[0].stats.matches > 0 ? Math.round((selectedPlayers[0].stats.wins / selectedPlayers[0].stats.matches) * 100) : 0} 
+                  value2={selectedPlayers[1].stats.matches > 0 ? Math.round((selectedPlayers[1].stats.wins / selectedPlayers[1].stats.matches) * 100) : 0} 
+                  better="higher" />
+                <MetricRow label="Wins" key1="wins" key2="wins" value1={selectedPlayers[0].stats.wins} value2={selectedPlayers[1].stats.wins} better="higher" />
+                <MetricRow label="Draws" key1="draws" key2="draws" value1={selectedPlayers[0].stats.draws} value2={selectedPlayers[1].stats.draws} better="higher" />
+                <MetricRow label="Losses" key1="losses" key2="losses" value1={selectedPlayers[0].stats.losses} value2={selectedPlayers[1].stats.losses} better="lower" />
+                <MetricRow label="Goals Conceded" key1="conceded" key2="conceded" value1={selectedPlayers[0].stats.conceded} value2={selectedPlayers[1].stats.conceded} better="lower" />
+                <MetricRow label="Clean Sheets" key1="cleanSheets" key2="cleanSheets" value1={selectedPlayers[0].stats.cleanSheets} value2={selectedPlayers[1].stats.cleanSheets} better="higher" />
+                <MetricRow label="MOTM Awards" key1="motm" key2="motm" value1={selectedPlayers[0].stats.motm} value2={selectedPlayers[1].stats.motm} better="higher" />
+                <MetricRow label="Hat-tricks" key1="hattricks" key2="hattricks" value1={selectedPlayers[0].stats.hattricks} value2={selectedPlayers[1].stats.hattricks} better="higher" />
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className="flex-1">
-          {renderSelectorTile(2, p2, '#ef4444', 'red-500')}
-        </div>
-      </div>
-
-      {/* Compare Button */}
-      {p1 && p2 && !isComparing && (
-        <button
-          onClick={() => setIsComparing(true)}
-          className="w-full py-5 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-amber-950 font-black tracking-widest text-sm hover:from-amber-500 hover:to-amber-500 transition-all shadow-[0_5px_20px_rgba(245,158,11,0.3)] hover:-translate-y-1"
-        >
-          COMPARE STATS
-        </button>
-      )}
-
-      {/* Output Content */}
-      {isComparing && renderComparison()}
-
-      {/* Modal */}
-      {selectorTarget && (
-        <PlayerSelectModal
-          players={computedPlayers}
-          onSelect={handleSelect}
-          onClose={() => setSelectorTarget(null)}
-        />
       )}
     </div>
   );

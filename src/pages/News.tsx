@@ -4,6 +4,8 @@ import { Button, Input, Badge } from '@/shared/components';
 import { fuzzyFilter } from '@/shared/lib/utils';
 import { Search } from 'lucide-react';
 
+const DEFAULT_NEWS_IMAGE = '/images/hero-banner.jpg';
+
 export function News() {
   const { news } = useFootballStore();
   const [search, setSearch] = useState('');
@@ -24,10 +26,10 @@ export function News() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h2 className="font-bold text-[22px] mb-1">News</h2>
-          <p className="text-muted-foreground text-[13px]">{news.length} articles</p>
+          <h2 className="font-heading font-bold text-[28px] tracking-wide mb-1">News</h2>
+          <p className="text-muted-foreground text-[13px] font-medium">{news.length} articles</p>
         </div>
         <div className="flex gap-3 items-center">
           <div className="relative">
@@ -42,40 +44,46 @@ export function News() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 stagger-children">
         {paginated.map(n => (
-          <div key={n.id} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm hover:border-primary/50 transition-colors">
-            {n.image && (
-              <div className="h-48 w-full overflow-hidden flex-shrink-0">
-                <img src={n.image} alt={n.title} className="w-full h-full object-cover" />
+          <div key={n.id} className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 card-hover-lift group">
+            <div className="h-48 w-full overflow-hidden flex-shrink-0 relative">
+              <img 
+                src={n.image || DEFAULT_NEWS_IMAGE} 
+                alt={n.title} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-3 left-3 flex gap-2">
+                {n.hot && <Badge bg="#7f1d1d" c="#fca5a5" className="shadow-lg border border-red-500/20">🔥 Hot</Badge>}
+                <Badge bg="rgba(0,0,0,0.6)" c="#ffffff" className="backdrop-blur-sm border border-white/10">{n.category}</Badge>
               </div>
-            )}
-            <div className="p-4 flex-1 flex flex-col">
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                {n.hot && <Badge bg="#7f1d1d" c="#fca5a5">Hot</Badge>}
-                <Badge bg="#111111" c="#e5e5e5">{n.category}</Badge>
-                <span className="text-muted-foreground text-[11px] ml-auto">{n.date}</span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-muted-foreground text-[11px] font-medium">{n.date}</span>
               </div>
-              <h3 className="font-bold text-[15px] mb-2 leading-tight">{n.title}</h3>
+              <h3 className="font-bold text-[15px] mb-2 leading-tight group-hover:text-primary transition-colors">{n.title}</h3>
               <p className="text-muted-foreground text-[12px] leading-relaxed mb-4 flex-1 break-words line-clamp-3">
                 {n.content || 'No content provided.'}
               </p>
               <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/50">
-                <p className="text-muted-foreground text-[11px]">By <span className="font-medium text-foreground">{n.author}</span></p>
+                <p className="text-muted-foreground text-[11px]">By <span className="font-semibold text-foreground">{n.author}</span></p>
               </div>
             </div>
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-xl">
-            <p className="text-muted-foreground text-[14px]">No articles found</p>
+          <div className="col-span-full py-16 text-center border-2 border-dashed border-border rounded-2xl bg-card/50">
+            <span className="text-4xl mb-3 block">📰</span>
+            <p className="text-muted-foreground text-[14px] font-medium">No articles found — stay tuned for updates!</p>
           </div>
         )}
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-8 bg-card border border-border p-3 rounded-xl shadow-sm">
-          <p className="text-[12px] text-muted-foreground">
+        <div className="flex items-center justify-between mt-8 bg-card border border-border p-4 rounded-2xl shadow-sm">
+          <p className="text-[12px] text-muted-foreground font-medium">
             Showing {(page-1)*PAGE_SIZE + 1} to {Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length} articles
           </p>
           <div className="flex gap-2">
@@ -87,7 +95,7 @@ export function News() {
             >
               Previous
             </Button>
-            <div className="flex items-center px-3 text-[12px] font-medium border border-border rounded-md bg-muted/30">
+            <div className="flex items-center px-3 text-[12px] font-bold border border-border rounded-lg bg-muted/30">
               Page {page} of {totalPages}
             </div>
             <Button 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
-import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X } from 'lucide-react';
+import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3 } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
 const NAV = [
@@ -9,10 +9,30 @@ const NAV = [
   { id: 'players', label: 'Players', icon: Users },
   { id: 'entries', label: 'Match entries', icon: ClipboardList },
   { id: 'matches', label: 'Matches', icon: Trophy },
-  { id: 'compare', label: 'Compare', icon: Users },
+  { id: 'compare', label: 'Compare', icon: BarChart3 },
   { id: 'news', label: 'News', icon: Newspaper },
   { id: 'hall-of-fame', label: 'Hall of Fame', icon: Award },
 ];
+
+// Bottom nav items for mobile (top 5)
+const BOTTOM_NAV = [
+  { id: 'overview', label: 'Overview', icon: Hexagon },
+  { id: 'players', label: 'Players', icon: Users },
+  { id: 'matches', label: 'Matches', icon: Trophy },
+  { id: 'compare', label: 'Compare', icon: BarChart3 },
+  { id: 'entries', label: 'Entries', icon: ClipboardList },
+];
+
+// Page title map
+const PAGE_TITLES: Record<string, string> = {
+  overview: 'Overview',
+  players: 'Players',
+  entries: 'Match Entries',
+  matches: 'Matches',
+  compare: 'Compare',
+  news: 'News',
+  'hall-of-fame': 'Hall of Fame',
+};
 
 export function AppShell() {
   const state = useFootballStore();
@@ -30,6 +50,13 @@ export function AppShell() {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Dynamic page title
+  useEffect(() => {
+    const segment = location.pathname.split('/').filter(Boolean)[0] || 'overview';
+    const pageTitle = PAGE_TITLES[segment] || 'Overview';
+    document.title = `${pageTitle} — Elites Empire`;
+  }, [location.pathname]);
+
   const counts: Record<string, number> = {
     players: state.players.length,
     entries: state.matchEntries.length,
@@ -41,8 +68,8 @@ export function AppShell() {
   return (
     <div className="flex flex-col h-screen min-h-[600px] max-h-screen bg-background text-foreground font-sans overflow-hidden">
       {/* Topbar */}
-      <header className="bg-popover border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm z-20 w-full relative">
-        <div className="flex items-center gap-8">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-border/60 h-16 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm z-20 w-full relative">
+        <div className="flex items-center gap-6 lg:gap-8">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <button 
@@ -51,14 +78,19 @@ export function AppShell() {
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-            <div className="hidden sm:flex w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-red-800 items-center justify-center shadow-sm">
-              <span className="text-white text-lg leading-none">⚽</span>
+            <img 
+              src="/images/club-logo.jpg" 
+              alt="Elites Empire" 
+              className="w-9 h-9 rounded-full object-cover shadow-md ring-2 ring-primary/20"
+            />
+            <div className="flex flex-col">
+              <span className="font-heading font-bold text-[16px] tracking-tight text-foreground leading-none">ELITES EMPIRE</span>
+              <span className="text-[9px] text-muted-foreground font-medium tracking-widest uppercase leading-none mt-0.5">In Mystery We Reign</span>
             </div>
-            <span className="font-semibold text-[15px] tracking-tight text-foreground">Elites Empire</span>
           </div>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-0.5 relative">
             {NAV.map(t => {
               const Icon = t.icon;
               const isActive = location.pathname.includes('/' + t.id);
@@ -67,19 +99,28 @@ export function AppShell() {
                   key={t.id}
                   to={`/${t.id}`}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-md text-[13px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                    isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    "relative flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary group",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                   )}
                 >
-                  <Icon className={cn("w-4 h-4", isActive ? "text-primary" : "text-muted-foreground")} strokeWidth={2} />
+                  <Icon className={cn(
+                    "w-4 h-4 transition-all duration-200",
+                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground group-hover:scale-110"
+                  )} strokeWidth={2} />
                   <span>{t.label}</span>
                   {counts[t.id] > 0 && (
                     <span className={cn(
-                      "ml-1 flex h-4 items-center justify-center px-1.5 rounded-full text-[10px] font-semibold",
-                      isActive ? "bg-background border border-border" : "bg-muted-foreground/10"
+                      "ml-0.5 flex h-5 items-center justify-center px-1.5 rounded-full text-[10px] font-bold transition-all",
+                      isActive 
+                        ? "bg-primary/10 text-primary border border-primary/20" 
+                        : "bg-muted text-muted-foreground"
                     )}>
                       {counts[t.id]}
                     </span>
+                  )}
+                  {/* Active indicator bar */}
+                  {isActive && (
+                    <span className="absolute -bottom-[13px] left-2 right-2 h-[3px] bg-gradient-to-r from-primary to-red-400 rounded-full animate-fade-in-scale" />
                   )}
                 </NavLink>
               );
@@ -97,7 +138,7 @@ export function AppShell() {
 
         {/* Navigation - Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-popover border-b border-border shadow-lg p-4 flex flex-col gap-1 md:hidden animate-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-border shadow-lg p-4 flex flex-col gap-1 md:hidden animate-in slide-in-from-top-2 duration-200 z-30">
             {NAV.map(t => {
               const Icon = t.icon;
               const isActive = location.pathname.includes('/' + t.id);
@@ -106,16 +147,18 @@ export function AppShell() {
                   key={t.id}
                   to={`/${t.id}`}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-[14px] font-medium transition-colors",
-                    isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium transition-all",
+                    isActive 
+                      ? "bg-primary/5 text-foreground border border-primary/20" 
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
                   <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-muted-foreground")} strokeWidth={2} />
                   <span>{t.label}</span>
                   {counts[t.id] > 0 && (
                     <span className={cn(
-                      "ml-auto flex h-5 items-center justify-center px-2 rounded-full text-[11px] font-semibold",
-                      isActive ? "bg-background border border-border" : "bg-muted/50"
+                      "ml-auto flex h-6 items-center justify-center px-2 rounded-full text-[11px] font-bold",
+                      isActive ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground"
                     )}>
                       {counts[t.id]}
                     </span>
@@ -136,12 +179,43 @@ export function AppShell() {
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
-        <main className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-10 relative w-full h-full">
+        <main className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-10 relative w-full h-full pb-20 md:pb-0">
           <div className="max-w-[1200px] mx-auto pb-12 w-full">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="bottom-nav md:hidden flex items-center justify-around py-2 px-1">
+        {BOTTOM_NAV.map(t => {
+          const Icon = t.icon;
+          const isActive = location.pathname.includes('/' + t.id);
+          return (
+            <NavLink
+              key={t.id}
+              to={`/${t.id}`}
+              className={cn(
+                "flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all min-w-[56px]",
+                isActive 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
+            >
+              <div className={cn(
+                "p-1.5 rounded-xl transition-all",
+                isActive ? "bg-primary/10" : ""
+              )}>
+                <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+              </div>
+              <span className={cn(
+                "text-[10px] font-semibold leading-none",
+                isActive ? "text-primary" : "text-muted-foreground"
+              )}>{t.label}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
     </div>
   );
 }

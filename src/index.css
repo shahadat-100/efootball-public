@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,6 +7,7 @@
 @layer base {
   :root {
     --font-sans: 'Inter', sans-serif;
+    --font-heading: 'Oswald', sans-serif;
   }
 
   body {
@@ -67,5 +68,195 @@
 
   ::-webkit-scrollbar-corner {
     background: transparent;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     UI Overhaul — Utility Classes
+     ═══════════════════════════════════════════════════ */
+
+  /* Gradient text effect */
+  .gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-red {
+    background-image: linear-gradient(135deg, #c8102e, #ff4d6a);
+  }
+
+  .gradient-text-gold {
+    background-image: linear-gradient(135deg, #b8860b, #ffd700, #daa520);
+  }
+
+  .gradient-text-emerald {
+    background-image: linear-gradient(135deg, #059669, #34d399);
+  }
+
+  /* Glassmorphism card */
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  /* Stat card glow on hover */
+  .stat-glow {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .stat-glow:hover {
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  /* Skeleton shimmer loading */
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #f3f4f6 25%,
+      #e5e7eb 50%,
+      #f3f4f6 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* Medal badges */
+  .medal-gold {
+    background: linear-gradient(135deg, #b8860b, #ffd700, #daa520);
+    color: #422006;
+    text-shadow: 0 1px 0 rgba(255, 215, 0, 0.3);
+  }
+  .medal-silver {
+    background: linear-gradient(135deg, #94a3b8, #cbd5e1, #94a3b8);
+    color: #1e293b;
+  }
+  .medal-bronze {
+    background: linear-gradient(135deg, #92400e, #d97706, #b45309);
+    color: #fffbeb;
+  }
+
+  /* Hero banner overlay */
+  .hero-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+  }
+
+  /* Card hover lift effect */
+  .card-hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Result color bar (left border) */
+  .result-bar-win {
+    border-left: 4px solid #10b981;
+  }
+  .result-bar-loss {
+    border-left: 4px solid #ef4444;
+  }
+  .result-bar-draw {
+    border-left: 4px solid #f59e0b;
+  }
+
+  /* Heading font utility */
+  .font-heading {
+    font-family: 'Oswald', sans-serif;
+  }
+
+  /* Bottom nav for mobile */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  }
+}
+
+@layer utilities {
+  /* Stagger fade-in for child elements */
+  .stagger-children > * {
+    opacity: 0;
+    animation: staggerFadeIn 0.4s ease-out forwards;
+  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+  .stagger-children > *:nth-child(8) { animation-delay: 420ms; }
+  .stagger-children > *:nth-child(9) { animation-delay: 480ms; }
+  .stagger-children > *:nth-child(10) { animation-delay: 540ms; }
+}
+
+/* ═══════════════════════════════════════════════════
+   Keyframe Animations
+   ═══════════════════════════════════════════════════ */
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(200, 16, 46, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(200, 16, 46, 0.4); }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

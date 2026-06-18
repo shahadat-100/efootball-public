@@ -6,6 +6,7 @@ import { PlayerRadarChart } from './PlayerRadarChart';
 import { SeasonPerformanceChart } from './SeasonPerformanceChart';
 import { RankTrendCard } from './RankTrendCard';
 import { SeasonTable } from './SeasonTable';
+import { cn } from '@/shared/lib/cn';
 
 interface PlayerDetailProps {
   playerId: string;
@@ -35,8 +36,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       return String(b.id).localeCompare(String(a.id));
     })
     .slice(0, 30); // Requested to show 30 instead of 50
-
-
 
 
   const oneWeekAgo = new Date();
@@ -95,9 +94,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   // Compute Ranks for all seasons
   const seasonRanksList = seasons.map(s => {
-    // Check if player played in this season (has stats and >0 appearances, or has any stats)
     const pStats = playerSeasonStats.find(ps => ps.playerId === player.id && ps.seasonId === s.id);
-    if (!pStats || pStats.appearances === 0) return null; // Didn't play
+    if (!pStats || pStats.appearances === 0) return null;
 
     const ranksForSeason = players.map(p => {
       const pS = playerSeasonStats.find(ps => ps.playerId === p.id && ps.seasonId === s.id);
@@ -160,7 +158,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   });
 
   const getRankFromMap = (map: Map<string, number>, pId: string) => {
-    // Only rank players who actually have points or consider all? We'll rank all and just find index
     const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
     const idx = sorted.findIndex(([id]) => id === pId);
     return idx !== -1 ? idx + 1 : undefined;
@@ -170,147 +167,58 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const recentMonthRank = getRankFromMap(monthlyMap, player.id);
 
   return (
-    <div>
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {/* Back navigation */}
       <div className="flex items-center gap-3 mb-5">
         <Button variant="secondary" size="sm" onClick={onBack}>← Back</Button>
         <span className="text-muted-foreground text-[12px]">Players /</span>
         <span className="text-[12px] font-semibold">{player.name}</span>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-5 mb-4 shadow-sm">
-        <div className="flex flex-col lg:flex-row gap-8 items-start justify-between">
-          <div className="flex gap-5 items-center flex-wrap flex-1">
-            <Avatar name={player.name} size={100} src={player.profileImageUrl} />
-            <div className="flex-1">
-              <div className="flex justify-between flex-wrap gap-3">
-                <div>
-                  <h2 className="font-bold text-[26px]">{player.name}</h2>
-                  <p className="text-muted-foreground text-[14px] font-medium">#{player.jerseyNumber || '—'}</p>
-                  <div className="flex gap-1.5 flex-wrap mt-2">
-                    {(player.playerRoles ?? []).map(t => (
-                      <Badge key={t} bg="#1a1a1a" c="#e5e5e5">{t}</Badge>
-                    ))}
-                    {(player.customTags ?? []).map(t => (
-                      <Badge key={t} bg="#4b5563" c="#e5e7eb">{t}</Badge>
-                    ))}
-                    {(player.customStringTags ?? []).map(t => (
-                      <Badge key={`str-${t}`} bg="#1e3a5f" c="#93c5fd">{t}</Badge>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex flex-col gap-4">
-                    <div className="flex items-center gap-4 text-[12px] bg-muted/30 p-2.5 rounded-lg border border-border/50 w-max flex-wrap">
-                      {player.email && (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground font-medium uppercase tracking-wider text-[10px]">Email</span>
-                            <span className="text-foreground font-semibold">{player.email}</span>
-                          </div>
-                          <div className="w-px h-4 bg-border hidden sm:block"></div>
-                        </>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground uppercase font-bold tracking-wider text-[10px]">Win Rate</span>
-                        <span className="font-bold">{(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%</span>
-                      </div>
-                    </div>
-
-                    {/* New: Recent Form & Ranks block */}
-                    <div className="flex flex-wrap gap-10 items-start">
-                      {/* Recent Form */}
-                      <div>
-                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Recent Form (Last 10)</h4>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {(() => {
-                            const recent10 = historyEntries.slice(0, 10).reverse();
-                            if (recent10.length === 0) return <span className="text-[11px] text-muted-foreground">No matches yet</span>;
-                            return recent10.map((entry, i) => {
-                              const result = entry.result || 'draw';
-                              const isWin = result === 'win';
-                              const isDraw = result === 'draw';
-                              const bg = isWin ? '#14532d' : isDraw ? '#78350f' : '#7f1d1d';
-                              const c = isWin ? '#4ade80' : isDraw ? '#fcd34d' : '#f87171';
-                              return (
-                                <div
-                                  key={entry.id || i}
-                                  className="w-7 h-7 rounded-md flex items-center justify-center font-bold text-[11px] shadow-sm cursor-default"
-                                  style={{ backgroundColor: bg, color: c }}
-                                  title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
-                                >
-                                  {result.charAt(0).toUpperCase()}
-                                </div>
-                              );
-                            });
-                          })()}
-                        </div>
-                      </div>
-
-                      {/* Form Status */}
-                      <div>
-                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Form Trend</h4>
-                        <div className="flex items-center gap-2">
-                          <span 
-                            className="font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm border flex items-center gap-1.5" 
-                            style={{ backgroundColor: `${formStatus.color}15`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
-                          >
-                            <span>{formStatus.icon}</span>
-                            {formStatus.text}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Overall Rank */}
-                      <div>
-                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Overall Rank</h4>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-amber-400 text-amber-950 font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
-                            #{currentRank || '-'}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground font-medium">All Time</span>
-                        </div>
-                      </div>
-
-                      {/* Recent Month Rank */}
-                      <div>
-                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Month Rank</h4>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-emerald-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
-                            #{recentMonthRank || '-'}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground font-medium">This Month</span>
-                        </div>
-                      </div>
-
-                      {/* Recent Week Rank */}
-                      <div>
-                        <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Week Rank</h4>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-purple-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
-                            #{recentWeekRank || '-'}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground font-medium">This Week</span>
-                        </div>
-                      </div>
-
-                      {/* Season Ranks */}
-                      {seasonRanksList.map((sr: any) => (
-                        <div key={sr.seasonName}>
-                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">{sr.seasonName} Rank</h4>
-                          <div className="flex items-center gap-2">
-                            <span className="bg-blue-500 text-white font-black text-[13px] px-2.5 py-0.5 rounded shadow-sm">
-                              #{sr.rank || '-'}
-                            </span>
-                            <span className="text-[11px] text-muted-foreground font-medium">Season</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+      {/* ═══════════════════════════════════════════
+          HERO ZONE — Player Header
+          ═══════════════════════════════════════════ */}
+      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-6 md:p-8 mb-6 shadow-xl overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')]" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px] pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+          {/* Left side: Avatar + Info */}
+          <div className="flex gap-6 items-center flex-wrap flex-1">
+            <div className="relative">
+              <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl" />
+              {currentRank && currentRank <= 3 && (
+                <div className={cn(
+                  "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
+                  currentRank === 1 ? "medal-gold" : currentRank === 2 ? "medal-silver" : "medal-bronze"
+                )}>
+                  #{currentRank}
                 </div>
+              )}
+            </div>
+            
+            <div className="flex-1">
+              <h2 className="font-heading font-bold text-[32px] md:text-[38px] text-white tracking-wide leading-none mb-1">{player.name}</h2>
+              <p className="text-white/40 text-[14px] font-bold mb-3">#{player.jerseyNumber || '—'}</p>
+              
+              <div className="flex gap-1.5 flex-wrap mb-4">
+                {(player.playerRoles ?? []).map(t => (
+                  <Badge key={t} bg="rgba(255,255,255,0.1)" c="#e5e5e5" className="border border-white/10">{t}</Badge>
+                ))}
+                {(player.customTags ?? []).map(t => (
+                  <Badge key={t} bg="rgba(255,255,255,0.06)" c="#9ca3af" className="border border-white/10">{t}</Badge>
+                ))}
+                {(player.customStringTags ?? []).map(t => (
+                  <Badge key={`str-${t}`} bg="rgba(59,130,246,0.15)" c="#93c5fd" className="border border-blue-500/20">{t}</Badge>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="w-full lg:w-auto lg:min-w-[250px] border-t lg:border-t-0 lg:border-l border-border pt-4 lg:pt-0 lg:pl-8 flex justify-center">
+          {/* Right side: Radar Chart */}
+          <div className="w-full lg:w-auto lg:min-w-[250px] flex justify-center">
             <PlayerRadarChart stats={{
               goals: stats.totalGoals,
               cleanSheets: stats.totalCleanSheets,
@@ -320,34 +228,162 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             }} />
           </div>
         </div>
+
+        {/* ═══ Quick Stats Ribbon ═══ */}
+        <div className="relative z-10 mt-6 pt-6 border-t border-white/10">
+          <div className="flex flex-wrap gap-6 items-start">
+            {/* Recent Form */}
+            <div>
+              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Recent Form (Last 10)</h4>
+              <div className="flex gap-1.5 flex-wrap">
+                {(() => {
+                  const recent10 = historyEntries.slice(0, 10).reverse();
+                  if (recent10.length === 0) return <span className="text-[11px] text-white/30">No matches yet</span>;
+                  return recent10.map((entry, i) => {
+                    const result = entry.result || 'draw';
+                    const isWin = result === 'win';
+                    const isDraw = result === 'draw';
+                    return (
+                      <div
+                        key={entry.id || i}
+                        className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default transition-transform hover:scale-110",
+                          isWin ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/20' :
+                          isDraw ? 'bg-amber-500/30 text-amber-300 border border-amber-500/20' :
+                          'bg-red-500/30 text-red-300 border border-red-500/20'
+                        )}
+                        title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
+                      >
+                        {result.charAt(0).toUpperCase()}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+
+            {/* Form Status */}
+            <div>
+              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Form Trend</h4>
+              <span 
+                className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
+                style={{ backgroundColor: `${formStatus.color}20`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
+              >
+                <span>{formStatus.icon}</span>
+                {formStatus.text}
+              </span>
+            </div>
+
+            {/* Ranks */}
+            {[
+              { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.2)' },
+              { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.2)' },
+              { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.2)' },
+            ].map(r => (
+              <div key={r.label}>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{r.label}</h4>
+                <div className="flex items-center gap-2">
+                  <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ backgroundColor: r.bgColor, color: r.color }}>
+                    #{r.value || '-'}
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            {/* Season Ranks */}
+            {seasonRanksList.map((sr: any) => (
+              <div key={sr.seasonName}>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{sr.seasonName}</h4>
+                <div className="flex items-center gap-2">
+                  <span className="bg-blue-500/20 text-blue-300 font-black text-[14px] px-3 py-1 rounded-lg shadow-md">
+                    #{sr.rank || '-'}
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            {/* Win Rate */}
+            <div>
+              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Win Rate</h4>
+              <span className="font-black text-[14px] text-white px-3 py-1 rounded-lg bg-white/10 shadow-md border border-white/10">
+                {(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%
+              </span>
+            </div>
+
+            {player.email && (
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Email</h4>
+                <span className="text-[13px] text-white/70 font-medium">{player.email}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-5 mb-4 shadow-sm">
-        <h3 className="font-semibold text-[14px] mb-4 border-b border-border pb-2">Career Stats</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          {[
-            { label: 'Matches', value: stats.totalMatches, color: '#6366f1', bg: 'rgba(99,102,241,0.10)', icon: '🎮' },
-            { label: 'Goals', value: stats.totalGoals, color: '#10b981', bg: 'rgba(16,185,129,0.10)', icon: '⚽' },
-            { label: 'Goals Conceded', value: stats.totalGoalsConceded, color: '#ef4444', bg: 'rgba(239,68,68,0.10)', icon: '🥅' },
-            { label: 'Wins', value: stats.totalWins, color: '#22c55e', bg: 'rgba(34,197,94,0.10)', icon: '🏆' },
-            { label: 'Draws', value: stats.totalDraws, color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', icon: '🤝' },
-            { label: 'Losses', value: stats.totalLosses, color: '#f87171', bg: 'rgba(248,113,113,0.10)', icon: '❌' },
-            { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: '🏅' },
-            { label: 'Clean Sheets', value: stats.totalCleanSheets, color: '#38bdf8', bg: 'rgba(56,189,248,0.10)', icon: '🧤' },
-            { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', bg: 'rgba(168,85,247,0.10)', icon: '🎩' },
-          ].map(({ label, value, color, bg, icon }) => (
-            <div
-              key={label}
-              className="rounded-xl p-3 flex flex-col gap-1 shadow-sm transition-transform hover:scale-[1.02]"
-              style={{ background: bg, border: `1.5px solid ${color}33` }}
-            >
-              <div className="flex items-center gap-1.5">
-                <span className="text-[13px]">{icon}</span>
-                <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color }}>{label}</p>
+      {/* ═══════════════════════════════════════════
+          CAREER STATS — Grouped by category
+          ═══════════════════════════════════════════ */}
+      <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
+        <h3 className="font-heading font-bold text-[18px] mb-5 tracking-tight">Career Stats</h3>
+        
+        {/* Attack */}
+        <div className="mb-4">
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-3">⚽ Attack</p>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Goals', value: stats.totalGoals, color: '#10b981', icon: '⚽' },
+              { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', icon: '🎩' },
+              { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', icon: '🏅' },
+            ].map(({ label, value, color, icon }) => (
+              <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-[13px]">{icon}</span>
+                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
+                </div>
+                <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
               </div>
-              <p className="text-[22px] font-black" style={{ color }}>{value}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Defense */}
+        <div className="mb-4">
+          <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-3">🛡️ Defense</p>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Clean Sheets', value: stats.totalCleanSheets, color: '#38bdf8', icon: '🧤' },
+              { label: 'Goals Conceded', value: stats.totalGoalsConceded, color: '#ef4444', icon: '🥅' },
+              { label: 'Matches', value: stats.totalMatches, color: '#6366f1', icon: '🎮' },
+            ].map(({ label, value, color, icon }) => (
+              <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-[13px]">{icon}</span>
+                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
+                </div>
+                <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Results */}
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-3">📊 Results</p>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Wins', value: stats.totalWins, color: '#22c55e', icon: '🏆' },
+              { label: 'Draws', value: stats.totalDraws, color: '#f59e0b', icon: '🤝' },
+              { label: 'Losses', value: stats.totalLosses, color: '#f87171', icon: '❌' },
+            ].map(({ label, value, color, icon }) => (
+              <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-[13px]">{icon}</span>
+                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
+                </div>
+                <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -399,8 +435,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         };
 
         // ── Monthly & Weekly RANK calculation ──────────────────────────────
-        // For each period (month/week), tally points for EVERY player from ALL match entries,
-        // then find where this player sits in the ranking.
         type PeriodStats = { wins: number; draws: number; losses: number; goals: number; matches: number; points: number };
 
         const buildPeriodKey = (date: Date, mode: 'month' | 'week') => {
@@ -422,7 +456,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         });
 
         const getRankForPeriod = (periodKey: string, mode: 'month' | 'week'): { rank: number; wins: number; draws: number; losses: number; goals: number; matches: number; totalPlayers: number } => {
-          // Build a points map for all players in this period
           const playerPoints = new Map<string, PeriodStats>();
           matchEntries.forEach(e => {
             if (!e.date) return;
@@ -463,16 +496,16 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               <div className="lg:col-span-1 min-h-[320px]">
                 <SeasonPerformanceChart data={seasonData} />
               </div>
-              <div className="lg:col-span-1 min-h-[320px] bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-6 shadow-xl shadow-black/5 flex flex-col relative overflow-hidden">
+              <div className="lg:col-span-1 min-h-[320px] bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl -z-10 pointer-events-none translate-x-1/3 -translate-y-1/3" />
-                <h3 className="font-bold text-[18px] tracking-tight w-full text-left mb-6">Monthly Performance</h3>
+                <h3 className="font-heading font-bold text-[18px] tracking-tight w-full text-left mb-6">Monthly Performance</h3>
                 <div className="flex-1 flex items-center justify-center">
                   <PieChart data={monthChartData} size={140} />
                 </div>
               </div>
-              <div className="lg:col-span-1 min-h-[320px] bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-6 shadow-xl shadow-black/5 flex flex-col relative overflow-hidden">
+              <div className="lg:col-span-1 min-h-[320px] bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl -z-10 pointer-events-none translate-x-1/3 -translate-y-1/3" />
-                <h3 className="font-bold text-[18px] tracking-tight w-full text-left mb-6">Recent Week</h3>
+                <h3 className="font-heading font-bold text-[18px] tracking-tight w-full text-left mb-6">Recent Week</h3>
                 <div className="flex-1 flex items-center justify-center">
                   <PieChart data={weekChartData} size={140} />
                 </div>
@@ -492,37 +525,48 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         );
       })()}
 
-      <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-        <p className="font-semibold mb-3 text-[13px]">Match Entries & History (Recent 30)</p>
+      {/* ═══════════════════════════════════════════
+          MATCH HISTORY TABLE — Improved
+          ═══════════════════════════════════════════ */}
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <p className="font-heading font-bold text-[18px] mb-4 tracking-tight">Match History <span className="text-muted-foreground text-[13px] font-sans font-normal ml-2">(Recent 30)</span></p>
         {historyEntries.length === 0 ? (
-          <p className="text-muted-foreground text-[12px] bg-muted/30 p-4 rounded-lg border border-border/50 text-center">No entries yet. Click "+ Entry" above.</p>
+          <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-xl">
+            <span className="text-4xl mb-3 block">🎮</span>
+            <p className="text-muted-foreground text-[14px] font-medium">No entries yet — the journey begins here!</p>
+          </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-[12px] text-left">
-              <thead className="bg-muted text-muted-foreground border-b border-border">
+              <thead className="bg-muted/50 text-muted-foreground border-b border-border sticky top-0 z-10">
                 <tr>
                   {['Date', 'Goals', 'Conceded', 'Result', 'Flags', 'Notes'].map(h => (
-                    <th key={h} className="px-3 py-2.5 font-medium">{h}</th>
+                    <th key={h} className="px-4 py-3 font-bold text-[10px] uppercase tracking-widest">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-popover">
-                {historyEntries.map(e => {
+              <tbody className="divide-y divide-border/30">
+                {historyEntries.map((e, idx) => {
                   const rb = RESULT_BADGE[e.result as keyof typeof RESULT_BADGE] ?? RESULT_BADGE.draw;
+                  const resultClass = e.result === 'win' ? 'result-bar-win' : e.result === 'loss' ? 'result-bar-loss' : 'result-bar-draw';
                   return (
-                    <tr key={e.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-3 py-2.5 text-muted-foreground whitespace-nowrap">{e.date}</td>
-                      <td className="px-3 py-2.5 font-bold text-foreground">{e.goals}</td>
-                      <td className="px-3 py-2.5 text-red-400 font-medium">{e.goalsConceded}</td>
-                      <td className="px-3 py-2.5"><Badge bg={rb.bg} c={rb.c}>{e.result}</Badge></td>
-                      <td className="px-3 py-2.5">
+                    <tr key={e.id} className={cn(
+                      "hover:bg-muted/30 transition-colors",
+                      resultClass,
+                      idx % 2 === 0 ? "bg-white" : "bg-muted/10"
+                    )}>
+                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap font-medium">{e.date}</td>
+                      <td className="px-4 py-3 font-black text-foreground text-[14px]">{e.goals}</td>
+                      <td className="px-4 py-3 text-red-400 font-bold">{e.goalsConceded}</td>
+                      <td className="px-4 py-3"><Badge bg={rb.bg} c={rb.c}>{e.result}</Badge></td>
+                      <td className="px-4 py-3">
                         <div className="flex gap-1.5 flex-wrap">
                           {e.hattricks > 0 && <Badge bg="#1a1a1a" c="#e5e5e5" className="border border-gray-500/30 text-[10px] px-1.5 py-0">HT×{e.hattricks}</Badge>}
                           {e.motm && <Badge bg="#78350f" c="#fcd34d" className="border border-amber-500/30 text-[10px] px-1.5 py-0">MOTM</Badge>}
                           {e.cleanSheet && <Badge bg="#111111" c="#e5e5e5" className="border border-gray-500/30 text-[10px] px-1.5 py-0">CS</Badge>}
                         </div>
                       </td>
-                      <td className="px-3 py-2.5 text-muted-foreground max-w-[160px] truncate">{e.notes || '—'}</td>
+                      <td className="px-4 py-3 text-muted-foreground max-w-[160px] truncate">{e.notes || '—'}</td>
                     </tr>
                   )
                 })}

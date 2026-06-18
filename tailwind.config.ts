@@ -30,7 +30,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['"Inter"', 'sans-serif'],
-        heading: ['"Inter"', 'sans-serif'],
+        heading: ['"Oswald"', 'sans-serif'],
         mono: ['monospace'],
       },
       boxShadow: {
@@ -40,6 +40,12 @@ const config: Config = {
         lg: '0 10px 15px rgba(0,0,0,0.05)',
         xl: '0 20px 25px rgba(0,0,0,0.05)',
         none: 'none',
+        'glow-red': '0 4px 20px rgba(200,16,46,0.15)',
+        'glow-emerald': '0 4px 20px rgba(16,185,129,0.15)',
+        'glow-amber': '0 4px 20px rgba(245,158,11,0.15)',
+        'glow-blue': '0 4px 20px rgba(59,130,246,0.15)',
+        'glow-purple': '0 4px 20px rgba(168,85,247,0.15)',
+        'lift': '0 20px 40px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.04)',
       },
       borderRadius: {
         DEFAULT: '8px',
@@ -62,7 +68,41 @@ const config: Config = {
         'sidebar-md': '768px',
         'sidebar-lg': '1024px',
         'sidebar-xl': '1280px',
-      }
+      },
+      animation: {
+        'stagger-in': 'staggerFadeIn 0.4s ease-out forwards',
+        'slide-up': 'slideUp 0.5s ease-out forwards',
+        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'fade-in-scale': 'fadeInScale 0.3s ease-out forwards',
+        'bar-grow': 'barGrow 0.8s ease-out forwards',
+      },
+      keyframes: {
+        staggerFadeIn: {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideUp: {
+          from: { opacity: '0', transform: 'translateY(20px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        glowPulse: {
+          '0%, 100%': { boxShadow: '0 0 8px rgba(200,16,46,0.2)' },
+          '50%': { boxShadow: '0 0 20px rgba(200,16,46,0.4)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+        fadeInScale: {
+          from: { opacity: '0', transform: 'scale(0.95)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        barGrow: {
+          from: { transform: 'scaleX(0)' },
+          to: { transform: 'scaleX(1)' },
+        },
+      },
     },
   },
   plugins: [],
