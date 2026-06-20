@@ -60,7 +60,7 @@ export function AwardsLeaderboard({ data }: AwardsLeaderboardProps) {
   return (
     <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden group">
       <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-      <p className="font-semibold text-base mb-6 text-foreground tracking-tight relative z-10">Awards Leaderboard</p>
+      <p className="font-semibold text-base mb-6 text-foreground tracking-tight relative z-10">Players Awards Leaderboard</p>
       <div className="flex flex-col md:flex-row gap-6 md:gap-5 flex-1 relative z-10">
         <Column title="MOTM" icon="⭐" items={topMotm} valueKey="motm" accentColor="#f59e0b" />
         <Column title="Clean Sheets" icon="🧤" items={topCleanSheets} valueKey="cleanSheets" accentColor="#06b6d4" />
