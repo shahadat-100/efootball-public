@@ -414,6 +414,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             goalsConceded: sb.goalsConceded,
             cleanSheets: sb.cleanSheets,
             motm: sb.motm,
+            hattricks: sb.hattricks,
           };
         }).reverse(); // Order older to newer for chart
 
@@ -429,7 +430,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           goals: stats.totalGoals,
           goalsConceded: stats.totalGoalsConceded,
           cleanSheets: stats.totalCleanSheets,
-          motm: stats.totalMOTM
+          motm: stats.totalMOTM,
+          hattricks: stats.totalHattricks
         };
 
         // ── Monthly & Weekly RANK calculation ──────────────────────────────

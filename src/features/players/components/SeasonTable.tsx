@@ -12,6 +12,7 @@ interface SeasonTableRow {
   goalsConceded: number;
   cleanSheets: number;
   motm: number;
+  hattricks: number;
 }
 
 interface SeasonTableProps {
@@ -39,6 +40,7 @@ export function SeasonTable({ data, allTime }: SeasonTableProps) {
             <th className="px-2 py-2 font-medium bg-muted/30" title="Goals For">GF</th>
             <th className="px-2 py-2 font-medium bg-muted/30" title="Goals Conceded">GC</th>
             <th className="px-2 py-2 font-medium bg-muted/30" title="Clean Sheets">CS</th>
+            <th className="px-2 py-2 font-medium bg-muted/30" title="Hat-tricks">HT</th>
             <th className="px-2 py-2 font-medium bg-muted/30 rounded-r-full" title="Man of the Match">MOTM</th>
           </tr>
         </thead>
@@ -55,11 +57,12 @@ export function SeasonTable({ data, allTime }: SeasonTableProps) {
               <td className="px-2 py-2.5 font-medium">{row.goals}</td>
               <td className="px-2 py-2.5 font-medium">{row.goalsConceded}</td>
               <td className="px-2 py-2.5 font-medium">{row.cleanSheets}</td>
+              <td className="px-2 py-2.5 font-medium text-purple-500">{row.hattricks}</td>
               <td className="px-2 py-2.5 font-medium text-amber-500">{row.motm}</td>
             </tr>
           ))}
           <tr className="border-t border-border mt-2">
-            <td colSpan={10} className="p-0"><div className="h-2"></div></td>
+            <td colSpan={11} className="p-0"><div className="h-2"></div></td>
           </tr>
           <tr className="font-bold bg-muted/10 rounded-lg">
             <td className="px-3 py-2.5 text-left rounded-l-lg">All-time</td>
@@ -71,6 +74,7 @@ export function SeasonTable({ data, allTime }: SeasonTableProps) {
             <td className="px-2 py-2.5">{allTime.goals}</td>
             <td className="px-2 py-2.5">{allTime.goalsConceded}</td>
             <td className="px-2 py-2.5">{allTime.cleanSheets}</td>
+            <td className="px-2 py-2.5 text-purple-500">{allTime.hattricks}</td>
             <td className="px-2 py-2.5 rounded-r-lg text-amber-500">{allTime.motm}</td>
           </tr>
         </tbody>
