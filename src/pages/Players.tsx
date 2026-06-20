@@ -11,10 +11,6 @@ export function Players() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'rank' | 'name'>('rank');
 
-  if (selectedId) {
-    return <PlayerDetail playerId={selectedId} onBack={() => setSelectedId(null)} />;
-  }
-
   // Calculate points and sort players
   const sortedPlayers = useMemo(() => {
     const calcSeasonPoints = (s: any) =>
@@ -38,6 +34,10 @@ export function Players() {
   }, [players, playerSeasonStats, sortBy]);
 
   const filtered = fuzzyFilter(sortedPlayers, search, ['name']);
+
+  if (selectedId) {
+    return <PlayerDetail playerId={selectedId} onBack={() => setSelectedId(null)} />;
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">

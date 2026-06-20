@@ -50,19 +50,6 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
         {/* Decorative pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvc3ZnPg==')] opacity-50" />
         
-        {/* Rank badge */}
-        {rank && (
-          <div className={cn(
-            "absolute top-3 right-3 w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black shadow-lg z-10",
-            rank === 1 ? "medal-gold" :
-            rank === 2 ? "medal-silver" :
-            rank === 3 ? "medal-bronze" :
-            "bg-white/10 text-white/80 border border-white/10"
-          )}>
-            #{rank}
-          </div>
-        )}
-
         <div className="relative z-10">
           <Avatar 
             name={player.name} 
@@ -73,6 +60,18 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
               hover ? "scale-105 ring-primary" : "ring-white/20"
             )}
           />
+          {/* Rank badge */}
+          {rank && (
+            <div className={cn(
+              "absolute -top-1 -left-1 w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black shadow-lg z-20",
+              rank === 1 ? "medal-gold" :
+              rank === 2 ? "medal-silver" :
+              rank === 3 ? "medal-bronze" :
+              "bg-white/10 text-white/80 border border-white/10"
+            )}>
+              #{rank}
+            </div>
+          )}
         </div>
         
         <div className="relative z-10 flex-1 min-w-0">

@@ -54,7 +54,7 @@ export function PlayerSelectModal({ players, onSelect, onClose }: PlayerSelectMo
               >
                 <div className="relative">
                   <Avatar name={p.name} src={p.imageUrl} size={40} />
-                  <div className="absolute -top-1 -right-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[8px] font-black px-1.5 rounded-sm">
+                  <div className="absolute -top-1 -left-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[8px] font-black px-1.5 rounded-sm">
                     #{p.rank}
                   </div>
                 </div>
