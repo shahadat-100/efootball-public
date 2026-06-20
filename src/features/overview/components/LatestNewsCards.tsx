@@ -6,9 +6,10 @@ import { Calendar, User, ArrowRight, Flame } from 'lucide-react';
 interface LatestNewsCardsProps {
   news: NewsArticle[];
   limit?: number;
+  onViewAll?: () => void;
 }
 
-export function LatestNewsCards({ news, limit = 3 }: LatestNewsCardsProps) {
+export function LatestNewsCards({ news, limit = 3, onViewAll }: LatestNewsCardsProps) {
   const latestNews = useMemo(() => {
     return [...news]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -26,9 +27,14 @@ export function LatestNewsCards({ news, limit = 3 }: LatestNewsCardsProps) {
           </span>
           Latest News
         </h3>
-        <button className="text-sm font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-          View All <ArrowRight className="w-4 h-4" />
-        </button>
+        {onViewAll && (
+          <button 
+            onClick={onViewAll}
+            className="text-sm font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          >
+            View All <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -39,17 +45,11 @@ export function LatestNewsCards({ news, limit = 3 }: LatestNewsCardsProps) {
           >
             {/* Image Container */}
             <div className="relative h-48 w-full overflow-hidden bg-muted">
-              {article.image ? (
-                <img 
-                  src={article.image} 
-                  alt={article.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20">
-                  <Flame className="w-12 h-12 text-muted-foreground/30" />
-                </div>
-              )}
+              <img 
+                src={article.image || '/images/hero-banner.jpg'} 
+                alt={article.title} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
               
               {/* Badges overlay */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -80,16 +80,9 @@ export function LatestNewsCards({ news, limit = 3 }: LatestNewsCardsProps) {
               </h4>
               
               <div 
-                className="text-sm text-muted-foreground line-clamp-3 mb-6 flex-1"
+                className="text-sm text-muted-foreground line-clamp-3 flex-1"
                 dangerouslySetInnerHTML={{ __html: article.content || 'No content provided.' }}
               />
-
-              <button className="mt-auto flex items-center justify-between w-full pt-4 border-t border-border/50 text-sm font-bold group/btn">
-                <span className="group-hover/btn:text-primary transition-colors">Read Article</span>
-                <span className="bg-muted group-hover/btn:bg-primary group-hover/btn:text-white w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300">
-                  <ArrowRight className="w-4 h-4" />
-                </span>
-              </button>
             </div>
           </div>
         ))}

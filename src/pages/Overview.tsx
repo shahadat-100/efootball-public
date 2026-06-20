@@ -13,7 +13,6 @@ import { PlayerSpotlights } from '@/features/overview/components/PlayerSpotlight
 import { TopScorerSpotlights } from '@/features/overview/components/TopScorerSpotlights';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
-import { RecentNewsTicker } from '@/features/overview/components/RecentNewsTicker';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal } from 'lucide-react';
@@ -93,9 +92,6 @@ export function Overview({ setTab }: OverviewProps) {
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />
       </div>
-
-      {/* Recent News Ticker */}
-      <RecentNewsTicker news={news} />
 
       {/* Stat Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-10 stagger-children">
@@ -209,7 +205,7 @@ export function Overview({ setTab }: OverviewProps) {
       </div>
 
       {/* Latest News Cards */}
-      <LatestNewsCards news={news} />
+      <LatestNewsCards news={news} onViewAll={() => setTab('news')} />
 
     </div>
   );
