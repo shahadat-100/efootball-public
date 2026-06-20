@@ -74,15 +74,15 @@ export function AppShell() {
         <div className="flex items-center gap-6 lg:gap-8">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <button 
+            <button
               className="md:hidden p-1.5 -ml-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-            <img 
-              src="/images/club-logo.jpg" 
-              alt="Elites Empire" 
+            <img
+              src="/images/club-logo.jpg"
+              alt="Elites Empire"
               className="w-9 h-9 rounded-full object-cover shadow-md ring-2 ring-primary/20"
             />
             <div className="flex flex-col">
@@ -113,8 +113,8 @@ export function AppShell() {
                   {counts[t.id] > 0 && (
                     <span className={cn(
                       "ml-0.5 flex h-5 items-center justify-center px-1.5 rounded-full text-[10px] font-bold transition-all",
-                      isActive 
-                        ? "bg-primary/10 text-primary border border-primary/20" 
+                      isActive
+                        ? "bg-primary/10 text-primary border border-primary/20"
                         : "bg-muted text-muted-foreground"
                     )}>
                       {counts[t.id]}
@@ -136,7 +136,7 @@ export function AppShell() {
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mt-0.5"></div>
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold uppercase tracking-wider leading-none">Live System</span>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-600/80 mt-1">Developed By Aryan Bhuiyan</span>
+              <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-600/80 mt-1">Developed By Aryan</span>
             </div>
           </div>
         </div>
@@ -153,8 +153,8 @@ export function AppShell() {
                   to={`/${t.id}`}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium transition-all",
-                    isActive 
-                      ? "bg-primary/5 text-foreground border border-primary/20" 
+                    isActive
+                      ? "bg-primary/5 text-foreground border border-primary/20"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
@@ -179,7 +179,7 @@ export function AppShell() {
       <div className="flex flex-1 overflow-hidden h-full relative">
         {/* Overlay when mobile menu is open */}
         {isMobileMenuOpen && (
-          <div 
+          <div
             className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 md:hidden animate-in fade-in duration-200"
             onClick={() => setIsMobileMenuOpen(false)}
           />
@@ -202,8 +202,8 @@ export function AppShell() {
               to={`/${t.id}`}
               className={cn(
                 "flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all min-w-[56px]",
-                isActive 
-                  ? "text-primary" 
+                isActive
+                  ? "text-primary"
                   : "text-muted-foreground"
               )}
             >
