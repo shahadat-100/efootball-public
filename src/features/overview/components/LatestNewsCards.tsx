@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { NewsArticle } from '@/features/news/types';
 import { Badge } from '@/shared/components';
 import { Calendar, User, ArrowRight, Flame } from 'lucide-react';
-import { cn } from '@/shared/lib/cn';
 
 interface LatestNewsCardsProps {
   news: NewsArticle[];
