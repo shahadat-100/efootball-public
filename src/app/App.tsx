@@ -135,7 +135,7 @@ export function AppShell() {
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mt-0.5"></div>
             <div className="flex flex-col">
-              <span className="text-[11px] font-semibold uppercase tracking-wider leading-none">Live System</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider leading-none">Live System</span>
               <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-600/80 mt-1">Developed By Aryan</span>
             </div>
           </div>
