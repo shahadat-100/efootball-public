@@ -76,6 +76,7 @@ const config: Config = {
         'float': 'float 3s ease-in-out infinite',
         'fade-in-scale': 'fadeInScale 0.3s ease-out forwards',
         'bar-grow': 'barGrow 0.8s ease-out forwards',
+        'marquee': 'marquee 25s linear infinite',
       },
       keyframes: {
         staggerFadeIn: {
@@ -101,6 +102,10 @@ const config: Config = {
         barGrow: {
           from: { transform: 'scaleX(0)' },
           to: { transform: 'scaleX(1)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },

@@ -12,6 +12,7 @@ import { ActivityTimeline } from '@/features/overview/components/ActivityTimelin
 import { PlayerSpotlights } from '@/features/overview/components/PlayerSpotlights';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
+import { RecentNewsTicker } from '@/features/overview/components/RecentNewsTicker';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal } from 'lucide-react';
 
@@ -20,7 +21,7 @@ interface OverviewProps {
 }
 
 export function Overview({ setTab }: OverviewProps) {
-  const { players, matchEntries, matches, playerSeasonStats, seasons } = useFootballStore();
+  const { players, matchEntries, matches, playerSeasonStats, seasons, news } = useFootballStore();
 
   // ── 1. Stat Cards Data ──
   const totalGoals = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
@@ -90,6 +91,9 @@ export function Overview({ setTab }: OverviewProps) {
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />
       </div>
+
+      {/* Recent News Ticker */}
+      <RecentNewsTicker news={news} />
 
       {/* Stat Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-10 stagger-children">
