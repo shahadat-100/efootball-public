@@ -23,11 +23,11 @@ export function Overview({ setTab }: OverviewProps) {
   const { players, matchEntries, matches, playerSeasonStats, seasons } = useFootballStore();
 
   // ── 1. Stat Cards Data ──
-  const totalGoals   = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
+  const totalGoals = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
   const totalMatches = playerSeasonStats.reduce((s, e) => s + (e.appearances || 0), 0);
-  const totalWins    = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);
-  const totalLosses  = playerSeasonStats.reduce((s, e) => s + (e.losses || 0), 0);
-  const totalDraws   = playerSeasonStats.reduce((s, e) => s + (e.draws || 0), 0);
+  const totalWins = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);
+  const totalLosses = playerSeasonStats.reduce((s, e) => s + (e.losses || 0), 0);
+  const totalDraws = playerSeasonStats.reduce((s, e) => s + (e.draws || 0), 0);
 
   const cards = [
     { label: 'Total Goals', value: totalGoals, tab: 'entries', color: '#c8102e', icon: <Target className="w-5 h-5" /> },
@@ -50,8 +50,8 @@ export function Overview({ setTab }: OverviewProps) {
   }, [matchEntries]);
 
   const donutStats = useMemo(() => {
-    const wins   = playerSeasonStats.reduce((s, e) => s + (e.wins   || 0), 0);
-    const draws  = playerSeasonStats.reduce((s, e) => s + (e.draws  || 0), 0);
+    const wins = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);
+    const draws = playerSeasonStats.reduce((s, e) => s + (e.draws || 0), 0);
     const losses = playerSeasonStats.reduce((s, e) => s + (e.losses || 0), 0);
     return { wins, draws, losses };
   }, [playerSeasonStats]);
@@ -60,7 +60,7 @@ export function Overview({ setTab }: OverviewProps) {
   const awardsData = useMemo(() => {
     return players.map(p => {
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
-      
+
       const histMotm = stats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
       const histCS = stats.reduce((acc, s) => acc + (s.cleansheets || 0), 0);
       const histHT = stats.reduce((acc, s) => acc + (s.hattricks || 0), 0);
@@ -81,12 +81,12 @@ export function Overview({ setTab }: OverviewProps) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-      
+
       {/* Hero Banner Section */}
-      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[820/312] min-h-[160px] group">
-        <img 
-          src="/images/hero-banner.jpg" 
-          alt="The Enigmatic Elite Banner" 
+      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[3/1] group">
+        <img
+          src="/images/hero-banner.jpg"
+          alt="The Enigmatic Elite Banner"
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />
       </div>
@@ -94,31 +94,31 @@ export function Overview({ setTab }: OverviewProps) {
       {/* Stat Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-10 stagger-children">
         {cards.map(c => (
-          <StatCard 
-            key={c.label} 
-            label={c.label} 
-            value={c.value} 
-            accent={c.color} 
+          <StatCard
+            key={c.label}
+            label={c.label}
+            value={c.value}
+            accent={c.color}
             icon={c.icon}
-            onClick={() => setTab(c.tab)} 
+            onClick={() => setTab(c.tab)}
           />
         ))}
       </div>
 
       {/* Player Spotlights */}
-      <PlayerSpotlights 
-        players={players} 
-        matchEntries={matchEntries} 
-        playerSeasonStats={playerSeasonStats} 
+      <PlayerSpotlights
+        players={players}
+        matchEntries={matchEntries}
+        playerSeasonStats={playerSeasonStats}
       />
 
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 stagger-children" style={{ animationDelay: '0.6s' }}>
         <div className="lg:col-span-1 h-full">
-          <WinRateDonut 
-            wins={donutStats.wins || totalWins} 
-            draws={donutStats.draws || totalDraws} 
-            losses={donutStats.losses || totalLosses} 
+          <WinRateDonut
+            wins={donutStats.wins || totalWins}
+            draws={donutStats.draws || totalDraws}
+            losses={donutStats.losses || totalLosses}
           />
         </div>
         <div className="lg:col-span-2 h-full">
@@ -154,7 +154,7 @@ export function Overview({ setTab }: OverviewProps) {
         <div className="xl:col-span-2 flex w-full min-w-0">
           <MonthlyTopXI players={players} matchEntries={matchEntries} />
         </div>
-        
+
         <div className="xl:col-span-1 flex">
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col w-full h-full max-h-[700px] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
@@ -168,18 +168,17 @@ export function Overview({ setTab }: OverviewProps) {
                 {([...matches].reverse().slice(0, 8)).map(m => {
                   const sb = STATUS_BADGE[m.status as keyof typeof STATUS_BADGE] ?? STATUS_BADGE.finished;
                   const result = uniqueMatchesResults.matchResultsMap.get(m.id);
-                  
+
                   return (
                     <div key={m.id} className="py-4 border-b border-border/50 last:border-0 group transition-colors">
                       <div className="flex justify-between items-center gap-4 mb-2">
                         <div className="flex items-center gap-3 flex-wrap">
                           <span className="text-[13px] font-bold text-foreground leading-tight">{m.homeTeam} <span className="text-muted-foreground font-normal mx-1">vs</span> {m.awayTeam}</span>
                           {m.status === 'finished' && result && (
-                            <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-sm tracking-wider ${
-                              result === 'win' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                              result === 'draw' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                              'bg-red-500/10 text-red-500 border border-red-500/20'
-                            }`}>
+                            <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-sm tracking-wider ${result === 'win' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                result === 'draw' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                  'bg-red-500/10 text-red-500 border border-red-500/20'
+                              }`}>
                               {result === 'loss' ? 'lost' : result}
                             </span>
                           )}
