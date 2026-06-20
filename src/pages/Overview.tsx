@@ -83,22 +83,12 @@ export function Overview({ setTab }: OverviewProps) {
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
       
       {/* Hero Banner Section */}
-      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl h-[300px] md:h-[350px] group">
-        <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" 
-             style={{ backgroundImage: 'url(/images/hero-banner.jpg)' }} />
-        <div className="absolute inset-0 hero-overlay" />
-        
-        <div className="relative z-10 h-full flex flex-col items-center justify-center p-6 text-center animate-slide-up">
-          <div className="p-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-6 shadow-xl shadow-black/20">
-            <img src="/images/club-logo.jpg" alt="Club Logo" className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-inner" />
-          </div>
-          <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-white tracking-wider mb-2 drop-shadow-lg">
-            THE ENIGMATIC ELITE
-          </h1>
-          <p className="text-gray-300 text-sm md:text-base font-medium tracking-[0.2em] uppercase max-w-2xl text-shadow-sm">
-            In Mystery We Reign — Dominating the Pitch Since 2023
-          </p>
-        </div>
+      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[2/1] group">
+        <img 
+          src="/images/hero-banner.jpg" 
+          alt="The Enigmatic Elite Banner" 
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+        />
       </div>
 
       {/* Stat Cards Row */}

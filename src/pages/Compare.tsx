@@ -57,18 +57,20 @@ export function Compare() {
       <div className="flex items-center justify-between py-4 border-b border-border/50 hover:bg-muted/10 transition-colors">
         <div className="w-1/3 text-center">
           <span className={cn(
-            "text-[15px] font-black tracking-tight px-3 py-1 rounded-lg transition-all",
+            "text-[13px] sm:text-[15px] font-black tracking-tight px-2 sm:px-3 py-1 rounded-lg transition-all",
             p1Better ? "bg-emerald-500/10 text-emerald-600 shadow-sm" : "text-foreground"
           )}>
             {value1}
           </span>
         </div>
-        <div className="w-1/3 text-center">
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 px-2 py-1 rounded-md">{label}</span>
+        <div className="w-1/3 text-center px-1">
+          <span className="text-[9px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-muted/50 px-1.5 sm:px-2 py-1 rounded-md block sm:inline leading-none">
+            {label}
+          </span>
         </div>
         <div className="w-1/3 text-center">
           <span className={cn(
-            "text-[15px] font-black tracking-tight px-3 py-1 rounded-lg transition-all",
+            "text-[13px] sm:text-[15px] font-black tracking-tight px-2 sm:px-3 py-1 rounded-lg transition-all",
             p2Better ? "bg-emerald-500/10 text-emerald-600 shadow-sm" : "text-foreground"
           )}>
             {value2}
@@ -145,7 +147,7 @@ export function Compare() {
       ) : (
         <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden flex flex-col">
           {/* Header Row */}
-          <div className="flex border-b border-border bg-gradient-to-br from-gray-900 to-gray-800 p-8 relative">
+          <div className="flex flex-col sm:flex-row border-b border-border bg-gradient-to-br from-gray-900 to-gray-800 p-6 sm:p-8 relative gap-6 sm:gap-0">
             <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvc3ZnPg==')]" />
             <div className="absolute top-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[60px] pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[60px] pointer-events-none" />
@@ -153,22 +155,25 @@ export function Compare() {
             {selectedPlayers.map((p, i) => (
               <div key={p.player.id} className={cn(
                 "flex-1 flex flex-col items-center justify-center relative z-10",
-                i === 0 ? "border-r border-white/10" : ""
+                i === 0 ? "border-b sm:border-b-0 sm:border-r border-white/10 pb-6 sm:pb-0" : "pt-6 sm:pt-0"
               )}>
-                <Avatar name={p.player.name} size={96} src={p.player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl mb-4" />
-                <h3 className="font-heading font-bold text-[28px] text-white tracking-wide text-center leading-none mb-2">{p.player.name}</h3>
-                <p className="text-white/50 text-[13px] font-bold">👕 {p.player.jerseyNumber}</p>
+                <Avatar name={p.player.name} size="w-16 h-16 sm:w-24 sm:h-24" src={p.player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl mb-4" />
+                <h3 className="font-heading font-bold text-[20px] sm:text-[28px] text-white tracking-wide text-center leading-none mb-2">{p.player.name}</h3>
+                <p className="text-white/50 text-[11px] sm:text-[13px] font-bold">👕 {p.player.jerseyNumber}</p>
               </div>
             ))}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border-2 border-white/10 rounded-full w-12 h-12 flex items-center justify-center z-20 shadow-xl">
-              <span className="text-[12px] font-black text-primary tracking-widest">VS</span>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border-2 border-white/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center z-20 shadow-xl">
+              <span className="text-[10px] sm:text-[12px] font-black text-primary tracking-widest">VS</span>
             </div>
           </div>
 
           {/* Radar Charts */}
-          <div className="flex border-b border-border bg-card p-6">
+          <div className="flex flex-col md:flex-row border-b border-border bg-card p-6 gap-6 md:gap-0">
             {selectedPlayers.map((p, i) => (
-              <div key={p.player.id} className={cn("flex-1 flex justify-center", i === 0 ? "border-r border-border/50" : "")}>
+              <div key={p.player.id} className={cn(
+                "flex-1 flex justify-center", 
+                i === 0 ? "border-b md:border-b-0 md:border-r border-border/50 pb-6 md:pb-0" : "pt-6 md:pt-0"
+              )}>
                 <PlayerRadarChart stats={{
                   goals: p.stats.goals,
                   cleanSheets: p.stats.cleanSheets,
