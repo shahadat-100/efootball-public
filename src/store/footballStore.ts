@@ -264,20 +264,66 @@ export const useFootballStore = create<FootballStore>()(
       setPlayers: (players: Player[]) => set({ players }),
       
       fetchMatches: async () => {
-        const { data, error } = await supabase.from('matches').select('*, competitions(name)');
-        if (data) {
-          set({ matches: data.map(mapMatchFromDb) });
+        let allData: any[] = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          const { data, error } = await supabase
+            .from('matches')
+            .select('*, competitions(name)')
+            .range(from, from + step - 1);
+
+          if (error) {
+            console.error('Error fetching matches:', error);
+            break;
+          }
+          if (data && data.length > 0) {
+            allData = [...allData, ...data];
+            if (data.length < step) {
+              hasMore = false;
+            } else {
+              from += step;
+            }
+          } else {
+            hasMore = false;
+          }
         }
-        if (error) console.error('Error fetching matches:', error);
+        
+        set({ matches: allData.map(mapMatchFromDb) });
       },
       setMatches: (matches: Match[]) => set({ matches }),
       
       fetchMatchEntries: async () => {
-        const { data, error } = await supabase.from('match_entries').select('*, matches(date)');
-        if (data) {
-          set({ matchEntries: data.map(mapMatchEntryFromDb) });
+        let allData: any[] = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          const { data, error } = await supabase
+            .from('match_entries')
+            .select('*, matches(date)')
+            .range(from, from + step - 1);
+
+          if (error) {
+            console.error('Error fetching match entries:', error);
+            break;
+          }
+          if (data && data.length > 0) {
+            allData = [...allData, ...data];
+            if (data.length < step) {
+              hasMore = false;
+            } else {
+              from += step;
+            }
+          } else {
+            hasMore = false;
+          }
         }
-        if (error) console.error('Error fetching match entries:', error);
+
+        set({ matchEntries: allData.map(mapMatchEntryFromDb) });
       },
       setMatchEntries: (matchEntries: MatchEntry[]) => set({ matchEntries }),
       fetchNews: async () => {
@@ -312,27 +358,50 @@ export const useFootballStore = create<FootballStore>()(
       },
 
       fetchPlayerSeasonStats: async () => {
-        const { data, error } = await supabase.from('player_season_stats').select('*, season(name)');
-        if (data) {
-          set({
-            playerSeasonStats: data.map(item => ({
-              id: item.id,
-              playerId: item.player_id,
-              seasonId: item.season_id,
-              seasonName: item.season?.name || `Season ${item.season_id}`,
-              appearances: item.appearances || 0,
-              goals: item.goals || 0,
-              cleansheets: item.cleansheets || 0,
-              hattricks: item.hattricks || 0,
-              motmCount: item.motmcount || 0,
-              wins: item.wins || 0,
-              draws: item.draws || 0,
-              losses: item.losses || 0,
-              goalsConceded: item.goalsconceded || 0,
-            }))
-          });
+        let allData: any[] = [];
+        let from = 0;
+        const step = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+          const { data, error } = await supabase
+            .from('player_season_stats')
+            .select('*, season(name)')
+            .range(from, from + step - 1);
+
+          if (error) {
+            console.error('Error fetching player season stats:', error);
+            break;
+          }
+          if (data && data.length > 0) {
+            allData = [...allData, ...data];
+            if (data.length < step) {
+              hasMore = false;
+            } else {
+              from += step;
+            }
+          } else {
+            hasMore = false;
+          }
         }
-        if (error) console.error('Error fetching player season stats:', error);
+
+        set({
+          playerSeasonStats: allData.map(item => ({
+            id: item.id,
+            playerId: item.player_id,
+            seasonId: item.season_id,
+            seasonName: item.season?.name || `Season ${item.season_id}`,
+            appearances: item.appearances || 0,
+            goals: item.goals || 0,
+            cleansheets: item.cleansheets || 0,
+            hattricks: item.hattricks || 0,
+            motmCount: item.motmcount || 0,
+            wins: item.wins || 0,
+            draws: item.draws || 0,
+            losses: item.losses || 0,
+            goalsConceded: item.goalsconceded || 0,
+          }))
+        });
       },
 
       fetchCompetitions: async () => {
