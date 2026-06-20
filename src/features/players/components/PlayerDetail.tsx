@@ -390,32 +390,30 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       {/* New Visualizations Section */}
       {(() => {
         // Prepare Data for SeasonPerformanceChart & SeasonTable
+        // Use authoritative playerSeasonStats values (wins, losses, motm, cleanSheets, etc.)
+        // so the Season Table shows correct counts from the DB rather than recomputed estimates.
         const seasonData = stats.seasonBreakdown.map((sb) => {
-          const seasonEntries = entries.filter(e => e.date?.startsWith(sb.year.toString()));
-          const sWins = seasonEntries.filter(e => e.result === 'win').length;
-          const sDraws = seasonEntries.filter(e => e.result === 'draw').length;
-          const sLosses = seasonEntries.filter(e => e.result === 'loss').length;
-          const sGoalsConc = seasonEntries.reduce((sum, e) => sum + e.goalsConceded, 0);
-          const sCS = seasonEntries.filter(e => e.cleanSheet).length;
-          const sMOTM = seasonEntries.filter(e => e.motm).length;
+          const sWins = sb.wins;
+          const sDraws = sb.draws;
+          const sLosses = sb.losses;
           const winRate = sb.matches > 0 ? (sWins / sb.matches) * 100 : 0;
           const drawRate = sb.matches > 0 ? (sDraws / sb.matches) * 100 : 0;
           const lossRate = sb.matches > 0 ? (sLosses / sb.matches) * 100 : 0;
 
           return {
-            season: `eFootball ${sb.year}`,
+            season: sb.seasonName ? `eFootball ${sb.seasonName}` : `eFootball ${sb.year}`,
             matches: sb.matches,
             appearances: sb.matches,
-            wins: sWins || Math.floor(sb.matches * (stats.totalWins / Math.max(1, stats.totalMatches))),
+            wins: sWins,
             draws: sDraws,
             losses: sLosses,
-            winRate: winRate || (stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0),
-            drawRate: drawRate || (stats.totalMatches > 0 ? (stats.totalDraws / stats.totalMatches) * 100 : 0),
-            lossRate: lossRate || (stats.totalMatches > 0 ? (stats.totalLosses / stats.totalMatches) * 100 : 0),
+            winRate,
+            drawRate,
+            lossRate,
             goals: sb.goals,
-            goalsConceded: sGoalsConc || Math.floor(sb.matches * 0.8),
-            cleanSheets: sCS,
-            motm: sMOTM
+            goalsConceded: sb.goalsConceded,
+            cleanSheets: sb.cleanSheets,
+            motm: sb.motm,
           };
         }).reverse(); // Order older to newer for chart
 

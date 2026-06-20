@@ -23,8 +23,17 @@ export function usePlayerStats(playerId: string) {
       const year = yearMatch ? Number(yearMatch[0]) : s.seasonId;
       return {
         year,
+        seasonId: s.seasonId,
+        seasonName: s.seasonName,
         goals: s.goals,
         matches: s.appearances,
+        wins: s.wins,
+        draws: s.draws,
+        losses: s.losses,
+        goalsConceded: s.goalsConceded,
+        cleanSheets: s.cleansheets,
+        motm: s.motmCount,
+        hattricks: s.hattricks,
       };
     }).sort((a, b) => b.year - a.year);
 
