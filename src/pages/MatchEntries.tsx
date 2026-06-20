@@ -16,7 +16,7 @@ export function MatchEntries() {
 
   // ── Aggregated totals from playerSeasonStats (authoritative source) ──
   const totals = (() => {
-    const matches = matchEntries.length;
+    const matches = playerSeasonStats.reduce((s, e) => s + (e.appearances || 0), 0);
     const goals   = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
     const conceded = playerSeasonStats.reduce((s, e) => s + (e.goalsConceded || 0), 0);
     const wins     = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);
