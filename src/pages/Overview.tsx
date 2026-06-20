@@ -10,9 +10,11 @@ import { TopScorersBars } from '@/features/overview/components/TopScorersBars';
 import { AwardsLeaderboard } from '@/features/overview/components/AwardsLeaderboard';
 import { ActivityTimeline } from '@/features/overview/components/ActivityTimeline';
 import { PlayerSpotlights } from '@/features/overview/components/PlayerSpotlights';
+import { TopScorerSpotlights } from '@/features/overview/components/TopScorerSpotlights';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { RecentNewsTicker } from '@/features/overview/components/RecentNewsTicker';
+import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal } from 'lucide-react';
 
@@ -116,6 +118,13 @@ export function Overview({ setTab }: OverviewProps) {
         playerSeasonStats={playerSeasonStats}
       />
 
+      {/* Top Scorer Spotlights */}
+      <TopScorerSpotlights
+        players={players}
+        matchEntries={matchEntries}
+        playerSeasonStats={playerSeasonStats}
+      />
+
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 stagger-children" style={{ animationDelay: '0.6s' }}>
         <div className="lg:col-span-1 h-full">
@@ -198,6 +207,9 @@ export function Overview({ setTab }: OverviewProps) {
           </div>
         </div>
       </div>
+
+      {/* Latest News Cards */}
+      <LatestNewsCards news={news} />
 
     </div>
   );
