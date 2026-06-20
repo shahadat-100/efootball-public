@@ -83,7 +83,7 @@ export function Overview({ setTab }: OverviewProps) {
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
       
       {/* Hero Banner Section */}
-      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[2/1] group">
+      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[820/312] min-h-[160px] group">
         <img 
           src="/images/hero-banner.jpg" 
           alt="The Enigmatic Elite Banner" 
