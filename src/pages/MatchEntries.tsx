@@ -6,7 +6,7 @@ import { RESULT_BADGE } from '@/shared/lib/constants';
 import { cn } from '@/shared/lib/cn';
 
 export function MatchEntries() {
-  const { matchEntries, players } = useFootballStore();
+  const { matchEntries, players, playerSeasonStats } = useFootballStore();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'overview' | 'entries'>('overview');
@@ -14,36 +14,37 @@ export function MatchEntries() {
 
   const getPlayer = (id: string) => players.find(p => p.id === id);
 
-  // ── Aggregated totals ──────────────────────────────────────────
-  const totals = matchEntries.reduce((acc, e) => ({
-    matches: acc.matches + 1,
-    goals: acc.goals + (e.goals || 0),
-    conceded: acc.conceded + (e.goalsConceded || 0),
-    wins: acc.wins + (e.result === 'win' ? 1 : 0),
-    losses: acc.losses + (e.result === 'loss' ? 1 : 0),
-    draws: acc.draws + (e.result === 'draw' ? 1 : 0),
-    hattricks: acc.hattricks + (e.hattricks || 0),
-    motm: acc.motm + (e.motm ? 1 : 0),
-    cleanSheets: acc.cleanSheets + (e.cleanSheet ? 1 : 0),
-  }), { matches: 0, goals: 0, conceded: 0, wins: 0, losses: 0, draws: 0, hattricks: 0, motm: 0, cleanSheets: 0 });
+  // ── Aggregated totals from playerSeasonStats (authoritative source) ──
+  const totals = (() => {
+    const matches = matchEntries.length;
+    const goals   = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
+    const conceded = playerSeasonStats.reduce((s, e) => s + (e.goalsConceded || 0), 0);
+    const wins     = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);
+    const losses   = playerSeasonStats.reduce((s, e) => s + (e.losses || 0), 0);
+    const draws    = playerSeasonStats.reduce((s, e) => s + (e.draws || 0), 0);
+    const hattricks = playerSeasonStats.reduce((s, e) => s + (e.hattricks || 0), 0);
+    const motm      = playerSeasonStats.reduce((s, e) => s + (e.motmCount || 0), 0);
+    const cleanSheets = playerSeasonStats.reduce((s, e) => s + (e.cleansheets || 0), 0);
+    return { matches, goals, conceded, wins, losses, draws, hattricks, motm, cleanSheets };
+  })();
 
-  const winRate = totals.matches > 0 ? Math.round((totals.wins / totals.matches) * 100) : 0;
+  const winRate = totals.wins + totals.draws + totals.losses > 0
+    ? Math.round((totals.wins / (totals.wins + totals.draws + totals.losses)) * 100)
+    : 0;
 
-  // ── Per-player breakdown ──────────────────────────────────────
+  // ── Per-player breakdown from playerSeasonStats (authoritative) ──
   const playerStats = players.map(p => {
-    const entries = matchEntries.filter(e => e.playerId === p.id);
-    return {
-      player: p,
-      matches: entries.length,
-      goals: entries.reduce((s, e) => s + (e.goals || 0), 0),
-      conceded: entries.reduce((s, e) => s + (e.goalsConceded || 0), 0),
-      wins: entries.filter(e => e.result === 'win').length,
-      losses: entries.filter(e => e.result === 'loss').length,
-      draws: entries.filter(e => e.result === 'draw').length,
-      hattricks: entries.reduce((s, e) => s + (e.hattricks || 0), 0),
-      motm: entries.filter(e => e.motm).length,
-      cleanSheets: entries.filter(e => e.cleanSheet).length,
-    };
+    const stats = playerSeasonStats.filter(s => s.playerId === p.id);
+    const matches    = stats.reduce((s, e) => s + (e.appearances || 0), 0);
+    const goals      = stats.reduce((s, e) => s + (e.goals || 0), 0);
+    const conceded   = stats.reduce((s, e) => s + (e.goalsConceded || 0), 0);
+    const wins       = stats.reduce((s, e) => s + (e.wins || 0), 0);
+    const losses     = stats.reduce((s, e) => s + (e.losses || 0), 0);
+    const draws      = stats.reduce((s, e) => s + (e.draws || 0), 0);
+    const hattricks  = stats.reduce((s, e) => s + (e.hattricks || 0), 0);
+    const motm       = stats.reduce((s, e) => s + (e.motmCount || 0), 0);
+    const cleanSheets = stats.reduce((s, e) => s + (e.cleansheets || 0), 0);
+    return { player: p, matches, goals, conceded, wins, losses, draws, hattricks, motm, cleanSheets };
   }).filter(ps => ps.matches > 0).sort((a, b) => b.goals - a.goals);
 
   // ── Filtered entries ──────────────────────────────────────────
