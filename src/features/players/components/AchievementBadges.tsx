@@ -32,18 +32,14 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
     const totalMOTM = seasonStats.reduce((s, x) => s + x.motmCount, 0);
     const totalCS = seasonStats.reduce((s, x) => s + x.cleansheets, 0);
     const totalHT = seasonStats.reduce((s, x) => s + x.hattricks, 0);
-    const seasons = seasonStats.length;
-
-    // Win streak and advanced calculation
+    // Advanced calculation (only real matches for streaks)
     const sorted = [...matchEntries]
-      .filter(e => e.date)
+      .filter(e => e.date && !e.notes?.startsWith('Generated'))
       .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime());
     
     let maxStreak = 0, streak = 0;
     let maxUnbeatenStreak = 0, unbeatenStreak = 0;
-    let maxScoringStreak = 0, scoringStreak = 0;
     let maxMotmStreak = 0, motmStreak = 0;
-    let maxGoalsInMatch = 0;
 
     sorted.forEach(e => {
       if (e.result === 'win') { streak++; maxStreak = Math.max(maxStreak, streak); }
@@ -52,68 +48,57 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
       if (e.result === 'win' || e.result === 'draw') { unbeatenStreak++; maxUnbeatenStreak = Math.max(maxUnbeatenStreak, unbeatenStreak); }
       else unbeatenStreak = 0;
 
-      if (e.goals > 0) { scoringStreak++; maxScoringStreak = Math.max(maxScoringStreak, scoringStreak); }
-      else scoringStreak = 0;
-
       if (e.motm) { motmStreak++; maxMotmStreak = Math.max(maxMotmStreak, motmStreak); }
       else motmStreak = 0;
-
-      maxGoalsInMatch = Math.max(maxGoalsInMatch, e.goals);
     });
 
-    const totalDraws = seasonStats.reduce((s, x) => s + x.draws, 0);
-    const gpm = totalMatches > 0 ? totalGoals / totalMatches : 0;
-    const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
+    const badges: AchievementBadge[] = [];
 
-    const badges: AchievementBadge[] = [
-      // Matches milestones
-      { id: 'matches_10', icon: '👟', label: 'First Steps', description: '10 matches played', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalMatches >= 10 },
-      { id: 'matches_50', icon: '🎽', label: 'Veteran', description: '50 matches played', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalMatches >= 50 },
-      { id: 'matches_100', icon: '💯', label: 'Centurion', description: '100 matches played', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalMatches >= 100 },
-      { id: 'matches_200', icon: '🏟️', label: 'Legend', description: '200 matches played', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalMatches >= 200 },
-      { id: 'matches_300', icon: '🏛️', label: 'Iron Man', description: '300 matches played', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalMatches >= 300 },
+    const getTier = (val: number, max: number): 'bronze' | 'silver' | 'gold' | 'platinum' => {
+      if (val >= max * 0.75) return 'platinum';
+      if (val >= max * 0.5) return 'gold';
+      if (val >= max * 0.25) return 'silver';
+      return 'bronze';
+    };
 
-      // Goals milestones
-      { id: 'goals_10', icon: '⚽', label: 'Scorer', description: '10 goals scored', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalGoals >= 10 },
-      { id: 'goals_50', icon: '🎯', label: 'Marksman', description: '50 goals scored', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalGoals >= 50 },
-      { id: 'goals_100', icon: '🔥', label: 'Goal Machine', description: '100 goals scored', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalGoals >= 100 },
-      { id: 'goals_200', icon: '👑', label: 'All-Time Scorer', description: '200 goals scored', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalGoals >= 200 },
-      { id: 'goals_300', icon: '⚜️', label: 'Golden Boot', description: '300 goals scored', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalGoals >= 300 },
+    const addMilestones = (current: number, steps: number[], type: string, maxMilestone: number) => {
+      steps.forEach(m => {
+        if (current >= m) {
+          const tier = getTier(m, maxMilestone);
+          badges.push({
+            id: `${type.replace(' ', '_').toLowerCase()}_${m}`,
+            icon: '',
+            label: `${m} ${type}`,
+            description: `Achieved ${m} ${type}`,
+            color: TIER_COLORS[tier].text,
+            tier,
+            unlocked: true
+          });
+        }
+      });
+    };
 
-      // Match performance
-      { id: 'gpm_1', icon: '🦅', label: 'Deadly Finisher', description: 'Goals per match > 1.0 (min 15 matches)', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalMatches >= 15 && gpm >= 1.0 },
-      { id: 'win_rate_80', icon: '🍀', label: 'Lucky Charm', description: 'Win Rate > 80% (min 15 matches)', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalMatches >= 15 && winRate >= 80 },
-      { id: 'draw_15', icon: '🤝', label: 'Draw Specialist', description: '15 draws', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalDraws >= 15 },
-      { id: 'goals_in_match_6', icon: '☄️', label: 'Double Hat-trick', description: 'Scored 6+ goals in a single match', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: maxGoalsInMatch >= 6 },
+    const mainSteps = [10, 50, ...Array.from({length: 50}, (_, i) => (i+1)*100)];
+    const winSteps = [25, 50, ...Array.from({length: 50}, (_, i) => (i+1)*100)];
+    const motmSteps = [5, 10, 25, 50, ...Array.from({length: 10}, (_, i) => (i+1)*100)];
+    const csSteps = [10, 25, 50, ...Array.from({length: 10}, (_, i) => (i+1)*100)];
+    const streakSteps = [5, 10, 15, 20, 25, 30, 40, 50];
 
-      // Wins
-      { id: 'wins_25', icon: '✅', label: 'Winner', description: '25 wins', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalWins >= 25 },
-      { id: 'wins_100', icon: '🏆', label: 'Champion', description: '100 wins', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalWins >= 100 },
+    addMilestones(totalMatches, mainSteps, 'Matches', 5000);
+    addMilestones(totalGoals, mainSteps, 'Goals', 5000);
+    addMilestones(totalWins, winSteps, 'Wins', 5000);
+    addMilestones(totalMOTM, motmSteps, 'MOTM', 1000);
+    addMilestones(totalCS, csSteps, 'Clean Sheets', 1000);
+    addMilestones(totalHT, [1, 5, 10, 25, 50, 100], 'Hat-tricks', 100);
+    addMilestones(maxStreak, streakSteps, 'Win Streak', 50);
+    addMilestones(maxUnbeatenStreak, streakSteps, 'Unbeaten Streak', 50);
 
-      // MOTM
-      { id: 'motm_5', icon: '⭐', label: 'Star Player', description: '5 MOTM awards', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalMOTM >= 5 },
-      { id: 'motm_10', icon: '🌟', label: 'Elite Player', description: '10 MOTM awards', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalMOTM >= 10 },
-      { id: 'motm_25', icon: '💫', label: 'MOTM King', description: '25 MOTM awards', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalMOTM >= 25 },
-      { id: 'motm_streak_3', icon: '🎭', label: 'Masterclass', description: 'MOTM in 3 consecutive matches', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: maxMotmStreak >= 3 },
-
-      // Clean Sheets
-      { id: 'cs_10', icon: '🛡️', label: 'Wall', description: '10 clean sheets', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalCS >= 10 },
-      { id: 'cs_25', icon: '🏰', label: 'Fort Knox', description: '25 clean sheets', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalCS >= 25 },
-      { id: 'cs_50', icon: '🗿', label: 'Unbreakable', description: '50 clean sheets', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalCS >= 50 },
-
-      // Hat-tricks
-      { id: 'ht_1', icon: '🎩', label: 'Hat-trick Hero', description: 'First hat-trick', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalHT >= 1 },
-      { id: 'ht_5', icon: '🪄', label: 'Magician', description: '5 hat-tricks', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalHT >= 5 },
-
-      // Seasons
-      { id: 'seasons_3', icon: '📅', label: 'Seasoned Pro', description: '3 seasons played', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: seasons >= 3 },
-
-      // Streaks
-      { id: 'streak_5', icon: '🔴', label: 'Hot Streak', description: '5-game win streak', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: maxStreak >= 5 },
-      { id: 'streak_10', icon: '🌋', label: 'Unstoppable', description: '10-game win streak', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: maxStreak >= 10 },
-      { id: 'unbeaten_10', icon: '🧿', label: 'Unflappable', description: '10 consecutive matches without a loss', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: maxUnbeatenStreak >= 10 },
-      { id: 'scoring_5', icon: '🚀', label: 'Goal Poacher', description: 'Scored in 5 consecutive matches', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: maxScoringStreak >= 5 },
-    ];
+    // Sort so highest milestones are first
+    badges.sort((a, b) => {
+      const numA = parseInt(a.label.split(' ')[0]) || 0;
+      const numB = parseInt(b.label.split(' ')[0]) || 0;
+      return numB - numA;
+    });
 
     return badges;
   }, [seasonStats, matchEntries]);
@@ -146,12 +131,11 @@ export function AchievementBadges({ seasonStats, matchEntries }: Props) {
             return (
               <div
                 key={badge.id}
-                className="group relative flex flex-col items-center gap-1 px-3 py-2 rounded-xl border cursor-default transition-all hover:scale-105"
+                className="group relative flex flex-col items-center justify-center gap-1 px-4 py-2.5 rounded-xl border cursor-default transition-all hover:scale-105"
                 style={{ background: t.bg, borderColor: t.border }}
                 title={badge.description}
               >
-                <span className="text-xl leading-none">{badge.icon}</span>
-                <span className="text-[9px] font-black uppercase tracking-wide leading-none" style={{ color: t.text }}>
+                <span className="text-[12px] font-black uppercase tracking-wide leading-none" style={{ color: t.text }}>
                   {badge.label}
                 </span>
                 {/* Tooltip */}

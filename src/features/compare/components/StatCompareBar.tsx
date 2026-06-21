@@ -36,43 +36,33 @@ export function StatCompareBar({ label, p1Value, p2Value, better, isFloat = fals
     <div className="flex flex-col mb-4">
       <div className="flex justify-between items-end mb-1.5 px-0.5">
         <span className={cn(
-          "text-[13px] font-black leading-none tabular-nums",
-          p1Better ? "text-blue-400" : "text-white/50"
+          "text-[14px] leading-none tabular-nums transition-all duration-300",
+          p1Better ? "text-emerald-500 font-black scale-110 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-foreground font-semibold opacity-80"
         )}>
           {formatValue(p1Value)}
         </span>
 
-        <span className="text-[10px] font-black uppercase tracking-widest text-white/50 text-center px-2 leading-none">
+        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center px-2 leading-none">
           {label}
         </span>
 
         <span className={cn(
-          "text-[13px] font-black leading-none tabular-nums",
-          p2Better ? "text-red-400" : "text-white/50"
+          "text-[14px] leading-none tabular-nums transition-all duration-300",
+          p2Better ? "text-emerald-500 font-black scale-110 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-foreground font-semibold opacity-80"
         )}>
           {formatValue(p2Value)}
         </span>
       </div>
 
       {/* Dual-sided progress bar */}
-      <div className="flex w-full h-2 rounded-full overflow-hidden gap-[2px]">
+      <div className="flex w-full h-2.5 rounded-full bg-muted/30 overflow-hidden gap-[2px]">
         <div
-          className={cn(
-            "h-full rounded-l-full transition-all duration-700 ease-out",
-            p1Better
-              ? "bg-gradient-to-r from-blue-600 to-blue-400 shadow-[0_0_8px_#3b82f680]"
-              : "bg-blue-900/40"
-          )}
-          style={{ width: `${p1Pct}%` }}
+          className="h-full rounded-l-full transition-all duration-700 ease-out bg-gradient-to-r from-blue-600 to-blue-400"
+          style={{ width: `${p1Pct}%`, opacity: p1Value > 0 ? 1 : 0.2 }}
         />
         <div
-          className={cn(
-            "h-full rounded-r-full transition-all duration-700 ease-out",
-            p2Better
-              ? "bg-gradient-to-l from-red-600 to-red-400 shadow-[0_0_8px_#ef444480]"
-              : "bg-red-900/40"
-          )}
-          style={{ width: `${p2Pct}%` }}
+          className="h-full rounded-r-full transition-all duration-700 ease-out bg-gradient-to-l from-red-600 to-red-400"
+          style={{ width: `${p2Pct}%`, opacity: p2Value > 0 ? 1 : 0.2 }}
         />
       </div>
     </div>

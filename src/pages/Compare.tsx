@@ -2,7 +2,6 @@ import { useState, useMemo, useRef } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Avatar } from '@/shared/components';
 import { CompareRadarChart } from '@/features/compare/components/CompareRadarChart';
-import { CompareFormChart } from '@/features/compare/components/CompareFormChart';
 import { StatCompareBar } from '@/features/compare/components/StatCompareBar';
 import { aggregatePlayerStats } from '@/features/compare/utils';
 import { cn } from '@/shared/lib/cn';
@@ -16,7 +15,7 @@ function RadarLegendDot({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <div className="w-3 h-3 rounded-full border-2" style={{ borderColor: color, backgroundColor: `${color}40` }} />
-      <span className="text-xs font-bold text-white/80">{label}</span>
+      <span className="text-xs font-bold text-muted-foreground">{label}</span>
     </div>
   );
 }
@@ -181,7 +180,7 @@ export function Compare() {
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-semibold transition-all duration-200',
                   isSelected
-                    ? 'text-white shadow-md scale-105'
+                    ? 'text-foreground shadow-md scale-105'
                     : 'border-border text-foreground bg-background hover:border-primary/40 hover:bg-primary/5'
                 )}
                 style={isSelected ? {
@@ -288,29 +287,29 @@ export function Compare() {
                     </div>
                   )}
                 </div>
-                <h2 className="font-heading font-black text-xl text-white mb-1">{p1.player?.name}</h2>
+                <h2 className="font-heading font-black text-xl text-foreground mb-1">{p1.player?.name}</h2>
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: P1_COLOR }}>Player 1</p>
                 <div
                   className="rounded-xl px-5 py-3 w-full"
                   style={{ background: `${P1_COLOR}15`, border: `1px solid ${P1_COLOR}30` }}
                 >
-                  <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-1">Rating Score</p>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Rating Score</p>
                   <p className="text-3xl font-black" style={{ color: P1_COLOR }}>
                     {p1.stats.points.toFixed(2)}
                   </p>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-3 w-full text-center">
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase mb-0.5">Matches</p>
-                    <p className="text-white font-black text-sm">{p1.stats.matches}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase mb-0.5">Matches</p>
+                    <p className="text-foreground font-black text-sm">{p1.stats.matches}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase mb-0.5">Win%</p>
-                    <p className="text-white font-black text-sm">{m1 > 0 ? Math.round((p1.stats.wins / m1) * 100) : 0}%</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase mb-0.5">Win%</p>
+                    <p className="text-foreground font-black text-sm">{m1 > 0 ? Math.round((p1.stats.wins / m1) * 100) : 0}%</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase mb-0.5">Goals</p>
-                    <p className="text-white font-black text-sm">{p1.stats.goals}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase mb-0.5">Goals</p>
+                    <p className="text-foreground font-black text-sm">{p1.stats.goals}</p>
                   </div>
                 </div>
               </div>
@@ -321,7 +320,7 @@ export function Compare() {
                   className="w-16 h-16 rounded-full border-2 flex items-center justify-center shadow-2xl"
                   style={{ borderColor: `${winnerColor}60`, background: `${winnerColor}15`, boxShadow: `0 0 30px ${winnerColor}40` }}
                 >
-                  <span className="font-heading font-black text-lg text-white">VS</span>
+                  <span className="font-heading font-black text-lg text-foreground">VS</span>
                 </div>
                 <div className="w-[1px] h-16 hidden md:block opacity-20" style={{ background: `linear-gradient(to bottom, ${P1_COLOR}, ${P2_COLOR})` }} />
               </div>
@@ -356,191 +355,30 @@ export function Compare() {
                     </div>
                   )}
                 </div>
-                <h2 className="font-heading font-black text-xl text-white mb-1">{p2.player?.name}</h2>
+                <h2 className="font-heading font-black text-xl text-foreground mb-1">{p2.player?.name}</h2>
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: P2_COLOR }}>Player 2</p>
                 <div
                   className="rounded-xl px-5 py-3 w-full"
                   style={{ background: `${P2_COLOR}15`, border: `1px solid ${P2_COLOR}30` }}
                 >
-                  <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-1">Rating Score</p>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Rating Score</p>
                   <p className="text-3xl font-black" style={{ color: P2_COLOR }}>
                     {p2.stats.points.toFixed(2)}
                   </p>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-3 w-full text-center">
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase mb-0.5">Matches</p>
-                    <p className="text-white font-black text-sm">{p2.stats.matches}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase mb-0.5">Matches</p>
+                    <p className="text-foreground font-black text-sm">{p2.stats.matches}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase mb-0.5">Win%</p>
-                    <p className="text-white font-black text-sm">{m2 > 0 ? Math.round((p2.stats.wins / m2) * 100) : 0}%</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase mb-0.5">Win%</p>
+                    <p className="text-foreground font-black text-sm">{m2 > 0 ? Math.round((p2.stats.wins / m2) * 100) : 0}%</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase mb-0.5">Goals</p>
-                    <p className="text-white font-black text-sm">{p2.stats.goals}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase mb-0.5">Goals</p>
+                    <p className="text-foreground font-black text-sm">{p2.stats.goals}</p>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ─── RADAR + FORM WAVE ─── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* Radar Chart */}
-            <div
-              className="rounded-3xl border overflow-hidden"
-              style={{ background: 'linear-gradient(145deg, #0a0a12, #0d111c)', borderColor: '#ffffff10' }}
-            >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-                <div>
-                  <h3 className="font-heading font-black text-white text-base uppercase tracking-tight">Skill Radar</h3>
-                  <p className="text-[10px] text-white/40 font-bold">Overall performance shape</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <RadarLegendDot color={P1_COLOR} label={p1.player?.name?.split(' ')[0] || 'P1'} />
-                  <RadarLegendDot color={P2_COLOR} label={p2.player?.name?.split(' ')[0] || 'P2'} />
-                </div>
-              </div>
-              <div className="p-4 flex items-center justify-center min-h-[380px]">
-                <CompareRadarChart
-                  p1={p1.computed!}
-                  p2={p2.computed!}
-                  maxStats={maxStats}
-                />
-              </div>
-            </div>
-
-            {/* Recent Form Wave Chart */}
-            <div
-              className="rounded-3xl border overflow-hidden"
-              style={{ background: 'linear-gradient(145deg, #0a0a12, #0d111c)', borderColor: '#ffffff10' }}
-            >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-                <div>
-                  <h3 className="font-heading font-black text-white text-base uppercase tracking-tight">Recent Form</h3>
-                  <p className="text-[10px] text-white/40 font-bold">Last 10 matches — W=3, D=1, L=0</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <RadarLegendDot color={P1_COLOR} label={p1.player?.name?.split(' ')[0] || 'P1'} />
-                  <RadarLegendDot color={P2_COLOR} label={p2.player?.name?.split(' ')[0] || 'P2'} />
-                </div>
-              </div>
-
-              <div className="p-6">
-                <CompareFormChart
-                  p1Name={p1.player?.name?.split(' ')[0] || 'P1'}
-                  p1Entries={p1.entries}
-                  p2Name={p2.player?.name?.split(' ')[0] || 'P2'}
-                  p2Entries={p2.entries}
-                />
-
-                {/* Form summary badges */}
-                <div className="grid grid-cols-2 gap-3 mt-6">
-                  {[
-                    { player: p1, color: P1_COLOR },
-                    { player: p2, color: P2_COLOR },
-                  ].map(({ player, color }) => {
-                    const last5 = [...player.entries]
-                      .filter(e => e.date)
-                      .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())
-                      .slice(0, 5);
-                    const formPts = last5.reduce((s, e) => s + (e.result === 'win' ? 3 : e.result === 'draw' ? 1 : 0), 0);
-                    const maxPts = last5.length * 3;
-                    const formPct = maxPts > 0 ? Math.round((formPts / maxPts) * 100) : 0;
-
-                    return (
-                      <div key={player.player?.id} className="rounded-2xl p-4" style={{ background: `${color}10`, border: `1px solid ${color}25` }}>
-                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 truncate" style={{ color }}>{player.player?.name}</p>
-                        <div className="flex items-end gap-2">
-                          <p className="text-2xl font-black text-white leading-none">{formPct}%</p>
-                          <p className="text-[10px] text-white/40 font-bold mb-0.5">form</p>
-                        </div>
-                        <div className="flex gap-1 mt-2">
-                          {last5.map((e, i) => (
-                            <div
-                              key={i}
-                              className="flex-1 h-1.5 rounded-full"
-                              style={{
-                                background: e.result === 'win' ? '#10b981' : e.result === 'draw' ? '#f59e0b' : '#ef4444'
-                              }}
-                            />
-                          ))}
-                          {Array.from({ length: Math.max(0, 5 - last5.length) }, (_, i) => (
-                            <div key={`empty-${i}`} className="flex-1 h-1.5 rounded-full bg-white/10" />
-                          ))}
-                        </div>
-                        <p className="text-[9px] text-white/30 font-bold mt-1">Last {last5.length} matches</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ─── FIFA-STYLE STAT COMPARISON BARS ─── */}
-          <div
-            className="rounded-3xl border overflow-hidden"
-            style={{ background: 'linear-gradient(145deg, #0a0a12, #0d111c)', borderColor: '#ffffff10' }}
-          >
-            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-              <div>
-                <h3 className="font-heading font-black text-white text-base uppercase tracking-tight">Performance Analysis</h3>
-                <p className="text-[10px] text-white/40 font-bold">Head-to-head stats breakdown</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-sm" style={{ background: P1_COLOR }} />
-                  <span className="text-xs font-bold text-white/70 truncate max-w-[80px]">{p1.player?.name}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-sm" style={{ background: P2_COLOR }} />
-                  <span className="text-xs font-bold text-white/70 truncate max-w-[80px]">{p2.player?.name}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              {/* Per-match rating breakdown */}
-              <div className="mb-6 pb-6 border-b border-white/5">
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Flame className="w-3 h-3" /> Rating Components (per match)
-                </p>
-                <div className="space-y-3">
-                  <StatCompareBar label="Win Rate" p1Value={m1 > 0 ? Math.round((p1.stats.wins / m1) * 100) : 0} p2Value={m2 > 0 ? Math.round((p2.stats.wins / m2) * 100) : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="Goals / Match" p1Value={m1 > 0 ? p1.stats.goals / m1 : 0} p2Value={m2 > 0 ? p2.stats.goals / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" isFloat />
-                  <StatCompareBar label="Conceded / Match" p1Value={m1 > 0 ? p1.stats.conceded / m1 : 0} p2Value={m2 > 0 ? p2.stats.conceded / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="lower" isFloat />
-                  <StatCompareBar label="Clean Sheets / Match" p1Value={m1 > 0 ? p1.stats.cleanSheets / m1 : 0} p2Value={m2 > 0 ? p2.stats.cleanSheets / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" isFloat />
-                  <StatCompareBar label="MOTM / Match" p1Value={m1 > 0 ? p1.stats.motm / m1 : 0} p2Value={m2 > 0 ? p2.stats.motm / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" isFloat />
-                </div>
-              </div>
-
-              {/* Career totals */}
-              <div className="mb-6 pb-6 border-b border-white/5">
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Target className="w-3 h-3" /> Career Totals
-                </p>
-                <div className="space-y-3">
-                  <StatCompareBar label="Matches" p1Value={p1.stats.matches} p2Value={p2.stats.matches} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="Goals Scored" p1Value={p1.stats.goals} p2Value={p2.stats.goals} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="Wins" p1Value={p1.stats.wins} p2Value={p2.stats.wins} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="Draws" p1Value={p1.stats.draws} p2Value={p2.stats.draws} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="Losses" p1Value={p1.stats.losses} p2Value={p2.stats.losses} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="lower" />
-                </div>
-              </div>
-
-              {/* Defensive & Special */}
-              <div>
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Shield className="w-3 h-3" /> Defensive & Honours
-                </p>
-                <div className="space-y-3">
-                  <StatCompareBar label="Goals Conceded" p1Value={p1.stats.conceded} p2Value={p2.stats.conceded} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="lower" />
-                  <StatCompareBar label="Clean Sheets" p1Value={p1.stats.cleanSheets} p2Value={p2.stats.cleanSheets} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="MOTM Awards" p1Value={p1.stats.motm} p2Value={p2.stats.motm} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
-                  <StatCompareBar label="Hat-tricks" p1Value={p1.stats.hattricks} p2Value={p2.stats.hattricks} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
                 </div>
               </div>
             </div>
@@ -560,15 +398,153 @@ export function Compare() {
               <p className="text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: winnerColor }}>
                 🏆 Performance Verdict
               </p>
-              <h2 className="font-heading font-black text-3xl md:text-4xl text-white mb-3 uppercase">
+              <h2 className="font-heading font-black text-3xl md:text-4xl text-foreground mb-3 uppercase">
                 {winner?.player?.name} is leading
               </h2>
-              <p className="text-sm text-white/60 max-w-xl mx-auto">
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto">
                 Based on per-match fair statistics including Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM.{' '}
-                <strong className="text-white">{winner?.player?.name}</strong> currently holds the superior overall statistical performance record.
+                <strong className="text-foreground">{winner?.player?.name}</strong> currently holds the superior overall statistical performance record.
               </p>
-              <div className="flex items-center justify-center gap-1 mt-2 text-[10px] text-white/30 font-bold uppercase tracking-widest">
+              <div className="flex items-center justify-center gap-1 mt-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
                 <Zap className="w-3 h-3" /> Note: Players with fewer than 100 matches have a reliability penalty applied
+              </div>
+            </div>
+          </div>
+
+          {/* ─── RADAR + FORM WAVE ─── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {/* Radar Chart */}
+            <div
+              className="rounded-3xl border border-border bg-card overflow-hidden"
+              
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <div>
+                  <h3 className="font-heading font-black text-foreground text-base uppercase tracking-tight">Skill Radar</h3>
+                  <p className="text-[10px] text-muted-foreground font-bold">Overall performance shape</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <RadarLegendDot color={P1_COLOR} label={p1.player?.name?.split(' ')[0] || 'P1'} />
+                  <RadarLegendDot color={P2_COLOR} label={p2.player?.name?.split(' ')[0] || 'P2'} />
+                </div>
+              </div>
+              <div className="p-4 flex items-center justify-center min-h-[380px]">
+                <CompareRadarChart
+                  p1={p1.computed!}
+                  p2={p2.computed!}
+                  maxStats={maxStats}
+                />
+              </div>
+            </div>
+
+            {/* Match Outcomes Breakdown */}
+            <div className="rounded-3xl border border-border bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <div>
+                  <h3 className="font-heading font-black text-foreground text-base uppercase tracking-tight">Match Outcomes</h3>
+                  <p className="text-[10px] text-muted-foreground font-bold">Win / Draw / Loss Distribution</p>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {[
+                  { player: p1, color: P1_COLOR },
+                  { player: p2, color: P2_COLOR }
+                ].map(({ player, color }) => {
+                  const total = player.stats.matches || 1;
+                  const wPct = (player.stats.wins / total) * 100;
+                  const dPct = (player.stats.draws / total) * 100;
+                  const lPct = (player.stats.losses / total) * 100;
+                  
+                  return (
+                    <div key={player.player?.id}>
+                      <p className="text-[11px] font-black uppercase tracking-widest mb-2" style={{ color }}>{player.player?.name}</p>
+                      <div className="flex w-full h-8 rounded-xl overflow-hidden gap-1 bg-muted/30">
+                        <div className="h-full bg-emerald-500/80 flex items-center justify-center text-[10px] font-black text-white transition-all" style={{ width: `${wPct}%` }}>
+                          {wPct > 10 ? 'W' : ''}
+                        </div>
+                        <div className="h-full bg-amber-500/80 flex items-center justify-center text-[10px] font-black text-white transition-all" style={{ width: `${dPct}%` }}>
+                          {dPct > 10 ? 'D' : ''}
+                        </div>
+                        <div className="h-full bg-red-500/80 flex items-center justify-center text-[10px] font-black text-white transition-all" style={{ width: `${lPct}%` }}>
+                          {lPct > 10 ? 'L' : ''}
+                        </div>
+                      </div>
+                      <div className="flex justify-between mt-2 text-[10px] font-bold text-muted-foreground">
+                        <span>{player.stats.wins} Wins ({Math.round(wPct)}%)</span>
+                        <span>{player.stats.draws} Draws ({Math.round(dPct)}%)</span>
+                        <span>{player.stats.losses} Losses ({Math.round(lPct)}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* ─── FIFA-STYLE STAT COMPARISON BARS ─── */}
+          <div
+            className="rounded-3xl border border-border bg-card overflow-hidden"
+            
+          >
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="font-heading font-black text-foreground text-base uppercase tracking-tight">Performance Analysis</h3>
+                <p className="text-[10px] text-muted-foreground font-bold">Head-to-head stats breakdown</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: P1_COLOR }} />
+                  <span className="text-xs font-bold text-muted-foreground truncate max-w-[80px]">{p1.player?.name}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: P2_COLOR }} />
+                  <span className="text-xs font-bold text-muted-foreground truncate max-w-[80px]">{p2.player?.name}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Per-match rating breakdown */}
+              <div className="mb-6 pb-6 border-b border-border">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Flame className="w-3 h-3" /> Rating Components (per match)
+                </p>
+                <div className="space-y-3">
+                  <StatCompareBar label="Win Rate" p1Value={m1 > 0 ? Math.round((p1.stats.wins / m1) * 100) : 0} p2Value={m2 > 0 ? Math.round((p2.stats.wins / m2) * 100) : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="Goals / Match" p1Value={m1 > 0 ? p1.stats.goals / m1 : 0} p2Value={m2 > 0 ? p2.stats.goals / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" isFloat />
+                  <StatCompareBar label="Conceded / Match" p1Value={m1 > 0 ? p1.stats.conceded / m1 : 0} p2Value={m2 > 0 ? p2.stats.conceded / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="lower" isFloat />
+                  <StatCompareBar label="Clean Sheets / Match" p1Value={m1 > 0 ? p1.stats.cleanSheets / m1 : 0} p2Value={m2 > 0 ? p2.stats.cleanSheets / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" isFloat />
+                  <StatCompareBar label="MOTM / Match" p1Value={m1 > 0 ? p1.stats.motm / m1 : 0} p2Value={m2 > 0 ? p2.stats.motm / m2 : 0} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" isFloat />
+                </div>
+              </div>
+
+              {/* Career totals */}
+              <div className="mb-6 pb-6 border-b border-border">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Target className="w-3 h-3" /> Career Totals
+                </p>
+                <div className="space-y-3">
+                  <StatCompareBar label="Matches" p1Value={p1.stats.matches} p2Value={p2.stats.matches} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="Goals Scored" p1Value={p1.stats.goals} p2Value={p2.stats.goals} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="Wins" p1Value={p1.stats.wins} p2Value={p2.stats.wins} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="Draws" p1Value={p1.stats.draws} p2Value={p2.stats.draws} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="Losses" p1Value={p1.stats.losses} p2Value={p2.stats.losses} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="lower" />
+                </div>
+              </div>
+
+              {/* Defensive & Special */}
+              <div>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Shield className="w-3 h-3" /> Defensive & Honours
+                </p>
+                <div className="space-y-3">
+                  <StatCompareBar label="Goals Conceded" p1Value={p1.stats.conceded} p2Value={p2.stats.conceded} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="lower" />
+                  <StatCompareBar label="Clean Sheets" p1Value={p1.stats.cleanSheets} p2Value={p2.stats.cleanSheets} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="MOTM Awards" p1Value={p1.stats.motm} p2Value={p2.stats.motm} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                  <StatCompareBar label="Hat-tricks" p1Value={p1.stats.hattricks} p2Value={p2.stats.hattricks} p1Name={p1.player?.name || ''} p2Name={p2.player?.name || ''} better="higher" />
+                </div>
               </div>
             </div>
           </div>
