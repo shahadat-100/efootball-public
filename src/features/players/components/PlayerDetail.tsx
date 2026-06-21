@@ -7,7 +7,6 @@ import { SeasonPerformanceChart } from './SeasonPerformanceChart';
 import { RankTrendCard } from './RankTrendCard';
 import { SeasonTable } from './SeasonTable';
 import { AchievementBadges } from './AchievementBadges';
-import { PlayerTimelineChart } from './PlayerTimelineChart';
 import { cn } from '@/shared/lib/cn';
 
 interface PlayerDetailProps {
@@ -615,16 +614,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           </div>
         )}
       </div>
-
-      {/* ═══════════════════════════════════════════
-          PLAYER TIMELINE — Season-by-season chart
-          ═══════════════════════════════════════════ */}
-      {playerSeasonStats.filter(s => s.playerId === playerId).length > 0 && (
-        <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
-          <h3 className="font-heading font-bold text-[18px] mb-6 tracking-tight">Career Timeline</h3>
-          <PlayerTimelineChart seasonStats={playerSeasonStats.filter(s => s.playerId === playerId)} />
-        </div>
-      )}
 
       {/* ═══════════════════════════════════════════
           ACHIEVEMENT BADGES

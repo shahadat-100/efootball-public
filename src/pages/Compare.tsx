@@ -25,14 +25,21 @@ export function Compare() {
   const { players, matchEntries, playerSeasonStats, seasons } = useFootballStore();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | 'all'>('all');
+  const [showComparison, setShowComparison] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
 
   const togglePlayer = (id: string) => {
     setSelectedIds(prev => {
-      if (prev.includes(id)) return prev.filter(p => p !== id);
-      if (prev.length >= 2) return [prev[1], id];
-      return [...prev, id];
+      let newSelection = prev;
+      if (prev.includes(id)) newSelection = prev.filter(p => p !== id);
+      else if (prev.length >= 2) newSelection = [prev[1], id];
+      else newSelection = [...prev, id];
+      
+      if (newSelection.length < 2) {
+        setShowComparison(false);
+      }
+      return newSelection;
     });
   };
 
@@ -107,7 +114,7 @@ export function Compare() {
     setIsExporting(true);
     try {
       const canvas = await html2canvas(captureRef.current, { 
-        backgroundColor: '#0a0a0a',
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#0a0a0a' : '#ffffff',
         scale: 2, // Higher resolution
         useCORS: true
       });
@@ -195,13 +202,34 @@ export function Compare() {
       </div>
 
       {/* ═══════════════════════════════════════════ 
-          COMPARISON AREA (only when 2 players selected)
+          START COMPARISON BUTTON
           ═══════════════════════════════════════════ */}
-      {compareReady && (
-        <div className="space-y-6 relative">
+      {selectedIds.length === 2 && !showComparison && (
+        <div className="flex justify-center my-12">
+          <button 
+            onClick={() => setShowComparison(true)}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-10 py-5 rounded-2xl shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-3"
+          >
+            <Zap className="w-6 h-6" />
+            <span className="text-lg">Compare Players</span>
+          </button>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════ 
+          COMPARISON AREA (only when button is clicked)
+          ═══════════════════════════════════════════ */}
+      {showComparison && compareReady && (
+        <div className="space-y-6 relative mt-6">
           
-          {/* Export Button */}
-          <div className="flex justify-end">
+          {/* Top Actions */}
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setShowComparison(false)}
+              className="text-sm font-semibold text-muted-foreground hover:text-foreground underline underline-offset-4"
+            >
+              ← Back to Selection
+            </button>
             <button
               onClick={handleExport}
               disabled={isExporting}
@@ -212,11 +240,11 @@ export function Compare() {
             </button>
           </div>
 
-          <div ref={captureRef} className="space-y-6 bg-background/50 p-2 -m-2 rounded-3xl">
+          <div ref={captureRef} className="space-y-6 bg-background p-2 -m-2 rounded-3xl">
             {/* ─── HERO VS SECTION ─── */}
           <div
-            className="relative rounded-3xl overflow-hidden border"
-            style={{ borderColor: `${winnerColor}40`, background: 'linear-gradient(135deg, #0a0a12 0%, #0d111c 100%)' }}
+            className="relative rounded-3xl overflow-hidden border bg-card/80"
+            style={{ borderColor: `${winnerColor}40` }}
           >
             {/* Glow orbs background */}
             <div

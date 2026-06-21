@@ -34,15 +34,36 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
     const totalHT = seasonStats.reduce((s, x) => s + x.hattricks, 0);
     const seasons = seasonStats.length;
 
-    // Win streak calculation
+    // Win streak and advanced calculation
     const sorted = [...matchEntries]
       .filter(e => e.date)
       .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime());
+    
     let maxStreak = 0, streak = 0;
+    let maxUnbeatenStreak = 0, unbeatenStreak = 0;
+    let maxScoringStreak = 0, scoringStreak = 0;
+    let maxMotmStreak = 0, motmStreak = 0;
+    let maxGoalsInMatch = 0;
+
     sorted.forEach(e => {
       if (e.result === 'win') { streak++; maxStreak = Math.max(maxStreak, streak); }
       else streak = 0;
+
+      if (e.result === 'win' || e.result === 'draw') { unbeatenStreak++; maxUnbeatenStreak = Math.max(maxUnbeatenStreak, unbeatenStreak); }
+      else unbeatenStreak = 0;
+
+      if (e.goals > 0) { scoringStreak++; maxScoringStreak = Math.max(maxScoringStreak, scoringStreak); }
+      else scoringStreak = 0;
+
+      if (e.motm) { motmStreak++; maxMotmStreak = Math.max(maxMotmStreak, motmStreak); }
+      else motmStreak = 0;
+
+      maxGoalsInMatch = Math.max(maxGoalsInMatch, e.goals);
     });
+
+    const totalDraws = seasonStats.reduce((s, x) => s + x.draws, 0);
+    const gpm = totalMatches > 0 ? totalGoals / totalMatches : 0;
+    const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
 
     const badges: AchievementBadge[] = [
       // Matches milestones
@@ -50,12 +71,20 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
       { id: 'matches_50', icon: '🎽', label: 'Veteran', description: '50 matches played', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalMatches >= 50 },
       { id: 'matches_100', icon: '💯', label: 'Centurion', description: '100 matches played', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalMatches >= 100 },
       { id: 'matches_200', icon: '🏟️', label: 'Legend', description: '200 matches played', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalMatches >= 200 },
+      { id: 'matches_300', icon: '🏛️', label: 'Iron Man', description: '300 matches played', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalMatches >= 300 },
 
       // Goals milestones
       { id: 'goals_10', icon: '⚽', label: 'Scorer', description: '10 goals scored', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalGoals >= 10 },
       { id: 'goals_50', icon: '🎯', label: 'Marksman', description: '50 goals scored', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalGoals >= 50 },
       { id: 'goals_100', icon: '🔥', label: 'Goal Machine', description: '100 goals scored', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalGoals >= 100 },
       { id: 'goals_200', icon: '👑', label: 'All-Time Scorer', description: '200 goals scored', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalGoals >= 200 },
+      { id: 'goals_300', icon: '⚜️', label: 'Golden Boot', description: '300 goals scored', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalGoals >= 300 },
+
+      // Match performance
+      { id: 'gpm_1', icon: '🦅', label: 'Deadly Finisher', description: 'Goals per match > 1.0 (min 15 matches)', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalMatches >= 15 && gpm >= 1.0 },
+      { id: 'win_rate_80', icon: '🍀', label: 'Lucky Charm', description: 'Win Rate > 80% (min 15 matches)', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: totalMatches >= 15 && winRate >= 80 },
+      { id: 'draw_15', icon: '🤝', label: 'Draw Specialist', description: '15 draws', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalDraws >= 15 },
+      { id: 'goals_in_match_6', icon: '☄️', label: 'Double Hat-trick', description: 'Scored 6+ goals in a single match', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: maxGoalsInMatch >= 6 },
 
       // Wins
       { id: 'wins_25', icon: '✅', label: 'Winner', description: '25 wins', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalWins >= 25 },
@@ -65,6 +94,7 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
       { id: 'motm_5', icon: '⭐', label: 'Star Player', description: '5 MOTM awards', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalMOTM >= 5 },
       { id: 'motm_10', icon: '🌟', label: 'Elite Player', description: '10 MOTM awards', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: totalMOTM >= 10 },
       { id: 'motm_25', icon: '💫', label: 'MOTM King', description: '25 MOTM awards', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: totalMOTM >= 25 },
+      { id: 'motm_streak_3', icon: '🎭', label: 'Masterclass', description: 'MOTM in 3 consecutive matches', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: maxMotmStreak >= 3 },
 
       // Clean Sheets
       { id: 'cs_10', icon: '🛡️', label: 'Wall', description: '10 clean sheets', color: TIER_COLORS.bronze.text, tier: 'bronze', unlocked: totalCS >= 10 },
@@ -78,9 +108,11 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
       // Seasons
       { id: 'seasons_3', icon: '📅', label: 'Seasoned Pro', description: '3 seasons played', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: seasons >= 3 },
 
-      // Streak
+      // Streaks
       { id: 'streak_5', icon: '🔴', label: 'Hot Streak', description: '5-game win streak', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: maxStreak >= 5 },
       { id: 'streak_10', icon: '🌋', label: 'Unstoppable', description: '10-game win streak', color: TIER_COLORS.platinum.text, tier: 'platinum', unlocked: maxStreak >= 10 },
+      { id: 'unbeaten_10', icon: '🧿', label: 'Unflappable', description: '10 consecutive matches without a loss', color: TIER_COLORS.gold.text, tier: 'gold', unlocked: maxUnbeatenStreak >= 10 },
+      { id: 'scoring_5', icon: '🚀', label: 'Goal Poacher', description: 'Scored in 5 consecutive matches', color: TIER_COLORS.silver.text, tier: 'silver', unlocked: maxScoringStreak >= 5 },
     ];
 
     return badges;
@@ -90,7 +122,6 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
 export function AchievementBadges({ seasonStats, matchEntries }: Props) {
   const badges = usePlayerAchievements({ seasonStats, matchEntries });
   const unlocked = badges.filter(b => b.unlocked);
-  const locked = badges.filter(b => !b.unlocked);
 
   return (
     <div>
@@ -99,7 +130,7 @@ export function AchievementBadges({ seasonStats, matchEntries }: Props) {
           Achievements
         </p>
         <span className="text-[10px] font-black text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-full">
-          {unlocked.length}/{badges.length}
+          {unlocked.length} Earned
         </span>
       </div>
 
@@ -133,24 +164,6 @@ export function AchievementBadges({ seasonStats, matchEntries }: Props) {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Locked Badges (greyed out) */}
-      {locked.length > 0 && (
-        <div className="flex flex-wrap gap-2 opacity-30">
-          {locked.map(badge => (
-            <div
-              key={badge.id}
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl border border-border bg-muted/20 cursor-default"
-              title={`🔒 ${badge.description}`}
-            >
-              <span className="text-xl leading-none grayscale">{badge.icon}</span>
-              <span className="text-[9px] font-black uppercase tracking-wide text-muted-foreground leading-none">
-                {badge.label}
-              </span>
-            </div>
-          ))}
         </div>
       )}
     </div>
