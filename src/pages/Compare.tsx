@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Avatar, Badge, Button } from '@/shared/components';
-import { PlayerRadarChart } from '@/features/players/components/PlayerRadarChart';
+import { CompareRadarChart } from '@/features/compare/components/CompareRadarChart';
+import { aggregatePlayerStats } from '@/features/compare/utils';
 import { cn } from '@/shared/lib/cn';
 import { BarChart3, ChevronDown, CheckCircle2 } from 'lucide-react';
 
@@ -18,26 +19,50 @@ export function Compare() {
     });
   };
 
+  const computedStatsList = useMemo(() => aggregatePlayerStats(players, playerSeasonStats), [players, playerSeasonStats]);
+
+  const maxStats = useMemo(() => {
+     let ms = {
+        matches: 1, winRate: 0.1, lossRate: 0.1, drawRate: 0.1, goalsPerMatch: 0.1,
+        hattricksPerMatch: 0.1, csRate: 0.1, motmRate: 0.1, ptsPerMatch: 0.1, gaPerMatch: 0.1
+     };
+     computedStatsList.forEach(p => {
+        const m = p.matches || 1;
+        ms.matches = Math.max(ms.matches, p.matches);
+        ms.winRate = Math.max(ms.winRate, p.wins / m);
+        ms.lossRate = Math.max(ms.lossRate, p.losses / m);
+        ms.drawRate = Math.max(ms.drawRate, p.draws / m);
+        ms.goalsPerMatch = Math.max(ms.goalsPerMatch, p.goals / m);
+        ms.hattricksPerMatch = Math.max(ms.hattricksPerMatch, p.hattricks / m);
+        ms.csRate = Math.max(ms.csRate, p.cleansheets / m);
+        ms.motmRate = Math.max(ms.motmRate, p.motm / m);
+        ms.ptsPerMatch = Math.max(ms.ptsPerMatch, p.pts);
+        ms.gaPerMatch = Math.max(ms.gaPerMatch, p.ga / m);
+     });
+     return ms;
+  }, [computedStatsList]);
+
   const selectedPlayers = useMemo(() => {
     return selectedIds.map(id => {
       const p = players.find(p => p.id === id);
-      const statsList = playerSeasonStats.filter(s => s.playerId === id);
+      const computed = computedStatsList.find(c => c.id === id);
       
       const stats = {
-        matches: statsList.reduce((s, e) => s + (e.appearances || 0), 0),
-        goals: statsList.reduce((s, e) => s + (e.goals || 0), 0),
-        conceded: statsList.reduce((s, e) => s + (e.goalsConceded || 0), 0),
-        wins: statsList.reduce((s, e) => s + (e.wins || 0), 0),
-        draws: statsList.reduce((s, e) => s + (e.draws || 0), 0),
-        losses: statsList.reduce((s, e) => s + (e.losses || 0), 0),
-        motm: statsList.reduce((s, e) => s + (e.motmCount || 0), 0),
-        cleanSheets: statsList.reduce((s, e) => s + (e.cleansheets || 0), 0),
-        hattricks: statsList.reduce((s, e) => s + (e.hattricks || 0), 0),
+        matches: computed?.matches || 0,
+        goals: computed?.goals || 0,
+        conceded: computed?.ga || 0,
+        wins: computed?.wins || 0,
+        draws: computed?.draws || 0,
+        losses: computed?.losses || 0,
+        motm: computed?.motm || 0,
+        cleanSheets: computed?.cleansheets || 0,
+        hattricks: computed?.hattricks || 0,
+        points: computed?.pts || 0,
       };
       
-      return { player: p!, stats };
-    }).filter(p => p.player);
-  }, [selectedIds, players, playerSeasonStats]);
+      return { player: p!, stats, computed };
+    }).filter(p => p.player && p.computed);
+  }, [selectedIds, players, computedStatsList]);
 
   const MetricRow = ({ label, value1, value2, better }: { label: string, value1: number, value2: number, better: 'higher' | 'lower' }) => {
     let p1Better = false;
@@ -168,21 +193,14 @@ export function Compare() {
           </div>
 
           {/* Radar Charts */}
-          <div className="flex flex-col md:flex-row border-b border-border bg-card p-6 gap-6 md:gap-0">
-            {selectedPlayers.map((p, i) => (
-              <div key={p.player.id} className={cn(
-                "flex-1 flex justify-center", 
-                i === 0 ? "border-b md:border-b-0 md:border-r border-border/50 pb-6 md:pb-0" : "pt-6 md:pt-0"
-              )}>
-                <PlayerRadarChart stats={{
-                  goals: p.stats.goals,
-                  cleanSheets: p.stats.cleanSheets,
-                  motm: p.stats.motm,
-                  wins: p.stats.wins,
-                  matches: p.stats.matches
-                }} />
-              </div>
-            ))}
+          <div className="flex border-b border-border bg-card p-6 min-h-[400px]">
+            {selectedPlayers.length === 2 && (
+              <CompareRadarChart 
+                p1={selectedPlayers[0].computed!} 
+                p2={selectedPlayers[1].computed!} 
+                maxStats={maxStats} 
+              />
+            )}
           </div>
 
           {/* Winner Summary */}
@@ -192,17 +210,7 @@ export function Compare() {
             const p1 = selectedPlayers[0].player;
             const p2 = selectedPlayers[1].player;
 
-            const m1 = p1Stats.matches || 1;
-            const m2 = p2Stats.matches || 1;
-
-            let p1Points = 0, p2Points = 0;
-            if ((p1Stats.wins / m1) > (p2Stats.wins / m2)) p1Points++; else if ((p2Stats.wins / m2) > (p1Stats.wins / m1)) p2Points++;
-            if ((p1Stats.goals / m1) > (p2Stats.goals / m2)) p1Points++; else if ((p2Stats.goals / m2) > (p1Stats.goals / m1)) p2Points++;
-            if ((p1Stats.conceded / m1) < (p2Stats.conceded / m2)) p1Points++; else if ((p2Stats.conceded / m2) < (p1Stats.conceded / m1)) p2Points++;
-            if ((p1Stats.cleanSheets / m1) > (p2Stats.cleanSheets / m2)) p1Points++; else if ((p2Stats.cleanSheets / m2) > (p1Stats.cleanSheets / m1)) p2Points++;
-            if ((p1Stats.motm / m1) > (p2Stats.motm / m2)) p1Points++; else if ((p2Stats.motm / m2) > (p1Stats.motm / m1)) p2Points++;
-
-            const p1Leading = p1Points >= p2Points;
+            const p1Leading = p1Stats.points >= p2Stats.points;
             const winner = p1Leading ? p1 : p2;
             const leaderColor = p1Leading ? '#3b82f6' : '#ef4444';
 
@@ -223,7 +231,7 @@ export function Compare() {
                     <p className="text-[11px] font-black tracking-widest mb-1" style={{ color: leaderColor }}>PERFORMANCE ANALYSIS</p>
                     <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2 uppercase leading-none">{winner.name} IS LEADING</h2>
                     <p className="text-sm text-muted-foreground font-medium">
-                      Based on per-match statistics (Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM), <strong className="text-foreground">{winner.name}</strong> currently has the superior head-to-head performance record.
+                      Based on per-match statistics (Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM), <strong className="text-foreground">{winner.name}</strong> currently has the superior overall statistical performance record.
                     </p>
                   </div>
                 </div>
@@ -235,7 +243,7 @@ export function Compare() {
           <div className="p-6 md:p-8 bg-card">
             <div className="max-w-3xl mx-auto">
               <h4 className="text-center font-heading font-bold text-[20px] mb-6 flex items-center justify-center gap-2">
-                Head to Head Statistics
+                Overall Career Comparison
                 <ChevronDown className="w-5 h-5 text-muted-foreground" />
               </h4>
               <div className="bg-muted/10 rounded-2xl border border-border p-2">

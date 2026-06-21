@@ -166,6 +166,24 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const recentWeekRank = getRankFromMap(weeklyMap, player.id);
   const recentMonthRank = getRankFromMap(monthlyMap, player.id);
 
+  // Dynamically calculate the maximum league stats to correctly scale the radar chart
+  const maxLeagueStats = players.reduce((max, p) => {
+    const pStats = playerSeasonStats.filter(s => s.playerId === p.id);
+    const goals = pStats.reduce((sum, s) => sum + (s.goals || 0), 0);
+    const cleanSheets = pStats.reduce((sum, s) => sum + (s.cleansheets || 0), 0);
+    const motm = pStats.reduce((sum, s) => sum + (s.motmCount || 0), 0);
+    const wins = pStats.reduce((sum, s) => sum + (s.wins || 0), 0);
+    const matches = pStats.reduce((sum, s) => sum + (s.appearances || 0), 0);
+    
+    return {
+      goals: Math.max(max.goals, goals),
+      cleanSheets: Math.max(max.cleanSheets, cleanSheets),
+      motm: Math.max(max.motm, motm),
+      wins: Math.max(max.wins, wins),
+      matches: Math.max(max.matches, matches),
+    };
+  }, { goals: 10, cleanSheets: 5, motm: 2, wins: 10, matches: 20 });
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
       {/* Back navigation */}
@@ -219,13 +237,16 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
           {/* Right side: Radar Chart */}
           <div className="w-full lg:w-auto lg:min-w-[250px] flex justify-center">
-            <PlayerRadarChart stats={{
-              goals: stats.totalGoals,
-              cleanSheets: stats.totalCleanSheets,
-              motm: stats.totalMOTM,
-              wins: stats.totalWins,
-              matches: stats.totalMatches
-            }} />
+            <PlayerRadarChart 
+              stats={{
+                goals: stats.totalGoals,
+                cleanSheets: stats.totalCleanSheets,
+                motm: stats.totalMOTM,
+                wins: stats.totalWins,
+                matches: stats.totalMatches
+              }} 
+              maxStats={maxLeagueStats}
+            />
           </div>
         </div>
 

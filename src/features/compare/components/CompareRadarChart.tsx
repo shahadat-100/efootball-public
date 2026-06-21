@@ -12,6 +12,7 @@ import { getNormalizedStats } from '../utils';
 interface CompareRadarChartProps {
   p1: ComputedPlayerStats;
   p2: ComputedPlayerStats;
+  maxStats: any;
   color1?: string;
   color2?: string;
 }
@@ -21,11 +22,12 @@ const LABELS = ["MATCHES", "WIN %", "LOSS %", "DRAW %", "GOALS/M", "HT/M", "CS %
 export function CompareRadarChart({
   p1,
   p2,
+  maxStats,
   color1 = '#3b82f6', // blue-500
   color2 = '#ef4444', // red-500
 }: CompareRadarChartProps) {
-  const v1 = getNormalizedStats(p1);
-  const v2 = getNormalizedStats(p2);
+  const v1 = getNormalizedStats(p1, maxStats);
+  const v2 = getNormalizedStats(p2, maxStats);
 
   const data = LABELS.map((label, i) => ({
     subject: label,

@@ -1,24 +1,19 @@
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { ComputedPlayerStats } from './types';
-
-// Points from aggregated season stats (for Overall)
-const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
-  stats.reduce((total, s) =>
-    total + (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks
-  , 0);
+import { calcPlayerRating } from '@/utils/playerStats';
 
 export function aggregatePlayerStats(
   players: Player[],
   playerSeasonStats: PlayerSeasonStat[]
 ): ComputedPlayerStats[] {
-  // 1. Calculate overall points for rank mapping
+  // 1. Calculate overall points for rank mapping using the new fair logic
   const overallMap = new Map<string, number>();
   players.forEach(p => {
     const stats = playerSeasonStats.filter(s => s.playerId === p.id);
-    overallMap.set(p.id, calcSeasonPoints(stats));
+    overallMap.set(p.id, calcPlayerRating(stats));
   });
 
-  // 2. Determine ranks
+  // 2. Determine ranks based on fair rating
   const sortedIds = Array.from(overallMap.entries())
     .sort((a, b) => b[1] - a[1])
     .map(entry => entry[0]);
@@ -65,32 +60,37 @@ export function aggregatePlayerStats(
   });
 }
 
-// Normalized Data for Radar Chart
-export function getNormalizedStats(p: ComputedPlayerStats): number[] {
+// Dynamically scales values based on max performance in the league to make it fair
+export function getNormalizedStats(
+  p: ComputedPlayerStats, 
+  maxStats: {
+    matches: number;
+    winRate: number;
+    lossRate: number;
+    drawRate: number;
+    goalsPerMatch: number;
+    hattricksPerMatch: number;
+    csRate: number;
+    motmRate: number;
+    ptsPerMatch: number;
+    gaPerMatch: number;
+  }
+): number[] {
   const m = p.matches > 0 ? p.matches : 1;
 
-  // matches (÷ 40)
-  // win rate (wins/m)
-  // loss rate (losses/m)
-  // draw rate (draws/m)
-  // goals/m (÷ 3)
-  // hattricks/m (÷ 0.5)
-  // cs rate (cleansheets/m)
-  // motm rate (motm/m)
-  // pts/m (÷ 3)
-  // ga/m (÷ 3)
-  
+  const getRatio = (val: number, max: number) => max > 0 ? Math.min(1, val / max) : 0;
+
   return [
-    Math.min(1, p.matches / 40),
-    Math.min(1, p.wins / m),
-    Math.min(1, p.losses / m),
-    Math.min(1, p.draws / m),
-    Math.min(1, (p.goals / m) / 3),
-    Math.min(1, (p.hattricks / m) / 0.5),
-    Math.min(1, p.cleansheets / m),
-    Math.min(1, p.motm / m),
-    Math.min(1, (p.pts / m) / 3),
-    Math.min(1, (p.ga / m) / 3),
+    getRatio(p.matches, maxStats.matches),
+    getRatio(p.wins / m, maxStats.winRate),
+    getRatio(p.losses / m, maxStats.lossRate),
+    getRatio(p.draws / m, maxStats.drawRate),
+    getRatio(p.goals / m, maxStats.goalsPerMatch),
+    getRatio(p.hattricks / m, maxStats.hattricksPerMatch),
+    getRatio(p.cleansheets / m, maxStats.csRate),
+    getRatio(p.motm / m, maxStats.motmRate),
+    getRatio(p.pts, maxStats.ptsPerMatch), // p.pts is already their new dynamic rating
+    getRatio(p.ga / m, maxStats.gaPerMatch),
   ];
 }
 
