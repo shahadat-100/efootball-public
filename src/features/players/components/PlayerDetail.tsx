@@ -621,7 +621,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
         <AchievementBadges
           seasonStats={playerSeasonStats.filter(s => s.playerId === playerId)}
-          matchEntries={matchEntries.filter(e => e.playerId === playerId)}
         />
       </div>
 

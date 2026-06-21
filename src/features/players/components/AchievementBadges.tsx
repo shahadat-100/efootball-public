@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { PlayerSeasonStat } from '@/features/players/types';
-import { MatchEntry } from '@/features/match-entries/types';
 
 export interface AchievementBadge {
   id: string;
@@ -14,7 +13,6 @@ export interface AchievementBadge {
 
 interface Props {
   seasonStats: PlayerSeasonStat[];
-  matchEntries: MatchEntry[];
 }
 
 const TIER_COLORS = {
@@ -24,40 +22,12 @@ const TIER_COLORS = {
   platinum: { bg: '#1e1b4b20', border: '#a78bfa', text: '#a78bfa', badge: 'linear-gradient(135deg, #4c1d95, #a78bfa)' },
 };
 
-export function usePlayerAchievements({ seasonStats, matchEntries }: Props): AchievementBadge[] {
+export function usePlayerAchievements({ seasonStats }: Props): AchievementBadge[] {
   return useMemo(() => {
-    const totalMatches = seasonStats.reduce((s, x) => s + x.appearances, 0);
     const totalGoals = seasonStats.reduce((s, x) => s + x.goals, 0);
-    const totalWins = seasonStats.reduce((s, x) => s + x.wins, 0);
     const totalMOTM = seasonStats.reduce((s, x) => s + x.motmCount, 0);
     const totalCS = seasonStats.reduce((s, x) => s + x.cleansheets, 0);
     const totalHT = seasonStats.reduce((s, x) => s + x.hattricks, 0);
-    // Advanced calculation (only real matches for streaks)
-    const sorted = [...matchEntries]
-      .filter(e => {
-        if (!e.date) return false;
-        if (e.id.startsWith('bulk')) return false;
-        if (e.matchId?.startsWith('bulk')) return false;
-        if (e.notes?.toLowerCase().includes('generated')) return false;
-        return true;
-      })
-      .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime());
-    
-    let maxStreak = 0, streak = 0;
-    let maxUnbeatenStreak = 0, unbeatenStreak = 0;
-    let maxMotmStreak = 0, motmStreak = 0;
-
-    sorted.forEach(e => {
-      if (e.result === 'win') { streak++; maxStreak = Math.max(maxStreak, streak); }
-      else streak = 0;
-
-      if (e.result === 'win' || e.result === 'draw') { unbeatenStreak++; maxUnbeatenStreak = Math.max(maxUnbeatenStreak, unbeatenStreak); }
-      else unbeatenStreak = 0;
-
-      if (e.motm) { motmStreak++; maxMotmStreak = Math.max(maxMotmStreak, motmStreak); }
-      else motmStreak = 0;
-    });
-
     const badges: AchievementBadge[] = [];
 
     const getTier = (val: number, max: number): 'bronze' | 'silver' | 'gold' | 'platinum' => {
@@ -85,19 +55,13 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
     };
 
     const mainSteps = [10, 50, ...Array.from({length: 50}, (_, i) => (i+1)*100)];
-    const winSteps = [25, 50, ...Array.from({length: 50}, (_, i) => (i+1)*100)];
     const motmSteps = [5, 10, 25, 50, ...Array.from({length: 10}, (_, i) => (i+1)*100)];
     const csSteps = [10, 25, 50, ...Array.from({length: 10}, (_, i) => (i+1)*100)];
-    const streakSteps = [5, 10, 15, 20, 25, 30, 40, 50];
 
-    addMilestones(totalMatches, mainSteps, 'Matches', 5000);
     addMilestones(totalGoals, mainSteps, 'Goals', 5000);
-    addMilestones(totalWins, winSteps, 'Wins', 5000);
     addMilestones(totalMOTM, motmSteps, 'MOTM', 1000);
     addMilestones(totalCS, csSteps, 'Clean Sheets', 1000);
     addMilestones(totalHT, [1, 5, 10, 25, 50, 100], 'Hat-tricks', 100);
-    addMilestones(maxStreak, streakSteps, 'Win Streak', 50);
-    addMilestones(maxUnbeatenStreak, streakSteps, 'Unbeaten Streak', 50);
 
     // Sort so highest milestones are first
     badges.sort((a, b) => {
@@ -107,11 +71,11 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
     });
 
     return badges;
-  }, [seasonStats, matchEntries]);
+  }, [seasonStats]);
 }
 
-export function AchievementBadges({ seasonStats, matchEntries }: Props) {
-  const badges = usePlayerAchievements({ seasonStats, matchEntries });
+export function AchievementBadges({ seasonStats }: Props) {
+  const badges = usePlayerAchievements({ seasonStats });
   const unlocked = badges.filter(b => b.unlocked);
 
   return (
