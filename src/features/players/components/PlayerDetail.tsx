@@ -47,14 +47,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     { label: 'Losses', value: recentWeekEntries.filter(e => e.result === 'loss').length, color: '#ef4444' }
   ];
 
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
-  const monthlyEntries = entries.filter(e => e.date && new Date(e.date) >= oneMonthAgo);
-  const monthChartData = [
-    { label: 'Wins', value: monthlyEntries.filter(e => e.result === 'win').length, color: '#10b981' },
-    { label: 'Draws', value: monthlyEntries.filter(e => e.result === 'draw').length, color: '#f59e0b' },
-    { label: 'Losses', value: monthlyEntries.filter(e => e.result === 'loss').length, color: '#ef4444' }
-  ];
+  const currentDay = new Date().getDate();
+  const currentMonthIndex = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const getFormStatus = () => {
     const recent10 = historyEntries.slice(0, 10);
@@ -77,6 +73,27 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     }
   };
   const formStatus = getFormStatus();
+
+  // Find the month of their most recent match to show relevant monthly stats
+  let targetMonthIndex = currentMonthIndex;
+  let targetYear = currentYear;
+  if (historyEntries.length > 0 && historyEntries[0].date) {
+    const lastMatchDate = new Date(historyEntries[0].date);
+    targetMonthIndex = lastMatchDate.getMonth();
+    targetYear = lastMatchDate.getFullYear();
+  }
+
+  const monthlyEntries = entries.filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    return d.getMonth() === targetMonthIndex && d.getFullYear() === targetYear;
+  });
+  const monthChartData = [
+    { label: 'Wins', value: monthlyEntries.filter(e => e.result === 'win').length, color: '#10b981' },
+    { label: 'Draws', value: monthlyEntries.filter(e => e.result === 'draw').length, color: '#f59e0b' },
+    { label: 'Losses', value: monthlyEntries.filter(e => e.result === 'loss').length, color: '#ef4444' }
+  ];
+
 
   // Points calculation helper (matching PointsLeaderboard)
   const calcSeasonPoints = (s: any) =>
@@ -110,9 +127,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   }).filter(Boolean);
 
   // Compute Recent Week and Recent Month Ranks
-  const currentDay = new Date().getDate();
-  const currentMonthIndex = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
 
   let activeWeekStart = 1, activeWeekEnd = 7;
   if (currentDay >= 8  && currentDay <= 14) { activeWeekStart = 8;  activeWeekEnd = 14; }
@@ -519,7 +533,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               </div>
               <div className="lg:col-span-1 min-h-[320px] bg-gradient-to-br from-card to-card/50 border border-border/50 rounded-2xl p-6 shadow-sm flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl -z-10 pointer-events-none translate-x-1/3 -translate-y-1/3" />
-                <h3 className="font-heading font-bold text-[18px] tracking-tight w-full text-left mb-6">Monthly Performance</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-heading font-bold text-[18px] tracking-tight text-left">Monthly Performance</h3>
+                  <Badge bg="var(--muted)" c="var(--muted-foreground)">{MONTHS[targetMonthIndex]} {targetYear}</Badge>
+                </div>
                 <div className="flex-1 flex items-center justify-center">
                   <PieChart data={monthChartData} size={140} />
                 </div>

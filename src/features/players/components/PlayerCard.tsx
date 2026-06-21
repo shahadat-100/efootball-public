@@ -31,7 +31,16 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
   // Form dots (last 5)
   const form = matchEntries
     .filter(e => e.playerId === player.id && e.result)
-    .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+    .sort((a, b) => {
+      const dateTimeA = a.time ? `${a.date}T${a.time}` : (a.date ? `${a.date}T00:00:00` : '');
+      const dateTimeB = b.time ? `${b.date}T${b.time}` : (b.date ? `${b.date}T00:00:00` : '');
+      const dateA = new Date(dateTimeA).getTime();
+      const dateB = new Date(dateTimeB).getTime();
+      const validA = isNaN(dateA) ? 0 : dateA;
+      const validB = isNaN(dateB) ? 0 : dateB;
+      if (validA !== validB) return validB - validA;
+      return String(b.id).localeCompare(String(a.id));
+    })
     .slice(0, 5)
     .map(e => e.result!)
     .reverse();
