@@ -249,6 +249,32 @@ export function Compare() {
                         <p className="text-2xl font-black text-foreground leading-none">{p2Stats.points.toFixed(2)} <span className="text-[12px] text-muted-foreground font-bold">pts</span></p>
                       </div>
                     </div>
+
+                    <div className="mt-8 pt-6 border-t border-border/40 w-full max-w-md">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">Per-Match Breakdown</p>
+                      <div className="bg-background/40 rounded-xl border border-border/50 p-1 flex flex-col">
+                        <MetricRow label="Win Rate" 
+                          value1={selectedPlayers[0].stats.matches > 0 ? Math.round((selectedPlayers[0].stats.wins / selectedPlayers[0].stats.matches) * 100) : 0} 
+                          value2={selectedPlayers[1].stats.matches > 0 ? Math.round((selectedPlayers[1].stats.wins / selectedPlayers[1].stats.matches) * 100) : 0} 
+                          better="higher" />
+                        <MetricRow label="Goals / Match" 
+                          value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.goals / selectedPlayers[0].stats.matches : 0} 
+                          value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.goals / selectedPlayers[1].stats.matches : 0} 
+                          better="higher" isFloat />
+                        <MetricRow label="Conceded / Match" 
+                          value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.conceded / selectedPlayers[0].stats.matches : 0} 
+                          value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.conceded / selectedPlayers[1].stats.matches : 0} 
+                          better="lower" isFloat />
+                        <MetricRow label="Clean Sheets / Match" 
+                          value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.cleanSheets / selectedPlayers[0].stats.matches : 0} 
+                          value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.cleanSheets / selectedPlayers[1].stats.matches : 0} 
+                          better="higher" isFloat />
+                        <MetricRow label="MOTM / Match" 
+                          value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.motm / selectedPlayers[0].stats.matches : 0} 
+                          value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.motm / selectedPlayers[1].stats.matches : 0} 
+                          better="higher" isFloat />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -265,32 +291,12 @@ export function Compare() {
               <div className="bg-muted/10 rounded-2xl border border-border p-2">
                 <MetricRow label="Matches Played" value1={selectedPlayers[0].stats.matches} value2={selectedPlayers[1].stats.matches} better="higher" />
                 <MetricRow label="Goals Scored" value1={selectedPlayers[0].stats.goals} value2={selectedPlayers[1].stats.goals} better="higher" />
-                <MetricRow label="Goals / Match" 
-                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.goals / selectedPlayers[0].stats.matches : 0} 
-                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.goals / selectedPlayers[1].stats.matches : 0} 
-                  better="higher" isFloat />
-                <MetricRow label="Win Rate" 
-                  value1={selectedPlayers[0].stats.matches > 0 ? Math.round((selectedPlayers[0].stats.wins / selectedPlayers[0].stats.matches) * 100) : 0} 
-                  value2={selectedPlayers[1].stats.matches > 0 ? Math.round((selectedPlayers[1].stats.wins / selectedPlayers[1].stats.matches) * 100) : 0} 
-                  better="higher" />
                 <MetricRow label="Wins" value1={selectedPlayers[0].stats.wins} value2={selectedPlayers[1].stats.wins} better="higher" />
                 <MetricRow label="Draws" value1={selectedPlayers[0].stats.draws} value2={selectedPlayers[1].stats.draws} better="higher" />
                 <MetricRow label="Losses" value1={selectedPlayers[0].stats.losses} value2={selectedPlayers[1].stats.losses} better="lower" />
                 <MetricRow label="Goals Conceded" value1={selectedPlayers[0].stats.conceded} value2={selectedPlayers[1].stats.conceded} better="lower" />
-                <MetricRow label="Conceded / Match" 
-                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.conceded / selectedPlayers[0].stats.matches : 0} 
-                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.conceded / selectedPlayers[1].stats.matches : 0} 
-                  better="lower" isFloat />
                 <MetricRow label="Clean Sheets" value1={selectedPlayers[0].stats.cleanSheets} value2={selectedPlayers[1].stats.cleanSheets} better="higher" />
-                <MetricRow label="Clean Sheets / Match" 
-                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.cleanSheets / selectedPlayers[0].stats.matches : 0} 
-                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.cleanSheets / selectedPlayers[1].stats.matches : 0} 
-                  better="higher" isFloat />
                 <MetricRow label="MOTM Awards" value1={selectedPlayers[0].stats.motm} value2={selectedPlayers[1].stats.motm} better="higher" />
-                <MetricRow label="MOTM / Match" 
-                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.motm / selectedPlayers[0].stats.matches : 0} 
-                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.motm / selectedPlayers[1].stats.matches : 0} 
-                  better="higher" isFloat />
                 <MetricRow label="Hat-tricks" value1={selectedPlayers[0].stats.hattricks} value2={selectedPlayers[1].stats.hattricks} better="higher" />
               </div>
             </div>

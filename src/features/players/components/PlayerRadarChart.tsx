@@ -146,7 +146,7 @@ export function PlayerRadarChart({ stats, maxStats }: PlayerRadarChartProps) {
             y={a.labelPos.y}
             textAnchor={a.anchor}
             dominantBaseline={a.baseline}
-            className="text-[10px] font-bold fill-foreground"
+            className="text-[10px] font-bold fill-white"
             style={{ fontSize: 10 }}
           >
             {a.short}
