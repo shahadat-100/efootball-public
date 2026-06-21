@@ -164,39 +164,70 @@ export function Compare() {
       {/* ═══════════════════════════════════════════ 
           PLAYER SELECTION GRID
           ═══════════════════════════════════════════ */}
-      <div className="bg-card border border-border rounded-2xl p-5 mb-8 shadow-sm">
-        <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-widest mb-4">
-          Select Players ({selectedIds.length}/2)
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {computedStatsList.sort((a, b) => a.name.localeCompare(b.name)).map(p => {
-            const isSelected = selectedIds.includes(p.id);
-            const isP1 = selectedIds[0] === p.id;
-            const selColor = isP1 ? P1_COLOR : P2_COLOR;
-            return (
-              <button
-                key={p.id}
-                onClick={() => togglePlayer(p.id)}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-semibold transition-all duration-200',
-                  isSelected
-                    ? 'text-foreground shadow-md scale-105'
-                    : 'border-border text-foreground bg-background hover:border-primary/40 hover:bg-primary/5'
-                )}
-                style={isSelected ? {
-                  borderColor: `${selColor}80`,
-                  backgroundColor: `${selColor}18`,
-                  color: selColor,
-                } : undefined}
-              >
-                <Avatar src={players.find(pl => pl.id === p.id)?.profileImageUrl} size="xs" />
-                <span>{p.name}</span>
-                {isSelected && (
-                  <span className="text-[10px] font-black opacity-80">{isP1 ? 'P1' : 'P2'}</span>
-                )}
-              </button>
-            );
-          })}
+      <div className="relative rounded-3xl border border-border bg-card overflow-hidden shadow-lg mb-8">
+        {/* Decorative background */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        
+        <div className="relative p-6 md:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 className="font-heading font-black text-xl text-foreground tracking-tight">Select Players</h3>
+              <p className="text-xs font-bold text-muted-foreground mt-1">Pick 2 players for head-to-head comparison</p>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <span className="bg-primary/10 text-primary font-black px-4 py-1.5 rounded-full text-sm">
+                {selectedIds.length}/2 Selected
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {computedStatsList.sort((a, b) => a.name.localeCompare(b.name)).map(p => {
+              const isSelected = selectedIds.includes(p.id);
+              const isP1 = selectedIds[0] === p.id;
+              const selColor = isP1 ? P1_COLOR : P2_COLOR;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => togglePlayer(p.id)}
+                  className={cn(
+                    'group relative flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300',
+                    isSelected
+                      ? 'shadow-xl scale-[1.02]'
+                      : 'border-transparent bg-background/50 hover:bg-background hover:border-border hover:shadow-md'
+                  )}
+                  style={isSelected ? {
+                    borderColor: selColor,
+                    backgroundColor: `${selColor}10`,
+                  } : undefined}
+                >
+                  <div className={cn(
+                    "w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 transition-colors duration-300 flex items-center justify-center",
+                    isSelected ? "border-transparent" : "border-border group-hover:border-primary/30"
+                  )}
+                  style={isSelected ? { borderColor: selColor, boxShadow: `0 0 15px ${selColor}40` } : undefined}
+                  >
+                    <Avatar src={players.find(pl => pl.id === p.id)?.profileImageUrl} size="full" className="w-full h-full object-cover" />
+                  </div>
+                  
+                  <div className="text-center w-full">
+                    <span className={cn(
+                      "block text-sm font-bold truncate",
+                      isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                    )}>
+                      {p.name}
+                    </span>
+                    {isSelected && (
+                      <span className="inline-block mt-1 text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm"
+                            style={{ backgroundColor: selColor, color: '#fff' }}>
+                        {isP1 ? 'Player 1' : 'Player 2'}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
