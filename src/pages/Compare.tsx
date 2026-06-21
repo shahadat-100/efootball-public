@@ -230,9 +230,20 @@ export function Compare() {
                   <div className="text-center md:text-left">
                     <p className="text-[11px] font-black tracking-widest mb-1" style={{ color: leaderColor }}>PERFORMANCE ANALYSIS</p>
                     <h2 className="text-2xl md:text-3xl font-black text-foreground mb-2 uppercase leading-none">{winner.name} IS LEADING</h2>
-                    <p className="text-sm text-muted-foreground font-medium">
+                    <p className="text-sm text-muted-foreground font-medium mb-5">
                       Based on per-match statistics (Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM), <strong className="text-foreground">{winner.name}</strong> currently has the superior overall statistical performance record.
                     </p>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20">
+                        <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mb-1">{p1.name}</p>
+                        <p className="text-2xl font-black text-foreground leading-none">{p1Stats.points.toFixed(2)} <span className="text-[12px] text-muted-foreground font-bold">pts</span></p>
+                      </div>
+                      <span className="text-muted-foreground font-black text-sm uppercase tracking-widest">vs</span>
+                      <div className="bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20">
+                        <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest leading-none mb-1">{p2.name}</p>
+                        <p className="text-2xl font-black text-foreground leading-none">{p2Stats.points.toFixed(2)} <span className="text-[12px] text-muted-foreground font-bold">pts</span></p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
