@@ -19,14 +19,14 @@ export function Leaderboard() {
         </p>
       </div>
 
-      <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl w-max">
+      <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
         <button
           onClick={() => setActiveTab('points')}
           className={cn(
-            "px-5 py-2 text-sm font-bold rounded-lg transition-all",
+            "px-6 py-2.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all",
             activeTab === 'points'
-              ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              ? "bg-primary text-primary-foreground shadow-md scale-105"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/80"
           )}
         >
           Points
@@ -34,10 +34,10 @@ export function Leaderboard() {
         <button
           onClick={() => setActiveTab('goals')}
           className={cn(
-            "px-5 py-2 text-sm font-bold rounded-lg transition-all",
+            "px-6 py-2.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all",
             activeTab === 'goals'
-              ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              ? "bg-primary text-primary-foreground shadow-md scale-105"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/80"
           )}
         >
           Goals
