@@ -576,16 +576,16 @@ export function Compare() {
                     <h3 className="font-heading font-black text-foreground text-base uppercase tracking-tight">Season Performance</h3>
                     <p className="text-[10px] text-muted-foreground font-bold">Trend over time</p>
                   </div>
-                  <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-lg">
+                  <div className="flex items-center gap-2 bg-muted/30 p-1.5 rounded-xl border border-border">
                     {(['points', 'goals', 'winRate'] as const).map(m => (
                       <button
                         key={m}
                         onClick={() => setChartMetric(m)}
                         className={cn(
-                          "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                          "px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all",
                           chartMetric === m 
-                            ? "bg-background text-foreground shadow-sm" 
-                            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                            ? "bg-primary text-primary-foreground shadow-md scale-105" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-background/80"
                         )}
                       >
                         {m === 'points' ? 'Rating' : m === 'goals' ? 'Goals' : 'Win %'}
