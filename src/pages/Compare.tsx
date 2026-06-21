@@ -238,7 +238,7 @@ export function Compare() {
                     <p className="text-sm text-muted-foreground font-medium mb-5">
                       Based on per-match statistics (Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM), <strong className="text-foreground">{winner.name}</strong> currently has the superior overall statistical performance record.
                     </p>
-                    <div className="flex items-center gap-3 w-full max-w-md">
+                    <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
                       <div className="flex-1 w-full bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20 flex flex-col justify-center">
                         <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mb-1 truncate">{p1.name}</p>
                         <p className="text-2xl font-black text-foreground leading-none">{p1Stats.points.toFixed(2)} <span className="text-[12px] text-muted-foreground font-bold">pts</span></p>
@@ -250,8 +250,8 @@ export function Compare() {
                       </div>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-border/40 w-full max-w-md">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">Per-Match Breakdown</p>
+                    <div className="mt-8 pt-6 border-t border-border/40 w-full max-w-md mx-auto">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 text-center">Per-Match Breakdown</p>
                       <div className="bg-background/40 rounded-xl border border-border/50 p-1 flex flex-col">
                         <MetricRow label="Win Rate" 
                           value1={selectedPlayers[0].stats.matches > 0 ? Math.round((selectedPlayers[0].stats.wins / selectedPlayers[0].stats.matches) * 100) : 0} 
