@@ -29,7 +29,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     setIsExporting(true);
     try {
       const canvas = await html2canvas(captureRef.current, { 
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#0a0a0a' : '#ffffff',
+        backgroundColor: null,
         scale: 2,
         useCORS: true
       });
@@ -249,17 +249,19 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       {/* ═══════════════════════════════════════════
           HERO ZONE — Player Header
           ═══════════════════════════════════════════ */}
-      <div ref={captureRef} className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-6 md:p-8 mb-6 shadow-xl overflow-hidden">
+      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 mb-6 shadow-xl overflow-hidden" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')]" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none" style={{ background: 'rgba(99,102,241,0.15)' }} />
+        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px] pointer-events-none" style={{ background: 'rgba(59,130,246,0.12)' }} />
         
         <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
             <div className="relative">
-              <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl" />
+              <div style={{ outline: '4px solid rgba(255,255,255,0.1)', outlineOffset: '4px', borderRadius: '50%', display: 'inline-flex' }}>
+                <Avatar name={player.name} size={110} src={player.profileImageUrl} className="shadow-2xl" />
+              </div>
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
                   "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
@@ -304,7 +306,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         </div>
 
         {/* ═══ Quick Stats Ribbon ═══ */}
-        <div className="relative z-10 mt-6 pt-6 border-t border-white/10">
+        <div className="relative z-10 mt-6 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <div className="flex flex-wrap gap-6 items-start">
             {/* Recent Form */}
             <div>
@@ -320,12 +322,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                     return (
                       <div
                         key={entry.id || i}
-                        className={cn(
-                          "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default transition-transform hover:scale-110",
-                          isWin ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/20' :
-                          isDraw ? 'bg-amber-500/30 text-amber-300 border border-amber-500/20' :
-                          'bg-red-500/30 text-red-300 border border-red-500/20'
-                        )}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default"
+                        style={isWin
+                          ? { background: 'rgba(16,185,129,0.3)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.2)' }
+                          : isDraw
+                          ? { background: 'rgba(245,158,11,0.3)', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.2)' }
+                          : { background: 'rgba(239,68,68,0.3)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.2)' }
+                        }
                         title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
                       >
                         {result.charAt(0).toUpperCase()}
@@ -369,7 +372,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               <div key={sr.seasonName}>
                 <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{sr.seasonName}</h4>
                 <div className="flex items-center gap-2">
-                  <span className="bg-blue-500/20 text-blue-300 font-black text-[14px] px-3 py-1 rounded-lg shadow-md">
+                  <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }}>
                     #{sr.rank || '-'}
                   </span>
                 </div>
@@ -379,7 +382,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             {/* Win Rate */}
             <div>
               <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Win Rate</h4>
-              <span className="font-black text-[14px] text-white px-3 py-1 rounded-lg bg-white/10 shadow-md border border-white/10">
+              <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
                 {(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%
               </span>
             </div>
