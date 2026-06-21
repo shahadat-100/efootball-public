@@ -56,7 +56,7 @@ export function AppShell() {
   useEffect(() => {
     const segment = location.pathname.split('/').filter(Boolean)[0] || 'overview';
     const pageTitle = PAGE_TITLES[segment] || 'Overview';
-    document.title = `${pageTitle} — Elites Empire`;
+    document.title = `${pageTitle} — The Enigmatic Elite `;
   }, [location.pathname]);
 
   const counts: Record<string, number> = {
@@ -185,7 +185,7 @@ export function AppShell() {
           />
         )}
         <main className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-10 relative w-full h-full pb-20 md:pb-0">
-          <div className="w-full max-w-[1536px] mx-auto pb-12">
+          <div className="max-w-[1200px] mx-auto pb-12 w-full">
             <Outlet />
           </div>
         </main>
