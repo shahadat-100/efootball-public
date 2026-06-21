@@ -34,7 +34,13 @@ export function usePlayerAchievements({ seasonStats, matchEntries }: Props): Ach
     const totalHT = seasonStats.reduce((s, x) => s + x.hattricks, 0);
     // Advanced calculation (only real matches for streaks)
     const sorted = [...matchEntries]
-      .filter(e => e.date && !e.notes?.startsWith('Generated'))
+      .filter(e => {
+        if (!e.date) return false;
+        if (e.id.startsWith('bulk')) return false;
+        if (e.matchId?.startsWith('bulk')) return false;
+        if (e.notes?.toLowerCase().includes('generated')) return false;
+        return true;
+      })
       .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime());
     
     let maxStreak = 0, streak = 0;
