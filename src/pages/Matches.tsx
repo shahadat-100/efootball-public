@@ -131,7 +131,7 @@ export function Matches() {
                   <div 
                     key={m.id} 
                     className={cn(
-                      "bg-card border rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm transition-all hover:shadow-md hover:border-border",
+                      "relative bg-card border rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm transition-all hover:shadow-md hover:border-border sm:pr-28 lg:pr-44",
                       result === 'win' ? 'border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/5 via-card/50 to-card' :
                       result === 'loss' ? 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/5 via-card/50 to-card' :
                       result === 'draw' ? 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/5 via-card/50 to-card' :
@@ -139,18 +139,18 @@ export function Matches() {
                     )}
                   >
                     {/* Home Team */}
-                    <div className="flex-1 flex items-center justify-end gap-3 text-center sm:text-right">
-                      <div>
-                        <p className="font-bold text-[15px]">{m.homeTeam}</p>
+                    <div className="flex-1 min-w-0 w-full sm:w-auto flex items-center justify-center sm:justify-end gap-3 text-center sm:text-right">
+                      <div className="min-w-0">
+                        <p className="font-bold text-[15px] truncate" title={m.homeTeam}>{m.homeTeam}</p>
                         <p className="text-muted-foreground text-[10px] uppercase tracking-widest mt-0.5 font-bold">Home</p>
                       </div>
                       {isElitesHome && (
-                        <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border" />
+                        <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border flex-shrink-0" />
                       )}
                     </div>
                     
                     {/* Score */}
-                    <div className="flex-shrink-0 text-center px-4 min-w-[130px]">
+                    <div className="flex-shrink-0 text-center px-4 w-[140px]">
                       <p className={cn(
                         "font-heading font-bold text-[28px] tracking-[6px] text-foreground leading-none",
                         m.status === 'upcoming' && "text-muted-foreground"
@@ -163,22 +163,23 @@ export function Matches() {
                     </div>
 
                     {/* Away Team */}
-                    <div className="flex-1 flex items-center justify-start gap-3 text-center sm:text-left">
+                    <div className="flex-1 min-w-0 w-full sm:w-auto flex items-center justify-center sm:justify-start gap-3 text-center sm:text-left">
                       {isElitesAway && (
-                        <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border" />
+                        <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border flex-shrink-0" />
                       )}
-                      <div>
-                        <p className="font-bold text-[15px]">{m.awayTeam}</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-[15px] truncate" title={m.awayTeam}>{m.awayTeam}</p>
                         <p className="text-muted-foreground text-[10px] uppercase tracking-widest mt-0.5 font-bold">Away</p>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 items-center sm:ml-auto w-full sm:w-auto justify-center sm:justify-end border-t sm:border-none border-border pt-3 sm:pt-0 mt-2 sm:mt-0">
-                      <Badge className="bg-muted text-muted-foreground hidden lg:block mr-2 border border-border/50 font-medium">{m.competition}</Badge>
+                    {/* Competition & Generated Badges */}
+                    <div className="flex gap-2 items-center justify-center border-t sm:border-none border-border pt-3 sm:pt-0 mt-2 sm:mt-0 w-full sm:w-auto sm:absolute sm:right-6 sm:top-1/2 sm:-translate-y-1/2">
+                      <Badge className="bg-muted text-muted-foreground hidden lg:block border border-border/50 font-medium">{m.competition}</Badge>
                       {m.id.startsWith('bulk-') && (
                         <button 
                           onClick={() => setModal({ type: 'info' })}
-                          className="text-[11px] text-muted-foreground font-medium px-2.5 py-1 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors"
+                          className="text-[11px] text-muted-foreground font-medium px-2.5 py-1 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors flex-shrink-0"
                         >
                           Generated
                         </button>
