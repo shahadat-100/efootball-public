@@ -64,7 +64,7 @@ export function Compare() {
     }).filter(p => p.player && p.computed);
   }, [selectedIds, players, computedStatsList]);
 
-  const MetricRow = ({ label, value1, value2, better }: { label: string, value1: number, value2: number, better: 'higher' | 'lower' }) => {
+  const MetricRow = ({ label, value1, value2, better, isFloat = false }: { label: string, value1: number, value2: number, better: 'higher' | 'lower', isFloat?: boolean }) => {
     let p1Better = false;
     let p2Better = false;
     
@@ -78,6 +78,11 @@ export function Compare() {
       }
     }
 
+    const formatValue = (v: number) => {
+      if (label.includes('Rate')) return `${v}%`;
+      return isFloat ? v.toFixed(2) : v;
+    };
+
     return (
       <div className="flex items-center justify-between py-4 border-b border-border/50 hover:bg-muted/10 transition-colors">
         <div className="w-1/3 text-center">
@@ -85,7 +90,7 @@ export function Compare() {
             "text-[13px] sm:text-[15px] font-black tracking-tight px-2 sm:px-3 py-1 rounded-lg transition-all",
             p1Better ? "bg-emerald-500/10 text-emerald-600 shadow-sm" : "text-foreground"
           )}>
-            {value1}
+            {formatValue(value1)}
           </span>
         </div>
         <div className="w-1/3 text-center px-1">
@@ -98,7 +103,7 @@ export function Compare() {
             "text-[13px] sm:text-[15px] font-black tracking-tight px-2 sm:px-3 py-1 rounded-lg transition-all",
             p2Better ? "bg-emerald-500/10 text-emerald-600 shadow-sm" : "text-foreground"
           )}>
-            {value2}
+            {formatValue(value2)}
           </span>
         </div>
       </div>
@@ -233,14 +238,14 @@ export function Compare() {
                     <p className="text-sm text-muted-foreground font-medium mb-5">
                       Based on per-match statistics (Win Rate, Goals per Match, Goals Conceded, Clean Sheets, and MOTM), <strong className="text-foreground">{winner.name}</strong> currently has the superior overall statistical performance record.
                     </p>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20">
-                        <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mb-1">{p1.name}</p>
+                    <div className="flex items-center gap-3 w-full max-w-md">
+                      <div className="flex-1 w-full bg-blue-500/10 px-4 py-2 rounded-xl border border-blue-500/20 flex flex-col justify-center">
+                        <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mb-1 truncate">{p1.name}</p>
                         <p className="text-2xl font-black text-foreground leading-none">{p1Stats.points.toFixed(2)} <span className="text-[12px] text-muted-foreground font-bold">pts</span></p>
                       </div>
-                      <span className="text-muted-foreground font-black text-sm uppercase tracking-widest">vs</span>
-                      <div className="bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20">
-                        <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest leading-none mb-1">{p2.name}</p>
+                      <span className="shrink-0 text-muted-foreground font-black text-sm uppercase tracking-widest">vs</span>
+                      <div className="flex-1 w-full bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20 flex flex-col justify-center">
+                        <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest leading-none mb-1 truncate">{p2.name}</p>
                         <p className="text-2xl font-black text-foreground leading-none">{p2Stats.points.toFixed(2)} <span className="text-[12px] text-muted-foreground font-bold">pts</span></p>
                       </div>
                     </div>
@@ -260,6 +265,10 @@ export function Compare() {
               <div className="bg-muted/10 rounded-2xl border border-border p-2">
                 <MetricRow label="Matches Played" value1={selectedPlayers[0].stats.matches} value2={selectedPlayers[1].stats.matches} better="higher" />
                 <MetricRow label="Goals Scored" value1={selectedPlayers[0].stats.goals} value2={selectedPlayers[1].stats.goals} better="higher" />
+                <MetricRow label="Goals / Match" 
+                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.goals / selectedPlayers[0].stats.matches : 0} 
+                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.goals / selectedPlayers[1].stats.matches : 0} 
+                  better="higher" isFloat />
                 <MetricRow label="Win Rate" 
                   value1={selectedPlayers[0].stats.matches > 0 ? Math.round((selectedPlayers[0].stats.wins / selectedPlayers[0].stats.matches) * 100) : 0} 
                   value2={selectedPlayers[1].stats.matches > 0 ? Math.round((selectedPlayers[1].stats.wins / selectedPlayers[1].stats.matches) * 100) : 0} 
@@ -268,8 +277,20 @@ export function Compare() {
                 <MetricRow label="Draws" value1={selectedPlayers[0].stats.draws} value2={selectedPlayers[1].stats.draws} better="higher" />
                 <MetricRow label="Losses" value1={selectedPlayers[0].stats.losses} value2={selectedPlayers[1].stats.losses} better="lower" />
                 <MetricRow label="Goals Conceded" value1={selectedPlayers[0].stats.conceded} value2={selectedPlayers[1].stats.conceded} better="lower" />
+                <MetricRow label="Conceded / Match" 
+                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.conceded / selectedPlayers[0].stats.matches : 0} 
+                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.conceded / selectedPlayers[1].stats.matches : 0} 
+                  better="lower" isFloat />
                 <MetricRow label="Clean Sheets" value1={selectedPlayers[0].stats.cleanSheets} value2={selectedPlayers[1].stats.cleanSheets} better="higher" />
+                <MetricRow label="Clean Sheets / Match" 
+                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.cleanSheets / selectedPlayers[0].stats.matches : 0} 
+                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.cleanSheets / selectedPlayers[1].stats.matches : 0} 
+                  better="higher" isFloat />
                 <MetricRow label="MOTM Awards" value1={selectedPlayers[0].stats.motm} value2={selectedPlayers[1].stats.motm} better="higher" />
+                <MetricRow label="MOTM / Match" 
+                  value1={selectedPlayers[0].stats.matches > 0 ? selectedPlayers[0].stats.motm / selectedPlayers[0].stats.matches : 0} 
+                  value2={selectedPlayers[1].stats.matches > 0 ? selectedPlayers[1].stats.motm / selectedPlayers[1].stats.matches : 0} 
+                  better="higher" isFloat />
                 <MetricRow label="Hat-tricks" value1={selectedPlayers[0].stats.hattricks} value2={selectedPlayers[1].stats.hattricks} better="higher" />
               </div>
             </div>

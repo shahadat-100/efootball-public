@@ -157,9 +157,9 @@ export function PlayerRadarChart({ stats, maxStats }: PlayerRadarChartProps) {
       {/* Stat legend below the chart — no overlap possible */}
       <div className="grid grid-cols-3 gap-x-4 gap-y-1.5 w-full max-w-[220px]">
         {data.map(d => (
-          <div key={d.label} className="flex flex-col items-center bg-muted/40 rounded-lg px-2 py-1.5">
-            <span className="text-[9px] text-muted-foreground leading-none mb-0.5">{d.label}</span>
-            <span className="text-[13px] font-bold text-foreground leading-none">{d.display}</span>
+          <div key={d.label} className="flex flex-col items-center bg-white/10 border border-white/10 rounded-lg px-2 py-1.5">
+            <span className="text-[9px] text-white/70 font-bold uppercase tracking-widest leading-none mb-0.5">{d.label}</span>
+            <span className="text-[13px] font-black text-white leading-none">{d.display}</span>
           </div>
         ))}
       </div>
