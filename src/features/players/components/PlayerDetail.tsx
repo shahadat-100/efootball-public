@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { Avatar, Badge, Button, PieChart } from '@/shared/components';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
@@ -8,6 +9,8 @@ import { RankTrendCard } from './RankTrendCard';
 import { SeasonTable } from './SeasonTable';
 import { AchievementBadges } from './AchievementBadges';
 import { cn } from '@/shared/lib/cn';
+import html2canvas from 'html2canvas';
+import { Download } from 'lucide-react';
 
 interface PlayerDetailProps {
   playerId: string;
@@ -17,6 +20,31 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const { players, matchEntries, playerSeasonStats, seasons } = useFootballStore();
   const player = players.find(p => p.id === playerId);
   const stats = usePlayerStats(playerId);
+
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    if (!captureRef.current || !player) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(captureRef.current, { 
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#0a0a0a' : '#ffffff',
+        scale: 2,
+        useCORS: true
+      });
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `player_card_${player.name.replace(/\s+/g, '_')}.png`;
+      a.click();
+    } catch (err) {
+      console.error('Export failed', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
 
   if (!player) {
     onBack();
@@ -201,17 +229,27 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-      {/* Back navigation */}
-      <div className="flex items-center gap-3 mb-5">
-        <Button variant="secondary" size="sm" onClick={onBack}>← Back</Button>
-        <span className="text-muted-foreground text-[12px]">Players /</span>
-        <span className="text-[12px] font-semibold">{player.name}</span>
+      {/* Back navigation & Actions */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" size="sm" onClick={onBack}>← Back</Button>
+          <span className="text-muted-foreground text-[12px]">Players /</span>
+          <span className="text-[12px] font-semibold">{player.name}</span>
+        </div>
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
+        >
+          <Download className="w-4 h-4" />
+          {isExporting ? 'Exporting...' : 'Export Card'}
+        </button>
       </div>
 
       {/* ═══════════════════════════════════════════
           HERO ZONE — Player Header
           ═══════════════════════════════════════════ */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-6 md:p-8 mb-6 shadow-xl overflow-hidden">
+      <div ref={captureRef} className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-6 md:p-8 mb-6 shadow-xl overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')]" />
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />

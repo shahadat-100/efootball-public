@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
+import { GoalsLeaderboard } from '@/features/overview/components/GoalsLeaderboard';
+import { cn } from '@/shared/lib/cn';
 
 export function Leaderboard() {
   const { players, matchEntries, seasons, playerSeasonStats } = useFootballStore();
+  const [activeTab, setActiveTab] = useState<'points' | 'goals'>('points');
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -15,12 +19,46 @@ export function Leaderboard() {
         </p>
       </div>
 
-      <PointsLeaderboard
-        players={players}
-        matchEntries={matchEntries}
-        seasons={seasons}
-        playerSeasonStats={playerSeasonStats}
-      />
+      <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl w-max">
+        <button
+          onClick={() => setActiveTab('points')}
+          className={cn(
+            "px-5 py-2 text-sm font-bold rounded-lg transition-all",
+            activeTab === 'points'
+              ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          )}
+        >
+          Points
+        </button>
+        <button
+          onClick={() => setActiveTab('goals')}
+          className={cn(
+            "px-5 py-2 text-sm font-bold rounded-lg transition-all",
+            activeTab === 'goals'
+              ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          )}
+        >
+          Goals
+        </button>
+      </div>
+
+      {activeTab === 'points' ? (
+        <PointsLeaderboard
+          players={players}
+          matchEntries={matchEntries}
+          seasons={seasons}
+          playerSeasonStats={playerSeasonStats}
+        />
+      ) : (
+        <GoalsLeaderboard
+          players={players}
+          matchEntries={matchEntries}
+          seasons={seasons}
+          playerSeasonStats={playerSeasonStats}
+        />
+      )}
     </div>
   );
 }
