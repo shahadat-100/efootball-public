@@ -82,11 +82,11 @@ export function AppShell() {
             </button>
             <img
               src="/images/club-logo.jpg"
-              alt="Elites Empire"
+              alt="The Enigmatic Elite"
               className="w-9 h-9 rounded-full object-cover shadow-md ring-2 ring-primary/20"
             />
             <div className="flex flex-col">
-              <span className="font-heading font-bold text-[16px] tracking-tight text-foreground leading-none">ELITES EMPIRE</span>
+              <span className="font-heading font-bold text-[16px] tracking-tight text-foreground leading-none">THE ENIGMATIC ELITE</span>
               <span className="text-[9px] text-muted-foreground font-medium tracking-widest uppercase leading-none mt-0.5">In Mystery We Reign</span>
             </div>
           </div>
