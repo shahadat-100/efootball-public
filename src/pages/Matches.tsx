@@ -132,9 +132,9 @@ export function Matches() {
                     key={m.id} 
                     className={cn(
                       "bg-card border rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm transition-all hover:shadow-md hover:border-border",
-                      result === 'win' ? 'border-l-4 border-l-emerald-500 border-border' :
-                      result === 'loss' ? 'border-l-4 border-l-red-500 border-border' :
-                      result === 'draw' ? 'border-l-4 border-l-amber-500 border-border' :
+                      result === 'win' ? 'border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/5 via-card/50 to-card' :
+                      result === 'loss' ? 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/5 via-card/50 to-card' :
+                      result === 'draw' ? 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/5 via-card/50 to-card' :
                       'border-border'
                     )}
                   >
