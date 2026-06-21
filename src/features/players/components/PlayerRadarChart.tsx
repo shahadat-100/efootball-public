@@ -105,7 +105,8 @@ export function PlayerRadarChart({ stats, maxStats }: PlayerRadarChartProps) {
               key={scale}
               points={bg}
               fill="none"
-              stroke="rgba(255,255,255,0.15)"
+              stroke="currentColor"
+              className="text-border"
               strokeWidth="1"
             />
           );
@@ -117,7 +118,8 @@ export function PlayerRadarChart({ stats, maxStats }: PlayerRadarChartProps) {
             key={i}
             x1={center} y1={center}
             x2={a.tip.x} y2={a.tip.y}
-            stroke="rgba(255,255,255,0.15)"
+            stroke="currentColor"
+            className="text-border"
             strokeWidth="1"
           />
         ))}
@@ -125,14 +127,15 @@ export function PlayerRadarChart({ stats, maxStats }: PlayerRadarChartProps) {
         {/* Filled polygon */}
         <polygon
           points={polygonString}
-          fill="rgba(99,102,241,0.25)"
-          stroke="rgba(99,102,241,1)"
+          fill="currentColor"
+          className="text-primary/25"
+          stroke="currentColor"
           strokeWidth="2"
         />
 
         {/* Vertex dots */}
         {points.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r={3} fill="rgba(99,102,241,1)" />
+          <circle key={i} cx={p.x} cy={p.y} r={3} fill="currentColor" className="text-primary" />
         ))}
 
         {/* Smart-positioned short axis labels (no overlap) */}
@@ -151,12 +154,12 @@ export function PlayerRadarChart({ stats, maxStats }: PlayerRadarChartProps) {
         ))}
       </svg>
 
-      {/* Stat legend below the chart */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', width: '100%', maxWidth: '220px' }}>
+      {/* Stat legend below the chart — no overlap possible */}
+      <div className="grid grid-cols-3 gap-x-4 gap-y-1.5 w-full max-w-[220px]">
         {data.map(d => (
-          <div key={d.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px 8px' }}>
-            <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', lineHeight: 1, marginBottom: '2px' }}>{d.label}</span>
-            <span style={{ fontSize: '13px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{d.display}</span>
+          <div key={d.label} className="flex flex-col items-center bg-white/10 border border-white/10 rounded-lg px-2 py-1.5">
+            <span className="text-[9px] text-white/70 font-bold uppercase tracking-widest leading-none mb-0.5">{d.label}</span>
+            <span className="text-[13px] font-black text-white leading-none">{d.display}</span>
           </div>
         ))}
       </div>

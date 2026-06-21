@@ -37,7 +37,7 @@ export function StatCompareBar({ label, p1Value, p2Value, better, isFloat = fals
       <div className="flex justify-between items-end mb-1.5 px-0.5">
         <span className={cn(
           "text-[14px] leading-none tabular-nums transition-all duration-300",
-          p1Better ? "text-emerald-500 font-black scale-110 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-foreground font-semibold opacity-80"
+          p1Better ? "text-emerald-500 font-black scale-110" : "text-foreground font-semibold opacity-80"
         )}>
           {formatValue(p1Value)}
         </span>
@@ -48,7 +48,7 @@ export function StatCompareBar({ label, p1Value, p2Value, better, isFloat = fals
 
         <span className={cn(
           "text-[14px] leading-none tabular-nums transition-all duration-300",
-          p2Better ? "text-emerald-500 font-black scale-110 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-foreground font-semibold opacity-80"
+          p2Better ? "text-emerald-500 font-black scale-110" : "text-foreground font-semibold opacity-80"
         )}>
           {formatValue(p2Value)}
         </span>
@@ -57,11 +57,11 @@ export function StatCompareBar({ label, p1Value, p2Value, better, isFloat = fals
       {/* Dual-sided progress bar */}
       <div className="flex w-full h-2.5 rounded-full bg-muted/30 overflow-hidden gap-[2px]">
         <div
-          className="h-full rounded-l-full transition-all duration-700 ease-out bg-gradient-to-r from-blue-600 to-blue-400"
+          className="h-full rounded-l-full bg-gradient-to-r from-blue-600 to-blue-400"
           style={{ width: `${p1Pct}%`, opacity: p1Value > 0 ? 1 : 0.2 }}
         />
         <div
-          className="h-full rounded-r-full transition-all duration-700 ease-out bg-gradient-to-l from-red-600 to-red-400"
+          className="h-full rounded-r-full bg-gradient-to-l from-red-600 to-red-400"
           style={{ width: `${p2Pct}%`, opacity: p2Value > 0 ? 1 : 0.2 }}
         />
       </div>

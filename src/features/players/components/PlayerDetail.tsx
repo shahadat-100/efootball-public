@@ -9,7 +9,7 @@ import { RankTrendCard } from './RankTrendCard';
 import { SeasonTable } from './SeasonTable';
 import { AchievementBadges } from './AchievementBadges';
 import { cn } from '@/shared/lib/cn';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { Download } from 'lucide-react';
 
 interface PlayerDetailProps {
@@ -28,14 +28,12 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (!captureRef.current || !player) return;
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(captureRef.current, { 
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true
+      const dataUrl = await toPng(captureRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
       });
-      const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
-      a.href = url;
+      a.href = dataUrl;
       a.download = `player_card_${player.name.replace(/\s+/g, '_')}.png`;
       a.click();
     } catch (err) {
@@ -255,13 +253,11 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none" style={{ background: 'rgba(99,102,241,0.15)' }} />
         <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px] pointer-events-none" style={{ background: 'rgba(59,130,246,0.12)' }} />
         
-        <div className="relative z-10" style={{ display: 'flex', flexDirection: 'row', gap: '32px', alignItems: 'flex-start' }}>
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
           {/* Left side: Avatar + Info */}
-          <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+          <div className="flex gap-6 items-center flex-wrap flex-1">
             <div className="relative">
-              <div style={{ outline: '4px solid rgba(255,255,255,0.1)', outlineOffset: '4px', borderRadius: '50%', display: 'inline-flex' }}>
-                <Avatar name={player.name} size={110} src={player.profileImageUrl} className="shadow-2xl" />
-              </div>
+              <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl" />
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
                   "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
@@ -273,25 +269,25 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             </div>
             
             <div className="flex-1">
-              <h2 style={{ fontWeight: 900, fontSize: '32px', color: '#fff', letterSpacing: '0.02em', lineHeight: 1, marginBottom: '4px' }}>{player.name}</h2>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', fontWeight: 700, marginBottom: '12px' }}>👕 {player.jerseyNumber || '—'}</p>
+              <h2 className="font-heading font-bold text-[32px] md:text-[38px] text-white tracking-wide leading-none mb-1">{player.name}</h2>
+              <p className="text-white/40 text-[14px] font-bold mb-3">👕 {player.jerseyNumber || '—'}</p>
               
               <div className="flex gap-1.5 flex-wrap mb-4">
                 {(player.playerRoles ?? []).map(t => (
-                  <Badge key={t} bg="rgba(255,255,255,0.1)" c="#e5e5e5" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>{t}</Badge>
+                  <Badge key={t} bg="rgba(255,255,255,0.1)" c="#e5e5e5" className="border border-white/10">{t}</Badge>
                 ))}
                 {(player.customTags ?? []).map(t => (
-                  <Badge key={t} bg="rgba(255,255,255,0.06)" c="#9ca3af" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>{t}</Badge>
+                  <Badge key={t} bg="rgba(255,255,255,0.06)" c="#9ca3af" className="border border-white/10">{t}</Badge>
                 ))}
                 {(player.customStringTags ?? []).map(t => (
-                  <Badge key={`str-${t}`} bg="rgba(59,130,246,0.15)" c="#93c5fd" style={{ border: '1px solid rgba(59,130,246,0.2)' }}>{t}</Badge>
+                  <Badge key={`str-${t}`} bg="rgba(59,130,246,0.15)" c="#93c5fd" className="border border-blue-500/20">{t}</Badge>
                 ))}
               </div>
             </div>
           </div>
 
           {/* Right side: Radar Chart */}
-          <div style={{ flexShrink: 0, minWidth: '250px', display: 'flex', justifyContent: 'center' }}>
+          <div className="w-full lg:w-auto lg:min-w-[250px] flex justify-center">
             <PlayerRadarChart 
               stats={{
                 goals: stats.totalGoals,
@@ -306,11 +302,11 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         </div>
 
         {/* ═══ Quick Stats Ribbon ═══ */}
-        <div className="relative z-10 mt-6 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="relative z-10 mt-6 pt-6 border-t border-white/10">
           <div className="flex flex-wrap gap-6 items-start">
             {/* Recent Form */}
             <div>
-            <h4 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '8px' }}>Recent Form (Last 10)</h4>
+              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Recent Form (Last 10)</h4>
               <div className="flex gap-1.5 flex-wrap">
                 {(() => {
                   const recent10 = historyEntries.slice(0, 10).reverse();
@@ -341,7 +337,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
             {/* Form Status */}
             <div>
-            <h4 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '8px' }}>Form Trend</h4>
+              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Form Trend</h4>
               <span 
                 className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
                 style={{ backgroundColor: `${formStatus.color}20`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
@@ -358,7 +354,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.2)' },
             ].map(r => (
               <div key={r.label}>
-                <h4 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '8px' }}>{r.label}</h4>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{r.label}</h4>
                 <div className="flex items-center gap-2">
                   <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ backgroundColor: r.bgColor, color: r.color }}>
                     #{r.value || '-'}
@@ -370,7 +366,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             {/* Season Ranks */}
             {seasonRanksList.map((sr: any) => (
               <div key={sr.seasonName}>
-                <h4 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '8px' }}>{sr.seasonName}</h4>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{sr.seasonName}</h4>
                 <div className="flex items-center gap-2">
                   <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }}>
                     #{sr.rank || '-'}
@@ -381,7 +377,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
             {/* Win Rate */}
             <div>
-              <h4 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '8px' }}>Win Rate</h4>
+              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Win Rate</h4>
               <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
                 {(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%
               </span>
@@ -389,8 +385,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
             {player.email && (
               <div>
-                <h4 style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', fontWeight: 900, marginBottom: '8px' }}>Email</h4>
-                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{player.email}</span>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Email</h4>
+                <span className="text-[13px] text-white/70 font-medium">{player.email}</span>
               </div>
             )}
           </div>

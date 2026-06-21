@@ -7,7 +7,7 @@ import { StatCompareBar } from '@/features/compare/components/StatCompareBar';
 import { aggregatePlayerStats } from '@/features/compare/utils';
 import { cn } from '@/shared/lib/cn';
 import { BarChart3, Trophy, Flame, Target, Shield, Zap, Download, Filter } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 function StatCompareText({ label, p1Value, p2Value, better = 'higher' }: any) {
   const isTie = p1Value === p2Value;
@@ -166,14 +166,12 @@ export function Compare() {
     if (!captureRef.current) return;
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(captureRef.current, { 
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#0a0a0a' : '#ffffff',
-        scale: 2, // Higher resolution
-        useCORS: true
+      const dataUrl = await toPng(captureRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
       });
-      const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
-      a.href = url;
+      a.href = dataUrl;
       a.download = `compare_${p1.player?.name.replace(/\s+/g, '_')}_vs_${p2.player?.name.replace(/\s+/g, '_')}.png`;
       a.click();
     } catch (err) {
@@ -324,7 +322,7 @@ export function Compare() {
             </button>
           </div>
 
-          <div ref={captureRef} className="space-y-6 bg-background p-2 -m-2 rounded-3xl">
+          <div ref={captureRef} className="space-y-6 rounded-3xl" style={{ background: 'var(--background)', padding: '8px', margin: '-8px' }}>
             {/* ─── HERO VS SECTION ─── */}
           <div
             className="relative rounded-3xl overflow-hidden border bg-card/80"
@@ -548,13 +546,13 @@ export function Compare() {
                       <div key={player.player?.id}>
                         <p className="text-[11px] font-black uppercase tracking-widest mb-2" style={{ color }}>{player.player?.name}</p>
                         <div className="flex w-full h-8 rounded-xl overflow-hidden gap-1 bg-muted/30">
-                          <div className="h-full bg-emerald-500/80 flex items-center justify-center text-[10px] font-black text-white transition-all" style={{ width: `${wPct}%` }}>
+                        <div className="h-full bg-emerald-500/80 flex items-center justify-center text-[10px] font-black text-white" style={{ width: `${wPct}%` }}>
                             {wPct > 10 ? 'W' : ''}
                           </div>
-                          <div className="h-full bg-amber-500/80 flex items-center justify-center text-[10px] font-black text-white transition-all" style={{ width: `${dPct}%` }}>
+                          <div className="h-full bg-amber-500/80 flex items-center justify-center text-[10px] font-black text-white" style={{ width: `${dPct}%` }}>
                             {dPct > 10 ? 'D' : ''}
                           </div>
-                          <div className="h-full bg-red-500/80 flex items-center justify-center text-[10px] font-black text-white transition-all" style={{ width: `${lPct}%` }}>
+                          <div className="h-full bg-red-500/80 flex items-center justify-center text-[10px] font-black text-white" style={{ width: `${lPct}%` }}>
                             {lPct > 10 ? 'L' : ''}
                           </div>
                         </div>
