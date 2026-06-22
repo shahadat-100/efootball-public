@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
-import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3, Medal } from 'lucide-react';
+import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3, Medal, Shield } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
   { id: 'news', label: 'News', icon: Newspaper },
   { id: 'hall-of-fame', label: 'Hall of Fame', icon: Award },
+  { id: 'club-info', label: 'Club Info', icon: Shield },
 ];
 
 // Bottom nav items for mobile (top 5)
@@ -34,6 +35,7 @@ const PAGE_TITLES: Record<string, string> = {
   leaderboard: 'Leaderboard',
   news: 'News',
   'hall-of-fame': 'Hall of Fame',
+  'club-info': 'Club Info',
 };
 
 export function AppShell() {
@@ -132,12 +134,9 @@ export function AppShell() {
 
         {/* Right Section */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mt-0.5"></div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-semibold uppercase tracking-wider leading-none">Live System</span>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-600/80 mt-1">Developed By Aryan</span>
-            </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/8 border border-primary/15">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary leading-none hidden sm:block">The Enigmatic Elite</span>
           </div>
         </div>
 
