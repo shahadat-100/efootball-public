@@ -486,7 +486,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Shield, Star, Trophy, BookOpen, ChevronDown, ChevronUp, AlertCircle, Loader2, Image as ImageIcon, Flame, Crown } from 'lucide-react';
+import { Shield, Star, Trophy, BookOpen, ChevronDown, ChevronUp, AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -583,32 +583,19 @@ function RankCard({ item }: { item: ClubRank }) {
     <div className="group relative bg-white border border-border/60 rounded-2xl overflow-hidden
                     shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
 
-      {/* Top accent bar */}
-      <div className="h-[3px] bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
-
-      {/* Badge image — centered with dark gradient bg */}
+      {/* Badge image — dark bg, square placeholder */}
       <div className="relative flex flex-col items-center justify-center pt-8 pb-6 px-6
-                      bg-gradient-to-b from-slate-900 to-slate-800 border-b border-white/5">
-        {/* Radial glow */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-36 h-36 rounded-full bg-amber-400/10 blur-2xl" />
-        </div>
-
-        {/* Crown icon top-right */}
-        <div className="absolute top-3 right-3 opacity-20">
-          <Crown className="w-5 h-5 text-amber-400" />
-        </div>
-
+                      bg-[#0e1117]">
         {item.image_url && !imgError ? (
           <img
             src={item.image_url}
             alt={item.title}
-            className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 object-contain drop-shadow-xl
-                       transition-transform duration-500 group-hover:scale-110 group-hover:drop-shadow-2xl"
+            className="w-24 h-24 sm:w-28 sm:h-28 object-contain drop-shadow-xl
+                       transition-transform duration-500 group-hover:scale-110"
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl
                           bg-white/5 border border-white/10
                           flex items-center justify-center">
             <ImageIcon className="w-10 h-10 text-white/20" />
@@ -646,12 +633,6 @@ function RankCard({ item }: { item: ClubRank }) {
           </div>
         )}
       </div>
-
-      {/* Hover bottom bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px]
-                      bg-gradient-to-r from-amber-400 to-yellow-300
-                      scale-x-0 group-hover:scale-x-100
-                      transition-transform duration-300 origin-left" />
     </div>
   );
 }
@@ -667,7 +648,7 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
                     shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300">
 
       {/* Cover image */}
-      <div className="relative h-44 sm:h-52 bg-slate-900 overflow-hidden">
+      <div className="relative h-44 sm:h-52 bg-[#1a1f2e] overflow-hidden">
         {item.image_url && !imgError ? (
           <>
             <img
@@ -676,7 +657,6 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90"
               onError={() => setImgError(true)}
             />
-            {/* Permanent bottom scrim */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </>
         ) : (
@@ -685,12 +665,12 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
           </div>
         )}
 
-        {/* Trophy badge overlay */}
+        {/* Achievement pill badge */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5
-                        bg-black/50 backdrop-blur-sm border border-white/10
+                        bg-black/55 border border-white/10
                         rounded-full px-2.5 py-1">
           <Trophy className="w-3 h-3 text-amber-400" />
-          <span className="text-[10px] font-semibold text-white/90 uppercase tracking-wide">Achievement</span>
+          <span className="text-[10px] font-semibold text-white/85 uppercase tracking-wide">Achievement</span>
         </div>
 
         {/* Title overlay on image */}
@@ -708,7 +688,7 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
         )}
       </div>
 
-      {/* Content (title shown here only if no image) */}
+      {/* Body — title shown here only when no image */}
       <div className="p-4 sm:p-5">
         {(!item.image_url || imgError) && (
           <>
@@ -742,12 +722,6 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
           </div>
         )}
       </div>
-
-      {/* Hover accent bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[3px]
-                      bg-gradient-to-r from-amber-400 to-yellow-300
-                      scale-x-0 group-hover:scale-x-100
-                      transition-transform duration-300 origin-left" />
     </div>
   );
 }
@@ -757,18 +731,15 @@ function RuleCard({ rule, index }: { rule: ClubRule; index: number }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div
-      className={cn(
-        "group bg-white border border-border rounded-2xl overflow-hidden shadow-sm transition-all duration-300",
-        open ? "shadow-md border-primary/20" : "hover:shadow-md hover:-translate-y-0.5"
-      )}
-    >
+    <div className={cn(
+      "group bg-white border border-border rounded-2xl overflow-hidden shadow-sm transition-all duration-300",
+      open ? "shadow-md border-primary/20" : "hover:shadow-md hover:-translate-y-0.5"
+    )}>
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-4 p-4 sm:p-5 text-left"
         aria-expanded={open}
       >
-        {/* Number badge */}
         <div className={cn(
           "shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-200",
           open
@@ -777,8 +748,6 @@ function RuleCard({ rule, index }: { rule: ClubRule; index: number }) {
         )}>
           {String(index + 1).padStart(2, '0')}
         </div>
-
-        {/* Titles */}
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-[14px] sm:text-[15px] text-foreground tracking-tight leading-tight">
             {rule.title}
@@ -789,8 +758,6 @@ function RuleCard({ rule, index }: { rule: ClubRule; index: number }) {
             </p>
           )}
         </div>
-
-        {/* Chevron */}
         <div className={cn(
           "shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200",
           open ? "bg-primary/10 text-primary rotate-180" : "bg-muted text-muted-foreground"
@@ -799,7 +766,6 @@ function RuleCard({ rule, index }: { rule: ClubRule; index: number }) {
         </div>
       </button>
 
-      {/* Expandable description */}
       <div className={cn(
         "overflow-hidden transition-all duration-300",
         open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -867,119 +833,63 @@ export function ClubInfo() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 w-full">
 
-      {/* ── Hero Banner ── */}
-      <div className="relative rounded-3xl overflow-hidden mb-8 sm:mb-10 shadow-xl">
-
-        {/* Dark layered background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-
-        {/* Gold accent glow top-left */}
-        <div className="absolute -top-10 -left-10 w-72 h-72 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
-        {/* Subtle red glow bottom-right */}
-        <div className="absolute -bottom-10 -right-10 w-56 h-56 bg-red-800/15 rounded-full blur-2xl pointer-events-none" />
-
-        {/* Top gold accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
-
-        {/* Content */}
-        <div className="relative p-6 sm:p-8 lg:p-10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
-
-            {/* Icon */}
-            <div className="relative shrink-0">
-              <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl
-                              bg-gradient-to-br from-amber-400/20 to-amber-600/10
-                              border border-amber-400/30
-                              flex items-center justify-center shadow-lg">
-                <Flame className="w-8 h-8 text-amber-400" />
-              </div>
-              {/* Small crown above */}
-              <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center shadow-md">
-                <Crown className="w-3.5 h-3.5 text-slate-900" />
-              </div>
-            </div>
-
-            {/* Title block */}
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-[10px] font-semibold text-amber-400/80 uppercase tracking-widest">
-                  The Elits · COBEG
-                </span>
-              </div>
-              <h1 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-white tracking-tight leading-tight">
-                Club Info
-              </h1>
-              <p className="text-white/45 text-[13px] sm:text-sm mt-1.5 max-w-lg">
-                Explore our club's rules, ranking tiers, and proudest achievements.
-              </p>
-            </div>
-
-            {/* Stats summary badges */}
-            <div className="flex flex-wrap gap-2 sm:gap-2.5 sm:ml-auto">
-              {[
-                { label: 'Rules', value: fetched.rules ? rules.length : '—', icon: BookOpen },
-                { label: 'Ranks', value: fetched.ranks ? ranks.length : '—', icon: Star },
-                { label: 'Achievements', value: fetched.achievements ? achievements.length : '—', icon: Trophy },
-              ].map(s => {
-                const Icon = s.icon;
-                return (
-                  <div
-                    key={s.label}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl
-                               bg-white/5 border border-white/10 backdrop-blur-sm"
-                  >
-                    <Icon className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-white/60 text-[11px] font-medium">{s.label}</span>
-                    <span className="text-white font-bold text-[13px]">{s.value}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+      {/* ── Hero ── */}
+      <div className="mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <h1 className="font-black text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight">
+            Club Info
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base font-medium mt-2 max-w-lg">
+            Explore our club's rules, ranking tiers, and proudest achievements.
+          </p>
         </div>
 
-        {/* Bottom gold accent line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
-      </div>
-
-      {/* ── Tab Bar ── */}
-      <div className="relative mb-6 sm:mb-8">
-        <div className="flex items-center bg-muted/60 border border-border rounded-2xl p-1 gap-1 w-full sm:w-auto sm:inline-flex">
-          {TABS.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+        {/* Stat badges */}
+        <div className="flex gap-2 sm:gap-3 flex-wrap">
+          {[
+            { label: 'Rules', value: fetched.rules ? rules.length : '—', icon: BookOpen },
+            { label: 'Ranks', value: fetched.ranks ? ranks.length : '—', icon: Star },
+            { label: 'Achievements', value: fetched.achievements ? achievements.length : '—', icon: Trophy },
+          ].map(s => {
+            const Icon = s.icon;
             return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "relative flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-[12px] sm:text-[13px] font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                  isActive
-                    ? "bg-white text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/50"
-                )}
-              >
-                <Icon className={cn(
-                  "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors",
-                  isActive ? "text-amber-500" : "text-muted-foreground"
-                )} />
-                <span className="hidden xs:inline sm:inline">{tab.label}</span>
-                {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-500 sm:hidden" />
-                )}
-              </button>
+              <div key={s.label} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/40 border border-border">
+                <Icon className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-muted-foreground text-[11px] font-medium">{s.label}</span>
+                <span className="text-foreground font-bold text-[13px]">{s.value}</span>
+              </div>
             );
           })}
         </div>
-        <p className="mt-3 sm:hidden text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
-          {TABS.find(t => t.id === activeTab)?.label}
-        </p>
+      </div>
+
+      {/* ── Segment Tab Bar ── */}
+      <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-2 px-5 py-2.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-md scale-105"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/80"
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* ── Content ── */}
       {error && <div className="mb-6"><ErrorBanner message={error} /></div>}
 
-      {/* Club Rules */}
+      {/* Rules */}
       {activeTab === 'rules' && (
         <div className="space-y-3">
           {isLoading ? (
