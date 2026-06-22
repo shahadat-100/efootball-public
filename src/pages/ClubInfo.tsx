@@ -587,16 +587,17 @@ function RankCard({ item }: { item: ClubRank }) {
       <div className="relative flex flex-col items-center justify-center pt-8 pb-6 px-6
                       bg-[#0e1117]">
         {item.image_url && !imgError ? (
-          <img
-            src={item.image_url}
-            alt={item.title}
-            className="w-24 h-24 sm:w-28 sm:h-28 object-contain drop-shadow-xl
-                       transition-transform duration-500 group-hover:scale-110"
-            onError={() => setImgError(true)}
-          />
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-white/15">
+            <img
+              src={item.image_url}
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={() => setImgError(true)}
+            />
+          </div>
         ) : (
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl
-                          bg-white/5 border border-white/10
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full
+                          bg-white/5 border-2 border-white/10
                           flex items-center justify-center">
             <ImageIcon className="w-10 h-10 text-white/20" />
           </div>
@@ -657,7 +658,6 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90"
               onError={() => setImgError(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -672,35 +672,17 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
           <Trophy className="w-3 h-3 text-amber-400" />
           <span className="text-[10px] font-semibold text-white/85 uppercase tracking-wide">Achievement</span>
         </div>
-
-        {/* Title overlay on image */}
-        {item.image_url && !imgError && (
-          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-            <h3 className="font-bold text-[15px] sm:text-[16px] text-white tracking-tight leading-tight truncate drop-shadow">
-              {item.title}
-            </h3>
-            {item.subtitle && (
-              <p className="text-amber-400 text-[11px] font-semibold uppercase tracking-wider mt-0.5 drop-shadow">
-                {item.subtitle}
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Body — title shown here only when no image */}
+      {/* Body — title/subtitle always here */}
       <div className="p-4 sm:p-5">
-        {(!item.image_url || imgError) && (
-          <>
-            <h3 className="font-bold text-[15px] sm:text-[16px] text-foreground tracking-tight leading-tight truncate">
-              {item.title}
-            </h3>
-            {item.subtitle && (
-              <p className="text-amber-500 text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider mt-1">
-                {item.subtitle}
-              </p>
-            )}
-          </>
+        <h3 className="font-bold text-[15px] sm:text-[16px] text-foreground tracking-tight leading-tight truncate">
+          {item.title}
+        </h3>
+        {item.subtitle && (
+          <p className="text-amber-500 text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider mt-1">
+            {item.subtitle}
+          </p>
         )}
         {item.description && (
           <div className={cn((!item.image_url || imgError) && "mt-3")}>
@@ -864,7 +846,7 @@ export function ClubInfo() {
       </div>
 
       {/* ── Segment Tab Bar ── */}
-      <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
+      <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-full sm:w-max">
         {TABS.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -873,14 +855,14 @@ export function ClubInfo() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-2 px-5 py-2.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all",
+                "flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 sm:px-5 py-2.5 text-sm font-bold uppercase tracking-wider rounded-lg transition-all",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-md scale-105"
                   : "text-muted-foreground hover:text-foreground hover:bg-background/80"
               )}
             >
-              <Icon className="w-4 h-4" />
-              {tab.label}
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           );
         })}
