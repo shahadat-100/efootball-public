@@ -58,6 +58,23 @@ export function Overview({ setTab }: OverviewProps) {
     return { wins, draws, losses };
   }, [playerSeasonStats]);
 
+  const topWinnerPlayer = useMemo(() => {
+    if (players.length === 0 || playerSeasonStats.length === 0) return null;
+
+    const winsByPlayer = players.map(p => {
+      const stats = playerSeasonStats.filter(s => s.playerId === p.id);
+      const playerWins = stats.reduce((acc, s) => acc + (s.wins || 0), 0);
+      return { player: p, wins: playerWins };
+    });
+
+    winsByPlayer.sort((a, b) => b.wins - a.wins);
+    
+    if (winsByPlayer.length > 0 && winsByPlayer[0].wins > 0) {
+      return winsByPlayer[0];
+    }
+    return null;
+  }, [players, playerSeasonStats]);
+
   // ── 3. Awards Data ──
   const awardsData = useMemo(() => {
     return players.map(p => {
@@ -128,6 +145,8 @@ export function Overview({ setTab }: OverviewProps) {
             wins={donutStats.wins || totalWins}
             draws={donutStats.draws || totalDraws}
             losses={donutStats.losses || totalLosses}
+            topWinnerName={topWinnerPlayer?.player.name}
+            topWinnerWins={topWinnerPlayer?.wins}
           />
         </div>
         <div className="lg:col-span-2 h-full">

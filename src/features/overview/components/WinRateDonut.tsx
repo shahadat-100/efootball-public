@@ -4,9 +4,11 @@ interface WinRateDonutProps {
   wins: number;
   draws: number;
   losses: number;
+  topWinnerName?: string;
+  topWinnerWins?: number;
 }
 
-export function WinRateDonut({ wins, draws, losses }: WinRateDonutProps) {
+export function WinRateDonut({ wins, draws, losses, topWinnerName, topWinnerWins }: WinRateDonutProps) {
   const [animate, setAnimate] = useState(false);
   
   useEffect(() => {
@@ -33,7 +35,7 @@ export function WinRateDonut({ wins, draws, losses }: WinRateDonutProps) {
   const lossOffset = animate ? drawOffset - drawStroke : 0;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col items-center justify-center relative overflow-hidden group h-full">
       {/* Decorative background blur */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
 
@@ -118,20 +120,37 @@ export function WinRateDonut({ wins, draws, losses }: WinRateDonutProps) {
       )}
       
       {total > 0 && (
-        <div className="flex items-center justify-center gap-5 mt-6 w-full relative z-10">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-            <span className="text-sm font-bold text-emerald-600">{wins}</span>
-            <span className="text-[10px] text-emerald-600/70 font-black tracking-widest">W</span>
+        <>
+          <div className="flex items-center justify-center gap-5 mt-6 w-full relative z-10">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <span className="text-sm font-bold text-emerald-600">{wins}</span>
+              <span className="text-[10px] text-emerald-600/70 font-black tracking-widest">W</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <span className="text-sm font-bold text-amber-600">{draws}</span>
+              <span className="text-[10px] text-amber-600/70 font-black tracking-widest">D</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 rounded-lg border border-red-500/20">
+              <span className="text-sm font-bold text-red-600">{losses}</span>
+              <span className="text-[10px] text-red-600/70 font-black tracking-widest">L</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
-            <span className="text-sm font-bold text-amber-600">{draws}</span>
-            <span className="text-[10px] text-amber-600/70 font-black tracking-widest">D</span>
+
+          <div className="mt-6 w-full relative z-10 grid gap-3">
+            <div className="bg-muted/30 rounded-xl p-4 text-center border border-border/50 flex flex-col items-center justify-center">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mb-1">Win Rate</p>
+              <p className="text-xl font-black text-emerald-500">{winPercentage.toFixed(1)}%</p>
+            </div>
+            
+            {topWinnerName && (
+              <div className="bg-gradient-to-br from-emerald-500/10 to-transparent rounded-xl p-4 text-center border border-emerald-500/20 flex flex-col items-center justify-center">
+                <p className="text-[10px] text-emerald-600/80 uppercase tracking-widest font-semibold mb-1">Most Match Winner</p>
+                <p className="text-sm font-bold text-foreground truncate w-full px-2">{topWinnerName}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">{topWinnerWins} Wins</p>
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 rounded-lg border border-red-500/20">
-            <span className="text-sm font-bold text-red-600">{losses}</span>
-            <span className="text-[10px] text-red-600/70 font-black tracking-widest">L</span>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
