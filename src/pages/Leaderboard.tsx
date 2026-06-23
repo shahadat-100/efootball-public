@@ -19,6 +19,7 @@ export function Leaderboard() {
         </p>
       </div>
 
+      {/* Points / Goals switcher */}
       <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
         <button
           onClick={() => setActiveTab('points')}
@@ -29,7 +30,7 @@ export function Leaderboard() {
               : "text-muted-foreground hover:text-foreground hover:bg-background/80"
           )}
         >
-          Points
+          🎯 Points
         </button>
         <button
           onClick={() => setActiveTab('goals')}
@@ -40,7 +41,7 @@ export function Leaderboard() {
               : "text-muted-foreground hover:text-foreground hover:bg-background/80"
           )}
         >
-          Goals
+          ⚽ Goals
         </button>
       </div>
 

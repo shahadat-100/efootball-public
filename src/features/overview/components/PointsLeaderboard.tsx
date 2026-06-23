@@ -15,260 +15,381 @@ interface PointsLeaderboardProps {
 interface RankedPlayer {
   player: Player;
   points: number;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  winRate: number;
+  gf: number;
+  gc: number;
+  cs: number;
+  ht: number;
+  motm: number;
 }
 
 const MONTHS = [
   'January','February','March','April','May','June',
-  'July','August','September','October','November','December'
+  'July','August','September','October','November','December',
 ];
 
-// Points from aggregated season stats (for Overall)
-const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
-  stats.reduce((total, s) =>
-    total + (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks
-  , 0);
-
-// Points from individual match entries (for Weekly / Monthly)
-const calcEntryPoints = (entries: MatchEntry[]): number =>
-  entries.reduce((total, e) => {
-    let pts = 0;
-    if (e.result === 'win') pts += 3;
-    else if (e.result === 'draw') pts += 1;
-    else if (e.result === 'loss') pts -= 1;
-    pts += (e.goals || 0);
-    pts -= (e.goalsConceded || 0);
-    pts += (e.motm ? 2 : 0);
-    pts += (e.hattricks || 0);
-    return total + pts;
-  }, 0);
-
 const today = new Date();
-const currentMonthIndex = today.getMonth(); // 0-indexed
+const currentMonthIndex = today.getMonth();
 const currentYear = today.getFullYear();
 const currentDay = today.getDate();
 
-export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, limit }: PointsLeaderboardProps) {
-  // ── Monthly filters ──
-  const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
-  const [selectedMonthlyMonth, setSelectedMonthlyMonth]       = useState<number>(currentMonthIndex); // 0-indexed
+type ViewMode = 'weekly' | 'monthly' | 'overall';
 
-  // ── Overall filter ──
+export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats }: PointsLeaderboardProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>('overall');
+  const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
+  const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
 
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
-    // Current week bucket
     let activeWeekStart = 1, activeWeekEnd = 7, activeWeekName = 'Week 1';
     if (currentDay >= 8  && currentDay <= 14) { activeWeekStart = 8;  activeWeekEnd = 14; activeWeekName = 'Week 2'; }
     else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; activeWeekName = 'Week 3'; }
     else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; activeWeekName = 'Week 4'; }
 
-    const weeklyMap  = new Map<string, number>();
-    const monthlyMap = new Map<string, number>();
-    const overallMap = new Map<string, number>();
+    type StatsMap = Map<string, { w: number; d: number; l: number; gf: number; gc: number; cs: number; ht: number; motm: number }>;
+    const empty = () => ({ w: 0, d: 0, l: 0, gf: 0, gc: 0, cs: 0, ht: 0, motm: 0 });
 
+    const weeklyMap: StatsMap  = new Map();
+    const monthlyMap: StatsMap = new Map();
     players.forEach(p => {
-      weeklyMap.set(p.id, 0);
-      monthlyMap.set(p.id, 0);
-      overallMap.set(p.id, 0);
+      weeklyMap.set(p.id, empty());
+      monthlyMap.set(p.id, empty());
     });
 
     matchEntries.forEach(entry => {
       if (!entry.date) return;
       const d = new Date(entry.date);
-      const pts = calcEntryPoints([entry]);
 
-      // ── Weekly: always current week of current year ──
       const isCurrentWeek =
         d.getFullYear() === currentYear &&
         d.getMonth() === currentMonthIndex &&
         d.getDate() >= activeWeekStart &&
         d.getDate() <= activeWeekEnd;
 
-      if (isCurrentWeek && weeklyMap.has(entry.playerId)) {
-        weeklyMap.set(entry.playerId, weeklyMap.get(entry.playerId)! + pts);
-      }
-
-      // ── Monthly: filtered by season + month ──
       const isMonthMatch = d.getMonth() === selectedMonthlyMonth;
       const isSeasonOrYearMatch = selectedMonthlySeasonId !== null
         ? entry.seasonId === selectedMonthlySeasonId
-        : d.getFullYear() === currentYear; // default: current year
+        : d.getFullYear() === currentYear;
 
-      if (isMonthMatch && isSeasonOrYearMatch && monthlyMap.has(entry.playerId)) {
-        monthlyMap.set(entry.playerId, monthlyMap.get(entry.playerId)! + pts);
-      }
+      const applyTo = (map: StatsMap) => {
+        const s = map.get(entry.playerId);
+        if (!s) return;
+        if (entry.result === 'win') s.w++;
+        else if (entry.result === 'draw') s.d++;
+        else if (entry.result === 'loss') s.l++;
+        s.gf += entry.goals || 0;
+        s.gc += entry.goalsConceded || 0;
+        if (entry.cleanSheet) s.cs++;
+        s.ht += entry.hattricks || 0;
+        if (entry.motm) s.motm++;
+      };
+
+      if (isCurrentWeek && weeklyMap.has(entry.playerId)) applyTo(weeklyMap);
+      if (isMonthMatch && isSeasonOrYearMatch && monthlyMap.has(entry.playerId)) applyTo(monthlyMap);
     });
 
-    // ── Overall: from playerSeasonStats (includes historical) ──
-    players.forEach(p => {
+    const calcPoints = (s: { w: number; d: number; l: number; gf: number; gc: number; ht: number; motm: number }) =>
+      s.w * 3 + s.d - s.l + s.gf - s.gc + s.motm * 2 + s.ht;
+
+    const fromMap = (map: StatsMap): RankedPlayer[] =>
+      Array.from(map.entries())
+        .map(([id, s]) => {
+          const player = players.find(p => p.id === id)!;
+          if (!player) return null;
+          const matches = s.w + s.d + s.l;
+          const winRate = matches > 0 ? Math.round((s.w / matches) * 100) : 0;
+          return { player, points: calcPoints(s), matches, wins: s.w, draws: s.d, losses: s.l, winRate, gf: s.gf, gc: s.gc, cs: s.cs, ht: s.ht, motm: s.motm };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b!.points - a!.points) as RankedPlayer[];
+
+    // Overall from playerSeasonStats
+    const overallList: RankedPlayer[] = players.map(p => {
       const stats = playerSeasonStats.filter(s =>
         s.playerId === p.id &&
         (selectedOverallSeasonId === null || s.seasonId === selectedOverallSeasonId)
       );
-      overallMap.set(p.id, calcSeasonPoints(stats));
-    });
-
-    const toSortedList = (map: Map<string, number>): RankedPlayer[] =>
-      Array.from(map.entries())
-        .map(([id, points]) => ({ player: players.find(p => p.id === id)!, points }))
-        .filter(x => x.player)
-        .sort((a, b) => b.points - a.points);
+      const wins = stats.reduce((t, s) => t + s.wins, 0);
+      const draws = stats.reduce((t, s) => t + s.draws, 0);
+      const losses = stats.reduce((t, s) => t + s.losses, 0);
+      const gf = stats.reduce((t, s) => t + s.goals, 0);
+      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+      const cs = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
+      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+      const matches = wins + draws + losses;
+      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
+      const points = wins * 3 + draws - losses + gf - gc + motm * 2 + ht;
+      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
+    }).sort((a, b) => b.points - a.points);
 
     const monthlySeasonLabel = selectedMonthlySeasonId
       ? seasons.find(s => s.id === selectedMonthlySeasonId)?.name ?? ''
       : currentYear.toString();
 
     return {
-      weeklyRanking:  { name: activeWeekName, list: toSortedList(weeklyMap) },
-      monthlyRanking: { label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`, list: toSortedList(monthlyMap) },
+      weeklyRanking:  { label: activeWeekName, list: fromMap(weeklyMap) },
+      monthlyRanking: { label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`, list: fromMap(monthlyMap) },
       overallRanking: {
-        name: selectedOverallSeasonId
+        label: selectedOverallSeasonId
           ? (seasons.find(s => s.id === selectedOverallSeasonId)?.name ?? 'Overall')
           : 'All Time',
-        list: toSortedList(overallMap)
+        list: overallList,
       },
     };
   }, [players, matchEntries, playerSeasonStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedOverallSeasonId]);
 
-  const renderRow = (r: RankedPlayer, i: number) => (
-    <div key={r.player.id} className={cn(
-      "flex items-center gap-3 p-2.5 rounded-xl transition-all group",
-      i === 0 ? "bg-amber-500/5 hover:bg-amber-500/10" :
-      i === 1 ? "bg-slate-200/30 hover:bg-slate-200/50" :
-      i === 2 ? "bg-amber-700/5 hover:bg-amber-700/10" :
-      "hover:bg-muted/50"
-    )}>
-      <div className={cn(
-        'font-black w-6 h-6 flex items-center justify-center rounded-full text-[10px] shrink-0 shadow-sm',
-        i === 0 ? 'medal-gold' : i === 1 ? 'medal-silver' : i === 2 ? 'medal-bronze' : 'bg-muted text-muted-foreground/60'
-      )}>
-        {i + 1}
-      </div>
-      <Avatar name={r.player.name} size={32} src={(r.player as any).profileImageUrl} />
-      <div className="flex-1 min-w-0">
-        <p className={cn(
-          "text-sm font-semibold text-foreground truncate",
-          i === 0 && "font-bold"
-        )}>{r.player.name}</p>
-      </div>
-      <div className={cn(
-        "font-black text-sm px-3 py-1 rounded-lg border shadow-sm",
-        r.points > 0 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
-        r.points < 0 ? "bg-red-500/10 text-red-500 border-red-500/20" :
-        "bg-muted text-muted-foreground border-border"
-      )}>
-        {r.points > 0 ? `+${r.points}` : r.points}
-      </div>
-    </div>
-  );
+  const activeRanking =
+    viewMode === 'weekly' ? weeklyRanking :
+    viewMode === 'monthly' ? monthlyRanking :
+    overallRanking;
 
-  const selectCls = "text-[11px] bg-muted border border-border rounded-lg px-2.5 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-sm";
+  const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
 
-  const CardWrapper = ({ children, accentColor }: { children: React.ReactNode, accentColor: string }) => (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col h-[420px] relative overflow-hidden group">
-      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-30 group-hover:opacity-50 transition-opacity" style={{ backgroundColor: accentColor }} />
-      {children}
-    </div>
-  );
+  const cols = [
+    { key: 'rank',    label: '#',       cls: 'w-10 text-center' },
+    { key: 'player',  label: 'Player',  cls: 'min-w-[160px]' },
+    { key: 'matches', label: 'M',       cls: 'w-12 text-center', title: 'Matches' },
+    { key: 'wins',    label: 'W',       cls: 'w-12 text-center', title: 'Wins' },
+    { key: 'draws',   label: 'D',       cls: 'w-12 text-center', title: 'Draws' },
+    { key: 'losses',  label: 'L',       cls: 'w-12 text-center', title: 'Losses' },
+    { key: 'winRate', label: 'Win%',    cls: 'w-16 text-center', title: 'Win Rate' },
+    { key: 'gf',      label: 'GF',      cls: 'w-12 text-center', title: 'Goals For' },
+    { key: 'gc',      label: 'GC',      cls: 'w-12 text-center', title: 'Goals Conceded' },
+    { key: 'cs',      label: 'CS',      cls: 'w-12 text-center', title: 'Clean Sheets' },
+    { key: 'ht',      label: 'HT',      cls: 'w-12 text-center', title: 'Hat-tricks' },
+    { key: 'motm',    label: 'MOTM',    cls: 'w-14 text-center', title: 'Man of the Match' },
+    { key: 'points',  label: 'Pts',     cls: 'w-16 text-center font-bold', title: 'Points' },
+  ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-
-      {/* ── Weekly: no filter, always current week ── */}
-      <CardWrapper accentColor="#8b5cf6">
-        <div className="mb-4 border-b border-border pb-3 flex items-center justify-between relative z-10">
-          <h3 className="font-bold text-base text-foreground tracking-tight">Weekly Points</h3>
-          <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-600 border border-purple-500/20 shadow-sm">
-            {weeklyRanking.name}
-          </span>
+    <div className="flex flex-col gap-5">
+      {/* Controls row */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* View mode tabs */}
+        <div className="flex items-center gap-1 bg-muted/40 border border-border p-1 rounded-xl">
+          {(['weekly', 'monthly', 'overall'] as ViewMode[]).map(mode => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={cn(
+                "px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all",
+                viewMode === mode
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+              )}
+            >
+              {mode}
+            </button>
+          ))}
         </div>
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar relative z-10">
-          {weeklyRanking.list.length === 0 || weeklyRanking.list.every(r => r.points === 0) ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <span className="text-3xl mb-2 block">📊</span>
-                <p className="text-muted-foreground text-sm font-medium">No points this week</p>
-              </div>
-            </div>
-          ) : (
-            weeklyRanking.list.slice(0, limit).map((r, i) => renderRow(r, i))
-          )}
-        </div>
-      </CardWrapper>
 
-      {/* ── Monthly: season + month filters ── */}
-      <CardWrapper accentColor="#06b6d4">
-        <div className="mb-4 border-b border-border pb-3 relative z-10">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-bold text-base text-foreground tracking-tight">Monthly Points</h3>
-            <span className="text-[10px] text-muted-foreground font-medium">{monthlyRanking.label}</span>
-          </div>
-          {/* Two filter dropdowns */}
-          <div className="flex gap-2">
+        {/* Monthly filters */}
+        {viewMode === 'monthly' && (
+          <div className="flex items-center gap-2">
             <select
               value={selectedMonthlySeasonId ?? ''}
               onChange={e => setSelectedMonthlySeasonId(e.target.value === '' ? null : Number(e.target.value))}
-              className={selectCls + ' flex-1'}
+              className={selectCls}
             >
               <option value="">{currentYear} (Current)</option>
-              {seasons.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
+              {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <select
               value={selectedMonthlyMonth}
               onChange={e => setSelectedMonthlyMonth(Number(e.target.value))}
-              className={selectCls + ' flex-1'}
+              className={selectCls}
             >
-              {MONTHS.map((m, i) => (
-                <option key={i} value={i}>{m}</option>
-              ))}
+              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
             </select>
           </div>
-        </div>
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar relative z-10">
-          {monthlyRanking.list.length === 0 || monthlyRanking.list.every(r => r.points === 0) ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <span className="text-3xl mb-2 block">📅</span>
-                <p className="text-muted-foreground text-sm font-medium">No points for this period</p>
-              </div>
-            </div>
-          ) : (
-            monthlyRanking.list.slice(0, limit).map((r, i) => renderRow(r, i))
-          )}
-        </div>
-      </CardWrapper>
+        )}
 
-      {/* ── Overall: season filter ── */}
-      <CardWrapper accentColor="#f59e0b">
-        <div className="mb-4 border-b border-border pb-3 flex items-center justify-between relative z-10">
-          <h3 className="font-bold text-base text-foreground tracking-tight">Overall Points</h3>
+        {/* Overall filter */}
+        {viewMode === 'overall' && (
           <select
             value={selectedOverallSeasonId ?? ''}
             onChange={e => setSelectedOverallSeasonId(e.target.value === '' ? null : Number(e.target.value))}
             className={selectCls}
           >
             <option value="">All Time</option>
-            {seasons.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
+            {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-        </div>
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar relative z-10">
-          {overallRanking.list.length === 0 || overallRanking.list.every(r => r.points === 0) ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <span className="text-3xl mb-2 block">🏆</span>
-                <p className="text-muted-foreground text-sm font-medium">No points yet</p>
-              </div>
-            </div>
-          ) : (
-            overallRanking.list.slice(0, limit).map((r, i) => renderRow(r, i))
-          )}
-        </div>
-      </CardWrapper>
+        )}
 
+        {/* Label badge */}
+        <span className="ml-auto text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
+          {activeRanking.label}
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <div className="overflow-y-auto" style={{ maxHeight: '680px' }}>
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0 z-20">
+                <tr className="bg-muted/60 backdrop-blur border-b border-border">
+                  {cols.map(c => (
+                    <th
+                      key={c.key}
+                      title={c.title}
+                      className={cn(
+                        "py-3 px-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none",
+                        c.cls
+                      )}
+                    >
+                      {c.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {activeRanking.list.length === 0 || activeRanking.list.every(r => r.points === 0 && r.matches === 0) ? (
+                  <tr>
+                    <td colSpan={cols.length} className="py-20 text-center text-muted-foreground">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-4xl">📊</span>
+                        <p className="font-medium text-sm">No data for this period</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  activeRanking.list.map((r, i) => {
+                    const isTop3 = i < 3;
+                    const medalCls =
+                      i === 0 ? 'medal-gold' :
+                      i === 1 ? 'medal-silver' :
+                      i === 2 ? 'medal-bronze' :
+                      'bg-muted/60 text-muted-foreground/70 text-[10px]';
+                    const rowCls =
+                      i === 0 ? 'bg-amber-500/5 hover:bg-amber-500/10' :
+                      i === 1 ? 'bg-slate-400/5 hover:bg-slate-400/10' :
+                      i === 2 ? 'bg-orange-700/5 hover:bg-orange-700/10' :
+                      'hover:bg-muted/40';
+
+                    return (
+                      <tr
+                        key={r.player.id}
+                        className={cn(
+                          "border-b border-border/50 transition-colors group",
+                          rowCls
+                        )}
+                      >
+                        {/* Rank */}
+                        <td className="py-2.5 px-2 text-center">
+                          <div className={cn(
+                            'w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm',
+                            medalCls
+                          )}>
+                            {i + 1}
+                          </div>
+                        </td>
+
+                        {/* Player */}
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-2.5">
+                            <Avatar name={r.player.name} size={30} src={(r.player as any).profileImageUrl} />
+                            <span className={cn("font-semibold text-foreground truncate max-w-[140px]", isTop3 && "font-bold")}>
+                              {r.player.name}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* M */}
+                        <td className="py-2.5 px-2 text-center text-muted-foreground font-medium">{r.matches}</td>
+
+                        {/* W */}
+                        <td className="py-2.5 px-2 text-center">
+                          <span className={cn("font-semibold", r.wins > 0 ? "text-emerald-500" : "text-muted-foreground/60")}>{r.wins}</span>
+                        </td>
+
+                        {/* D */}
+                        <td className="py-2.5 px-2 text-center">
+                          <span className={cn("font-semibold", r.draws > 0 ? "text-amber-500" : "text-muted-foreground/60")}>{r.draws}</span>
+                        </td>
+
+                        {/* L */}
+                        <td className="py-2.5 px-2 text-center">
+                          <span className={cn("font-semibold", r.losses > 0 ? "text-red-500" : "text-muted-foreground/60")}>{r.losses}</span>
+                        </td>
+
+                        {/* Win% */}
+                        <td className="py-2.5 px-2 text-center">
+                          <span className={cn(
+                            "text-xs font-bold px-1.5 py-0.5 rounded-md",
+                            r.winRate >= 60 ? "bg-emerald-500/15 text-emerald-600" :
+                            r.winRate >= 40 ? "bg-amber-500/15 text-amber-600" :
+                            r.matches > 0 ? "bg-red-500/10 text-red-500" :
+                            "text-muted-foreground/50"
+                          )}>
+                            {r.matches > 0 ? `${r.winRate}%` : '—'}
+                          </span>
+                        </td>
+
+                        {/* GF */}
+                        <td className="py-2.5 px-2 text-center font-medium text-foreground/80">{r.gf}</td>
+
+                        {/* GC */}
+                        <td className="py-2.5 px-2 text-center font-medium text-foreground/80">{r.gc}</td>
+
+                        {/* CS */}
+                        <td className="py-2.5 px-2 text-center">
+                          {r.cs > 0 ? (
+                            <span className="text-xs font-bold text-cyan-600 bg-cyan-500/10 px-1.5 py-0.5 rounded-md">{r.cs}</span>
+                          ) : (
+                            <span className="text-muted-foreground/40">—</span>
+                          )}
+                        </td>
+
+                        {/* HT */}
+                        <td className="py-2.5 px-2 text-center">
+                          {r.ht > 0 ? (
+                            <span className="text-xs font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">🎩 {r.ht}</span>
+                          ) : (
+                            <span className="text-muted-foreground/40">—</span>
+                          )}
+                        </td>
+
+                        {/* MOTM */}
+                        <td className="py-2.5 px-2 text-center">
+                          {r.motm > 0 ? (
+                            <span className="text-xs font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">⭐ {r.motm}</span>
+                          ) : (
+                            <span className="text-muted-foreground/40">—</span>
+                          )}
+                        </td>
+
+                        {/* Points */}
+                        <td className="py-2.5 px-2 text-center">
+                          <span className={cn(
+                            "font-black text-sm px-2.5 py-1 rounded-lg border shadow-sm",
+                            r.points > 0 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+                            r.points < 0 ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                            "bg-muted text-muted-foreground border-border"
+                          )}>
+                            {r.points > 0 ? `+${r.points}` : r.points}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer count */}
+      <p className="text-xs text-muted-foreground text-right">
+        {activeRanking.list.length} players ranked
+      </p>
     </div>
   );
 }
