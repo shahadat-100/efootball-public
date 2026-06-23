@@ -62,9 +62,9 @@ export function AwardsLeaderboard({ data }: AwardsLeaderboardProps) {
       <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
       <p className="font-semibold text-base mb-6 text-foreground tracking-tight relative z-10">Players Awards Leaderboard</p>
       <div className="flex flex-col md:flex-row gap-6 md:gap-5 flex-1 relative z-10">
-        <Column title="MOTM" icon="⭐" items={topMotm} valueKey="motm" accentColor="#f59e0b" />
+        <Column title="MOTM" icon="👑" items={topMotm} valueKey="motm" accentColor="#f59e0b" />
         <Column title="Clean Sheets" icon="🧤" items={topCleanSheets} valueKey="cleanSheets" accentColor="#06b6d4" />
-        <Column title="Hat-tricks" icon="🎩" items={topHattricks} valueKey="hattricks" accentColor="#a855f7" />
+        <Column title="Hat-tricks" icon="⚽" items={topHattricks} valueKey="hattricks" accentColor="#a855f7" />
       </div>
     </div>
   );

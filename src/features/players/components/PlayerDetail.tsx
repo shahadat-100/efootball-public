@@ -405,8 +405,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: 'Goals', value: stats.totalGoals, color: '#10b981', icon: '⚽' },
-              { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', icon: '🎩' },
-              { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', icon: '🏅' },
+              { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', icon: '⚽' },
+              { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', icon: '👑' },
             ].map(({ label, value, color, icon }) => (
               <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
                 <div className="flex items-center gap-1.5 mb-1">

@@ -394,7 +394,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
                       {/* HT */}
                       <td className="py-2.5 px-1 text-center">
                         {r.ht > 0 ? (
-                          <span className="text-[11px] font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">🎩 {r.ht}</span>
+                          <span className="text-[11px] font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">⚽ {r.ht}</span>
                         ) : (
                           <span className="text-muted-foreground/40 text-[12px]">—</span>
                         )}
@@ -403,7 +403,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
                       {/* MOTM */}
                       <td className="py-2.5 px-1 text-center">
                         {r.motm > 0 ? (
-                          <span className="text-[11px] font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">⭐ {r.motm}</span>
+                          <span className="text-[11px] font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">👑 {r.motm}</span>
                         ) : (
                           <span className="text-muted-foreground/40 text-[12px]">—</span>
                         )}
