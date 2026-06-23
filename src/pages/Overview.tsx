@@ -11,7 +11,7 @@ import { AwardsLeaderboard } from '@/features/overview/components/AwardsLeaderbo
 import { ActivityTimeline } from '@/features/overview/components/ActivityTimeline';
 import { PlayerSpotlights } from '@/features/overview/components/PlayerSpotlights';
 import { TopScorerSpotlights } from '@/features/overview/components/TopScorerSpotlights';
-import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
+import { OverviewPointsLeaderboard } from '@/features/overview/components/OverviewPointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 
@@ -166,14 +166,12 @@ export function Overview({ setTab }: OverviewProps) {
         </div>
       </div>
 
-      {/* Points Leaderboards */}
+      {/* Points Leaderboard (compact overview) */}
       <div className="mb-8">
-        <PointsLeaderboard
+        <OverviewPointsLeaderboard
           players={players}
-          matchEntries={matchEntries}
-          seasons={seasons}
           playerSeasonStats={playerSeasonStats}
-          limit={5}
+          onViewAll={() => setTab('leaderboard')}
         />
       </div>
 

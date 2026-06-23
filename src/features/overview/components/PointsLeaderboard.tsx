@@ -39,11 +39,14 @@ const currentDay = today.getDate();
 
 type ViewMode = 'weekly' | 'monthly' | 'overall';
 
+const PAGE_SIZE = 20;
+
 export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats }: PointsLeaderboardProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
 
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
     let activeWeekStart = 1, activeWeekEnd = 7, activeWeekName = 'Week 1';
@@ -149,23 +152,22 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
     viewMode === 'monthly' ? monthlyRanking :
     overallRanking;
 
+  // Reset to page 1 whenever filter changes
+  const totalEntries = activeRanking.list.length;
+  const totalPages = Math.max(1, Math.ceil(totalEntries / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * PAGE_SIZE;
+  const pageEnd   = Math.min(pageStart + PAGE_SIZE, totalEntries);
+  const pageList  = activeRanking.list.slice(pageStart, pageEnd);
+
   const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
 
-  const cols = [
-    { key: 'rank',    label: '#',       cls: 'w-10 text-center' },
-    { key: 'player',  label: 'Player',  cls: 'min-w-[160px]' },
-    { key: 'matches', label: 'M',       cls: 'w-12 text-center', title: 'Matches' },
-    { key: 'wins',    label: 'W',       cls: 'w-12 text-center', title: 'Wins' },
-    { key: 'draws',   label: 'D',       cls: 'w-12 text-center', title: 'Draws' },
-    { key: 'losses',  label: 'L',       cls: 'w-12 text-center', title: 'Losses' },
-    { key: 'winRate', label: 'Win%',    cls: 'w-16 text-center', title: 'Win Rate' },
-    { key: 'gf',      label: 'GF',      cls: 'w-12 text-center', title: 'Goals For' },
-    { key: 'gc',      label: 'GC',      cls: 'w-12 text-center', title: 'Goals Conceded' },
-    { key: 'cs',      label: 'CS',      cls: 'w-12 text-center', title: 'Clean Sheets' },
-    { key: 'ht',      label: 'HT',      cls: 'w-12 text-center', title: 'Hat-tricks' },
-    { key: 'motm',    label: 'MOTM',    cls: 'w-14 text-center', title: 'Man of the Match' },
-    { key: 'points',  label: 'Pts',     cls: 'w-16 text-center font-bold', title: 'Points' },
-  ];
+  const handleViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    setPage(1);
+  };
+
+  const isEmpty = activeRanking.list.length === 0 || activeRanking.list.every(r => r.points === 0 && r.matches === 0);
 
   return (
     <div className="flex flex-col gap-5">
@@ -176,7 +178,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
           {(['weekly', 'monthly', 'overall'] as ViewMode[]).map(mode => (
             <button
               key={mode}
-              onClick={() => setViewMode(mode)}
+              onClick={() => handleViewMode(mode)}
               className={cn(
                 "px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all",
                 viewMode === mode
@@ -194,7 +196,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
           <div className="flex items-center gap-2">
             <select
               value={selectedMonthlySeasonId ?? ''}
-              onChange={e => setSelectedMonthlySeasonId(e.target.value === '' ? null : Number(e.target.value))}
+              onChange={e => { setSelectedMonthlySeasonId(e.target.value === '' ? null : Number(e.target.value)); setPage(1); }}
               className={selectCls}
             >
               <option value="">{currentYear} (Current)</option>
@@ -202,7 +204,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
             </select>
             <select
               value={selectedMonthlyMonth}
-              onChange={e => setSelectedMonthlyMonth(Number(e.target.value))}
+              onChange={e => { setSelectedMonthlyMonth(Number(e.target.value)); setPage(1); }}
               className={selectCls}
             >
               {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
@@ -214,7 +216,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
         {viewMode === 'overall' && (
           <select
             value={selectedOverallSeasonId ?? ''}
-            onChange={e => setSelectedOverallSeasonId(e.target.value === '' ? null : Number(e.target.value))}
+            onChange={e => { setSelectedOverallSeasonId(e.target.value === '' ? null : Number(e.target.value)); setPage(1); }}
             className={selectCls}
           >
             <option value="">All Time</option>
@@ -231,165 +233,237 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <div className="overflow-y-auto" style={{ maxHeight: '680px' }}>
-            <table className="w-full text-sm border-collapse">
-              <thead className="sticky top-0 z-20">
-                <tr className="bg-muted/60 backdrop-blur border-b border-border">
-                  {cols.map(c => (
-                    <th
-                      key={c.key}
-                      title={c.title}
+          <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '44px' }} />   {/* # */}
+              <col style={{ width: '160px' }} />  {/* Player */}
+              <col style={{ width: '48px' }} />   {/* M */}
+              <col style={{ width: '48px' }} />   {/* W */}
+              <col style={{ width: '48px' }} />   {/* D */}
+              <col style={{ width: '48px' }} />   {/* L */}
+              <col style={{ width: '60px' }} />   {/* Win% */}
+              <col style={{ width: '48px' }} />   {/* GF */}
+              <col style={{ width: '48px' }} />   {/* GC */}
+              <col style={{ width: '48px' }} />   {/* CS */}
+              <col style={{ width: '64px' }} />   {/* HT */}
+              <col style={{ width: '64px' }} />   {/* MOTM */}
+              <col style={{ width: '64px' }} />   {/* Pts */}
+            </colgroup>
+            <thead className="sticky top-0 z-20">
+              <tr className="bg-muted/60 backdrop-blur border-b border-border">
+                {[
+                  { label: '#',    title: 'Rank' },
+                  { label: 'Player', title: 'Player' },
+                  { label: 'M',    title: 'Matches' },
+                  { label: 'W',    title: 'Wins' },
+                  { label: 'D',    title: 'Draws' },
+                  { label: 'L',    title: 'Losses' },
+                  { label: 'Win%', title: 'Win Rate' },
+                  { label: 'GF',   title: 'Goals For' },
+                  { label: 'GC',   title: 'Goals Conceded' },
+                  { label: 'CS',   title: 'Clean Sheets' },
+                  { label: 'HT',   title: 'Hat-tricks' },
+                  { label: 'MOTM', title: 'Man of the Match' },
+                  { label: 'Pts',  title: 'Points' },
+                ].map((c, idx) => (
+                  <th
+                    key={idx}
+                    title={c.title}
+                    className={cn(
+                      "py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none",
+                      idx === 0 ? 'text-center px-2' :
+                      idx === 1 ? 'text-left px-3' :
+                      'text-center px-1'
+                    )}
+                  >
+                    {c.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {isEmpty ? (
+                <tr>
+                  <td colSpan={13} className="py-20 text-center text-muted-foreground">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-4xl">📊</span>
+                      <p className="font-medium text-sm">No data for this period</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                pageList.map((r, i) => {
+                  const globalIdx = pageStart + i;
+                  const isTop3 = globalIdx < 3;
+
+                  const medalCls =
+                    globalIdx === 0 ? 'medal-gold' :
+                    globalIdx === 1 ? 'medal-silver' :
+                    globalIdx === 2 ? 'medal-bronze' :
+                    'bg-muted/60 text-muted-foreground/70 text-[10px]';
+
+                  const rowCls =
+                    globalIdx === 0 ? 'bg-amber-500/5 hover:bg-amber-500/10' :
+                    globalIdx === 1 ? 'bg-slate-400/5 hover:bg-slate-400/10' :
+                    globalIdx === 2 ? 'bg-orange-700/5 hover:bg-orange-700/10' :
+                    'hover:bg-muted/40';
+
+                  return (
+                    <tr
+                      key={r.player.id}
                       className={cn(
-                        "py-3 px-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none",
-                        c.cls
+                        "border-b border-border/50 transition-colors group",
+                        rowCls
                       )}
                     >
-                      {c.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {activeRanking.list.length === 0 || activeRanking.list.every(r => r.points === 0 && r.matches === 0) ? (
-                  <tr>
-                    <td colSpan={cols.length} className="py-20 text-center text-muted-foreground">
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-4xl">📊</span>
-                        <p className="font-medium text-sm">No data for this period</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  activeRanking.list.map((r, i) => {
-                    const isTop3 = i < 3;
-                    const medalCls =
-                      i === 0 ? 'medal-gold' :
-                      i === 1 ? 'medal-silver' :
-                      i === 2 ? 'medal-bronze' :
-                      'bg-muted/60 text-muted-foreground/70 text-[10px]';
-                    const rowCls =
-                      i === 0 ? 'bg-amber-500/5 hover:bg-amber-500/10' :
-                      i === 1 ? 'bg-slate-400/5 hover:bg-slate-400/10' :
-                      i === 2 ? 'bg-orange-700/5 hover:bg-orange-700/10' :
-                      'hover:bg-muted/40';
+                      {/* Rank */}
+                      <td className="py-2.5 px-2 text-center">
+                        <div className={cn(
+                          'w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm',
+                          medalCls
+                        )}>
+                          {globalIdx + 1}
+                        </div>
+                      </td>
 
-                    return (
-                      <tr
-                        key={r.player.id}
-                        className={cn(
-                          "border-b border-border/50 transition-colors group",
-                          rowCls
+                      {/* Player */}
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Avatar name={r.player.name} size={28} src={(r.player as any).profileImageUrl} />
+                          <span className={cn(
+                            "font-semibold text-foreground truncate text-[13px]",
+                            isTop3 && "font-bold"
+                          )}>
+                            {r.player.name}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* M */}
+                      <td className="py-2.5 px-1 text-center text-muted-foreground font-medium text-[13px]">{r.matches}</td>
+
+                      {/* W */}
+                      <td className="py-2.5 px-1 text-center">
+                        <span className={cn("font-semibold text-[13px]", r.wins > 0 ? "text-emerald-500" : "text-muted-foreground/50")}>{r.wins}</span>
+                      </td>
+
+                      {/* D */}
+                      <td className="py-2.5 px-1 text-center">
+                        <span className={cn("font-semibold text-[13px]", r.draws > 0 ? "text-amber-500" : "text-muted-foreground/50")}>{r.draws}</span>
+                      </td>
+
+                      {/* L */}
+                      <td className="py-2.5 px-1 text-center">
+                        <span className={cn("font-semibold text-[13px]", r.losses > 0 ? "text-red-500" : "text-muted-foreground/50")}>{r.losses}</span>
+                      </td>
+
+                      {/* Win% */}
+                      <td className="py-2.5 px-1 text-center">
+                        <span className={cn(
+                          "text-[11px] font-bold px-1.5 py-0.5 rounded-md",
+                          r.winRate >= 60 ? "bg-emerald-500/15 text-emerald-600" :
+                          r.winRate >= 40 ? "bg-amber-500/15 text-amber-600" :
+                          r.matches > 0  ? "bg-red-500/10 text-red-500" :
+                          "text-muted-foreground/40"
+                        )}>
+                          {r.matches > 0 ? `${r.winRate}%` : '—'}
+                        </span>
+                      </td>
+
+                      {/* GF */}
+                      <td className="py-2.5 px-1 text-center font-medium text-foreground/80 text-[13px]">{r.gf}</td>
+
+                      {/* GC */}
+                      <td className="py-2.5 px-1 text-center font-medium text-foreground/80 text-[13px]">{r.gc}</td>
+
+                      {/* CS */}
+                      <td className="py-2.5 px-1 text-center">
+                        {r.cs > 0 ? (
+                          <span className="text-[11px] font-bold text-cyan-600 bg-cyan-500/10 px-1.5 py-0.5 rounded-md">{r.cs}</span>
+                        ) : (
+                          <span className="text-muted-foreground/40 text-[12px]">—</span>
                         )}
-                      >
-                        {/* Rank */}
-                        <td className="py-2.5 px-2 text-center">
-                          <div className={cn(
-                            'w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm',
-                            medalCls
-                          )}>
-                            {i + 1}
-                          </div>
-                        </td>
+                      </td>
 
-                        {/* Player */}
-                        <td className="py-2.5 px-3">
-                          <div className="flex items-center gap-2.5">
-                            <Avatar name={r.player.name} size={30} src={(r.player as any).profileImageUrl} />
-                            <span className={cn("font-semibold text-foreground truncate max-w-[140px]", isTop3 && "font-bold")}>
-                              {r.player.name}
-                            </span>
-                          </div>
-                        </td>
+                      {/* HT */}
+                      <td className="py-2.5 px-1 text-center">
+                        {r.ht > 0 ? (
+                          <span className="text-[11px] font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">🎩 {r.ht}</span>
+                        ) : (
+                          <span className="text-muted-foreground/40 text-[12px]">—</span>
+                        )}
+                      </td>
 
-                        {/* M */}
-                        <td className="py-2.5 px-2 text-center text-muted-foreground font-medium">{r.matches}</td>
+                      {/* MOTM */}
+                      <td className="py-2.5 px-1 text-center">
+                        {r.motm > 0 ? (
+                          <span className="text-[11px] font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">⭐ {r.motm}</span>
+                        ) : (
+                          <span className="text-muted-foreground/40 text-[12px]">—</span>
+                        )}
+                      </td>
 
-                        {/* W */}
-                        <td className="py-2.5 px-2 text-center">
-                          <span className={cn("font-semibold", r.wins > 0 ? "text-emerald-500" : "text-muted-foreground/60")}>{r.wins}</span>
-                        </td>
-
-                        {/* D */}
-                        <td className="py-2.5 px-2 text-center">
-                          <span className={cn("font-semibold", r.draws > 0 ? "text-amber-500" : "text-muted-foreground/60")}>{r.draws}</span>
-                        </td>
-
-                        {/* L */}
-                        <td className="py-2.5 px-2 text-center">
-                          <span className={cn("font-semibold", r.losses > 0 ? "text-red-500" : "text-muted-foreground/60")}>{r.losses}</span>
-                        </td>
-
-                        {/* Win% */}
-                        <td className="py-2.5 px-2 text-center">
-                          <span className={cn(
-                            "text-xs font-bold px-1.5 py-0.5 rounded-md",
-                            r.winRate >= 60 ? "bg-emerald-500/15 text-emerald-600" :
-                            r.winRate >= 40 ? "bg-amber-500/15 text-amber-600" :
-                            r.matches > 0 ? "bg-red-500/10 text-red-500" :
-                            "text-muted-foreground/50"
-                          )}>
-                            {r.matches > 0 ? `${r.winRate}%` : '—'}
-                          </span>
-                        </td>
-
-                        {/* GF */}
-                        <td className="py-2.5 px-2 text-center font-medium text-foreground/80">{r.gf}</td>
-
-                        {/* GC */}
-                        <td className="py-2.5 px-2 text-center font-medium text-foreground/80">{r.gc}</td>
-
-                        {/* CS */}
-                        <td className="py-2.5 px-2 text-center">
-                          {r.cs > 0 ? (
-                            <span className="text-xs font-bold text-cyan-600 bg-cyan-500/10 px-1.5 py-0.5 rounded-md">{r.cs}</span>
-                          ) : (
-                            <span className="text-muted-foreground/40">—</span>
-                          )}
-                        </td>
-
-                        {/* HT */}
-                        <td className="py-2.5 px-2 text-center">
-                          {r.ht > 0 ? (
-                            <span className="text-xs font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">🎩 {r.ht}</span>
-                          ) : (
-                            <span className="text-muted-foreground/40">—</span>
-                          )}
-                        </td>
-
-                        {/* MOTM */}
-                        <td className="py-2.5 px-2 text-center">
-                          {r.motm > 0 ? (
-                            <span className="text-xs font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">⭐ {r.motm}</span>
-                          ) : (
-                            <span className="text-muted-foreground/40">—</span>
-                          )}
-                        </td>
-
-                        {/* Points */}
-                        <td className="py-2.5 px-2 text-center">
-                          <span className={cn(
-                            "font-black text-sm px-2.5 py-1 rounded-lg border shadow-sm",
-                            r.points > 0 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
-                            r.points < 0 ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                            "bg-muted text-muted-foreground border-border"
-                          )}>
-                            {r.points > 0 ? `+${r.points}` : r.points}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                      {/* Points */}
+                      <td className="py-2.5 px-1 text-center">
+                        <span className={cn(
+                          "font-black text-[13px] px-2 py-0.5 rounded-lg border shadow-sm",
+                          r.points > 0 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+                          r.points < 0 ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                          "bg-muted text-muted-foreground border-border"
+                        )}>
+                          {r.points > 0 ? `+${r.points}` : r.points}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Footer count */}
-      <p className="text-xs text-muted-foreground text-right">
-        {activeRanking.list.length} players ranked
-      </p>
+      {/* Pagination footer */}
+      {!isEmpty && (
+        <div className="flex items-center justify-between px-1">
+          <p className="text-xs text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{pageStart + 1}–{pageEnd}</span> of{' '}
+            <span className="font-semibold text-foreground">{totalEntries}</span> players
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all",
+                safePage <= 1
+                  ? "border-border/50 text-muted-foreground/40 cursor-not-allowed"
+                  : "border-border bg-card hover:bg-muted/50 text-foreground active:scale-95"
+              )}
+            >
+              ← Previous
+            </button>
+
+            <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 min-w-[80px] text-center">
+              Page {safePage}/{totalPages}
+            </span>
+
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all",
+                safePage >= totalPages
+                  ? "border-border/50 text-muted-foreground/40 cursor-not-allowed"
+                  : "border-border bg-card hover:bg-muted/50 text-foreground active:scale-95"
+              )}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
