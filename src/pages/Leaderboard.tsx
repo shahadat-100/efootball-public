@@ -17,7 +17,38 @@ export function Leaderboard() {
         <p className="text-muted-foreground text-sm md:text-base font-medium max-w-2xl">
           Comprehensive rankings of all players across weekly, monthly, and overall timeframes.
         </p>
+
+        {/* Scoring formula hint */}
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          {activeTab === 'points' ? (
+            <>
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mr-1">Points formula:</span>
+              {[
+                { label: 'Win', value: '+3', color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+                { label: 'Draw', value: '+1', color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
+                { label: 'Loss', value: '-1', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+                { label: 'GF', value: '+1', color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+                { label: 'GC', value: '-1', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+                { label: '👑 MOTM', value: '+2', color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
+                { label: '⚽ HT', value: '+1 Per HT', color: 'text-violet-600 bg-violet-500/10 border-violet-500/20' },
+              ].map(({ label, value, color }) => (
+                <span key={label} className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md border ${color}`}>
+                  {label} <span className="opacity-70">{value}</span>
+                </span>
+              ))}
+            </>
+          ) : (
+            <>
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mr-1">Ranked by:</span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md border text-red-600 bg-red-500/10 border-red-500/20">
+                ⚽ Total Goals scored
+              </span>
+              <span className="text-[10px] text-muted-foreground/50 ml-1">· all other stats shown for context</span>
+            </>
+          )}
+        </div>
       </div>
+
 
       {/* Points / Goals switcher */}
       <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
