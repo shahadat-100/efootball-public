@@ -300,7 +300,7 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: project only needed columns and cap at 200 most-recent articles
         const { data, error } = await supabase
           .from('news')
-          .select('id, title, content, author, category, hot, date')
+          .select('id, title, content, author, category, hot, date, image')
           .order('date', { ascending: false })
           .limit(200);
         if (data) set({ news: data as NewsArticle[] });
