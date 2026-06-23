@@ -173,7 +173,7 @@ export function Overview({ setTab }: OverviewProps) {
           matchEntries={matchEntries}
           seasons={seasons}
           playerSeasonStats={playerSeasonStats}
-          limit={8}
+          limit={10}
         />
       </div>
 
