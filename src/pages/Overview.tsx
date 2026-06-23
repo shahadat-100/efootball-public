@@ -68,7 +68,7 @@ export function Overview({ setTab }: OverviewProps) {
     });
 
     winsByPlayer.sort((a, b) => b.wins - a.wins);
-    
+
     if (winsByPlayer.length > 0 && winsByPlayer[0].wins > 0) {
       return winsByPlayer[0];
     }
@@ -173,7 +173,7 @@ export function Overview({ setTab }: OverviewProps) {
           matchEntries={matchEntries}
           seasons={seasons}
           playerSeasonStats={playerSeasonStats}
-          limit={10}
+          limit={5}
         />
       </div>
 
@@ -204,8 +204,8 @@ export function Overview({ setTab }: OverviewProps) {
                           <span className="text-[13px] font-bold text-foreground leading-tight">{m.homeTeam} <span className="text-muted-foreground font-normal mx-1">vs</span> {m.awayTeam}</span>
                           {m.status === 'finished' && result && (
                             <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-sm tracking-wider ${result === 'win' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                result === 'draw' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                  'bg-red-500/10 text-red-500 border border-red-500/20'
+                              result === 'draw' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                'bg-red-500/10 text-red-500 border border-red-500/20'
                               }`}>
                               {result === 'loss' ? 'lost' : result}
                             </span>
