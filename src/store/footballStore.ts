@@ -159,6 +159,8 @@ interface FootballStore {
   
   fetchMatchEntries: (force?: boolean) => Promise<void>;
   setMatchEntries: (e: MatchEntry[]) => void;
+  matchEntriesHasMore: boolean;
+  loadMoreMatchEntries: () => Promise<void>;
   
   fetchNews: () => Promise<void>;
   setNews: (n: NewsArticle[]) => void;
@@ -188,6 +190,7 @@ export const useFootballStore = create<FootballStore>()(
       availableRoles: [],
       availableTags: [],
       matchEntriesLoaded: false,
+      matchEntriesHasMore: true,
       isInitialized: false,
       
       initializeData: async () => {
@@ -291,11 +294,40 @@ export const useFootballStore = create<FootballStore>()(
           .order('date', { ascending: false })
           .limit(500);
         if (data) {
-          set({ matchEntries: data.map(mapMatchEntryFromDb), matchEntriesLoaded: true });
+          set({ 
+            matchEntries: data.map(mapMatchEntryFromDb), 
+            matchEntriesLoaded: true,
+            matchEntriesHasMore: data.length === 500
+          });
         }
         if (error) console.error('Error fetching match entries:', error);
       },
       setMatchEntries: (matchEntries: MatchEntry[]) => set({ matchEntries }),
+      
+      loadMoreMatchEntries: async () => {
+        const currentEntries = get().matchEntries;
+        const offset = currentEntries.length;
+        const limit = 500;
+        
+        const { data, error } = await supabase
+          .from('match_entries')
+          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id')
+          .order('date', { ascending: false })
+          .range(offset, offset + limit - 1);
+          
+        if (data) {
+          const newEntries = data.map(mapMatchEntryFromDb);
+          // filter out duplicates just in case
+          const existingIds = new Set(currentEntries.map(e => e.id));
+          const uniqueNewEntries = newEntries.filter(e => !existingIds.has(e.id));
+          
+          set({ 
+            matchEntries: [...currentEntries, ...uniqueNewEntries],
+            matchEntriesHasMore: data.length === limit
+          });
+        }
+        if (error) console.error('Error loading more match entries:', error);
+      },
       fetchNews: async () => {
         // Fix: project only needed columns and cap at 200 most-recent articles
         const { data, error } = await supabase

@@ -6,11 +6,18 @@ import { RESULT_BADGE } from '@/shared/lib/constants';
 import { cn } from '@/shared/lib/cn';
 
 export function MatchEntries() {
-  const { matchEntries, players, playerSeasonStats } = useFootballStore();
+  const { matchEntries, players, playerSeasonStats, matchEntriesHasMore, loadMoreMatchEntries } = useFootballStore();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'overview' | 'entries'>('overview');
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 50;
+  
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    await loadMoreMatchEntries();
+    setIsLoadingMore(false);
+  };
 
   const getPlayer = (id: string) => players.find(p => p.id === id);
 
@@ -251,18 +258,31 @@ export function MatchEntries() {
             </div>
           </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 bg-card border border-border p-4 rounded-2xl shadow-sm">
-              <p className="text-[12px] text-muted-foreground font-medium">
-                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
-              </p>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
-                <div className="flex items-center px-3 text-[12px] font-bold border border-border rounded-lg bg-muted/30">Page {page}/{totalPages}</div>
-                <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</Button>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+            {totalPages > 1 ? (
+              <div className="flex items-center justify-between w-full sm:w-auto bg-card border border-border p-3 rounded-2xl shadow-sm flex-1">
+                <p className="text-[12px] text-muted-foreground font-medium hidden sm:block">
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
+                </p>
+                <div className="flex gap-2">
+                  <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
+                  <div className="flex items-center px-3 text-[12px] font-bold border border-border rounded-lg bg-muted/30">Page {page}/{totalPages}</div>
+                  <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</Button>
+                </div>
               </div>
-            </div>
-          )}
+            ) : <div className="flex-1" />}
+
+            {matchEntriesHasMore && !search && (
+              <Button 
+                variant="secondary" 
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="w-full sm:w-auto shrink-0 border-dashed"
+              >
+                {isLoadingMore ? 'Loading...' : 'Load Older Entries from Database'}
+              </Button>
+            )}
+          </div>
         </>
       )}
     </div>
