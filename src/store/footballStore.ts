@@ -358,7 +358,14 @@ export const useFootballStore = create<FootballStore>()(
           .from('competitions')
           .select('id, name, is_active, created_at');
         if (data) {
-          set({ competitions: data as Competition[] });
+          set({
+            competitions: data.map(c => ({
+              id: c.id,
+              name: c.name,
+              isActive: c.is_active,
+              createdAt: c.created_at,
+            })),
+          });
         }
         if (error) console.error('Error fetching competitions:', error);
       },
