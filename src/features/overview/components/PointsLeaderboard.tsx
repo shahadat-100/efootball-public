@@ -10,6 +10,9 @@ interface PointsLeaderboardProps {
   seasons: SeasonDb[];
   playerSeasonStats: PlayerSeasonStat[];
   limit?: number;
+  /** compact=true → show top N rows, hide pagination (for Overview widget) */
+  compact?: boolean;
+  compactLimit?: number;
 }
 
 interface RankedPlayer {
@@ -41,7 +44,7 @@ type ViewMode = 'weekly' | 'monthly' | 'overall';
 
 const PAGE_SIZE = 20;
 
-export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats }: PointsLeaderboardProps) {
+export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, compact = false, compactLimit = 8 }: PointsLeaderboardProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
@@ -158,7 +161,10 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * PAGE_SIZE;
   const pageEnd   = Math.min(pageStart + PAGE_SIZE, totalEntries);
-  const pageList  = activeRanking.list.slice(pageStart, pageEnd);
+  // In compact mode show only the top N rows; otherwise show the current page slice
+  const pageList  = compact
+    ? activeRanking.list.slice(0, compactLimit)
+    : activeRanking.list.slice(pageStart, pageEnd);
 
   const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
 
@@ -423,8 +429,8 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
         </div>
       </div>
 
-      {/* Pagination footer */}
-      {!isEmpty && (
+      {/* Pagination footer — hidden in compact/overview mode */}
+      {!isEmpty && !compact && (
         <div className="flex items-center justify-between px-1">
           <p className="text-xs text-muted-foreground">
             Showing <span className="font-semibold text-foreground">{pageStart + 1}–{pageEnd}</span> of{' '}

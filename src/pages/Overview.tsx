@@ -166,12 +166,14 @@ export function Overview({ setTab }: OverviewProps) {
         </div>
       </div>
 
-      {/* Points Leaderboard (compact overview) */}
+      {/* Points Leaderboard — 3 cards: Weekly / Monthly / Overall */}
       <div className="mb-8">
         <OverviewPointsLeaderboard
           players={players}
+          matchEntries={matchEntries}
+          seasons={seasons}
           playerSeasonStats={playerSeasonStats}
-          onViewAll={() => setTab('leaderboard')}
+          limit={8}
         />
       </div>
 
