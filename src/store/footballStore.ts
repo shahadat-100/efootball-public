@@ -149,6 +149,7 @@ interface FootballStore {
   hallOfFame: HallOfFameEntry[];
   availableRoles: PlayerRole[];
   availableTags: CustomTag[];
+  matchEntriesLoaded: boolean; // lazy-load guard
   
   fetchPlayers: () => Promise<void>;
   setPlayers: (p: Player[]) => void;
@@ -156,7 +157,7 @@ interface FootballStore {
   fetchMatches: () => Promise<void>;
   setMatches: (m: Match[]) => void;
   
-  fetchMatchEntries: () => Promise<void>;
+  fetchMatchEntries: (force?: boolean) => Promise<void>;
   setMatchEntries: (e: MatchEntry[]) => void;
   
   fetchNews: () => Promise<void>;
@@ -186,37 +187,43 @@ export const useFootballStore = create<FootballStore>()(
       hallOfFame: [],
       availableRoles: [],
       availableTags: [],
+      matchEntriesLoaded: false,
       isInitialized: false,
       
       initializeData: async () => {
         if (get().isInitialized) return;
         const store = get();
-        // Step 1: ডাটাবেসকে জাগানোর জন্য সবচেয়ে ছোট ডাটাটি আগে ফেচ করুন
+        // Step 1: Wake the DB with the smallest query first
         await store.fetchSeasons();
-        // Step 2: ডাটাবেস জেগে উঠলে বাকি সব ডাটা একসাথে প্যারালাল ফেচ করুন
+        // Step 2: Fetch core data in parallel on the warm connection.
+        // Non-critical data (hallOfFame, roles, tags) is deferred — fetch on demand.
         await Promise.all([
           store.fetchPlayers(),
           store.fetchMatches(),
           store.fetchMatchEntries(),
           store.fetchPlayerSeasonStats(),
-          store.fetchCompetitions(),
           store.fetchNews(),
+        ]);
+        set({ isInitialized: true });
+        // Fetch lower-priority data after core is ready (non-blocking)
+        Promise.all([
+          store.fetchCompetitions(),
           store.fetchHallOfFame(),
           store.fetchAvailableRoles(),
           store.fetchAvailableTags(),
         ]);
-        set({ isInitialized: true });
       },
       
       fetchPlayers: async () => {
         try {
           // ৫টি টেবিল প্যারালাল ফেচ করা হচ্ছে (Nested Join বাদ দিয়ে)
+          // Fix: project only needed columns on junction/lookup tables
           const [playersRes, junctionRolesRes, rolesRes, junctionTagsRes, tagsRes] = await Promise.all([
             supabase.from('players').select('id, name, jerseynumber, email, custom_string_tags, createdat, profileimageurl'),
-            supabase.from('player_player_roles').select('*'),
-            supabase.from('player_role').select('*'),
-            supabase.from('player_custom_tags').select('*'),
-            supabase.from('custom_tags').select('*')
+            supabase.from('player_player_roles').select('player_id, role_id'),
+            supabase.from('player_role').select('id, name'),
+            supabase.from('player_custom_tags').select('player_id, tag_id'),
+            supabase.from('custom_tags').select('id, name')
           ]);
           if (playersRes.error) throw playersRes.error;
           const players = playersRes.data || [];
@@ -264,148 +271,92 @@ export const useFootballStore = create<FootballStore>()(
       setPlayers: (players: Player[]) => set({ players }),
       
       fetchMatches: async () => {
-        let allData: any[] = [];
-        let from = 0;
-        const step = 1000;
-        let hasMore = true;
-
-        while (hasMore) {
-          const { data, error } = await supabase
-            .from('matches')
-            .select('*, competitions(name)')
-            .range(from, from + step - 1);
-
-          if (error) {
-            console.error('Error fetching matches:', error);
-            break;
-          }
-          if (data && data.length > 0) {
-            allData = [...allData, ...data];
-            if (data.length < step) {
-              hasMore = false;
-            } else {
-              from += step;
-            }
-          } else {
-            hasMore = false;
-          }
-        }
-        
-        set({ matches: allData.map(mapMatchFromDb) });
+        // Fix: project only columns mapMatchFromDb reads — drops created_at, updated_at, etc.
+        const { data, error } = await supabase
+          .from('matches')
+          .select('id, season_id, hometeam, awayteam, homescore, awayscore, date, time, status, competition_id, competitions(name)');
+        if (data) set({ matches: data.map(mapMatchFromDb) });
+        if (error) console.error('Error fetching matches:', error);
       },
       setMatches: (matches: Match[]) => set({ matches }),
       
-      fetchMatchEntries: async () => {
-        let allData: any[] = [];
-        let from = 0;
-        const step = 1000;
-        let hasMore = true;
-
-        while (hasMore) {
-          const { data, error } = await supabase
-            .from('match_entries')
-            .select('*, matches(date)')
-            .range(from, from + step - 1);
-
-          if (error) {
-            console.error('Error fetching match entries:', error);
-            break;
-          }
-          if (data && data.length > 0) {
-            allData = [...allData, ...data];
-            if (data.length < step) {
-              hasMore = false;
-            } else {
-              from += step;
-            }
-          } else {
-            hasMore = false;
-          }
+      fetchMatchEntries: async (force = false) => {
+        // Fix: lazy-load guard — only fetch once per session
+        if (!force && get().matchEntriesLoaded) return;
+        // Fix: limit to 500 most-recent, project only columns mapMatchEntryFromDb reads,
+        // remove matches(date) join — the entry already carries its own date column.
+        const { data, error } = await supabase
+          .from('match_entries')
+          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id')
+          .order('date', { ascending: false })
+          .limit(500);
+        if (data) {
+          set({ matchEntries: data.map(mapMatchEntryFromDb), matchEntriesLoaded: true });
         }
-
-        set({ matchEntries: allData.map(mapMatchEntryFromDb) });
+        if (error) console.error('Error fetching match entries:', error);
       },
       setMatchEntries: (matchEntries: MatchEntry[]) => set({ matchEntries }),
       fetchNews: async () => {
-        const { data, error } = await supabase.from('news').select('*');
+        // Fix: project only needed columns and cap at 200 most-recent articles
+        const { data, error } = await supabase
+          .from('news')
+          .select('id, title, content, author, category, hot, date')
+          .order('date', { ascending: false })
+          .limit(200);
         if (data) set({ news: data as NewsArticle[] });
         if (error) console.error('Error fetching news:', error);
       },
       setNews: (news: NewsArticle[]) => set({ news }),
       fetchSeasons: async () => {
-        const { data, error } = await supabase.from('season').select('*').order('name', { ascending: true });
+        // Fix: project only columns SeasonDb type uses
+        const { data, error } = await supabase
+          .from('season')
+          .select('id, name, is_current, start_date')
+          .order('name', { ascending: true });
         if (data) {
           set({ seasons: data as SeasonDb[] });
-
-          // Defensive initialization: If no seasons exist, create a default current season
-          if (data.length === 0) {
-            const defaultSeasonName = 'Season 1';
-            const { data: newSeason } = await supabase
-              .from('season')
-              .insert({
-                name: defaultSeasonName,
-                is_current: true,
-                start_date: new Date().toISOString()
-              })
-              .select()
-              .single();
-            if (newSeason) {
-              set({ seasons: [newSeason as SeasonDb] });
-            }
-          }
         }
         if (error) console.error('Error fetching seasons:', error);
       },
 
       fetchPlayerSeasonStats: async () => {
-        let allData: any[] = [];
-        let from = 0;
-        const step = 1000;
-        let hasMore = true;
-
-        while (hasMore) {
-          const { data, error } = await supabase
-            .from('player_season_stats')
-            .select('*, season(name)')
-            .range(from, from + step - 1);
-
-          if (error) {
-            console.error('Error fetching player season stats:', error);
-            break;
-          }
-          if (data && data.length > 0) {
-            allData = [...allData, ...data];
-            if (data.length < step) {
-              hasMore = false;
-            } else {
-              from += step;
-            }
-          } else {
-            hasMore = false;
-          }
+        // Fix: drop the season(name) join — resolve season name from in-memory seasons array.
+        // Fix: project only the columns the mapper reads.
+        const { data, error } = await supabase
+          .from('player_season_stats')
+          .select('id, player_id, season_id, appearances, goals, cleansheets, hattricks, motmcount, wins, draws, losses, goalsconceded');
+        if (error) {
+          console.error('Error fetching player season stats:', error);
+          return;
         }
-
+        const seasons = get().seasons;
         set({
-          playerSeasonStats: allData.map(item => ({
-            id: item.id,
-            playerId: item.player_id,
-            seasonId: item.season_id,
-            seasonName: item.season?.name || `Season ${item.season_id}`,
-            appearances: item.appearances || 0,
-            goals: item.goals || 0,
-            cleansheets: item.cleansheets || 0,
-            hattricks: item.hattricks || 0,
-            motmCount: item.motmcount || 0,
-            wins: item.wins || 0,
-            draws: item.draws || 0,
-            losses: item.losses || 0,
-            goalsConceded: item.goalsconceded || 0,
-          }))
+          playerSeasonStats: (data ?? []).map(item => {
+            const seasonObj = seasons.find(s => s.id === item.season_id);
+            return {
+              id: item.id,
+              playerId: item.player_id,
+              seasonId: item.season_id,
+              seasonName: seasonObj?.name || `Season ${item.season_id}`,
+              appearances: item.appearances || 0,
+              goals: item.goals || 0,
+              cleansheets: item.cleansheets || 0,
+              hattricks: item.hattricks || 0,
+              motmCount: item.motmcount || 0,
+              wins: item.wins || 0,
+              draws: item.draws || 0,
+              losses: item.losses || 0,
+              goalsConceded: item.goalsconceded || 0,
+            };
+          })
         });
       },
 
       fetchCompetitions: async () => {
-        const { data, error } = await supabase.from('competitions').select('*');
+        // Fix: project only columns Competition interface uses
+        const { data, error } = await supabase
+          .from('competitions')
+          .select('id, name, is_active, created_at');
         if (data) {
           set({ competitions: data as Competition[] });
         }
@@ -413,9 +364,10 @@ export const useFootballStore = create<FootballStore>()(
       },
 
       fetchAvailableRoles: async () => {
+        // Fix: explicit column projection instead of select('*')
         const { data, error } = await supabase
           .from('player_role')
-          .select('*')
+          .select('id, name, status, created_at')
           .eq('status', true)
           .order('name', { ascending: true });
         if (data) {
@@ -432,9 +384,10 @@ export const useFootballStore = create<FootballStore>()(
       },
 
       fetchAvailableTags: async () => {
+        // Fix: explicit column projection instead of select('*')
         const { data, error } = await supabase
           .from('custom_tags')
-          .select('*')
+          .select('id, name, status, created_at')
           .eq('status', true)
           .order('name', { ascending: true });
         if (data) {
@@ -452,7 +405,10 @@ export const useFootballStore = create<FootballStore>()(
 
 
       fetchHallOfFame: async () => {
-        const { data, error } = await supabase.from('hall_of_frame').select('*');
+        // Fix: project only columns mapHallOfFameFromDb reads
+        const { data, error } = await supabase
+          .from('hall_of_frame')
+          .select('id, created_at, player_id, category, season_text, sub_title, descriptions');
         if (data) {
           set({ hallOfFame: data.map(mapHallOfFameFromDb) });
         }
