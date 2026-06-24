@@ -35,7 +35,7 @@ export function ImageUpload({ value, onChange, onRemove, className }: ImageUploa
         const ext = file.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
         
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from('images')
           .upload(fileName, blob, { contentType: blob.type, upsert: false });
           
