@@ -85,17 +85,19 @@ export function MatchEntries() {
             {totals.matches} entries · {totals.wins}W {totals.losses}L {totals.draws}D · {totals.goals} goals
           </p>
         </div>
-        <div className="flex gap-3 items-center flex-wrap">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Filter by player..."
-              className="pl-9 w-full sm:w-[200px]"
-            />
+        {activeTab === 'entries' && (
+          <div className="flex gap-3 items-center flex-wrap">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                placeholder="Filter by player..."
+                className="pl-9 w-full sm:w-[200px]"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Stat Cards */}
