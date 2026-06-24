@@ -785,15 +785,15 @@ export function ClubInfo() {
 
       try {
         if (activeTab === 'rules') {
-          const { data, error } = await supabase.from('club_rules').select('*').order('created_at', { ascending: false });
+          const { data, error } = await supabase.from('club_rules').select('id, title, subtitle, description, created_at').order('created_at', { ascending: false });
           if (error) throw error;
           setRules(data ?? []);
         } else if (activeTab === 'ranks') {
-          const { data, error } = await supabase.from('club_ranks').select('*').order('created_at', { ascending: false });
+          const { data, error } = await supabase.from('club_ranks').select('id, image_url, title, subtitle, description, created_at').order('created_at', { ascending: false });
           if (error) throw error;
           setRanks(data ?? []);
         } else if (activeTab === 'achievements') {
-          const { data, error } = await supabase.from('club_achievements').select('*').order('created_at', { ascending: false });
+          const { data, error } = await supabase.from('club_achievements').select('id, image_url, title, subtitle, description, created_at').order('created_at', { ascending: false });
           if (error) throw error;
           setAchievements(data ?? []);
         }

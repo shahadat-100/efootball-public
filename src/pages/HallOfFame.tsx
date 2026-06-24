@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Avatar, Badge } from '@/shared/components';
 import { Award, Calendar, ChevronRight, Sparkles } from 'lucide-react';
@@ -10,11 +10,54 @@ export function HallOfFame() {
     fetchHallOfFame
   } = useFootballStore();
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    fetchHallOfFame();
+    const load = async () => {
+      setIsLoading(true);
+      await fetchHallOfFame();
+      setIsLoading(false);
+    };
+    load();
   }, [fetchHallOfFame]);
 
   const getPlayer = (id: string) => players.find(p => p.id === id);
+
+  if (isLoading) {
+    return (
+      <div className="animate-in fade-in duration-300">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4 border-b border-border/40 pb-6 animate-pulse">
+          <div className="space-y-2">
+            <div className="h-7 w-40 bg-muted rounded-md" />
+            <div className="h-4 w-72 bg-muted rounded-md" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl p-6 space-y-5 animate-pulse">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-muted" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 bg-muted rounded-md" />
+                    <div className="h-3 w-14 bg-muted rounded-md" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-6 w-20 bg-muted rounded-full" />
+                  <div className="h-5 w-16 bg-muted rounded-full" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-36 bg-muted rounded-md" />
+                <div className="h-20 bg-muted rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">

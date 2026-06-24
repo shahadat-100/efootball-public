@@ -62,10 +62,10 @@ export function AppShell() {
   }, [location.pathname]);
 
   const counts: Record<string, number> = {
-    players: state.players.length,
-    matches: state.matches.length,
-    news: state.news.length,
-    'hall-of-fame': state.hallOfFame.length,
+    players: state.globalCounts?.players || 0,
+    matches: state.globalCounts?.matches || 0,
+    news: state.globalCounts?.news || 0,
+    'hall-of-fame': state.globalCounts?.['hall-of-fame'] || 0,
   };
 
   return (

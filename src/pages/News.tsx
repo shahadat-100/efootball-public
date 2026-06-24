@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Button, Input, Badge } from '@/shared/components';
 import { fuzzyFilter } from '@/shared/lib/utils';
@@ -7,10 +7,51 @@ import { Search } from 'lucide-react';
 const DEFAULT_NEWS_IMAGE = '/images/hero-banner.jpg';
 
 export function News() {
-  const { news } = useFootballStore();
+  const { news, fetchNews } = useFootballStore();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const PAGE_SIZE = 50;
+
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      await fetchNews();
+      setIsLoading(false);
+    };
+    load();
+  }, [fetchNews]);
+
+  if (isLoading) {
+    return (
+      <div className="animate-in fade-in duration-300">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4 animate-pulse">
+          <div className="space-y-2">
+            <div className="h-7 w-24 bg-muted rounded-md" />
+            <div className="h-4 w-28 bg-muted rounded-md" />
+          </div>
+          <div className="h-9 w-44 bg-muted rounded-md" />
+        </div>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-sm animate-pulse">
+              <div className="h-48 w-full bg-muted" />
+              <div className="p-5 space-y-3">
+                <div className="h-3 w-20 bg-muted rounded-md" />
+                <div className="h-5 w-full bg-muted rounded-md" />
+                <div className="h-5 w-4/5 bg-muted rounded-md" />
+                <div className="space-y-1">
+                  <div className="h-3 bg-muted rounded-md w-full" />
+                  <div className="h-3 bg-muted rounded-md w-full" />
+                  <div className="h-3 bg-muted rounded-md w-3/5" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const sorted = [...news].sort((a, b) => {
     const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();

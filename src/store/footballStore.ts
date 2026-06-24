@@ -151,6 +151,9 @@ interface FootballStore {
   availableTags: CustomTag[];
   matchEntriesLoaded: boolean; // lazy-load guard
   
+  globalCounts: Record<string, number>;
+  fetchGlobalCounts: () => Promise<void>;
+  
   fetchPlayers: () => Promise<void>;
   setPlayers: (p: Player[]) => void;
   
@@ -193,31 +196,49 @@ export const useFootballStore = create<FootballStore>()(
       matchEntriesHasMore: true,
       isInitialized: false,
       
+      globalCounts: {
+        players: 0,
+        matches: 0,
+        news: 0,
+        'hall-of-fame': 0,
+      },
+
+      fetchGlobalCounts: async () => {
+        try {
+          const [playersRes, matchesRes, newsRes, hofRes] = await Promise.all([
+            supabase.from('players').select('id', { count: 'exact', head: true }),
+            supabase.from('matches').select('id', { count: 'exact', head: true }),
+            supabase.from('news').select('id', { count: 'exact', head: true }),
+            supabase.from('hall_of_frame').select('id', { count: 'exact', head: true }),
+          ]);
+          
+          set({
+            globalCounts: {
+              players: playersRes.count || 0,
+              matches: matchesRes.count || 0,
+              news: newsRes.count || 0,
+              'hall-of-fame': hofRes.count || 0,
+            }
+          });
+        } catch (err) {
+          console.error('Error fetching global counts:', err);
+        }
+      },
+      
       initializeData: async () => {
         if (get().isInitialized) return;
         const store = get();
-        // Step 1: Wake the DB with the smallest query first
-        await store.fetchSeasons();
-        // Step 2: Fetch core data in parallel on the warm connection.
-        // Non-critical data (hallOfFame, roles, tags) is deferred — fetch on demand.
+        // Step 1: Wake the DB and fetch global counts for navigation badges
         await Promise.all([
-          store.fetchPlayers(),
-          store.fetchMatches(),
-          store.fetchMatchEntries(),
-          store.fetchPlayerSeasonStats(),
-          store.fetchNews(),
+          store.fetchSeasons(),
+          store.fetchGlobalCounts(),
         ]);
+        
         set({ isInitialized: true });
-        // Fetch lower-priority data after core is ready (non-blocking)
-        Promise.all([
-          store.fetchCompetitions(),
-          store.fetchHallOfFame(),
-          store.fetchAvailableRoles(),
-          store.fetchAvailableTags(),
-        ]);
       },
       
       fetchPlayers: async () => {
+        if (get().players.length > 0) return;
         try {
           // ৫টি টেবিল প্যারালাল ফেচ করা হচ্ছে (Nested Join বাদ দিয়ে)
           // Fix: project only needed columns on junction/lookup tables
@@ -274,6 +295,7 @@ export const useFootballStore = create<FootballStore>()(
       setPlayers: (players: Player[]) => set({ players }),
       
       fetchMatches: async () => {
+        if (get().matches.length > 0) return;
         // Fix: project only columns mapMatchFromDb reads — drops created_at, updated_at, etc.
         const { data, error } = await supabase
           .from('matches')
@@ -329,6 +351,7 @@ export const useFootballStore = create<FootballStore>()(
         if (error) console.error('Error loading more match entries:', error);
       },
       fetchNews: async () => {
+        if (get().news.length > 0) return;
         // Fix: project only needed columns and cap at 200 most-recent articles
         const { data, error } = await supabase
           .from('news')
@@ -340,6 +363,7 @@ export const useFootballStore = create<FootballStore>()(
       },
       setNews: (news: NewsArticle[]) => set({ news }),
       fetchSeasons: async () => {
+        if (get().seasons.length > 0) return;
         // Fix: project only columns SeasonDb type uses
         const { data, error } = await supabase
           .from('season')
@@ -352,6 +376,7 @@ export const useFootballStore = create<FootballStore>()(
       },
 
       fetchPlayerSeasonStats: async () => {
+        if (get().playerSeasonStats.length > 0) return;
         // Fix: drop the season(name) join — resolve season name from in-memory seasons array.
         // Fix: project only the columns the mapper reads.
         const { data, error } = await supabase
@@ -385,6 +410,7 @@ export const useFootballStore = create<FootballStore>()(
       },
 
       fetchCompetitions: async () => {
+        if (get().competitions.length > 0) return;
         // Fix: project only columns Competition interface uses
         const { data, error } = await supabase
           .from('competitions')
@@ -444,6 +470,7 @@ export const useFootballStore = create<FootballStore>()(
 
 
       fetchHallOfFame: async () => {
+        if (get().hallOfFame.length > 0) return;
         // Fix: project only columns mapHallOfFameFromDb reads
         const { data, error } = await supabase
           .from('hall_of_frame')

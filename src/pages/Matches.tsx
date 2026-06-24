@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Match } from '@/features/matches/types';
 import { Button, Input, Modal, Badge } from '@/shared/components';
@@ -28,11 +28,24 @@ function formatDateLabel(dateStr: string): string {
 }
 
 export function Matches() {
-  const { matches, matchEntries } = useFootballStore();
+  const { matches, matchEntries, fetchMatches, fetchMatchEntries } = useFootballStore();
   const [modal, setModal] = useState<{ type: 'info', data?: Match } | null>(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const PAGE_SIZE = 50;
+
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchMatches(),
+        fetchMatchEntries(), // since match results rely on it
+      ]);
+      setIsLoading(false);
+    };
+    load();
+  }, [fetchMatches, fetchMatchEntries]);
 
   const visibleMatches = matches.filter(m => m.competition !== 'Bulk Season');
   const filtered = fuzzyFilter(visibleMatches, search, ['homeTeam', 'awayTeam', 'competition'])
@@ -65,6 +78,47 @@ export function Matches() {
     });
     return map;
   }, [matchEntries]);
+
+  if (isLoading) {
+    return (
+      <div className="animate-in fade-in duration-300">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-6 gap-4 animate-pulse">
+          <div className="space-y-2">
+            <div className="h-6 w-32 bg-muted rounded-md" />
+            <div className="h-4 w-28 bg-muted rounded-md" />
+          </div>
+          <div className="flex gap-3">
+            <div className="h-9 w-44 bg-muted rounded-md" />
+            <div className="h-9 w-28 bg-muted rounded-md" />
+          </div>
+        </div>
+        <div className="grid gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-4 flex flex-col sm:flex-row items-center gap-6 animate-pulse">
+              <div className="flex-1 flex flex-col items-center sm:items-end space-y-1">
+                <div className="h-4 w-24 bg-muted rounded-md" />
+                <div className="h-3 w-12 bg-muted rounded-md" />
+              </div>
+              <div className="flex-shrink-0 text-center px-4 border-x border-border/50 min-w-[120px] flex flex-col items-center space-y-2">
+                <div className="h-6 w-16 bg-muted rounded-md" />
+                <div className="h-4 w-12 bg-muted rounded-md" />
+                <div className="h-3 w-20 bg-muted rounded-md" />
+              </div>
+              <div className="flex-1 flex flex-col items-center sm:items-start space-y-1">
+                <div className="h-4 w-24 bg-muted rounded-md" />
+                <div className="h-3 w-12 bg-muted rounded-md" />
+              </div>
+              <div className="flex gap-2 items-center sm:ml-auto w-full sm:w-auto justify-center sm:justify-end border-t sm:border-none border-border pt-4 sm:pt-0 mt-2 sm:mt-0">
+                <div className="h-6 w-20 bg-muted rounded-md" />
+                <div className="h-6 w-14 bg-muted rounded-md" />
+                <div className="h-6 w-8 bg-muted rounded-md" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
