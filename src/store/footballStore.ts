@@ -381,20 +381,18 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: project only the columns the mapper reads.
         const { data, error } = await supabase
           .from('player_season_stats')
-          .select('id, player_id, season_id, appearances, goals, cleansheets, hattricks, motmcount, wins, draws, losses, goalsconceded');
+          .select('id, player_id, season_id, appearances, goals, cleansheets, hattricks, motmcount, wins, draws, losses, goalsconceded, season:season_id(name)');
         if (error) {
           console.error('Error fetching player season stats:', error);
           return;
         }
-        const seasons = get().seasons;
         set({
           playerSeasonStats: (data ?? []).map(item => {
-            const seasonObj = seasons.find(s => s.id === item.season_id);
             return {
               id: item.id,
               playerId: item.player_id,
               seasonId: item.season_id,
-              seasonName: seasonObj?.name || `Season ${item.season_id}`,
+              seasonName: (item.season as any)?.name || `Season ${item.season_id}`,
               appearances: item.appearances || 0,
               goals: item.goals || 0,
               cleansheets: item.cleansheets || 0,
