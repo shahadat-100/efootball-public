@@ -24,12 +24,12 @@ export function Leaderboard() {
             <>
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mr-1">Points formula:</span>
               {[
-                { label: 'Win', value: '+3', color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
-                { label: 'Draw', value: '+1', color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
-                { label: 'Loss', value: '-1', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+                { label: 'Win', value: '+10', color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+                { label: 'Draw', value: '+5', color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
+                { label: 'Loss', value: '-3', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
                 { label: 'GF', value: '+1', color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
                 { label: 'GC', value: '-1', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
-                { label: '👑 MOTM', value: '+2', color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
+                { label: '👑 MOTM', value: '+4', color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
                 { label: '⚽ HT', value: '+1 Per HT', color: 'text-violet-600 bg-violet-500/10 border-violet-500/20' },
               ].map(({ label, value, color }) => (
                 <span key={label} className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md border ${color}`}>
