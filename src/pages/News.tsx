@@ -133,12 +133,12 @@ export function News() {
         {CATEGORY_TABS.map(tab => {
           const isActive = activeTab === tab;
           const tabColors: Record<string, { bg: string; text: string; border: string }> = {
-            All:      { bg: '#c8102e', text: '#fff',     border: '#c8102e' },
-            General:  { bg: '#e8ff00', text: '#111',     border: '#e8ff00' },
-            Player:   { bg: '#8b0000', text: '#fff',     border: '#8b0000' },
-            League:   { bg: '#0a1628', text: '#93c5fd',  border: '#1e3a5f' },
-            Transfer: { bg: '#1a237e', text: '#fff',     border: '#1a237e' },
-            Injury:   { bg: '#c8102e', text: '#fff',     border: '#c8102e' },
+            All:       { bg: '#c8102e',  text: '#fff',    border: '#c8102e' },
+            Milestone: { bg: '#991b1b',  text: '#fecaca', border: '#7f1d1d' },
+            General:   { bg: '#0a1628',  text: '#93c5fd', border: '#1e3a5f' },
+            Player:    { bg: '#059669',  text: '#fff',    border: '#047857' },
+            League:    { bg: '#0a1628',  text: '#93c5fd', border: '#1e3a5f' },
+            Transfer:  { bg: '#059669',  text: '#fff',    border: '#047857' },
           };
           const colors = tabColors[tab] || tabColors['All'];
           return (
