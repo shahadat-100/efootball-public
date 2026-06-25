@@ -15,9 +15,8 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
   const stats = usePlayerStats(player.id);
   const { matchEntries, players, playerSeasonStats } = useFootballStore();
 
-  // Calculate rank
   const calcSeasonPoints = (s: any) =>
-    (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks;
+    (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
   const playerRanks = players.map(p => {
     const pStats = playerSeasonStats.filter(s => s.playerId === p.id);

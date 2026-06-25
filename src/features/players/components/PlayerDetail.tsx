@@ -86,7 +86,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     }
     
     const calcPoints = (entries: typeof historyEntries) => 
-      entries.reduce((sum, e) => sum + (e.result === 'win' ? 3 : e.result === 'draw' ? 1 : 0), 0) / entries.length;
+      entries.reduce((sum, e) => sum + (e.result === 'win' ? 10 : e.result === 'draw' ? 5 : e.result === 'loss' ? -3 : 0), 0) / entries.length;
 
     const first5Avg = calcPoints(recent10.slice(0, 5)); // newer
     const last5Avg = calcPoints(recent10.slice(5, 10)); // older
@@ -124,7 +124,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   // Points calculation helper (matching PointsLeaderboard)
   const calcSeasonPoints = (s: any) =>
-    (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks;
+    (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
   // Compute Leaderboard Rank based on total points
   const playerRanks = players.map(p => {
@@ -162,12 +162,12 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   const calcEntryPoints = (e: any) => {
     let pts = 0;
-    if (e.result === 'win') pts += 3;
-    else if (e.result === 'draw') pts += 1;
-    else if (e.result === 'loss') pts -= 1;
+    if (e.result === 'win') pts += 10;
+    else if (e.result === 'draw') pts += 5;
+    else if (e.result === 'loss') pts -= 3;
     pts += (e.goals || 0);
     pts -= (e.goalsConceded || 0);
-    pts += (e.motm ? 2 : 0);
+    pts += (e.motm ? 4 : 0);
     pts += (e.hattricks || 0);
     return pts;
   };

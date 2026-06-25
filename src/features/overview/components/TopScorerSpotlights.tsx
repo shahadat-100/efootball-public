@@ -16,12 +16,12 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 // Helper: Calculate points from entries
 const calcEntryPoints = (e: MatchEntry): number => {
   let pts = 0;
-  if (e.result === 'win') pts += 3;
-  else if (e.result === 'draw') pts += 1;
-  else if (e.result === 'loss') pts -= 1;
+  if (e.result === 'win') pts += 10;
+  else if (e.result === 'draw') pts += 5;
+  else if (e.result === 'loss') pts -= 3;
   pts += (e.goals || 0);
   pts -= (e.goalsConceded || 0);
-  pts += (e.motm ? 2 : 0);
+  pts += (e.motm ? 4 : 0);
   pts += (e.hattricks || 0);
   return pts;
 };
@@ -29,7 +29,7 @@ const calcEntryPoints = (e: MatchEntry): number => {
 // Helper: Calculate points from season stats
 const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
   stats.reduce((total, s) =>
-    total + (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks
+    total + (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks
   , 0);
 
 export function TopScorerSpotlights({ players, matchEntries, playerSeasonStats }: TopScorerSpotlightsProps) {

@@ -100,7 +100,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
     });
 
     const calcPoints = (s: { w: number; d: number; l: number; gf: number; gc: number; ht: number; motm: number }) =>
-      s.w * 3 + s.d - s.l + s.gf - s.gc + s.motm * 2 + s.ht;
+      s.w * 10 + s.d * 5 - s.l * 3 + s.gf - s.gc + s.motm * 4 + s.ht;
 
     const fromMap = (map: StatsMap): RankedPlayer[] =>
       Array.from(map.entries())
