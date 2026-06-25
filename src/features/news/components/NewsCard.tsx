@@ -111,7 +111,7 @@ function GeneralCard({ article }: NewsCardProps) {
             color: '#111',
             textTransform: 'uppercase',
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             margin: 0,
@@ -120,6 +120,19 @@ function GeneralCard({ article }: NewsCardProps) {
           {article.title}
         </h3>
       </div>
+
+      {/* Description */}
+      {article.content && (
+        <div style={{ background: '#181818', padding: '10px 16px 12px' }}>
+          <p style={{
+            fontSize: '12px', color: '#999', lineHeight: 1.6,
+            display: '-webkit-box', WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0,
+          }}>
+            {article.content}
+          </p>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{
@@ -212,7 +225,7 @@ function PlayerCard({ article }: NewsCardProps) {
             color: '#111',
             textTransform: 'uppercase',
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             margin: 0,
@@ -221,6 +234,19 @@ function PlayerCard({ article }: NewsCardProps) {
           {article.title}
         </h3>
       </div>
+
+      {/* Description */}
+      {article.content && (
+        <div style={{ background: '#181818', padding: '10px 16px 12px' }}>
+          <p style={{
+            fontSize: '12px', color: '#999', lineHeight: 1.6,
+            display: '-webkit-box', WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0,
+          }}>
+            {article.content}
+          </p>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{
@@ -350,6 +376,20 @@ function LeagueCard({ article }: NewsCardProps) {
           </p>
         </div>
       </div>
+
+      {/* Description strip below image */}
+      <div style={{ background: '#0d1e36', padding: '12px 16px 14px' }}>
+        <p style={{
+          fontSize: '12px', color: '#93c5fd', lineHeight: 1.6,
+          display: '-webkit-box', WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 8px',
+        }}>
+          {article.content || 'No content provided.'}
+        </p>
+        <span style={{ fontSize: '10px', color: '#60a5fa', fontWeight: 600 }}>
+          By {article.author}
+        </span>
+      </div>
     </div>
   );
 }
@@ -468,6 +508,17 @@ function TransferCard({ article }: NewsCardProps) {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Description strip below image */}
+      <div style={{ background: '#081f12', padding: '12px 16px 14px' }}>
+        <p style={{
+          fontSize: '12px', color: '#6ee7b7', lineHeight: 1.6,
+          display: '-webkit-box', WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0,
+        }}>
+          {article.content || 'No content provided.'}
+        </p>
       </div>
     </div>
   );
@@ -593,6 +644,17 @@ function InjuryCard({ article }: NewsCardProps) {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Description strip below image */}
+      <div style={{ background: '#1f0008', padding: '12px 16px 14px' }}>
+        <p style={{
+          fontSize: '12px', color: '#fca5a5', lineHeight: 1.6,
+          display: '-webkit-box', WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0,
+        }}>
+          {article.content || 'No content provided.'}
+        </p>
       </div>
     </div>
   );
