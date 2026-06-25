@@ -74,7 +74,7 @@ function NavyCard({ article }: NewsCardProps) {
 
         {/* Bottom ribbon + title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
-          <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg,#c8102e 60%,#9b0020)',
@@ -89,7 +89,7 @@ function NavyCard({ article }: NewsCardProps) {
                 {article.category}
               </span>
             </div>
-            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.12)', padding: '4px 14px', backdropFilter: 'blur(4px)', marginLeft: '-8px' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.12)', padding: '4px 14px', backdropFilter: 'blur(4px)' }}>
               <span style={{
                 fontFamily: "'Oswald', sans-serif", fontWeight: 700,
                 fontSize: '14px', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.03em',
@@ -169,7 +169,7 @@ function EmeraldCard({ article }: NewsCardProps) {
 
         {/* Bottom ribbon + title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
-          <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg,#059669 60%,#047857)',
@@ -184,7 +184,7 @@ function EmeraldCard({ article }: NewsCardProps) {
                 {article.category}
               </span>
             </div>
-            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '4px 14px', backdropFilter: 'blur(4px)', marginLeft: '-8px' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '4px 14px', backdropFilter: 'blur(4px)' }}>
               <span style={{
                 fontFamily: "'Oswald', sans-serif", fontWeight: 700,
                 fontSize: '14px', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.03em',
@@ -242,7 +242,6 @@ function CrimsonCard({ article }: NewsCardProps) {
           className="news-card-img"
           style={{
             width: '100%', height: '100%', objectFit: 'cover',
-            filter: 'saturate(0.65)',
             transition: 'transform 0.5s ease',
           }}
           onError={e => { (e.currentTarget as HTMLImageElement).src = DEFAULT_NEWS_IMAGE; }}
@@ -250,7 +249,7 @@ function CrimsonCard({ article }: NewsCardProps) {
         {/* Deep crimson gradient */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(26,0,5,0.1) 0%, rgba(26,0,5,0.5) 50%, rgba(26,0,5,0.97) 100%)',
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(26,0,5,0.3) 50%, rgba(26,0,5,0.95) 100%)',
         }} />
 
         {/* Date badge top-left */}
@@ -268,7 +267,7 @@ function CrimsonCard({ article }: NewsCardProps) {
 
         {/* Bottom ribbon + title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
-          <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg,#991b1b 60%,#7f1d1d)',
@@ -285,7 +284,7 @@ function CrimsonCard({ article }: NewsCardProps) {
             </div>
             <div style={{
               display: 'inline-flex', background: 'rgba(255,255,255,0.08)', padding: '4px 14px',
-              backdropFilter: 'blur(4px)', alignItems: 'center', gap: '6px', marginLeft: '-8px'
+              backdropFilter: 'blur(4px)', alignItems: 'center', gap: '6px'
             }}>
               <span style={{ fontSize: '10px' }}>🏆</span>
               <span style={{
