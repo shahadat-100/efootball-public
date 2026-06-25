@@ -74,7 +74,7 @@ function NavyCard({ article }: NewsCardProps) {
 
         {/* Bottom ribbon + title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
-          <div style={{ marginBottom: '10px' }}>
+          <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
             <div style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg,#c8102e 60%,#9b0020)',
@@ -89,7 +89,7 @@ function NavyCard({ article }: NewsCardProps) {
                 {article.category}
               </span>
             </div>
-            <div style={{ background: 'rgba(255,255,255,0.12)', padding: '4px 14px', backdropFilter: 'blur(4px)' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.12)', padding: '4px 14px', backdropFilter: 'blur(4px)', marginLeft: '-8px' }}>
               <span style={{
                 fontFamily: "'Oswald', sans-serif", fontWeight: 700,
                 fontSize: '14px', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.03em',
@@ -169,7 +169,7 @@ function EmeraldCard({ article }: NewsCardProps) {
 
         {/* Bottom ribbon + title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
-          <div style={{ marginBottom: '10px' }}>
+          <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
             <div style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg,#059669 60%,#047857)',
@@ -184,7 +184,7 @@ function EmeraldCard({ article }: NewsCardProps) {
                 {article.category}
               </span>
             </div>
-            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 14px', backdropFilter: 'blur(4px)' }}>
+            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '4px 14px', backdropFilter: 'blur(4px)', marginLeft: '-8px' }}>
               <span style={{
                 fontFamily: "'Oswald', sans-serif", fontWeight: 700,
                 fontSize: '14px', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.03em',
@@ -200,9 +200,6 @@ function EmeraldCard({ article }: NewsCardProps) {
           }}>
             {article.title}
           </p>
-          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
-            <span style={{ fontSize: '10px', color: '#6ee7b7', fontWeight: 600 }}>By {article.author}</span>
-          </div>
         </div>
       </div>
 
@@ -210,10 +207,13 @@ function EmeraldCard({ article }: NewsCardProps) {
       <div style={{ background: '#081f12', padding: '12px 16px 14px' }}>
         <p style={{
           fontSize: '12px', color: '#6ee7b7', lineHeight: 1.6,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0,
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 8px',
         }}>
           {article.content || 'No content provided.'}
         </p>
+        <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 600 }}>
+          By {article.author}
+        </span>
       </div>
     </div>
   );
@@ -268,7 +268,7 @@ function CrimsonCard({ article }: NewsCardProps) {
 
         {/* Bottom ribbon + title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
-          <div style={{ marginBottom: '10px' }}>
+          <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
             <div style={{
               display: 'inline-block',
               background: 'linear-gradient(135deg,#991b1b 60%,#7f1d1d)',
@@ -284,8 +284,8 @@ function CrimsonCard({ article }: NewsCardProps) {
               </span>
             </div>
             <div style={{
-              background: 'rgba(255,255,255,0.08)', padding: '4px 14px',
-              backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: '6px',
+              display: 'inline-flex', background: 'rgba(255,255,255,0.08)', padding: '4px 14px',
+              backdropFilter: 'blur(4px)', alignItems: 'center', gap: '6px', marginLeft: '-8px'
             }}>
               <span style={{ fontSize: '10px' }}>🏆</span>
               <span style={{
@@ -303,9 +303,6 @@ function CrimsonCard({ article }: NewsCardProps) {
           }}>
             {article.title}
           </p>
-          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
-            <span style={{ fontSize: '10px', color: '#fca5a5', fontWeight: 600 }}>By {article.author}</span>
-          </div>
         </div>
       </div>
 
@@ -313,10 +310,13 @@ function CrimsonCard({ article }: NewsCardProps) {
       <div style={{ background: '#1f0008', padding: '12px 16px 14px' }}>
         <p style={{
           fontSize: '12px', color: '#fca5a5', lineHeight: 1.6,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: 0,
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 8px',
         }}>
           {article.content || 'No content provided.'}
         </p>
+        <span style={{ fontSize: '10px', color: '#f87171', fontWeight: 600 }}>
+          By {article.author}
+        </span>
       </div>
     </div>
   );
