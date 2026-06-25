@@ -52,10 +52,11 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
   const [page, setPage] = useState(1);
 
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
+    const lastDayOfCurrentMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
     let activeWeekStart = 1, activeWeekEnd = 7, activeWeekName = 'Week 1';
     if (currentDay >= 8  && currentDay <= 14) { activeWeekStart = 8;  activeWeekEnd = 14; activeWeekName = 'Week 2'; }
     else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; activeWeekName = 'Week 3'; }
-    else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; activeWeekName = 'Week 4'; }
+    else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = lastDayOfCurrentMonth; activeWeekName = 'Week 4'; }
 
     type StatsMap = Map<string, { w: number; d: number; l: number; gf: number; gc: number; cs: number; ht: number; motm: number }>;
     const empty = () => ({ w: 0, d: 0, l: 0, gf: 0, gc: 0, cs: 0, ht: 0, motm: 0 });
@@ -130,7 +131,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      const points = wins * 3 + draws - losses + gf - gc + motm * 2 + ht;
+      const points = wins * 10 + draws * 5 - losses * 3 + gf - gc + motm * 4 + ht;
       return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
     }).sort((a, b) => b.points - a.points);
 

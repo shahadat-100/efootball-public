@@ -43,6 +43,6 @@ export const calcPlayerRating = (stats: PlayerSeasonStat[] | undefined | null): 
 export const calcTotalRawPoints = (stats: PlayerSeasonStat[] | undefined | null): number => {
   if (!stats || stats.length === 0) return 0;
   return stats.reduce((total, s) =>
-    total + (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks
+    total + (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks
   , 0);
 };

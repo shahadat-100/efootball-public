@@ -28,7 +28,7 @@ export function Players() {
   // Calculate points and sort players
   const sortedPlayers = useMemo(() => {
     const calcSeasonPoints = (s: any) =>
-      (s.wins * 3) + s.draws - s.losses + s.goals - s.goalsConceded + (s.motmCount * 2) + s.hattricks;
+      (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
     const mapped = players.map(p => {
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
