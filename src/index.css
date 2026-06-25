@@ -171,6 +171,18 @@
     font-family: 'Oswald', sans-serif;
   }
 
+  /* News card hover effects */
+  .news-card-general:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(0,0,0,0.6) !important; }
+  .news-card-player:hover  { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 20px 48px rgba(200,16,46,0.25) !important; }
+  .news-card-league:hover  { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,128,0.4) !important; }
+  .news-card-transfer:hover{ transform: translateY(-6px); box-shadow: 0 20px 45px rgba(0,0,0,0.25) !important; }
+  .news-card-injury:hover  { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(200,16,46,0.35) !important; }
+  .news-card-general:hover .news-card-img,
+  .news-card-player:hover  .news-card-img,
+  .news-card-league:hover  .news-card-img,
+  .news-card-transfer:hover .news-card-img,
+  .news-card-injury:hover  .news-card-img { transform: scale(1.07); }
+
   /* Bottom nav for mobile */
   .bottom-nav {
     position: fixed;

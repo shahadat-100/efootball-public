@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
-import { Button, Input, Badge } from '@/shared/components';
+import { Button, Input } from '@/shared/components';
 import { fuzzyFilter } from '@/shared/lib/utils';
-import { Search } from 'lucide-react';
+import { Search, Flame } from 'lucide-react';
+import { NewsCard } from '@/features/news/components/NewsCard';
+import { NEWS_CATEGORIES } from '@/shared/lib/constants';
 
-const DEFAULT_NEWS_IMAGE = '/images/hero-banner.jpg';
+const CATEGORY_TABS = ['All', ...NEWS_CATEGORIES] as const;
+type TabValue = typeof CATEGORY_TABS[number];
 
 export function News() {
   const { news, fetchNews } = useFootballStore();
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<TabValue>('All');
+  const [hotOnly, setHotOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const PAGE_SIZE = 50;
@@ -54,65 +59,117 @@ export function News() {
   }
 
   const sorted = [...news].sort((a, b) => {
+    // Hot articles first, then by date
+    if (a.hot && !b.hot) return -1;
+    if (!a.hot && b.hot) return 1;
     const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
     if (dateDiff !== 0) return dateDiff;
     const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
     const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
     return timeB - timeA;
   });
-  const filtered = fuzzyFilter(sorted, search, ['title', 'author', 'category']);
+
+  const categoryFiltered = activeTab === 'All'
+    ? sorted
+    : sorted.filter(n => n.category === activeTab);
+
+  const hotFiltered = hotOnly
+    ? categoryFiltered.filter(n => n.hot)
+    : categoryFiltered;
+
+  const filtered = fuzzyFilter(hotFiltered, search, ['title', 'author', 'category']);
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const hotCount = news.filter(n => n.hot).length;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4">
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-6 gap-4">
         <div>
           <h2 className="font-heading font-bold text-[28px] tracking-wide mb-1">News</h2>
           <p className="text-muted-foreground text-[13px] font-medium">{news.length} articles</p>
         </div>
         <div className="flex gap-3 items-center">
+          {/* Hot filter toggle */}
+          <button
+            onClick={() => { setHotOnly(h => !h); setPage(1); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '7px 14px', borderRadius: '999px',
+              border: hotOnly ? '1.5px solid #ff3131' : '1.5px solid transparent',
+              background: hotOnly
+                ? 'linear-gradient(135deg,rgba(255,49,49,0.18),rgba(255,107,53,0.12))'
+                : 'rgba(0,0,0,0.06)',
+              color: hotOnly ? '#ff3131' : '#888',
+              fontSize: '12px', fontWeight: 700,
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+              cursor: 'pointer', transition: 'all 0.2s ease',
+            }}
+          >
+            <Flame size={13} />
+            Hot {hotCount > 0 && `(${hotCount})`}
+          </button>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              value={search} 
-              onChange={e => setSearch(e.target.value)} 
-              placeholder="Search articles..." 
+            <Input
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Search articles..."
               className="pl-9 w-full sm:w-[220px]"
             />
           </div>
         </div>
       </div>
 
+      {/* ── Category Filter Tabs ── */}
+      <div
+        style={{
+          display: 'flex', gap: '8px', flexWrap: 'wrap',
+          marginBottom: '24px',
+        }}
+      >
+        {CATEGORY_TABS.map(tab => {
+          const isActive = activeTab === tab;
+          const tabColors: Record<string, { bg: string; text: string; border: string }> = {
+            All:      { bg: '#c8102e', text: '#fff',     border: '#c8102e' },
+            General:  { bg: '#e8ff00', text: '#111',     border: '#e8ff00' },
+            Player:   { bg: '#8b0000', text: '#fff',     border: '#8b0000' },
+            League:   { bg: '#0a1628', text: '#93c5fd',  border: '#1e3a5f' },
+            Transfer: { bg: '#1a237e', text: '#fff',     border: '#1a237e' },
+            Injury:   { bg: '#c8102e', text: '#fff',     border: '#c8102e' },
+          };
+          const colors = tabColors[tab] || tabColors['All'];
+          return (
+            <button
+              key={tab}
+              onClick={() => { setActiveTab(tab); setPage(1); }}
+              style={{
+                padding: '6px 16px',
+                borderRadius: '999px',
+                border: `1.5px solid ${isActive ? colors.border : 'rgba(0,0,0,0.12)'}`,
+                background: isActive ? colors.bg : 'transparent',
+                color: isActive ? colors.text : '#888',
+                fontSize: '12px', fontWeight: 700,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: "'Oswald', sans-serif",
+              }}
+            >
+              {tab}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Cards Grid ── */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 stagger-children">
         {paginated.map(n => (
-          <div key={n.id} className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 card-hover-lift group">
-            <div className="h-48 w-full overflow-hidden flex-shrink-0 relative">
-              <img 
-                src={n.image || DEFAULT_NEWS_IMAGE} 
-                alt={n.title} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-3 left-3 flex gap-2">
-                {n.hot && <Badge bg="#7f1d1d" c="#fca5a5" className="shadow-lg border border-red-500/20">🔥 Hot</Badge>}
-                <Badge bg="rgba(0,0,0,0.6)" c="#ffffff" className="backdrop-blur-sm border border-white/10">{n.category}</Badge>
-              </div>
-            </div>
-            <div className="p-5 flex-1 flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-muted-foreground text-[11px] font-medium">{n.date}</span>
-              </div>
-              <h3 className="font-bold text-[15px] mb-2 leading-tight group-hover:text-primary transition-colors">{n.title}</h3>
-              <p className="text-muted-foreground text-[12px] leading-relaxed mb-4 flex-1 break-words line-clamp-3">
-                {n.content || 'No content provided.'}
-              </p>
-              <div className="flex items-center justify-between mt-auto pt-3 border-t border-border/50">
-                <p className="text-muted-foreground text-[11px]">By <span className="font-semibold text-foreground">{n.author}</span></p>
-              </div>
-            </div>
-          </div>
+          <NewsCard key={n.id} article={n} />
         ))}
         {filtered.length === 0 && (
           <div className="col-span-full py-16 text-center border-2 border-dashed border-border rounded-2xl bg-card/50">
@@ -122,15 +179,16 @@ export function News() {
         )}
       </div>
 
+      {/* ── Pagination ── */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-8 bg-card border border-border p-4 rounded-2xl shadow-sm">
           <p className="text-[12px] text-muted-foreground font-medium">
             Showing {(page-1)*PAGE_SIZE + 1} to {Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length} articles
           </p>
           <div className="flex gap-2">
-            <Button 
-              variant="secondary" 
-              size="sm" 
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo(0, 0); }}
               disabled={page === 1}
             >
@@ -139,9 +197,9 @@ export function News() {
             <div className="flex items-center px-3 text-[12px] font-bold border border-border rounded-lg bg-muted/30">
               Page {page} of {totalPages}
             </div>
-            <Button 
-              variant="secondary" 
-              size="sm" 
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo(0, 0); }}
               disabled={page === totalPages}
             >
