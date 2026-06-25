@@ -141,7 +141,7 @@ function GeneralCard({ article }: NewsCardProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STYLE 2 — "Player" → Torn paper / player spotlight card (dark red + white)
+// STYLE 2 — "Player" → General-style dark card but with gold/amber accent panel
 // ═══════════════════════════════════════════════════════════════════════════════
 function PlayerCard({ article }: NewsCardProps) {
   const img = article.image || DEFAULT_NEWS_IMAGE;
@@ -149,18 +149,17 @@ function PlayerCard({ article }: NewsCardProps) {
     <div
       className="group news-card-player"
       style={{
-        background: '#fff',
+        background: '#0d0d0d',
         borderRadius: '16px',
         overflow: 'hidden',
         position: 'relative',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         cursor: 'pointer',
-        border: article.hot ? '2px solid #c8102e' : '2px solid #eee',
       }}
     >
-      {/* Image section */}
-      <div style={{ position: 'relative', height: '170px', overflow: 'hidden', background: '#f0f0f0' }}>
+      {/* Image */}
+      <div style={{ height: '200px', overflow: 'hidden', position: 'relative' }}>
         <img
           src={img}
           alt={article.title}
@@ -168,43 +167,52 @@ function PlayerCard({ article }: NewsCardProps) {
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
           onError={e => { (e.currentTarget as HTMLImageElement).src = DEFAULT_NEWS_IMAGE; }}
         />
-        {/* torn paper bottom mask */}
-        <div style={{
-          position: 'absolute', bottom: -1, left: 0, right: 0, height: '28px',
-          background: '#fff',
-          clipPath: 'polygon(0 60%,2% 20%,4% 70%,6% 30%,8% 65%,10% 15%,12% 55%,14% 25%,16% 60%,18% 10%,20% 50%,22% 80%,24% 40%,26% 70%,28% 20%,30% 55%,32% 30%,34% 65%,36% 15%,38% 50%,40% 80%,42% 35%,44% 65%,46% 25%,48% 55%,50% 10%,52% 45%,54% 80%,56% 30%,58% 60%,60% 20%,62% 55%,64% 25%,66% 65%,68% 10%,70% 50%,72% 80%,74% 40%,76% 70%,78% 20%,80% 55%,82% 30%,84% 60%,86% 15%,88% 50%,90% 75%,92% 35%,94% 65%,96% 25%,98% 55%,100% 20%,100% 100%,0 100%)',
-        }} />
+        {/* Category tag top-left */}
+        <span style={{
+          position: 'absolute', top: 12, left: 12,
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+          color: '#fbbf24', fontSize: '10px', fontWeight: 700,
+          letterSpacing: '0.12em', textTransform: 'uppercase',
+          padding: '4px 10px', borderRadius: '6px',
+          border: '1px solid rgba(251,191,36,0.3)',
+        }}>
+          {article.category}
+        </span>
         {article.hot && (
-          <span style={{ position: 'absolute', top: 10, right: 10 }}>
+          <span style={{ position: 'absolute', top: 12, right: 12 }}>
             <HotBadge />
           </span>
         )}
+        {/* Diagonal gold stripe accent */}
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          width: '48px', height: '100%',
+          background: 'repeating-linear-gradient(45deg,#fbbf24 0,#fbbf24 6px,transparent 6px,transparent 14px)',
+          opacity: 0.45,
+          pointerEvents: 'none',
+        }} />
       </div>
 
-      {/* Dark red title block */}
+      {/* Gold title block */}
       <div style={{
-        background: '#8b0000',
-        padding: '10px 16px 12px',
-        position: 'relative',
+        background: 'linear-gradient(135deg,#b8860b,#fbbf24)',
+        padding: '14px 16px 10px',
+        clipPath: 'polygon(0 8px,100% 0,100% 100%,0 100%)',
+        marginTop: '-2px',
       }}>
-        <span style={{
-          display: 'inline-block',
-          fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em',
-          textTransform: 'uppercase', color: '#ffcdd2',
-          marginBottom: '4px',
-        }}>
-          ● {article.category}
-        </span>
+        <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', color: '#422006', textTransform: 'uppercase', marginBottom: '6px' }}>
+          {article.category} Spotlight
+        </p>
         <h3
           style={{
             fontFamily: "'Oswald', sans-serif",
             fontWeight: 700,
-            fontSize: '20px',
-            lineHeight: 1.15,
-            color: '#fff',
+            fontSize: '17px',
+            lineHeight: 1.2,
+            color: '#111',
             textTransform: 'uppercase',
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             margin: 0,
@@ -212,33 +220,21 @@ function PlayerCard({ article }: NewsCardProps) {
         >
           {article.title}
         </h3>
-        {article.author && (
-          <p style={{
-            fontSize: '11px', color: '#ff8a80',
-            fontStyle: 'italic', fontWeight: 600, marginTop: '6px',
-          }}>
-            {article.author}
-          </p>
-        )}
       </div>
 
       {/* Footer */}
       <div style={{
-        background: '#fff',
-        padding: '10px 16px',
+        background: '#111',
+        padding: '10px 16px 14px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderTop: '1px solid #f0f0f0',
       }}>
-        <span style={{ fontSize: '10px', color: '#888', fontWeight: 600, letterSpacing: '0.06em' }}>
+        <span style={{ fontSize: '10px', color: '#bbb', fontWeight: 600, letterSpacing: '0.08em' }}>
           {formatDate(article.date)}
         </span>
-        <span style={{
-          fontSize: '10px', fontWeight: 700, color: '#8b0000',
-          textTransform: 'uppercase', letterSpacing: '0.1em',
-        }}>
-          Read More →
+        <span style={{ fontSize: '10px', color: '#fbbf24', fontWeight: 600 }}>
+          By {article.author}
         </span>
       </div>
     </div>
@@ -359,7 +355,7 @@ function LeagueCard({ article }: NewsCardProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STYLE 4 — "Transfer" → Soccer magazine style: image top + blue/red info block
+// STYLE 4 — "Transfer" → League-style full-bleed with emerald/green ribbon
 // ═══════════════════════════════════════════════════════════════════════════════
 function TransferCard({ article }: NewsCardProps) {
   const img = article.image || DEFAULT_NEWS_IMAGE;
@@ -367,16 +363,17 @@ function TransferCard({ article }: NewsCardProps) {
     <div
       className="group news-card-transfer"
       style={{
-        background: '#fff',
         borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: '0 8px 28px rgba(0,0,0,0.15)',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        position: 'relative',
         cursor: 'pointer',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        background: '#071a0f',
       }}
     >
-      {/* Image */}
-      <div style={{ height: '170px', overflow: 'hidden', position: 'relative' }}>
+      {/* Full-height image */}
+      <div style={{ height: '280px', overflow: 'hidden', position: 'relative' }}>
         <img
           src={img}
           alt={article.title}
@@ -384,104 +381,100 @@ function TransferCard({ article }: NewsCardProps) {
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
           onError={e => { (e.currentTarget as HTMLImageElement).src = DEFAULT_NEWS_IMAGE; }}
         />
+        {/* Deep green gradient overlay */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, rgba(0,0,50,0.7) 0%, transparent 55%)',
+          background: 'linear-gradient(to bottom, rgba(7,26,15,0.25) 0%, rgba(7,26,15,0.55) 50%, rgba(7,26,15,0.93) 100%)',
         }} />
+
+        {/* Date badge top-left */}
+        <div style={{
+          position: 'absolute', top: 12, left: 12,
+          background: 'rgba(5,40,20,0.85)', backdropFilter: 'blur(8px)',
+          color: '#6ee7b7', fontSize: '10px', fontWeight: 700,
+          letterSpacing: '0.1em', textTransform: 'uppercase',
+          padding: '4px 10px', borderRadius: '6px',
+          border: '1px solid rgba(110,231,183,0.25)',
+        }}>
+          {formatDate(article.date)}
+        </div>
+
         {article.hot && (
-          <span style={{ position: 'absolute', top: 10, right: 10 }}>
+          <span style={{ position: 'absolute', top: 12, right: 12 }}>
             <HotBadge />
           </span>
         )}
-      </div>
 
-      {/* Blue-navy category banner */}
-      <div style={{
-        background: 'linear-gradient(135deg,#1a237e,#283593)',
-        padding: '10px 16px 8px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-      }}>
-        <span style={{
-          width: '32px', height: '32px', borderRadius: '50%',
-          background: '#c8102e',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '14px', flexShrink: 0,
-        }}>
-          🔄
-        </span>
-        <div>
+        {/* Bottom content overlay */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
+          {/* Emerald diagonal ribbon */}
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'linear-gradient(135deg,#059669 60%,#047857)',
+              padding: '6px 20px 6px 14px',
+              clipPath: 'polygon(0 0,100% 0,95% 100%,0 100%)',
+            }}>
+              <span style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontWeight: 800,
+                fontSize: '22px',
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                lineHeight: 1,
+                display: 'block',
+              }}>
+                {article.category}
+              </span>
+            </div>
+            <div style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '4px 14px',
+              backdropFilter: 'blur(4px)',
+            }}>
+              <span style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontWeight: 700,
+                fontSize: '14px',
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.03em',
+              }}>
+                News
+              </span>
+            </div>
+          </div>
+
           <p style={{
-            fontFamily: "'Oswald', sans-serif",
-            fontWeight: 800, fontSize: '16px',
-            color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em',
-            lineHeight: 1, margin: 0,
+            fontStyle: 'italic',
+            fontWeight: 600,
+            color: '#d1fae5',
+            fontSize: '13px',
+            lineHeight: 1.4,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            margin: 0,
           }}>
-            {article.category}
+            {article.title}
           </p>
-          <p style={{ fontSize: '9px', color: '#90caf9', fontWeight: 600, letterSpacing: '0.08em', margin: '2px 0 0' }}>
-            {formatDate(article.date)}
-          </p>
+
+          {/* Author row */}
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: '10px', color: '#6ee7b7', fontWeight: 600 }}>
+              By {article.author}
+            </span>
+          </div>
         </div>
-      </div>
-
-      {/* Title & content */}
-      <div style={{ padding: '12px 16px' }}>
-        <h3 style={{
-          fontWeight: 700, fontSize: '14px', lineHeight: 1.3,
-          color: '#1a237e', marginBottom: '6px',
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          margin: '0 0 6px',
-        }}>
-          {article.title}
-        </h3>
-        <p style={{
-          fontSize: '12px', color: '#555', lineHeight: 1.55,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          margin: 0,
-        }}>
-          {article.content || 'No content provided.'}
-        </p>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        padding: '8px 16px 12px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderTop: '1px solid #e8eaf6',
-      }}>
-        <span style={{
-          display: 'flex', alignItems: 'center', gap: '6px',
-          fontSize: '10px', color: '#555', fontWeight: 600,
-        }}>
-          <span style={{
-            width: '20px', height: '20px', borderRadius: '50%',
-            background: 'linear-gradient(135deg,#1a237e,#c8102e)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: '8px', fontWeight: 700,
-          }}>
-            {article.author?.charAt(0) || 'A'}
-          </span>
-          {article.author}
-        </span>
-        <button style={{
-          background: '#c8102e',
-          color: '#fff', border: 'none',
-          padding: '5px 14px', borderRadius: '999px',
-          fontSize: '10px', fontWeight: 700,
-          cursor: 'pointer', letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-        }}>
-          Read More
-        </button>
       </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STYLE 5 — "Injury" → Dark alert card with red warning accent + excerpt
+// STYLE 5 — "Injury" → League-style full-bleed with deep crimson atmosphere
 // ═══════════════════════════════════════════════════════════════════════════════
 function InjuryCard({ article }: NewsCardProps) {
   const img = article.image || DEFAULT_NEWS_IMAGE;
@@ -489,89 +482,116 @@ function InjuryCard({ article }: NewsCardProps) {
     <div
       className="group news-card-injury"
       style={{
-        background: '#1a0a0a',
         borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(200,16,46,0.2)',
-        border: `1px solid ${article.hot ? '#c8102e' : '#2d1515'}`,
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        position: 'relative',
         cursor: 'pointer',
+        boxShadow: '0 8px 32px rgba(140,0,20,0.4)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        background: '#1a0005',
       }}
     >
-      {/* Image with dark red gradient */}
-      <div style={{ height: '160px', overflow: 'hidden', position: 'relative' }}>
+      {/* Full-height image */}
+      <div style={{ height: '280px', overflow: 'hidden', position: 'relative' }}>
         <img
           src={img}
           alt={article.title}
           className="news-card-img"
           style={{
             width: '100%', height: '100%', objectFit: 'cover',
-            filter: 'saturate(0.7) brightness(0.75)',
+            filter: 'saturate(0.6)',
             transition: 'transform 0.5s ease',
           }}
           onError={e => { (e.currentTarget as HTMLImageElement).src = DEFAULT_NEWS_IMAGE; }}
         />
+        {/* Deep crimson gradient overlay */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, transparent 30%, rgba(26,10,10,0.95) 100%)',
+          background: 'linear-gradient(to bottom, rgba(26,0,5,0.2) 0%, rgba(26,0,5,0.5) 45%, rgba(26,0,5,0.95) 100%)',
         }} />
-        {/* Alert strip */}
+
+        {/* Date badge top-left */}
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          background: 'linear-gradient(90deg,#c8102e,#a00020)',
-          padding: '4px 14px',
-          display: 'flex', alignItems: 'center', gap: '6px',
+          position: 'absolute', top: 12, left: 12,
+          background: 'rgba(60,0,10,0.85)', backdropFilter: 'blur(8px)',
+          color: '#fca5a5', fontSize: '10px', fontWeight: 700,
+          letterSpacing: '0.1em', textTransform: 'uppercase',
+          padding: '4px 10px', borderRadius: '6px',
+          border: '1px solid rgba(252,165,165,0.2)',
         }}>
-          <span style={{ fontSize: '11px' }}>⚠️</span>
-          <span style={{
-            fontFamily: "'Oswald', sans-serif",
-            fontWeight: 700, fontSize: '11px',
-            color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em',
-          }}>
-            Injury Update
-          </span>
-          {article.hot && (
-            <span style={{ marginLeft: 'auto' }}>
-              <HotBadge />
-            </span>
-          )}
+          {formatDate(article.date)}
         </div>
-      </div>
 
-      {/* Content */}
-      <div style={{ padding: '14px 16px' }}>
-        <h3 style={{
-          fontFamily: "'Oswald', sans-serif",
-          fontWeight: 700, fontSize: '16px',
-          color: '#fff', textTransform: 'uppercase',
-          lineHeight: 1.25, marginBottom: '8px',
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          margin: '0 0 8px',
-        }}>
-          {article.title}
-        </h3>
-        <p style={{
-          fontSize: '12px', color: '#b0b0b0', lineHeight: 1.55,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          margin: 0,
-        }}>
-          {article.content || 'No content provided.'}
-        </p>
-
-        <div style={{
-          marginTop: '12px', paddingTop: '12px',
-          borderTop: '1px solid #2d1515',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <span style={{ fontSize: '10px', color: '#888', fontWeight: 600 }}>
-            {formatDate(article.date)}
+        {article.hot && (
+          <span style={{ position: 'absolute', top: 12, right: 12 }}>
+            <HotBadge />
           </span>
-          <span style={{
-            fontSize: '10px', color: '#ff6b6b', fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.08em',
+        )}
+
+        {/* Bottom content overlay */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px' }}>
+          {/* Crimson diagonal ribbon */}
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'linear-gradient(135deg,#991b1b 60%,#7f1d1d)',
+              padding: '6px 20px 6px 14px',
+              clipPath: 'polygon(0 0,100% 0,95% 100%,0 100%)',
+            }}>
+              <span style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontWeight: 800,
+                fontSize: '22px',
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                lineHeight: 1,
+                display: 'block',
+              }}>
+                {article.category}
+              </span>
+            </div>
+            <div style={{
+              background: 'rgba(255,255,255,0.08)',
+              padding: '4px 14px',
+              backdropFilter: 'blur(4px)',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <span style={{ fontSize: '10px' }}>⚠️</span>
+              <span style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontWeight: 700,
+                fontSize: '13px',
+                color: '#fca5a5',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}>
+                Update
+              </span>
+            </div>
+          </div>
+
+          <p style={{
+            fontStyle: 'italic',
+            fontWeight: 600,
+            color: '#fecaca',
+            fontSize: '13px',
+            lineHeight: 1.4,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            margin: 0,
           }}>
-            By {article.author}
-          </span>
+            {article.title}
+          </p>
+
+          {/* Author row */}
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: '10px', color: '#fca5a5', fontWeight: 600 }}>
+              By {article.author}
+            </span>
+          </div>
         </div>
       </div>
     </div>

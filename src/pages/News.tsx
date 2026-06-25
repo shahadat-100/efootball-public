@@ -58,10 +58,8 @@ export function News() {
     );
   }
 
+  // Sort purely by most recent: date desc, then created_at desc as tiebreaker
   const sorted = [...news].sort((a, b) => {
-    // Hot articles first, then by date
-    if (a.hot && !b.hot) return -1;
-    if (!a.hot && b.hot) return 1;
     const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
     if (dateDiff !== 0) return dateDiff;
     const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
