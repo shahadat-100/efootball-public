@@ -257,7 +257,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       {/* ═══════════════════════════════════════════
           HERO ZONE — Player Header
           ═══════════════════════════════════════════ */}
-      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 lg:p-12 lg:min-h-[380px] flex flex-col justify-center mb-6 shadow-xl overflow-hidden" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
+      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 lg:p-12 min-h-[320px] md:min-h-[360px] lg:min-h-[410px] flex flex-col justify-center mb-6 shadow-xl overflow-hidden" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
         {player.coverImageUrl && (
           <img src={player.coverImageUrl} alt={`${player.name} cover`} className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay pointer-events-none" />
         )}
