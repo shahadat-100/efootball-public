@@ -310,11 +310,11 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: lazy-load guard — only fetch once per session
         if (!force && get().matchEntriesLoaded) return;
         // Fix: limit to 500 most-recent, project only columns mapMatchEntryFromDb reads,
-        // remove matches(date) join — the entry already carries its own date column.
+        // Fix: limit to 500 most-recent, project only columns mapMatchEntryFromDb reads.
         const { data, error } = await supabase
           .from('match_entries')
-          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id')
-          .order('date', { ascending: false })
+          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
+          .order('id', { ascending: false })
           .limit(500);
         if (data) {
           set({ 
@@ -334,8 +334,8 @@ export const useFootballStore = create<FootballStore>()(
         
         const { data, error } = await supabase
           .from('match_entries')
-          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id')
-          .order('date', { ascending: false })
+          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
+          .order('id', { ascending: false })
           .range(offset, offset + limit - 1);
           
         if (data) {
