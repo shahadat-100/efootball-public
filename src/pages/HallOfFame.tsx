@@ -177,7 +177,6 @@ export function HallOfFame() {
                 <p style={{
                   fontSize: '13px', color: '#a78219',
                   lineHeight: 1.7, margin: 0,
-                  display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                   background: 'rgba(251,191,36,0.05)',
                   border: '1px solid rgba(251,191,36,0.08)',
                   borderRadius: '10px', padding: '10px 14px',
