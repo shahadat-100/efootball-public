@@ -4,10 +4,10 @@ import { Avatar } from '@/shared/components';
 import { Award, Sparkles } from 'lucide-react';
 
 export function HallOfFame() {
-  const { 
-    hallOfFame, 
-    players, 
-    fetchHallOfFame
+  const {
+    hallOfFame,
+    players,
+    fetchHallOfFame,
   } = useFootballStore();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -34,14 +34,7 @@ export function HallOfFame() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden animate-pulse" style={{ background: '#1a1200', height: '320px' }}>
-              <div className="h-[180px] bg-muted/20" />
-              <div className="p-4 space-y-3">
-                <div className="h-4 w-48 bg-muted/30 rounded" />
-                <div className="h-3 w-full bg-muted/20 rounded" />
-                <div className="h-3 w-3/4 bg-muted/20 rounded" />
-              </div>
-            </div>
+            <div key={i} className="rounded-2xl overflow-hidden animate-pulse h-[240px]" style={{ background: '#1c1600' }} />
           ))}
         </div>
       </div>
@@ -72,115 +65,122 @@ export function HallOfFame() {
               key={entry.id}
               className="group"
               style={{
-                borderRadius: '16px',
+                borderRadius: '20px',
                 overflow: 'hidden',
                 position: 'relative',
-                cursor: 'default',
-                background: '#120e00',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(251,191,36,0.1)',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                background: 'linear-gradient(145deg, #1c1400 0%, #221900 50%, #1a1200 100%)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(251,191,36,0.12)',
+                border: '1px solid rgba(251,191,36,0.15)',
+                transition: 'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(251,191,36,0.3), 0 0 40px rgba(251,191,36,0.08)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(251,191,36,0.35)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(251,191,36,0.12)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(251,191,36,0.15)';
               }}
             >
-              {/* Top image/avatar area */}
-              <div style={{ height: '160px', overflow: 'hidden', position: 'relative', background: 'linear-gradient(135deg, #1c1500 0%, #2a1d00 50%, #1a1200 100%)' }}>
-                {/* Ambient glow orbs */}
-                <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.25) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', bottom: '-10px', left: '30px', width: '80px', height: '80px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,119,6,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                
-                {/* Subtle trophy pattern */}
-                <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='28' font-size='20'%3E🏆%3C/text%3E%3C/svg%3E\")", backgroundRepeat: 'repeat' }} />
+              {/* Decorative top-right corner glow */}
+              <div style={{ position: 'absolute', top: 0, right: 0, width: '180px', height: '180px', background: 'radial-gradient(circle at top right, rgba(251,191,36,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+              {/* Decorative bottom-left glow */}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, width: '120px', height: '120px', background: 'radial-gradient(circle at bottom left, rgba(217,119,6,0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
 
-                {/* Dark gradient overlay bottom */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(18,14,0,0.9) 100%)' }} />
-
-                {/* Season badge top-left */}
-                <div style={{
-                  position: 'absolute', top: 12, left: 12,
-                  background: 'rgba(30,20,0,0.85)', backdropFilter: 'blur(8px)',
-                  color: '#fbbf24', fontSize: '10px', fontWeight: 700,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  padding: '4px 10px', borderRadius: '6px',
-                  border: '1px solid rgba(251,191,36,0.25)',
-                  display: 'flex', alignItems: 'center', gap: '5px',
-                }}>
-                  🏆 {entry.seasonText}
-                </div>
-
-                {/* Category ribbon top-right */}
-                <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '4px',
-                    background: 'linear-gradient(135deg, #b45309, #92400e)',
-                    color: '#fef3c7', fontSize: '10px', fontWeight: 700,
-                    letterSpacing: '0.08em', padding: '3px 10px',
-                    borderRadius: '999px', textTransform: 'uppercase',
-                    boxShadow: '0 2px 10px rgba(180,83,9,0.5)',
-                  }}>
-                    <Award size={10} /> {entry.category}
-                  </span>
-                </div>
-
-                {/* Player avatar + ribbon at bottom */}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 16px 0', display: 'flex', alignItems: 'flex-end', gap: '14px' }}>
+              <div style={{ position: 'relative', zIndex: 1, padding: '24px' }}>
+                {/* ─── Top row: Avatar + Name + Category badge ─── */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '18px' }}>
                   {/* Avatar with gold ring */}
-                  <div style={{ position: 'relative', flexShrink: 0, marginBottom: '-20px' }}>
-                    <div style={{ padding: '3px', borderRadius: '50%', background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 20px rgba(251,191,36,0.4)' }}>
-                      <Avatar name={player?.name ?? 'Legend'} size={56} src={player?.profileImageUrl} />
-                    </div>
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
                     <div style={{
-                      position: 'absolute', bottom: '-4px', right: '-4px',
-                      width: '22px', height: '22px',
+                      padding: '3px', borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #fbbf24, #d97706, #92400e)',
+                      boxShadow: '0 0 20px rgba(251,191,36,0.35)',
+                    }}>
+                      <div style={{ borderRadius: '50%', overflow: 'hidden', background: '#1c1400' }}>
+                        <Avatar name={player?.name ?? 'Legend'} size={68} src={player?.profileImageUrl} />
+                      </div>
+                    </div>
+                    {/* Award pin */}
+                    <div style={{
+                      position: 'absolute', bottom: '-2px', right: '-2px',
+                      width: '24px', height: '24px',
                       background: 'linear-gradient(135deg, #fbbf24, #d97706)',
-                      borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(251,191,36,0.5)',
+                      borderRadius: '8px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 10px rgba(251,191,36,0.6)',
+                      border: '2px solid #1c1400',
                     }}>
                       <Award size={12} style={{ color: '#78350f' }} />
                     </div>
                   </div>
 
-                  {/* Name + jersey on ribbon */}
-                  <div style={{ flex: 1, marginBottom: '-2px' }}>
-                    <div style={{
-                      display: 'inline-block',
-                      background: 'linear-gradient(135deg, #b45309 60%, #92400e)',
-                      padding: '7px 24px 7px 12px',
-                      clipPath: 'polygon(0 0, 100% 0, 93% 100%, 0 100%)',
-                      minWidth: '160px',
+                  {/* Name + jersey */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      fontWeight: 800, fontSize: '20px',
+                      color: '#fef3c7', letterSpacing: '0.02em',
+                      lineHeight: 1.1, marginBottom: '4px',
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                     }}>
-                      <span style={{
-                        fontFamily: "'Oswald', sans-serif", fontWeight: 800,
-                        fontSize: '18px', color: '#fef3c7', textTransform: 'uppercase',
-                        letterSpacing: '0.04em', lineHeight: 1, display: 'block',
-                      }}>
-                        {player?.name ?? 'Unknown Legend'}
-                      </span>
-                    </div>
-                    <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.08)', padding: '3px 12px', backdropFilter: 'blur(4px)' }}>
-                      <span style={{
-                        fontFamily: "'Oswald', sans-serif", fontWeight: 700,
-                        fontSize: '12px', color: '#d4a800', textTransform: 'uppercase', letterSpacing: '0.06em',
-                      }}>
-                        👕 {player?.jerseyNumber ?? '—'}
-                      </span>
-                    </div>
+                      {player?.name ?? 'Unknown Legend'}
+                    </p>
+                    <p style={{ fontSize: '12px', color: '#d97706', fontWeight: 600, letterSpacing: '0.06em' }}>
+                      👕 #{player?.jerseyNumber ?? '—'}
+                    </p>
+                  </div>
+
+                  {/* Category badge */}
+                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      background: 'linear-gradient(135deg, #b45309, #92400e)',
+                      color: '#fef3c7', fontSize: '10px', fontWeight: 800,
+                      letterSpacing: '0.1em', padding: '5px 12px',
+                      borderRadius: '999px', textTransform: 'uppercase',
+                      boxShadow: '0 2px 12px rgba(180,83,9,0.5)',
+                      border: '1px solid rgba(251,191,36,0.2)',
+                    }}>
+                      <Award size={10} />
+                      {entry.category}
+                    </span>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      background: 'rgba(251,191,36,0.08)',
+                      color: '#fbbf24', fontSize: '10px', fontWeight: 700,
+                      letterSpacing: '0.08em', padding: '4px 10px',
+                      borderRadius: '999px',
+                      border: '1px solid rgba(251,191,36,0.15)',
+                    }}>
+                      🏆 {entry.seasonText}
+                    </span>
                   </div>
                 </div>
-              </div>
 
-              {/* Description strip */}
-              <div style={{ background: '#1a1200', padding: '28px 16px 16px' }}>
+                {/* ─── Divider ─── */}
+                <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(251,191,36,0.3), transparent)', marginBottom: '16px' }} />
+
+                {/* ─── Subtitle ─── */}
                 <p style={{
-                  fontFamily: "'Oswald', sans-serif", fontWeight: 700,
-                  fontSize: '13px', color: '#fbbf24', textTransform: 'uppercase',
-                  letterSpacing: '0.06em', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px',
+                  fontSize: '12px', fontWeight: 800,
+                  color: '#fbbf24', textTransform: 'uppercase',
+                  letterSpacing: '0.1em', marginBottom: '10px',
+                  display: 'flex', alignItems: 'center', gap: '8px',
                 }}>
-                  <span style={{ display: 'inline-block', width: '3px', height: '14px', background: 'linear-gradient(to bottom, #fbbf24, #d97706)', borderRadius: '2px', flexShrink: 0 }} />
+                  <span style={{ display: 'inline-block', width: '4px', height: '14px', background: 'linear-gradient(to bottom, #fbbf24, #d97706)', borderRadius: '2px', flexShrink: 0 }} />
                   {entry.subTitle}
                 </p>
+
+                {/* ─── Description ─── */}
                 <p style={{
-                  fontSize: '12.5px', color: '#d4a800', lineHeight: 1.65,
+                  fontSize: '13px', color: '#a78219',
+                  lineHeight: 1.7, margin: 0,
                   display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                  margin: 0, opacity: 0.8,
+                  background: 'rgba(251,191,36,0.05)',
+                  border: '1px solid rgba(251,191,36,0.08)',
+                  borderRadius: '10px', padding: '10px 14px',
                 }}>
                   {entry.descriptions}
                 </p>
@@ -190,9 +190,9 @@ export function HallOfFame() {
         })}
 
         {hallOfFame.length === 0 && (
-          <div className="col-span-full py-16 text-center border-2 border-dashed border-amber-500/20 rounded-2xl flex flex-col items-center justify-center" style={{ background: 'rgba(18,14,0,0.5)' }}>
-            <Award className="w-12 h-12 text-amber-400/40 mb-3 animate-float" />
-            <p className="text-amber-500/50 text-[14px] font-medium">No one inducted yet — greatness awaits! 🏆</p>
+          <div className="col-span-full py-20 text-center rounded-2xl flex flex-col items-center justify-center" style={{ background: 'rgba(28,20,0,0.5)', border: '2px dashed rgba(251,191,36,0.2)' }}>
+            <Award className="w-14 h-14 mb-4" style={{ color: 'rgba(251,191,36,0.3)' }} />
+            <p style={{ color: 'rgba(251,191,36,0.4)', fontSize: '14px', fontWeight: 600 }}>No one inducted yet — greatness awaits! 🏆</p>
           </div>
         )}
       </div>
