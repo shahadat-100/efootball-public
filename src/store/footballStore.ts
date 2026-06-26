@@ -243,7 +243,7 @@ export const useFootballStore = create<FootballStore>()(
           // ৫টি টেবিল প্যারালাল ফেচ করা হচ্ছে (Nested Join বাদ দিয়ে)
           // Fix: project only needed columns on junction/lookup tables
           const [playersRes, junctionRolesRes, rolesRes, junctionTagsRes, tagsRes] = await Promise.all([
-            supabase.from('players').select('id, name, jerseynumber, email, custom_string_tags, createdat, profileimageurl'),
+            supabase.from('players').select('id, name, jerseynumber, email, custom_string_tags, createdat, profileimageurl, coverimageurl'),
             supabase.from('player_player_roles').select('player_id, role_id'),
             supabase.from('player_role').select('id, name'),
             supabase.from('player_custom_tags').select('player_id, tag_id'),
@@ -279,6 +279,7 @@ export const useFootballStore = create<FootballStore>()(
             id: p.id,
             name: p.name,
             profileImageUrl: p.profileimageurl || '',
+            coverImageUrl: p.coverimageurl || '',
             jerseyNumber: p.jerseynumber ?? undefined,
             email: p.email || '',
             playerRoles: playerRolesMap.get(p.id) || [],
