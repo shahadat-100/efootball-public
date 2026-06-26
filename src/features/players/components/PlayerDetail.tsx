@@ -80,22 +80,32 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const getFormStatus = () => {
-    const recent10 = historyEntries.slice(0, 10);
-    if (recent10.length < 10) {
+    const recentN = historyEntries.slice(0, 10);
+    if (recentN.length === 0) {
       return { text: 'STABLE / N/A', color: '#9ca3af', icon: '➖' };
     }
     
-    const calcPoints = (entries: typeof historyEntries) => 
-      entries.reduce((sum, e) => sum + (e.result === 'win' ? 10 : e.result === 'draw' ? 5 : e.result === 'loss' ? -3 : 0), 0) / entries.length;
+    let points = 0;
+    
+    recentN.forEach(e => {
+      const res = e.result?.toLowerCase() || 'draw';
+      if (res === 'win') points += 3;
+      if (res === 'draw') points += 1;
+    });
 
-    const first5Avg = calcPoints(recent10.slice(0, 5)); // newer
-    const last5Avg = calcPoints(recent10.slice(5, 10)); // older
+    const maxPossiblePoints = recentN.length * 3;
+    const formPercentage = points / maxPossiblePoints;
 
-    if (first5Avg > last5Avg) {
+    // >= 60% of possible points is great form
+    if (formPercentage >= 0.6) {
       return { text: 'IN FORM', color: '#10b981', icon: '📈' };
-    } else if (first5Avg < last5Avg) {
+    } 
+    // <= 33% of possible points is poor form
+    else if (formPercentage <= 0.33) {
       return { text: 'OUT OF FORM', color: '#ef4444', icon: '📉' };
-    } else {
+    } 
+    // Anything in between (e.g. 50% win rate) is stable
+    else {
       return { text: 'STABLE', color: '#f59e0b', icon: '➖' };
     }
   };
@@ -315,7 +325,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                   const recent10 = historyEntries.slice(0, 10).reverse();
                   if (recent10.length === 0) return <span className="text-[11px] text-white/30">No matches yet</span>;
                   return recent10.map((entry, i) => {
-                    const result = entry.result || 'draw';
+                    const result = entry.result?.toLowerCase() || 'draw';
                     const isWin = result === 'win';
                     const isDraw = result === 'draw';
                     return (
