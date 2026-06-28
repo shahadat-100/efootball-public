@@ -8,10 +8,11 @@ import { SeasonPerformanceChart } from './SeasonPerformanceChart';
 import { RankTrendCard } from './RankTrendCard';
 import { SeasonTable } from './SeasonTable';
 import { AchievementBadges } from './AchievementBadges';
+import { PlayerSnapshot } from './detail-tabs/PlayerSnapshot';
+import { PlayerTimeline } from './detail-tabs/PlayerTimeline';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
-import { Download } from 'lucide-react';
-
+import { Download, User, Activity, BarChart2, Award } from 'lucide-react';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
@@ -25,6 +26,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
   const ITEMS_PER_PAGE = 30;
+  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'statistics' | 'achievements'>('overview');
 
   const handleExport = async () => {
     if (!captureRef.current || !player) return;
@@ -312,97 +314,232 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           </div>
         </div>
 
-        {/* ═══ Quick Stats Ribbon ═══ */}
-        <div className="relative z-10 mt-6 pt-6 border-t border-white/10">
-          <div className="flex flex-wrap gap-6 items-start">
-            {/* Recent Form */}
-            <div>
-              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Recent Form (Last 10)</h4>
-              <div className="flex gap-1.5 flex-wrap">
-                {(() => {
-                  const recent10 = historyEntries.slice(0, 10).reverse();
-                  if (recent10.length === 0) return <span className="text-[11px] text-white/30">No matches yet</span>;
-                  return recent10.map((entry, i) => {
-                    const result = entry.result?.toLowerCase() || 'draw';
-                    const isWin = result === 'win';
-                    const isDraw = result === 'draw';
-                    return (
-                      <div
-                        key={entry.id || i}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default"
-                        style={isWin
-                          ? { background: 'rgba(16,185,129,0.3)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.2)' }
-                          : isDraw
-                          ? { background: 'rgba(245,158,11,0.3)', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.2)' }
-                          : { background: 'rgba(239,68,68,0.3)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.2)' }
-                        }
-                        title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
-                      >
-                        {result.charAt(0).toUpperCase()}
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            </div>
+      </div>
 
-            {/* Form Status */}
-            <div>
-              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Form Trend</h4>
-              <span 
-                className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
-                style={{ backgroundColor: `${formStatus.color}20`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
-              >
-                <span>{formStatus.icon}</span>
-                {formStatus.text}
-              </span>
-            </div>
+      {/* ══ Tab Navigation ══ */}
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 custom-scrollbar">
+        {[
+          { id: 'overview', label: 'Overview', icon: User },
+          { id: 'timeline', label: 'Timeline', icon: Activity },
+          { id: 'statistics', label: 'Statistics', icon: BarChart2 },
+          { id: 'achievements', label: 'Achievements', icon: Award },
+        ].map(t => {
+          const Icon = t.icon;
+          const isActive = activeTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id as any)}
+              className={cn(
+                "flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap",
+                isActive 
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                  : "bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
 
-            {/* Ranks */}
-            {[
-              { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.2)' },
-              { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.2)' },
-              { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.2)' },
-            ].map(r => (
-              <div key={r.label}>
-                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{r.label}</h4>
-                <div className="flex items-center gap-2">
-                  <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ backgroundColor: r.bgColor, color: r.color }}>
-                    #{r.value || '-'}
-                  </span>
-                </div>
-              </div>
-            ))}
-
-            {/* Season Ranks */}
-            {seasonRanksList.map((sr: any) => (
-              <div key={sr.seasonName}>
-                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">{sr.seasonName}</h4>
-                <div className="flex items-center gap-2">
-                  <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ background: 'rgba(59,130,246,0.2)', color: '#93c5fd' }}>
-                    #{sr.rank || '-'}
-                  </span>
-                </div>
-              </div>
-            ))}
-
-            {/* Win Rate */}
-            <div>
-              <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Win Rate</h4>
-              <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-md" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                {(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%
-              </span>
-            </div>
-
-            {player.email && (
+      {/* ══ Tab Content ══ */}
+      {activeTab === 'overview' && (
+        <div className="animate-in fade-in slide-in-from-bottom-2">
+          <PlayerSnapshot entries={entries} />
+          
+          <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
+            <h3 className="font-heading font-bold text-[18px] mb-5 tracking-tight">Quick Stats</h3>
+            <div className="flex flex-wrap gap-6 items-start">
+              {/* Recent Form */}
               <div>
-                <h4 className="text-[10px] uppercase tracking-widest text-white/40 font-black mb-2">Email</h4>
-                <span className="text-[13px] text-white/70 font-medium">{player.email}</span>
+                <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Recent Form (Last 10)</h4>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(() => {
+                    const recent10 = historyEntries.slice(0, 10).reverse();
+                    if (recent10.length === 0) return <span className="text-[11px] text-muted-foreground/50">No matches yet</span>;
+                    return recent10.map((entry, i) => {
+                      const result = entry.result?.toLowerCase() || 'draw';
+                      const isWin = result === 'win';
+                      const isDraw = result === 'draw';
+                      return (
+                        <div
+                          key={entry.id || i}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default"
+                          style={isWin
+                            ? { background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }
+                            : isDraw
+                            ? { background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }
+                            : { background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }
+                          }
+                          title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
+                        >
+                          {result.charAt(0).toUpperCase()}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
               </div>
-            )}
+
+              {/* Form Status */}
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Form Trend</h4>
+                <span 
+                  className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
+                  style={{ backgroundColor: `${formStatus.color}15`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
+                >
+                  <span>{formStatus.icon}</span>
+                  {formStatus.text}
+                </span>
+              </div>
+
+              {/* Ranks */}
+              {[
+                { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.1)' },
+                { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.1)' },
+                { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.1)' },
+              ].map(r => (
+                <div key={r.label}>
+                  <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">{r.label}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-[14px] px-3 py-1 rounded-lg border shadow-sm" style={{ backgroundColor: r.bgColor, color: r.color, borderColor: r.bgColor.replace('0.1', '0.2') }}>
+                      #{r.value || '-'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Season Ranks */}
+              {seasonRanksList.map((sr: any) => (
+                <div key={sr.seasonName}>
+                  <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">{sr.seasonName}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-[14px] px-3 py-1 rounded-lg border shadow-sm" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.2)' }}>
+                      #{sr.rank || '-'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Win Rate */}
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Win Rate</h4>
+                <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-sm border border-border bg-muted/50 text-foreground">
+                  {(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%
+                </span>
+              </div>
+
+              {player.email && (
+                <div>
+                  <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Email</h4>
+                  <span className="text-[13px] text-foreground font-medium">{player.email}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'timeline' && (
+        <PlayerTimeline entries={entries} />
+      )}
+
+      {activeTab === 'statistics' && (
+        <div className="animate-in fade-in slide-in-from-bottom-2">
+          {/* All-Time Statistics Overview */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-heading font-bold text-[18px] tracking-tight">All-Time Statistics</h3>
+                  {currentRank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{currentRank}</p>}
+                </div>
+                <Button size="sm" variant="secondary" className="gap-2 h-8 text-[12px]">
+                  <Download className="w-3 h-3" /> Download
+                </Button>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-3">
+                {[
+                  { l: 'M', v: stats.totalMatches },
+                  { l: 'W', v: stats.totalWins },
+                  { l: 'D', v: stats.totalDraws },
+                  { l: 'L', v: stats.totalLosses },
+                  { l: 'WIN%', v: `${(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(1)}%` },
+                  { l: 'GF', v: stats.totalGoals },
+                  { l: 'GA', v: stats.totalGoalsConceded },
+                ].map(s => (
+                  <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-1 min-w-[50px]">
+                    <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
+                    <p className="text-[15px] font-black text-foreground">{s.v}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { l: 'CS', v: stats.totalCleanSheets },
+                  { l: 'MOTM', v: stats.totalMOTM },
+                  { l: 'PTS', v: playerRanks.find(r => r.id === player.id)?.points || 0 },
+                ].map(s => (
+                  <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-none min-w-[70px]">
+                    <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
+                    <p className="text-[15px] font-black text-foreground">{s.v}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Latest Season Statistics Overview */}
+            {(() => {
+              const latestSeasonStats = stats.seasonBreakdown[0];
+              if (!latestSeasonStats) return null;
+              const sRanks = seasonRanksList.find(sr => sr.seasonName === latestSeasonStats.seasonName) || { rank: undefined };
+              return (
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-heading font-bold text-[18px] tracking-tight">Season {latestSeasonStats.seasonName || latestSeasonStats.year} Stats</h3>
+                      {sRanks.rank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{sRanks.rank}</p>}
+                    </div>
+                    <Button size="sm" variant="secondary" className="gap-2 h-8 text-[12px]">
+                      <Download className="w-3 h-3" /> Download
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      { l: 'M', v: latestSeasonStats.matches },
+                      { l: 'W', v: latestSeasonStats.wins },
+                      { l: 'D', v: latestSeasonStats.draws },
+                      { l: 'L', v: latestSeasonStats.losses },
+                      { l: 'WIN%', v: `${(latestSeasonStats.matches > 0 ? (latestSeasonStats.wins / latestSeasonStats.matches) * 100 : 0).toFixed(1)}%` },
+                      { l: 'GF', v: latestSeasonStats.goals },
+                      { l: 'GA', v: latestSeasonStats.goalsConceded },
+                    ].map(s => (
+                      <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-1 min-w-[50px]">
+                        <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
+                        <p className="text-[15px] font-black text-foreground">{s.v}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { l: 'CS', v: latestSeasonStats.cleanSheets },
+                      { l: 'MOTM', v: latestSeasonStats.motm },
+                    ].map(s => (
+                      <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-none min-w-[70px]">
+                        <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
+                        <p className="text-[15px] font-black text-foreground">{s.v}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
 
       {/* ═══════════════════════════════════════════
           CAREER STATS — Grouped by category
@@ -697,15 +834,78 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           </div>
         )}
       </div>
-
-      {/* ═══════════════════════════════════════════
-          ACHIEVEMENT BADGES
-          ═══════════════════════════════════════════ */}
-      <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
-        <AchievementBadges
-          seasonStats={playerSeasonStats.filter(s => s.playerId === playerId)}
-        />
+        )}
       </div>
+      </div>
+      )}
+
+      {activeTab === 'achievements' && (
+        <div className="animate-in fade-in slide-in-from-bottom-2">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Achievements Summary */}
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+              <div className="mb-6">
+                <h3 className="font-heading font-bold text-[18px] tracking-tight">Achievements Summary</h3>
+                <p className="text-[13px] text-muted-foreground">Official milestones and ranking achievements.</p>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
+                    {seasonRanksList.filter(s => s.rank && s.rank <= Math.max(5, players.length * 0.2)).length}
+                  </p>
+                  <p className="text-[11px] font-bold text-muted-foreground">Season Top 20%</p>
+                </div>
+                <div>
+                  <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
+                    {monthlyRankData.filter(d => d.rank <= Math.max(3, players.length * 0.1)).length}
+                  </p>
+                  <p className="text-[11px] font-bold text-muted-foreground">Month Top 10%</p>
+                </div>
+                <div>
+                  <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
+                    {recentWeekRank && recentWeekRank <= Math.max(3, players.length * 0.05) ? 1 : 0}
+                  </p>
+                  <p className="text-[11px] font-bold text-muted-foreground">Week Top 5%</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Rankings Overview */}
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+              <div className="mb-6">
+                <h3 className="font-heading font-bold text-[18px] tracking-tight">Rankings Overview</h3>
+                <p className="text-[13px] text-muted-foreground">Season rank and wins by official ranking data.</p>
+              </div>
+              
+              <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                <div className="border border-border/50 rounded-xl p-3 min-w-[100px] text-center shrink-0">
+                  <p className="text-[9px] font-black uppercase text-muted-foreground mb-1">Overall</p>
+                  <p className="text-[20px] font-heading font-black text-foreground leading-none mb-2">#{currentRank || '-'}</p>
+                  <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">{stats.totalWins} Wins</span>
+                </div>
+                {seasonRanksList.map(sr => {
+                  const sStats = stats.seasonBreakdown.find(sb => sb.seasonName === sr.seasonName);
+                  return (
+                    <div key={sr.seasonName} className="border border-border/50 rounded-xl p-3 min-w-[100px] text-center shrink-0">
+                      <p className="text-[9px] font-black uppercase text-muted-foreground mb-1">Season {sr.seasonName}</p>
+                      <p className="text-[20px] font-heading font-black text-foreground leading-none mb-2">#{sr.rank || '-'}</p>
+                      <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">{sStats?.wins || 0} Wins</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
+            <AchievementBadges
+              seasonStats={playerSeasonStats.filter(s => s.playerId === playerId)}
+            />
+          </div>
+        </div>
+      )}
 
     </div>
   );
