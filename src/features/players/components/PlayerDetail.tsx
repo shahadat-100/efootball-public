@@ -429,22 +429,22 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (!closestMilestone || closestMilestone.percent === 0) return null;
 
     return (
-      <div className="w-full">
-        <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-3 flex items-center gap-2">
+      <div className="bg-card border border-border rounded-2xl p-5 shadow-sm mb-6">
+        <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-3 flex items-center gap-2">
           <span>🎯 Next Milestone</span>
-          <span className="bg-white/10 text-white px-1.5 py-0.5 rounded text-[9px]">{closestMilestone.percent}%</span>
+          <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[9px]">{closestMilestone.percent}%</span>
         </h4>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
+        <div className="bg-muted/30 border border-border/50 rounded-xl p-4 transition-all hover:bg-muted/50">
           <div className="flex justify-between items-end mb-2.5">
             <div>
-              <p className="text-[14px] font-bold text-white leading-tight">{closestMilestone.title}</p>
-              <p className="text-[11px] text-white/60 mt-0.5">Just <strong className="text-white font-black">{closestMilestone.remaining} more</strong> to go!</p>
+              <p className="text-[14px] font-bold text-foreground leading-tight">{closestMilestone.title}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Just <strong className="text-primary font-black">{closestMilestone.remaining} more</strong> to go!</p>
             </div>
-            <span className="text-[12px] font-black text-white bg-white/10 px-2 py-1 rounded-lg border border-white/5">{closestMilestone.current} / {closestMilestone.target}</span>
+            <span className="text-[12px] font-black text-primary bg-primary/10 px-2 py-1 rounded-lg border border-primary/20">{closestMilestone.current} / {closestMilestone.target}</span>
           </div>
-          <div className="h-2.5 bg-white/10 rounded-full overflow-hidden shadow-inner">
+          <div className="h-2.5 bg-border rounded-full overflow-hidden shadow-inner">
             <div 
-              className="h-full bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full transition-all duration-1000 relative" 
+              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 relative" 
               style={{ width: `${closestMilestone.percent}%` }}
             >
               <div className="absolute inset-0 bg-white/20 animate-pulse" />
@@ -597,6 +597,18 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                   </div>
                 </div>
               ))}
+
+              {/* Season Ranks */}
+              {seasonRanksList.map((sr: any) => (
+                <div key={sr?.seasonName}>
+                  <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-2">{sr?.seasonName}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-[14px] px-3 py-1 rounded-lg border shadow-sm backdrop-blur-sm" style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', borderColor: 'rgba(59,130,246,0.3)' }}>
+                      #{sr.rank || '-'}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Trophies Group */}
@@ -605,10 +617,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 {renderTrophyCabinet()}
               </div>
             </div>
-          </div>
-          
-          <div className="w-full max-w-2xl">
-            {renderNextMilestone()}
           </div>
         </div>
       </div>
@@ -647,7 +655,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           <div className="mb-6">
             <PlayerSnapshot entries={entries} />
           </div>
-          <PlayerOverviewDashboard entries={entries} stats={stats} />
+          {renderNextMilestone()}
+          <div className="mt-6">
+            <PlayerOverviewDashboard entries={entries} stats={stats} />
+          </div>
         </div>
       )}
 
