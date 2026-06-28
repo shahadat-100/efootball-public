@@ -3,6 +3,7 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
 import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3, Medal, Shield } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
+import { Analytics } from '@vercel/analytics/react';
 
 const NAV = [
   { id: 'overview', label: 'Overview', icon: Hexagon },
@@ -219,6 +220,7 @@ export function AppShell() {
           );
         })}
       </nav>
+      <Analytics />
     </div>
   );
 }
