@@ -85,26 +85,20 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       return { text: 'STABLE / N/A', color: '#9ca3af', icon: '➖' };
     }
     
-    let points = 0;
+    let wins = 0;
     
     recentN.forEach(e => {
-      const res = e.result?.toLowerCase() || 'draw';
-      if (res === 'win') points += 3;
-      if (res === 'draw') points += 1;
+      if (e.result?.toLowerCase() === 'win') wins++;
     });
 
-    const maxPossiblePoints = recentN.length * 3;
-    const formPercentage = points / maxPossiblePoints;
+    const winRate = wins / recentN.length;
 
-    // >= 60% of possible points is great form
-    if (formPercentage >= 0.6) {
+    if (winRate > 0.6) {
       return { text: 'IN FORM', color: '#10b981', icon: '📈' };
     } 
-    // <= 33% of possible points is poor form
-    else if (formPercentage <= 0.33) {
+    else if (winRate < 0.3) {
       return { text: 'OUT OF FORM', color: '#ef4444', icon: '📉' };
     } 
-    // Anything in between (e.g. 50% win rate) is stable
     else {
       return { text: 'STABLE', color: '#f59e0b', icon: '➖' };
     }

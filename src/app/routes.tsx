@@ -5,6 +5,7 @@ import { Players } from '@/pages/Players';
 import { MatchEntries } from '@/pages/MatchEntries';
 import { Matches } from '@/pages/Matches';
 import { News } from '@/pages/News';
+import { NewsDetail } from '@/pages/NewsDetail';
 import { HallOfFame } from '@/pages/HallOfFame';
 import { Compare } from '@/pages/Compare';
 import { Leaderboard } from '@/pages/Leaderboard';
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: "compare", element: <Compare /> },
       { path: "leaderboard", element: <Leaderboard /> },
       { path: "news", element: <News /> },
+      { path: "news/:id", element: <NewsDetail /> },
       { path: "hall-of-fame", element: <HallOfFame /> },
       { path: "club-info", element: <ClubInfo /> },
     ]

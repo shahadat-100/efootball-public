@@ -1,12 +1,12 @@
 import { useState, useMemo, useRef } from 'react';
 import { useFootballStore } from '@/store/footballStore';
-import { Avatar } from '@/shared/components';
+import { Avatar, Input } from '@/shared/components';
 import { CompareRadarChart } from '@/features/compare/components/CompareRadarChart';
 import { CompareSeasonChart } from '@/features/compare/components/CompareSeasonChart';
 import { StatCompareBar } from '@/features/compare/components/StatCompareBar';
 import { aggregatePlayerStats } from '@/features/compare/utils';
 import { cn } from '@/shared/lib/cn';
-import { BarChart3, Trophy, Flame, Target, Shield, Zap, Download, Filter } from 'lucide-react';
+import { BarChart3, Trophy, Flame, Target, Shield, Zap, Download, Filter, Search } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
 function StatCompareText({ label, p1Value, p2Value, better = 'higher' }: any) {
@@ -54,6 +54,7 @@ export function Compare() {
   const [showComparison, setShowComparison] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [chartMetric, setChartMetric] = useState<'goals' | 'points' | 'winRate'>('points');
+  const [searchQuery, setSearchQuery] = useState('');
   const captureRef = useRef<HTMLDivElement>(null);
 
   const togglePlayer = (id: string) => {
@@ -81,6 +82,12 @@ export function Compare() {
   }, [matchEntries, selectedSeasonId]);
 
   const computedStatsList = useMemo(() => aggregatePlayerStats(players, filteredSeasonStats), [players, filteredSeasonStats]);
+
+  const filteredPlayersList = useMemo(() => {
+    if (!searchQuery) return computedStatsList;
+    const lowerQ = searchQuery.toLowerCase();
+    return computedStatsList.filter(p => p.name.toLowerCase().includes(lowerQ));
+  }, [computedStatsList, searchQuery]);
 
   const maxStats = useMemo(() => {
     let ms = {
@@ -226,7 +233,16 @@ export function Compare() {
               <h3 className="font-heading font-black text-xl text-foreground tracking-tight">Select Players</h3>
               <p className="text-xs font-bold text-muted-foreground mt-1">Pick 2 players for head-to-head comparison</p>
             </div>
-            <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search players..."
+                  className="pl-9 w-full sm:w-[200px]"
+                />
+              </div>
               <span className="bg-primary/10 text-primary font-black px-4 py-1.5 rounded-full text-sm">
                 {selectedIds.length}/2 Selected
               </span>
@@ -234,7 +250,7 @@ export function Compare() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {computedStatsList.sort((a, b) => a.name.localeCompare(b.name)).map(p => {
+            {filteredPlayersList.sort((a, b) => a.name.localeCompare(b.name)).map(p => {
               const isSelected = selectedIds.includes(p.id);
               const isP1 = selectedIds[0] === p.id;
               const selColor = isP1 ? P1_COLOR : P2_COLOR;

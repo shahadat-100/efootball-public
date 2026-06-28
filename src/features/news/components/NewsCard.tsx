@@ -1,4 +1,5 @@
 import type { NewsArticle } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 const DEFAULT_NEWS_IMAGE = '/images/hero-banner.jpg';
 
@@ -35,8 +36,10 @@ function HotBadge() {
 // ═══════════════════════════════════════════════════════════════════════════════
 function NavyCard({ article }: NewsCardProps) {
   const img = article.image || DEFAULT_NEWS_IMAGE;
+  const navigate = useNavigate();
   return (
     <div
+      onClick={() => navigate(`/news/${article.id}`)}
       className="group news-card-league"
       style={{
         borderRadius: '16px', overflow: 'hidden', position: 'relative',
@@ -109,16 +112,22 @@ function NavyCard({ article }: NewsCardProps) {
       </div>
 
       {/* Description strip */}
-      <div style={{ background: '#0d1e36', padding: '12px 16px 14px' }}>
+      <div style={{ background: '#0d1e36', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', height: '100%' }}>
         <p style={{
           fontSize: '12px', color: '#93c5fd', lineHeight: 1.6,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 8px',
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 12px',
+          flexGrow: 1,
         }}>
           {article.content || 'No content provided.'}
         </p>
-        <span style={{ fontSize: '10px', color: '#60a5fa', fontWeight: 600 }}>
-          By {article.author}
-        </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '10px', color: '#60a5fa', fontWeight: 600 }}>
+            By {article.author}
+          </span>
+          <span className="group-hover:translate-x-1 transition-transform" style={{ fontSize: '11px', color: '#93c5fd', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Read More →
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -130,8 +139,10 @@ function NavyCard({ article }: NewsCardProps) {
 // ═══════════════════════════════════════════════════════════════════════════════
 function EmeraldCard({ article }: NewsCardProps) {
   const img = article.image || DEFAULT_NEWS_IMAGE;
+  const navigate = useNavigate();
   return (
     <div
+      onClick={() => navigate(`/news/${article.id}`)}
       className="group news-card-transfer"
       style={{
         borderRadius: '16px', overflow: 'hidden', position: 'relative',
@@ -204,16 +215,22 @@ function EmeraldCard({ article }: NewsCardProps) {
       </div>
 
       {/* Description strip */}
-      <div style={{ background: '#081f12', padding: '12px 16px 14px' }}>
+      <div style={{ background: '#081f12', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', height: '100%' }}>
         <p style={{
           fontSize: '12px', color: '#6ee7b7', lineHeight: 1.6,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 8px',
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 12px',
+          flexGrow: 1,
         }}>
           {article.content || 'No content provided.'}
         </p>
-        <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 600 }}>
-          By {article.author}
-        </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 600 }}>
+            By {article.author}
+          </span>
+          <span className="group-hover:translate-x-1 transition-transform" style={{ fontSize: '11px', color: '#6ee7b7', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Read More →
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -225,8 +242,10 @@ function EmeraldCard({ article }: NewsCardProps) {
 // ═══════════════════════════════════════════════════════════════════════════════
 function CrimsonCard({ article }: NewsCardProps) {
   const img = article.image || DEFAULT_NEWS_IMAGE;
+  const navigate = useNavigate();
   return (
     <div
+      onClick={() => navigate(`/news/${article.id}`)}
       className="group news-card-injury"
       style={{
         borderRadius: '16px', overflow: 'hidden', position: 'relative',
@@ -306,16 +325,22 @@ function CrimsonCard({ article }: NewsCardProps) {
       </div>
 
       {/* Description strip */}
-      <div style={{ background: '#1f0008', padding: '12px 16px 14px' }}>
+      <div style={{ background: '#1f0008', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', height: '100%' }}>
         <p style={{
           fontSize: '12px', color: '#fca5a5', lineHeight: 1.6,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 8px',
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 12px',
+          flexGrow: 1,
         }}>
           {article.content || 'No content provided.'}
         </p>
-        <span style={{ fontSize: '10px', color: '#f87171', fontWeight: 600 }}>
-          By {article.author}
-        </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '10px', color: '#f87171', fontWeight: 600 }}>
+            By {article.author}
+          </span>
+          <span className="group-hover:translate-x-1 transition-transform" style={{ fontSize: '11px', color: '#fca5a5', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Read More →
+          </span>
+        </div>
       </div>
     </div>
   );
