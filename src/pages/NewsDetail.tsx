@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
 import { NewsCard } from '@/features/news/components/NewsCard';
 import { ArrowLeft, Calendar, User, Flame, Share2 } from 'lucide-react';
-import { cn } from '@/shared/lib/cn';
 import type { NewsArticle } from '@/features/news/types';
 
 export function NewsDetail() {
