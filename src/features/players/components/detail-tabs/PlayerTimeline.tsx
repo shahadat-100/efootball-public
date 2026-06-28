@@ -64,11 +64,6 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
     });
   };
 
-  const getOrdinal = (n: number) => {
-    const s = ["th", "st", "nd", "rd"];
-    const v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  };
 
   let currentWinStreak = 0;
   let currentUnbeatenStreak = 0;
@@ -77,9 +72,14 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
   let winStreak5Times = 0;
   let unbeaten10Times = 0;
   let cs3Times = 0;
-
   let defMasterclassTimes = 0;
   let doubleHattrickTimes = 0;
+
+  let lastWinStreak5Date = '';
+  let lastUnbeaten10Date = '';
+  let lastCs3Date = '';
+  let lastDefMasterclassDate = '';
+  let lastDoubleHattrickDate = '';
 
   sortedEntries.forEach((e) => {
     appearances++;
@@ -139,11 +139,11 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
     // Legendary Performances
     if (e.motm && e.cleanSheet) {
       defMasterclassTimes++;
-      addMilestone(`Defensive Masterclass (${getOrdinal(defMasterclassTimes)} time)`, e.date!, `def_master_${e.id}`, '🛡️', 'Clean Sheet + MOTM');
+      lastDefMasterclassDate = e.date!;
     }
     if ((e.goals || 0) >= 6) {
       doubleHattrickTimes++;
-      addMilestone(`Double Hat-trick (${getOrdinal(doubleHattrickTimes)} time) - ${e.goals} Goals`, e.date!, `dht_${e.id}`, '⚽', 'Legendary Performance');
+      lastDoubleHattrickDate = e.date!;
     }
 
     // Streaks Logic
@@ -152,7 +152,7 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
       currentUnbeatenStreak++;
       if (currentWinStreak % 5 === 0) {
         winStreak5Times++;
-        addMilestone(`5-Match Win Streak (${getOrdinal(winStreak5Times)} time)`, e.date!, `w_streak_${winStreak5Times}`, '🔥');
+        lastWinStreak5Date = e.date!;
       }
     } else if (e.result === 'draw') {
       currentWinStreak = 0;
@@ -164,19 +164,25 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
 
     if (currentUnbeatenStreak > 0 && currentUnbeatenStreak % 10 === 0) {
       unbeaten10Times++;
-      addMilestone(`10 Matches Unbeaten (${getOrdinal(unbeaten10Times)} time)`, e.date!, `ub_streak_${unbeaten10Times}`, '🛡️');
+      lastUnbeaten10Date = e.date!;
     }
 
     if (e.cleanSheet) {
       currentCleanSheetStreak++;
       if (currentCleanSheetStreak % 3 === 0) {
         cs3Times++;
-        addMilestone(`3 Consecutive Clean Sheets (${getOrdinal(cs3Times)} time)`, e.date!, `cs_streak_${cs3Times}`, '🧤');
+        lastCs3Date = e.date!;
       }
     } else {
       currentCleanSheetStreak = 0;
     }
   });
+
+  if (defMasterclassTimes > 0) addMilestone(`Defensive Masterclass (${defMasterclassTimes} ${defMasterclassTimes === 1 ? 'time' : 'times'})`, lastDefMasterclassDate, 'def_master_agg', '🛡️', 'Clean Sheet + MOTM');
+  if (doubleHattrickTimes > 0) addMilestone(`Double Hat-trick (${doubleHattrickTimes} ${doubleHattrickTimes === 1 ? 'time' : 'times'})`, lastDoubleHattrickDate, 'dht_agg', '⚽', 'Legendary Performance');
+  if (winStreak5Times > 0) addMilestone(`5-Match Win Streak (${winStreak5Times} ${winStreak5Times === 1 ? 'time' : 'times'})`, lastWinStreak5Date, 'ws5_agg', '🔥');
+  if (unbeaten10Times > 0) addMilestone(`10 Matches Unbeaten (${unbeaten10Times} ${unbeaten10Times === 1 ? 'time' : 'times'})`, lastUnbeaten10Date, 'ub10_agg', '🛡️');
+  if (cs3Times > 0) addMilestone(`3 Consecutive Clean Sheets (${cs3Times} ${cs3Times === 1 ? 'time' : 'times'})`, lastCs3Date, 'cs3_agg', '🧤');
 
 
   // Add the dynamic records (they only get added at the end based on their final max values)
