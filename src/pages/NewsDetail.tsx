@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
 import { NewsCard } from '@/features/news/components/NewsCard';
-import { ArrowLeft, Calendar, User, Flame } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Flame, Share2 } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import type { NewsArticle } from '@/features/news/types';
 
@@ -35,11 +35,12 @@ export function NewsDetail() {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-6">
-        <div className="h-[400px] bg-muted rounded-3xl" />
-        <div className="space-y-4 max-w-3xl mx-auto px-4">
-          <div className="h-8 bg-muted rounded w-3/4" />
-          <div className="h-4 bg-muted rounded w-1/4" />
-          <div className="space-y-2 pt-8">
+        <div className="h-[50vh] bg-muted w-full" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)' }} />
+        <div className="space-y-4 max-w-4xl mx-auto px-6 -mt-12 relative z-10">
+          <div className="h-10 w-40 bg-muted rounded-full mx-auto md:mx-0" />
+          <div className="h-12 bg-muted rounded w-3/4 mt-4" />
+          <div className="h-4 bg-muted rounded w-1/4 mt-6" />
+          <div className="space-y-3 pt-12">
             <div className="h-4 bg-muted rounded" />
             <div className="h-4 bg-muted rounded" />
             <div className="h-4 bg-muted rounded w-5/6" />
@@ -63,19 +64,16 @@ export function NewsDetail() {
     );
   }
 
-  // Determine styles based on category
-  let categoryColor = '#0a1628';
-  let categoryAccent = '#93c5fd';
-  let categoryGradient = 'from-blue-500/20 to-blue-900/40';
-
+  // Determine styles based on category matching the magazine vibe
+  let categoryColor = '#0a1628'; // Navy for General/League
+  let categoryAccent = '#3b82f6';
+  
   if (article.category === 'Player' || article.category === 'Transfer') {
-    categoryColor = '#071a0f';
-    categoryAccent = '#6ee7b7';
-    categoryGradient = 'from-emerald-500/20 to-emerald-900/40';
+    categoryColor = '#064e3b'; // Deep Emerald
+    categoryAccent = '#10b981';
   } else if (article.category === 'Milestone') {
-    categoryColor = '#1a0005';
-    categoryAccent = '#fca5a5';
-    categoryGradient = 'from-red-500/20 to-red-900/40';
+    categoryColor = '#4c0519'; // Deep Crimson
+    categoryAccent = '#f43f5e';
   }
 
   // Get 3 recent news (excluding current)
@@ -88,93 +86,130 @@ export function NewsDetail() {
   const formattedDate = isNaN(d.getTime()) ? article.date : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate('/news')}
-        className="group flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <div className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 group-hover:text-primary transition-all">
-          <ArrowLeft className="w-4 h-4" />
-        </div>
-        Back to News
-      </button>
+    <div 
+      className="animate-in fade-in duration-500 min-h-screen pb-16 relative"
+      style={{ 
+        // Background gradient blending from a dark top to the category color
+        background: `linear-gradient(to bottom, #020617 0%, ${categoryColor} 40%, #020617 100%)` 
+      }}
+    >
+      {/* Back Button (Floating on Image) */}
+      <div className="absolute top-6 left-6 z-50">
+        <button
+          onClick={() => navigate('/news')}
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg"
+          title="Back to News"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+      </div>
 
-      {/* Hero Section */}
+      {/* Top Image Section with Magazine-Style Cut */}
       <div 
-        className="relative rounded-[2rem] overflow-hidden mb-12 shadow-2xl border border-border/50"
-        style={{ minHeight: '400px', maxHeight: '60vh' }}
+        className="relative w-full h-[55vh] md:h-[65vh] overflow-hidden"
+        style={{ 
+          // Dynamic angled cut at the bottom of the image
+          clipPath: 'polygon(0 0, 100% 0, 100% 92%, 0 100%)',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+        }}
       >
         <img
           src={article.image || '/images/hero-banner.jpg'}
           alt={article.title}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="w-full h-full object-cover"
           onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/hero-banner.jpg'; }}
         />
-        <div className={cn("absolute inset-0 bg-gradient-to-t via-background/60 to-transparent", categoryGradient)} />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
-        
-        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 max-w-5xl mx-auto w-full">
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span 
-              className="px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full"
-              style={{ background: categoryColor, color: categoryAccent, border: `1px solid ${categoryAccent}40` }}
-            >
-              {article.category}
-            </span>
-            {article.hot && (
-              <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
-                <Flame className="w-3.5 h-3.5" /> Hot News
-              </span>
-            )}
-          </div>
-          <h1 className="font-heading font-black text-3xl md:text-5xl lg:text-6xl text-foreground mb-6 leading-tight tracking-tight max-w-4xl">
-            {article.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-6 text-sm font-semibold text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4" style={{ color: categoryAccent }} />
-              <span className="text-foreground/90">{article.author}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" style={{ color: categoryAccent }} />
-              <span>{formattedDate}</span>
-            </div>
-          </div>
-        </div>
+        {/* Subtle overlay to make top buttons readable */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/20" />
       </div>
 
-      {/* Content Section */}
-      <div className="max-w-3xl mx-auto px-4 md:px-0">
-        <div className="prose prose-invert prose-lg max-w-none prose-headings:font-heading prose-headings:font-bold prose-p:text-muted-foreground prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-primary/80">
-          <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed mb-10 first-letter:text-5xl first-letter:font-black first-letter:mr-1 first-letter:float-left first-letter:text-primary">
-            {article.content}
-          </p>
-          
-          {/* Decorative divider */}
-          <div className="flex items-center justify-center gap-4 my-12 opacity-50">
-            <div className="h-px bg-border flex-1" />
-            <div className="w-2 h-2 rotate-45" style={{ background: categoryAccent }} />
-            <div className="w-2 h-2 rotate-45" style={{ background: categoryAccent }} />
-            <div className="w-2 h-2 rotate-45" style={{ background: categoryAccent }} />
-            <div className="h-px bg-border flex-1" />
+      {/* Main Content Area */}
+      <div className="relative max-w-5xl mx-auto px-6 md:px-12 -mt-16 md:-mt-24 z-10">
+        
+        {/* Overlapping Pill Badge */}
+        <div className="flex justify-center md:justify-start mb-6 md:mb-8">
+          <div 
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black font-black uppercase tracking-[0.2em] text-xs md:text-sm shadow-2xl transition-transform hover:scale-105"
+            style={{ 
+              boxShadow: `0 10px 30px ${categoryAccent}40`,
+              border: `2px solid ${categoryAccent}`
+            }}
+          >
+            {article.category}
+            {article.hot && <Flame className="w-4 h-4 text-red-500" />}
           </div>
+        </div>
+
+        {/* Magazine-Style Headline */}
+        <div className="mb-8">
+          <h1 
+            className="font-heading font-black text-4xl md:text-6xl lg:text-7xl text-white uppercase leading-[0.95] tracking-tighter"
+            style={{ textShadow: '0 10px 30px rgba(0,0,0,0.8)' }}
+          >
+            {article.title}
+          </h1>
+          
+          {/* Angled highlight accent line under title */}
+          <div 
+            className="h-2 w-32 mt-6 rounded-full" 
+            style={{ background: categoryAccent, boxShadow: `0 0 15px ${categoryAccent}` }} 
+          />
+        </div>
+
+        {/* Metadata Strip */}
+        <div className="flex flex-wrap items-center gap-6 text-[10px] md:text-xs font-black text-white/60 uppercase tracking-widest mb-12 py-4 border-y border-white/10">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" style={{ color: categoryAccent }} />
+            <span className="text-white/90">By {article.author}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" style={{ color: categoryAccent }} />
+            <span className="text-white/90">{formattedDate}</span>
+          </div>
+          <div className="ml-auto flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+            <Share2 className="w-4 h-4" /> Share
+          </div>
+        </div>
+
+        {/* Article Body */}
+        <div className="prose prose-invert prose-lg md:prose-xl max-w-4xl mx-auto md:mx-0">
+          <p className="text-white/90 leading-relaxed font-medium">
+            {/* The first letter drop cap */}
+            <span 
+              className="float-left text-7xl md:text-8xl font-black font-heading leading-none pr-3 pt-2"
+              style={{ color: categoryAccent, textShadow: '2px 2px 0 rgba(0,0,0,0.5)' }}
+            >
+              {article.content.charAt(0)}
+            </span>
+            {article.content.slice(1)}
+          </p>
+        </div>
+
+        {/* End of article marker */}
+        <div className="flex items-center gap-4 my-16 opacity-30">
+          <div className="h-px bg-white flex-1" />
+          <div className="w-2 h-2 rotate-45 bg-white" />
+          <div className="w-2 h-2 rotate-45 bg-white" />
+          <div className="h-px bg-white flex-1" />
         </div>
       </div>
 
       {/* Recent News Footer */}
       {recentNews.length > 0 && (
-        <div className="mt-20 pt-12 border-t border-border">
+        <div className="max-w-7xl mx-auto px-6 mt-12">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="font-heading font-black text-2xl">Recent News</h3>
+            <div className="flex items-center gap-4">
+              <div className="w-2 h-8 rounded-full" style={{ background: categoryAccent }} />
+              <h3 className="font-heading font-black text-3xl uppercase tracking-tight text-white">More Headlines</h3>
+            </div>
             <button 
               onClick={() => navigate('/news')}
-              className="text-sm font-bold text-primary hover:underline flex items-center gap-2"
+              className="text-xs font-black uppercase tracking-widest text-white/60 hover:text-white flex items-center gap-2 transition-colors"
             >
               View All <ArrowLeft className="w-4 h-4 rotate-180" />
             </button>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {recentNews.map(n => (
               <NewsCard key={n.id} article={n} />
             ))}
