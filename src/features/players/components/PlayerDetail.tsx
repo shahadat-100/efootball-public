@@ -23,6 +23,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   const captureRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const ITEMS_PER_PAGE = 30;
 
   const handleExport = async () => {
     if (!captureRef.current || !player) return;
@@ -51,7 +53,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   const entries = matchEntries.filter(me => me.playerId === playerId);
 
-  const historyEntries = [...entries]
+  const allSortedEntries = [...entries]
     .sort((a, b) => {
       const dateTimeA = a.time ? `${a.date}T${a.time}` : (a.date ? `${a.date}T00:00:00` : '');
       const dateTimeB = b.time ? `${b.date}T${b.time}` : (b.date ? `${b.date}T00:00:00` : '');
@@ -61,8 +63,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       const validB = isNaN(dateB) ? 0 : dateB;
       if (validA !== validB) return validB - validA;
       return String(b.id).localeCompare(String(a.id));
-    })
-    .slice(0, 30); // Requested to show 30 instead of 50
+    });
+
+  const totalPages = Math.max(1, Math.ceil(allSortedEntries.length / ITEMS_PER_PAGE));
+  const historyEntries = allSortedEntries.slice((historyPage - 1) * ITEMS_PER_PAGE, historyPage * ITEMS_PER_PAGE);
 
 
   const oneWeekAgo = new Date();
@@ -612,7 +616,28 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           MATCH HISTORY TABLE — Improved
           ═══════════════════════════════════════════ */}
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <p className="font-heading font-bold text-[18px] mb-4 tracking-tight">Match History <span className="text-muted-foreground text-[13px] font-sans font-normal ml-2">(Recent 30)</span></p>
+        <div className="flex justify-between items-center mb-4">
+          <p className="font-heading font-bold text-[18px] tracking-tight">Match History</p>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                disabled={historyPage === 1}
+                className="px-2 py-1 bg-muted hover:bg-muted/80 disabled:opacity-50 text-[11px] rounded"
+              >
+                Prev
+              </button>
+              <span className="text-[11px] text-muted-foreground">Page {historyPage} of {totalPages}</span>
+              <button
+                onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))}
+                disabled={historyPage === totalPages}
+                className="px-2 py-1 bg-muted hover:bg-muted/80 disabled:opacity-50 text-[11px] rounded"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
         {historyEntries.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-xl">
             <span className="text-4xl mb-3 block">🎮</span>
