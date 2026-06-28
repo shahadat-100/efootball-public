@@ -125,17 +125,29 @@ export function NewsDetail() {
       {/* Main Content Area */}
       <div className="relative max-w-5xl mx-auto px-6 md:px-12 -mt-16 md:-mt-24 z-10">
         
-        {/* Overlapping Pill Badge */}
+        {/* Category Label — sharp angular ribbon style */}
         <div className="flex justify-center md:justify-start mb-6 md:mb-8">
-          <div 
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black font-black uppercase tracking-[0.2em] text-xs md:text-sm shadow-2xl transition-transform hover:scale-105"
-            style={{ 
-              boxShadow: `0 10px 30px ${categoryAccent}40`,
-              border: `2px solid ${categoryAccent}`
+          <div
+            className="inline-flex items-center gap-3"
+            style={{
+              background: `linear-gradient(135deg, ${categoryAccent} 0%, ${categoryAccent}cc 100%)`,
+              padding: '8px 28px 8px 16px',
+              clipPath: 'polygon(0 0, 100% 0, 92% 100%, 0 100%)',
+              boxShadow: `0 6px 24px ${categoryAccent}60`,
             }}
           >
-            {article.category}
-            {article.hot && <Flame className="w-4 h-4 text-red-500" />}
+            <span style={{
+              fontFamily: "'Oswald', sans-serif",
+              fontWeight: 800,
+              fontSize: '20px',
+              color: '#fff',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              lineHeight: 1,
+            }}>
+              {article.category}
+            </span>
+            {article.hot && <Flame className="w-5 h-5 text-white drop-shadow" />}
           </div>
         </div>
 
@@ -173,14 +185,31 @@ export function NewsDetail() {
         {/* Article Body */}
         <div className="prose prose-invert prose-lg md:prose-xl max-w-4xl mx-auto md:mx-0">
           <p className="text-white/90 leading-relaxed font-medium">
-            {/* The first letter drop cap */}
-            <span 
-              className="float-left text-7xl md:text-8xl font-black font-heading leading-none pr-3 pt-2"
-              style={{ color: categoryAccent, textShadow: '2px 2px 0 rgba(0,0,0,0.5)' }}
-            >
-              {article.content.charAt(0)}
-            </span>
-            {article.content.slice(1)}
+            {/* First WORD large */}
+            {(() => {
+              const words = article.content.split(' ');
+              const firstWord = words[0];
+              const rest = words.slice(1).join(' ');
+              return (
+                <>
+                  <span
+                    className="font-black font-heading uppercase"
+                    style={{
+                      fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                      color: categoryAccent,
+                      textShadow: `0 0 20px ${categoryAccent}80, 2px 2px 0 rgba(0,0,0,0.5)`,
+                      lineHeight: 1,
+                      marginRight: '0.3em',
+                      display: 'inline',
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
+                    {firstWord}
+                  </span>
+                  {rest}
+                </>
+              );
+            })()}
           </p>
         </div>
 
