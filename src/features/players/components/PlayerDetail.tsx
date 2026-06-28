@@ -673,12 +673,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           {/* All-Time Statistics Overview */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-heading font-bold text-[18px] tracking-tight">All-Time Statistics</h3>
-                  {currentRank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{currentRank}</p>}
-                </div>
-
+              <div className="mb-4">
+                <h3 className="font-heading font-bold text-[18px] tracking-tight">All-Time Statistics</h3>
+                {currentRank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{currentRank}</p>}
               </div>
               
               <div className="flex flex-wrap gap-2 mb-3">
@@ -718,12 +715,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               const sRanks = seasonRanksList.find(sr => sr?.seasonName === latestSeasonStats.seasonName) || { rank: undefined };
               return (
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-heading font-bold text-[18px] tracking-tight">Season {latestSeasonStats.seasonName || latestSeasonStats.year} Stats</h3>
-                      {sRanks.rank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{sRanks.rank}</p>}
-                    </div>
-
+                  <div className="mb-4">
+                    <h3 className="font-heading font-bold text-[18px] tracking-tight">Season {latestSeasonStats.seasonName || latestSeasonStats.year} Stats</h3>
+                    {sRanks.rank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{sRanks.rank}</p>}
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -866,27 +860,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           MATCH HISTORY TABLE — Improved
           ═══════════════════════════════════════════ */}
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <p className="font-heading font-bold text-[18px] tracking-tight">Match History</p>
-          {totalPages > 1 && (
-            <div className="flex items-center gap-4 bg-muted/30 px-3 py-1.5 rounded-lg border border-border/50">
-              <button
-                onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
-                disabled={historyPage === 1}
-                className="text-[12px] font-medium hover:text-primary disabled:opacity-50 disabled:hover:text-inherit transition-colors flex items-center gap-1"
-              >
-                ← Previous
-              </button>
-              <span className="text-[12px] font-bold text-foreground/80">Page {historyPage}/{totalPages}</span>
-              <button
-                onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))}
-                disabled={historyPage === totalPages}
-                className="text-[12px] font-medium hover:text-primary disabled:opacity-50 disabled:hover:text-inherit transition-colors flex items-center gap-1"
-              >
-                Next →
-              </button>
-            </div>
-          )}
+        <div className="mb-4">
+          <h3 className="font-heading font-bold text-[18px] tracking-tight">Match History</h3>
         </div>
         {historyEntries.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-xl">
@@ -930,6 +905,30 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+        
+        {totalPages > 1 && (
+          <div className="mt-6 flex justify-center border-t border-border/50 pt-6">
+            <div className="flex items-center gap-6 bg-muted/30 px-4 py-2 rounded-xl border border-border shadow-sm">
+              <button
+                onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                disabled={historyPage === 1}
+                className="text-[13px] font-bold hover:text-primary disabled:opacity-40 disabled:hover:text-inherit transition-all flex items-center gap-2"
+              >
+                ← Previous
+              </button>
+              <div className="px-3 border-x border-border/50">
+                <span className="text-[12px] font-black text-foreground">Page {historyPage} of {totalPages}</span>
+              </div>
+              <button
+                onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))}
+                disabled={historyPage === totalPages}
+                className="text-[13px] font-bold hover:text-primary disabled:opacity-40 disabled:hover:text-inherit transition-all flex items-center gap-2"
+              >
+                Next →
+              </button>
+            </div>
           </div>
         )}
       </div>
