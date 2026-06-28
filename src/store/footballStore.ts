@@ -100,7 +100,7 @@ export const mapMatchEntryFromDb = (e: any): MatchEntry => ({
   cleanSheet: e.cleansheet || false,
   motm: e.motm || false,
   date: e.date || e.matches?.date || '',
-  time: e.time || null,
+  time: e.time || e.matches?.time || null,
   notes: e.notes || '',
   seasonId: e.season_id,
 });
@@ -314,7 +314,7 @@ export const useFootballStore = create<FootballStore>()(
         const { data, error } = await supabase
           .from('match_entries')
           .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
-          .order('id', { ascending: false })
+          .order('date', { ascending: false })
           .limit(500);
         if (data) {
           set({ 
@@ -335,7 +335,7 @@ export const useFootballStore = create<FootballStore>()(
         const { data, error } = await supabase
           .from('match_entries')
           .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
-          .order('id', { ascending: false })
+          .order('date', { ascending: false })
           .range(offset, offset + limit - 1);
           
         if (data) {
