@@ -204,7 +204,7 @@ export function OverviewPointsLeaderboard({
   );
 
   const CardWrapper = ({ children, accentColor }: { children: React.ReactNode; accentColor: string }) => (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col h-[420px] relative overflow-hidden group">
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col relative overflow-hidden group">
       <div
         className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-30 group-hover:opacity-50 transition-opacity"
         style={{ backgroundColor: accentColor }}
@@ -224,7 +224,7 @@ export function OverviewPointsLeaderboard({
             {weeklyRanking.label}
           </span>
         </div>
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar relative z-10">
+        <div className="space-y-1 relative z-10">
           {weeklyRanking.list.length === 0 || weeklyRanking.list.every(r => r.points === 0 && r.matches === 0) ? (
             <EmptyState emoji="📊" msg="No points this week" />
           ) : (
@@ -258,7 +258,7 @@ export function OverviewPointsLeaderboard({
             </select>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar relative z-10">
+        <div className="space-y-1 relative z-10">
           {monthlyRanking.list.length === 0 || monthlyRanking.list.every(r => r.points === 0 && r.matches === 0) ? (
             <EmptyState emoji="📅" msg="No points for this period" />
           ) : (
@@ -285,7 +285,7 @@ export function OverviewPointsLeaderboard({
             {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
-        <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar relative z-10">
+        <div className="space-y-1 relative z-10">
           {overallRanking.list.length === 0 || overallRanking.list.every(r => r.points === 0 && r.matches === 0) ? (
             <EmptyState emoji="🏆" msg="No points yet" />
           ) : (

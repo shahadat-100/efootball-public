@@ -220,12 +220,12 @@ export function Overview({ setTab }: OverviewProps) {
 
       {/* Monthly Top XI & Recent Matches Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-        <div className="xl:col-span-2 flex w-full min-w-0">
+        <div className="xl:col-span-2 w-full min-w-0">
           <MonthlyTopXI players={players} matchEntries={matchEntries} />
         </div>
 
-        <div className="xl:col-span-1 flex">
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col w-full h-full max-h-[700px] overflow-y-auto">
+        <div className="xl:col-span-1">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col w-full">
             <div className="flex items-center justify-between mb-6">
               <p className="font-semibold text-base text-foreground tracking-tight">Recent Matches</p>
               <Badge bg="#1a1a1a" c="#e5e5e5">Live</Badge>
