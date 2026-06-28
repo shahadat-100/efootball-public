@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
 import { NewsCard } from '@/features/news/components/NewsCard';
-import { ArrowLeft, Calendar, User, Flame, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Flame } from 'lucide-react';
 import type { NewsArticle } from '@/features/news/types';
 
 export function NewsDetail() {
@@ -176,9 +176,6 @@ export function NewsDetail() {
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" style={{ color: categoryAccent }} />
             <span className="text-white/90">{formattedDate}</span>
-          </div>
-          <div className="ml-auto flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
-            <Share2 className="w-4 h-4" /> Share
           </div>
         </div>
 
