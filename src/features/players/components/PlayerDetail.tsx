@@ -10,6 +10,7 @@ import { SeasonTable } from './SeasonTable';
 import { AchievementBadges } from './AchievementBadges';
 import { PlayerSnapshot } from './detail-tabs/PlayerSnapshot';
 import { PlayerTimeline } from './detail-tabs/PlayerTimeline';
+import { PlayerOverviewDashboard } from './detail-tabs/PlayerOverviewDashboard';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
 import { Download, User, Activity, BarChart2, Award } from 'lucide-react';
@@ -382,8 +383,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (trophies.length === 0) return null;
 
     return (
-      <div className="mt-6 w-full pt-6 border-t border-border/50">
-        <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-3">Trophy Cabinet</h4>
+      <div className="w-full">
+        <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-3">Trophy Cabinet</h4>
         <div className="flex gap-2.5 flex-wrap">
           {trophies.map((t, i) => (
             <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${t.border} ${t.bg} shadow-sm hover:scale-105 transition-transform`}>
@@ -428,22 +429,22 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (!closestMilestone || closestMilestone.percent === 0) return null;
 
     return (
-      <div className="mt-6 w-full pt-6 border-t border-border/50">
-        <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-3 flex items-center gap-2">
+      <div className="w-full">
+        <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-3 flex items-center gap-2">
           <span>🎯 Next Milestone</span>
-          <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[9px]">{closestMilestone.percent}%</span>
+          <span className="bg-white/10 text-white px-1.5 py-0.5 rounded text-[9px]">{closestMilestone.percent}%</span>
         </h4>
-        <div className="bg-muted/30 border border-border/50 rounded-xl p-4 transition-all hover:bg-muted/50">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 transition-all hover:bg-white/10 backdrop-blur-sm">
           <div className="flex justify-between items-end mb-2.5">
             <div>
-              <p className="text-[14px] font-bold text-foreground leading-tight">{closestMilestone.title}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Just <strong className="text-primary font-black">{closestMilestone.remaining} more</strong> to go!</p>
+              <p className="text-[14px] font-bold text-white leading-tight">{closestMilestone.title}</p>
+              <p className="text-[11px] text-white/60 mt-0.5">Just <strong className="text-white font-black">{closestMilestone.remaining} more</strong> to go!</p>
             </div>
-            <span className="text-[12px] font-black text-primary bg-primary/10 px-2 py-1 rounded-lg">{closestMilestone.current} / {closestMilestone.target}</span>
+            <span className="text-[12px] font-black text-white bg-white/10 px-2 py-1 rounded-lg border border-white/5">{closestMilestone.current} / {closestMilestone.target}</span>
           </div>
-          <div className="h-2.5 bg-border rounded-full overflow-hidden shadow-inner">
+          <div className="h-2.5 bg-white/10 rounded-full overflow-hidden shadow-inner">
             <div 
-              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 relative" 
+              className="h-full bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full transition-all duration-1000 relative" 
               style={{ width: `${closestMilestone.percent}%` }}
             >
               <div className="absolute inset-0 bg-white/20 animate-pulse" />
@@ -533,6 +534,83 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           </div>
         </div>
 
+        {/* HERO ZONE EXPANSION: Quick Stats & Trophies */}
+        <div className="relative z-10 mt-8 pt-8 border-t border-white/10 w-full flex flex-col gap-6">
+          <div className="flex flex-wrap gap-8 items-start justify-between">
+            {/* Quick Stats Group */}
+            <div className="flex flex-wrap gap-8 flex-1">
+              {/* Recent Form */}
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-2">Recent Form (Last 10)</h4>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(() => {
+                    const recent10 = historyEntries.slice(0, 10).reverse();
+                    if (recent10.length === 0) return <span className="text-[11px] text-white/30">No matches yet</span>;
+                    return recent10.map((entry, i) => {
+                      const result = entry.result?.toLowerCase() || 'draw';
+                      const isWin = result === 'win';
+                      const isDraw = result === 'draw';
+                      return (
+                        <div
+                          key={entry.id || i}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default"
+                          style={isWin
+                            ? { background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }
+                            : isDraw
+                            ? { background: 'rgba(245,158,11,0.15)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.3)' }
+                            : { background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }
+                          }
+                          title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
+                        >
+                          {result.charAt(0).toUpperCase()}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* Form Status */}
+              <div>
+                <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-2">Form Trend</h4>
+                <span 
+                  className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
+                  style={{ backgroundColor: `${formStatus.color}20`, color: formStatus.color, borderColor: `${formStatus.color}40` }}
+                >
+                  <span>{formStatus.icon}</span>
+                  {formStatus.text}
+                </span>
+              </div>
+
+              {/* Ranks */}
+              {[
+                { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.15)' },
+                { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.15)' },
+                { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.15)' },
+              ].map(r => (
+                <div key={r.label}>
+                  <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-2">{r.label}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-[14px] px-3 py-1 rounded-lg border shadow-sm backdrop-blur-sm" style={{ backgroundColor: r.bgColor, color: r.color, borderColor: r.bgColor.replace('0.15', '0.3') }}>
+                      #{r.value || '-'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Trophies Group */}
+            <div className="w-full xl:w-auto xl:max-w-md">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
+                {renderTrophyCabinet()}
+              </div>
+            </div>
+          </div>
+          
+          <div className="w-full max-w-2xl">
+            {renderNextMilestone()}
+          </div>
+        </div>
       </div>
 
       {/* ══ Tab Navigation ══ */}
@@ -566,101 +644,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       {/* ══ Tab Content ══ */}
       {activeTab === 'overview' && (
         <div className="animate-in fade-in slide-in-from-bottom-2">
-          <PlayerSnapshot entries={entries} />
-          
-          <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
-            <h3 className="font-heading font-bold text-[18px] mb-5 tracking-tight">Quick Stats</h3>
-            <div className="flex flex-wrap gap-6 items-start">
-              {/* Recent Form */}
-              <div>
-                <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Recent Form (Last 10)</h4>
-                <div className="flex gap-1.5 flex-wrap">
-                  {(() => {
-                    const recent10 = historyEntries.slice(0, 10).reverse();
-                    if (recent10.length === 0) return <span className="text-[11px] text-muted-foreground/50">No matches yet</span>;
-                    return recent10.map((entry, i) => {
-                      const result = entry.result?.toLowerCase() || 'draw';
-                      const isWin = result === 'win';
-                      const isDraw = result === 'draw';
-                      return (
-                        <div
-                          key={entry.id || i}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] shadow-md cursor-default"
-                          style={isWin
-                            ? { background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }
-                            : isDraw
-                            ? { background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }
-                            : { background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }
-                          }
-                          title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
-                        >
-                          {result.charAt(0).toUpperCase()}
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
-
-              {/* Form Status */}
-              <div>
-                <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Form Trend</h4>
-                <span 
-                  className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
-                  style={{ backgroundColor: `${formStatus.color}15`, color: formStatus.color, borderColor: `${formStatus.color}30` }}
-                >
-                  <span>{formStatus.icon}</span>
-                  {formStatus.text}
-                </span>
-              </div>
-
-              {/* Ranks */}
-              {[
-                { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.1)' },
-                { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.1)' },
-                { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.1)' },
-              ].map(r => (
-                <div key={r.label}>
-                  <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">{r.label}</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="font-black text-[14px] px-3 py-1 rounded-lg border shadow-sm" style={{ backgroundColor: r.bgColor, color: r.color, borderColor: r.bgColor.replace('0.1', '0.2') }}>
-                      #{r.value || '-'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Season Ranks */}
-              {seasonRanksList.map((sr: any) => (
-                <div key={sr?.seasonName}>
-                  <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">{sr?.seasonName}</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="font-black text-[14px] px-3 py-1 rounded-lg border shadow-sm" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.2)' }}>
-                      #{sr.rank || '-'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {/* Win Rate */}
-              <div>
-                <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Win Rate</h4>
-                <span className="font-black text-[14px] px-3 py-1 rounded-lg shadow-sm border border-border bg-muted/50 text-foreground">
-                  {(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(0)}%
-                </span>
-              </div>
-
-              {player.email && (
-                <div>
-                  <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-2">Email</h4>
-                  <span className="text-[13px] text-foreground font-medium">{player.email}</span>
-                </div>
-              )}
-            </div>
-
-            {renderTrophyCabinet()}
-            {renderNextMilestone()}
+          <div className="mb-6">
+            <PlayerSnapshot entries={entries} />
           </div>
+          <PlayerOverviewDashboard entries={entries} stats={stats} />
         </div>
       )}
 
