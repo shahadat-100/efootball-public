@@ -162,6 +162,7 @@ interface FootballStore {
   
   fetchMatchEntries: (force?: boolean) => Promise<void>;
   setMatchEntries: (e: MatchEntry[]) => void;
+  fetchPlayerMatchEntries: (playerId: string) => Promise<void>;
   matchEntriesHasMore: boolean;
   loadMoreMatchEntries: () => Promise<void>;
   
@@ -326,6 +327,28 @@ export const useFootballStore = create<FootballStore>()(
         if (error) console.error('Error fetching match entries:', error);
       },
       setMatchEntries: (matchEntries: MatchEntry[]) => set({ matchEntries }),
+
+      fetchPlayerMatchEntries: async (playerId: string) => {
+        const { data, error } = await supabase
+          .from('match_entries')
+          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
+          .eq('playerid', playerId)
+          .order('date', { ascending: false });
+
+        if (data) {
+          const newEntries = data.map(mapMatchEntryFromDb);
+          const currentEntries = get().matchEntries;
+          
+          // Merge avoiding duplicates
+          const existingIds = new Set(currentEntries.map(e => e.id));
+          const uniqueNewEntries = newEntries.filter(e => !existingIds.has(e.id));
+          
+          if (uniqueNewEntries.length > 0) {
+            set({ matchEntries: [...currentEntries, ...uniqueNewEntries] });
+          }
+        }
+        if (error) console.error('Error fetching player specific match entries:', error);
+      },
       
       loadMoreMatchEntries: async () => {
         const currentEntries = get().matchEntries;

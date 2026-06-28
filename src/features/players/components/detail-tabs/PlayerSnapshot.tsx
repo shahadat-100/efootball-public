@@ -1,5 +1,5 @@
-import React from 'react';
-import { MatchEntry } from '@/shared/schemas/models';
+
+import { MatchEntry } from '@/features/match-entries/types';
 import { differenceInDays, differenceInWeeks } from 'date-fns';
 
 interface PlayerSnapshotProps {

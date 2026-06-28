@@ -1,5 +1,4 @@
-import React from 'react';
-import { MatchEntry } from '@/shared/schemas/models';
+import { MatchEntry } from '@/features/match-entries/types';
 
 interface PlayerTimelineProps {
   entries: MatchEntry[];
@@ -37,9 +36,9 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
   let hattricks = 0;
   let doubleHattricks = 0;
   let maxMargin = 0;
-  let maxMarginMatch: MatchEntry | null = null;
+  let maxMarginMatch: any = null;
   let maxGoals = 0;
-  let maxGoalsMatch: MatchEntry | null = null;
+  let maxGoalsMatch: any = null;
 
   const addMilestone = (title: string, date: string, type: string, tag: string, subText?: string) => {
     let tagColor = '#94a3b8';
