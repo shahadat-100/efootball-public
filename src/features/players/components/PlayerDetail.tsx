@@ -355,6 +355,105 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       return a.rank - b.rank;
     });
 
+  const renderTrophyCabinet = () => {
+    const trophies = [];
+    const goldSeasons = seasonRanksList.filter(s => s?.rank === 1);
+    goldSeasons.forEach(s => {
+      trophies.push({ icon: '🏆', title: `eFootball ${s?.seasonName} Champion`, color: 'text-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' });
+    });
+
+    const silverSeasons = seasonRanksList.filter(s => s?.rank === 2 || s?.rank === 3);
+    silverSeasons.forEach(s => {
+      trophies.push({ icon: '🥈', title: `eFootball ${s?.seasonName} Podium`, color: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/30' });
+    });
+
+    if (stats.totalMOTM >= 5) {
+      trophies.push({ icon: '👑', title: `Star Player (${stats.totalMOTM} MOTM)`, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30' });
+    }
+
+    if (stats.totalCleanSheets >= 10) {
+      trophies.push({ icon: '🧤', title: `Golden Glove (${stats.totalCleanSheets} CS)`, color: 'text-sky-500', bg: 'bg-sky-500/10', border: 'border-sky-500/30' });
+    }
+
+    if (stats.totalHattricks >= 3) {
+      trophies.push({ icon: '⚽', title: `Hat-trick Hero (${stats.totalHattricks})`, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/30' });
+    }
+
+    if (trophies.length === 0) return null;
+
+    return (
+      <div className="mt-6 w-full pt-6 border-t border-border/50">
+        <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-3">Trophy Cabinet</h4>
+        <div className="flex gap-2.5 flex-wrap">
+          {trophies.map((t, i) => (
+            <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${t.border} ${t.bg} shadow-sm hover:scale-105 transition-transform`}>
+              <span className="text-[16px] drop-shadow-md">{t.icon}</span>
+              <span className={`text-[11px] font-bold ${t.color}`}>{t.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderNextMilestone = () => {
+    const milestones = [
+      { name: 'Goals', current: stats.totalGoals, steps: [10, 50, 100, 150, 200, 250, 300, 400, 500, 1000] },
+      { name: 'Matches', current: stats.totalMatches, steps: [10, 50, 100, 150, 200, 250, 300, 400, 500, 1000] },
+      { name: 'Wins', current: stats.totalWins, steps: [10, 50, 100, 150, 200, 250, 300, 400, 500] },
+    ];
+
+    let closestMilestone: any = null;
+    let highestPercentage = 0;
+
+    milestones.forEach(m => {
+      const nextStep = m.steps.find(s => s > m.current);
+      if (nextStep) {
+        const prevStep = m.steps.slice().reverse().find(s => s <= m.current) || 0;
+        const progress = (m.current - prevStep) / (nextStep - prevStep);
+        
+        if (progress > highestPercentage) {
+          highestPercentage = progress;
+          closestMilestone = {
+            title: `${nextStep} Career ${m.name}`,
+            current: m.current,
+            target: nextStep,
+            percent: Math.round(progress * 100),
+            remaining: nextStep - m.current
+          };
+        }
+      }
+    });
+
+    if (!closestMilestone || closestMilestone.percent === 0) return null;
+
+    return (
+      <div className="mt-6 w-full pt-6 border-t border-border/50">
+        <h4 className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-3 flex items-center gap-2">
+          <span>🎯 Next Milestone</span>
+          <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[9px]">{closestMilestone.percent}%</span>
+        </h4>
+        <div className="bg-muted/30 border border-border/50 rounded-xl p-4 transition-all hover:bg-muted/50">
+          <div className="flex justify-between items-end mb-2.5">
+            <div>
+              <p className="text-[14px] font-bold text-foreground leading-tight">{closestMilestone.title}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Just <strong className="text-primary font-black">{closestMilestone.remaining} more</strong> to go!</p>
+            </div>
+            <span className="text-[12px] font-black text-primary bg-primary/10 px-2 py-1 rounded-lg">{closestMilestone.current} / {closestMilestone.target}</span>
+          </div>
+          <div className="h-2.5 bg-border rounded-full overflow-hidden shadow-inner">
+            <div 
+              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 relative" 
+              style={{ width: `${closestMilestone.percent}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
       {/* Back navigation & Actions */}
@@ -558,6 +657,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 </div>
               )}
             </div>
+
+            {renderTrophyCabinet()}
+            {renderNextMilestone()}
           </div>
         </div>
       )}
@@ -576,9 +678,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                   <h3 className="font-heading font-bold text-[18px] tracking-tight">All-Time Statistics</h3>
                   {currentRank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{currentRank}</p>}
                 </div>
-                <Button size="sm" variant="secondary" className="gap-2 h-8 text-[12px]">
-                  <Download className="w-3 h-3" /> Download
-                </Button>
+
               </div>
               
               <div className="flex flex-wrap gap-2 mb-3">
@@ -623,9 +723,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                       <h3 className="font-heading font-bold text-[18px] tracking-tight">Season {latestSeasonStats.seasonName || latestSeasonStats.year} Stats</h3>
                       {sRanks.rank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{sRanks.rank}</p>}
                     </div>
-                    <Button size="sm" variant="secondary" className="gap-2 h-8 text-[12px]">
-                      <Download className="w-3 h-3" /> Download
-                    </Button>
+
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mb-3">
