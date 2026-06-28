@@ -64,6 +64,23 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
     });
   };
 
+  const getOrdinal = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  let currentWinStreak = 0;
+  let currentUnbeatenStreak = 0;
+  let currentCleanSheetStreak = 0;
+
+  let winStreak5Times = 0;
+  let unbeaten10Times = 0;
+  let cs3Times = 0;
+
+  let defMasterclassTimes = 0;
+  let doubleHattrickTimes = 0;
+
   sortedEntries.forEach((e) => {
     appearances++;
     if (appearances === 1) addMilestone('Played Debut', e.date!, 'debut', 'PL');
@@ -118,34 +135,49 @@ export function PlayerTimeline({ entries }: PlayerTimelineProps) {
       maxGoals = e.goals || 0;
       maxGoalsMatch = e;
     }
-  });
 
-  // Calculate Streaks
-  let maxUnbeaten = 0;
-  let currentUnbeaten = 0;
-  let maxUnbeatenStart = '';
-  let maxUnbeatenEnd = '';
-  let currentStart = '';
+    // Legendary Performances
+    if (e.motm && e.cleanSheet) {
+      defMasterclassTimes++;
+      addMilestone(`Defensive Masterclass (${getOrdinal(defMasterclassTimes)} time)`, e.date!, `def_master_${e.id}`, '🛡️', 'Clean Sheet + MOTM');
+    }
+    if ((e.goals || 0) >= 6) {
+      doubleHattrickTimes++;
+      addMilestone(`Double Hat-trick (${getOrdinal(doubleHattrickTimes)} time) - ${e.goals} Goals`, e.date!, `dht_${e.id}`, '⚽', 'Legendary Performance');
+    }
 
-  sortedEntries.forEach((e) => {
-    if (e.result === 'win' || e.result === 'draw') {
-      if (currentUnbeaten === 0) currentStart = e.date!;
-      currentUnbeaten++;
-      if (currentUnbeaten > maxUnbeaten) {
-        maxUnbeaten = currentUnbeaten;
-        maxUnbeatenStart = currentStart;
-        maxUnbeatenEnd = e.date!;
+    // Streaks Logic
+    if (e.result === 'win') {
+      currentWinStreak++;
+      currentUnbeatenStreak++;
+      if (currentWinStreak % 5 === 0) {
+        winStreak5Times++;
+        addMilestone(`5-Match Win Streak (${getOrdinal(winStreak5Times)} time)`, e.date!, `w_streak_${winStreak5Times}`, '🔥');
+      }
+    } else if (e.result === 'draw') {
+      currentWinStreak = 0;
+      currentUnbeatenStreak++;
+    } else {
+      currentWinStreak = 0;
+      currentUnbeatenStreak = 0;
+    }
+
+    if (currentUnbeatenStreak > 0 && currentUnbeatenStreak % 10 === 0) {
+      unbeaten10Times++;
+      addMilestone(`10 Matches Unbeaten (${getOrdinal(unbeaten10Times)} time)`, e.date!, `ub_streak_${unbeaten10Times}`, '🛡️');
+    }
+
+    if (e.cleanSheet) {
+      currentCleanSheetStreak++;
+      if (currentCleanSheetStreak % 3 === 0) {
+        cs3Times++;
+        addMilestone(`3 Consecutive Clean Sheets (${getOrdinal(cs3Times)} time)`, e.date!, `cs_streak_${cs3Times}`, '🧤');
       }
     } else {
-      currentUnbeaten = 0;
+      currentCleanSheetStreak = 0;
     }
   });
 
-  if (maxUnbeaten >= 10) {
-    const s = new Date(maxUnbeatenStart).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const e = new Date(maxUnbeatenEnd).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    addMilestone(`${maxUnbeaten}-match unbeaten streak`, maxUnbeatenEnd, 'unbeaten', '🔥', `${s} — ${e}`);
-  }
 
   // Add the dynamic records (they only get added at the end based on their final max values)
   if (maxMarginMatch) {
