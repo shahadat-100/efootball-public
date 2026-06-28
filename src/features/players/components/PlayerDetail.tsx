@@ -521,10 +521,16 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         // ── Monthly & Weekly RANK calculation ──────────────────────────────
         type PeriodStats = { wins: number; draws: number; losses: number; goals: number; matches: number; points: number };
 
-        const buildPeriodKey = (date: Date, mode: 'month' | 'week') => {
-          const monthKey = date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+        const buildPeriodKey = (dateStr: string, mode: 'month' | 'week') => {
+          if (!dateStr || dateStr.length < 10) return '';
+          const [year, month, day] = dateStr.split('-');
+          const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          if (isNaN(d.getTime())) return '';
+          
+          const monthKey = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
           if (mode === 'month') return monthKey;
-          const weekNum = Math.ceil(date.getDate() / 7);
+          
+          const weekNum = Math.ceil(d.getDate() / 7);
           return `W${weekNum} ${monthKey}`;
         };
 
@@ -533,29 +539,31 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         const myWeekKeys = new Set<string>();
         entries.forEach(e => {
           if (!e.date) return;
-          const d = new Date(e.date);
-          if (isNaN(d.getTime())) return;
-          myMonthKeys.add(buildPeriodKey(d, 'month'));
-          myWeekKeys.add(buildPeriodKey(d, 'week'));
+          const mk = buildPeriodKey(e.date, 'month');
+          if (mk) myMonthKeys.add(mk);
+          const wk = buildPeriodKey(e.date, 'week');
+          if (wk) myWeekKeys.add(wk);
         });
 
         const getRankForPeriod = (periodKey: string, mode: 'month' | 'week'): { rank: number; wins: number; draws: number; losses: number; goals: number; matches: number; totalPlayers: number } => {
           const playerPoints = new Map<string, PeriodStats>();
           matchEntries.forEach(e => {
             if (!e.date) return;
-            const d = new Date(e.date);
-            if (isNaN(d.getTime())) return;
-            if (buildPeriodKey(d, mode) !== periodKey) return;
+            const pk = buildPeriodKey(e.date, mode);
+            if (pk !== periodKey) return;
             if (!playerPoints.has(e.playerId)) {
               playerPoints.set(e.playerId, { wins: 0, draws: 0, losses: 0, goals: 0, matches: 0, points: 0 });
             }
             const ps = playerPoints.get(e.playerId)!;
             ps.matches += 1;
             ps.goals += e.goals || 0;
-            if (e.result === 'win') { ps.wins += 1; ps.points += 3; }
-            else if (e.result === 'draw') { ps.draws += 1; ps.points += 1; }
-            else if (e.result === 'loss') { ps.losses += 1; }
-            if (e.motm) ps.points += 2;
+            if (e.result === 'win') { ps.wins += 1; ps.points += 10; }
+            else if (e.result === 'draw') { ps.draws += 1; ps.points += 5; }
+            else if (e.result === 'loss') { ps.losses += 1; ps.points -= 3; }
+            ps.points += (e.goals || 0);
+            ps.points -= (e.goalsConceded || 0);
+            if (e.motm) ps.points += 4;
+            ps.points += (e.hattricks || 0);
           });
 
           const sorted = Array.from(playerPoints.entries()).sort((a, b) => b[1].points - a[1].points || b[1].goals - a[1].goals);
@@ -568,11 +576,17 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           };
         };
 
-        // Only keep months where this player ranked top 5
         const monthlyRankData = Array.from(myMonthKeys)
           .map(key => ({ label: key, ...getRankForPeriod(key, 'month') }))
-          .filter(d => d.rank <= 5)
-          .sort((a, b) => a.rank - b.rank); // best rank first
+          .sort((a, b) => {
+            // Sort by most recent month first, fallback to rank
+            const dateA = new Date(`1 ${a.label}`);
+            const dateB = new Date(`1 ${b.label}`);
+            if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+              return dateB.getTime() - dateA.getTime();
+            }
+            return a.rank - b.rank;
+          });
 
         return (
           <>
@@ -604,7 +618,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             <div className="my-4">
               <RankTrendCard
                 title="Monthly Rank"
-                subtitle="Months this player reached Top 5 in the leaderboard"
+                subtitle="Monthly performance and rank overview"
                 data={monthlyRankData}
               />
             </div>
@@ -619,21 +633,21 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         <div className="flex justify-between items-center mb-4">
           <p className="font-heading font-bold text-[18px] tracking-tight">Match History</p>
           {totalPages > 1 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4 bg-muted/30 px-3 py-1.5 rounded-lg border border-border/50">
               <button
                 onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
                 disabled={historyPage === 1}
-                className="px-2 py-1 bg-muted hover:bg-muted/80 disabled:opacity-50 text-[11px] rounded"
+                className="text-[12px] font-medium hover:text-primary disabled:opacity-50 disabled:hover:text-inherit transition-colors flex items-center gap-1"
               >
-                Prev
+                ← Previous
               </button>
-              <span className="text-[11px] text-muted-foreground">Page {historyPage} of {totalPages}</span>
+              <span className="text-[12px] font-bold text-foreground/80">Page {historyPage}/{totalPages}</span>
               <button
                 onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))}
                 disabled={historyPage === totalPages}
-                className="px-2 py-1 bg-muted hover:bg-muted/80 disabled:opacity-50 text-[11px] rounded"
+                className="text-[12px] font-medium hover:text-primary disabled:opacity-50 disabled:hover:text-inherit transition-colors flex items-center gap-1"
               >
-                Next
+                Next →
               </button>
             </div>
           )}
