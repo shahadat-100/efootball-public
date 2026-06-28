@@ -112,20 +112,28 @@ function NavyCard({ article }: NewsCardProps) {
       </div>
 
       {/* Description strip */}
-      <div style={{ background: '#0d1e36', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ background: '#0d1e36', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', minHeight: '110px' }}>
         <p style={{
           fontSize: '12px', color: '#93c5fd', lineHeight: 1.6,
           display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 12px',
-          flexGrow: 1,
+          flex: '1 1 auto',
         }}>
           {article.content || 'No content provided.'}
         </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
           <span style={{ fontSize: '10px', color: '#60a5fa', fontWeight: 600 }}>
             By {article.author}
           </span>
-          <span className="group-hover:translate-x-1 transition-transform" style={{ fontSize: '11px', color: '#93c5fd', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Read More →
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '5px',
+            background: 'linear-gradient(135deg, rgba(147,197,253,0.15), rgba(96,165,250,0.1))',
+            border: '1px solid rgba(147,197,253,0.35)',
+            color: '#93c5fd', fontSize: '11px', fontWeight: 800,
+            textTransform: 'uppercase', letterSpacing: '0.07em',
+            padding: '5px 12px', borderRadius: '999px',
+            backdropFilter: 'blur(4px)',
+          }}>
+            See More <span style={{ fontSize: '13px', lineHeight: 1 }}>›</span>
           </span>
         </div>
       </div>
@@ -215,20 +223,28 @@ function EmeraldCard({ article }: NewsCardProps) {
       </div>
 
       {/* Description strip */}
-      <div style={{ background: '#081f12', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ background: '#081f12', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', minHeight: '110px' }}>
         <p style={{
           fontSize: '12px', color: '#6ee7b7', lineHeight: 1.6,
           display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 12px',
-          flexGrow: 1,
+          flex: '1 1 auto',
         }}>
           {article.content || 'No content provided.'}
         </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
           <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 600 }}>
             By {article.author}
           </span>
-          <span className="group-hover:translate-x-1 transition-transform" style={{ fontSize: '11px', color: '#6ee7b7', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Read More →
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '5px',
+            background: 'linear-gradient(135deg, rgba(110,231,183,0.15), rgba(52,211,153,0.1))',
+            border: '1px solid rgba(110,231,183,0.35)',
+            color: '#6ee7b7', fontSize: '11px', fontWeight: 800,
+            textTransform: 'uppercase', letterSpacing: '0.07em',
+            padding: '5px 12px', borderRadius: '999px',
+            backdropFilter: 'blur(4px)',
+          }}>
+            See More <span style={{ fontSize: '13px', lineHeight: 1 }}>›</span>
           </span>
         </div>
       </div>
@@ -325,20 +341,28 @@ function CrimsonCard({ article }: NewsCardProps) {
       </div>
 
       {/* Description strip */}
-      <div style={{ background: '#1f0008', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ background: '#1f0008', padding: '12px 16px 14px', display: 'flex', flexDirection: 'column', minHeight: '110px' }}>
         <p style={{
           fontSize: '12px', color: '#fca5a5', lineHeight: 1.6,
           display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', margin: '0 0 12px',
-          flexGrow: 1,
+          flex: '1 1 auto',
         }}>
           {article.content || 'No content provided.'}
         </p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
           <span style={{ fontSize: '10px', color: '#f87171', fontWeight: 600 }}>
             By {article.author}
           </span>
-          <span className="group-hover:translate-x-1 transition-transform" style={{ fontSize: '11px', color: '#fca5a5', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Read More →
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '5px',
+            background: 'linear-gradient(135deg, rgba(252,165,165,0.15), rgba(248,113,113,0.1))',
+            border: '1px solid rgba(252,165,165,0.35)',
+            color: '#fca5a5', fontSize: '11px', fontWeight: 800,
+            textTransform: 'uppercase', letterSpacing: '0.07em',
+            padding: '5px 12px', borderRadius: '999px',
+            backdropFilter: 'blur(4px)',
+          }}>
+            See More <span style={{ fontSize: '13px', lineHeight: 1 }}>›</span>
           </span>
         </div>
       </div>
