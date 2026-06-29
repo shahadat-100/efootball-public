@@ -54,7 +54,6 @@ export function OverviewPointsLeaderboard({
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
 
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
-    const lastDayOfCurrentMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
     let activeWeekName = 'Week 1';
     if (currentDay >= 8  && currentDay <= 14) { activeWeekName = 'Week 2'; }
     else if (currentDay >= 15 && currentDay <= 21) { activeWeekName = 'Week 3'; }

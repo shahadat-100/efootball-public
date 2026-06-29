@@ -5,10 +5,9 @@ import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
 import { Star, Crown, Zap } from 'lucide-react';
 
-import { PlayerSpotlightsProps } from './types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 
-interface SpotlightsProps {
+interface PlayerSpotlightsProps {
   players: Player[];
   playerSeasonStats: PlayerSeasonStat[];
   playerWeeklyStats?: PlayerWeeklyStat[];
@@ -17,26 +16,13 @@ interface SpotlightsProps {
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-// Helper: Calculate points from entries
-const calcEntryPoints = (e: MatchEntry): number => {
-  let pts = 0;
-  if (e.result === 'win') pts += 10;
-  else if (e.result === 'draw') pts += 5;
-  else if (e.result === 'loss') pts -= 3;
-  pts += (e.goals || 0);
-  pts -= (e.goalsConceded || 0);
-  pts += (e.motm ? 4 : 0);
-  pts += (e.hattricks || 0);
-  return pts;
-};
-
 // Helper: Calculate points from season stats
 const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
   stats.reduce((total, s) =>
     total + (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks
   , 0);
 
-export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats = [], playerMonthlyStats = [] }: SpotlightsProps) {
+export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats = [], playerMonthlyStats = [] }: PlayerSpotlightsProps) {
   const { weekTop, monthTop, seasonTop } = useMemo(() => {
     const today = new Date();
     const currentMonthIndex = today.getMonth();
