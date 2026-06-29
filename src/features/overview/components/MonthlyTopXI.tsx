@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { Player } from '@/features/players/types';
 import { MatchEntry } from '@/features/match-entries/types';
+import { PlayerMonthlyStat } from '@/store/footballStore';
 
 interface MonthlyTopXIProps {
   players: Player[];
   matchEntries: MatchEntry[];
+  playerMonthlyStats?: PlayerMonthlyStat[];
 }
 
 interface PlayerPoints {
@@ -36,8 +38,8 @@ const FORMATION_POSITIONS = [
   { x: 65, y: 15, role: 'RS' },
 ];
 
-export function MonthlyTopXI({ players, matchEntries }: MonthlyTopXIProps) {
-  // Find the most recent month with actual data to display
+export function MonthlyTopXI({ players, matchEntries, playerMonthlyStats = [] }: MonthlyTopXIProps) {
+  // Find the most recent month with actual data to display (fallback to matchEntries if needed for date, but ideally just current date)
   const mostRecentEntry = matchEntries
     .map(e => e.date ? new Date(e.date) : null)
     .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
@@ -49,33 +51,32 @@ export function MonthlyTopXI({ players, matchEntries }: MonthlyTopXIProps) {
   const monthName = targetDate.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
 
   const topXI = useMemo<PlayerPoints[]>(() => {
-    const monthEntries = matchEntries.filter(e => {
-      if (!e.date) return false;
-      const d = new Date(e.date);
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-    });
+    // We use playerMonthlyStats for the calculation to avoid pagination bugs.
+    const monthStats = playerMonthlyStats.filter(s => 
+      s.year === currentYear && s.monthIndex === currentMonth
+    );
 
-    const pointsMap = new Map<string, PlayerPoints>();
+    const pointsList: PlayerPoints[] = monthStats.map(stat => {
+      const player = players.find(p => p.id === stat.playerId);
+      if (!player) return null;
 
-    for (const entry of monthEntries) {
-      const player = players.find(p => p.id === entry.playerId);
-      if (!player) continue;
+      // Calculate points (3 for win, 1 for draw, 2 for motm)
+      const points = (stat.wins * 3) + (stat.draws * 1) + (stat.motmCount * 2);
 
-      if (!pointsMap.has(player.id)) {
-        pointsMap.set(player.id, { player, points: 0, matches: 0, wins: 0, goals: 0, motm: 0 });
-      }
-      const data = pointsMap.get(player.id)!;
-      data.matches += 1;
-      if (entry.result === 'win') { data.points += 3; data.wins += 1; }
-      else if (entry.result === 'draw') { data.points += 1; }
-      data.goals += entry.goals || 0;
-      if (entry.motm) { data.points += 2; data.motm += 1; }
-    }
+      return {
+        player,
+        points,
+        matches: stat.appearances,
+        wins: stat.wins,
+        goals: stat.goals,
+        motm: stat.motmCount
+      };
+    }).filter(Boolean) as PlayerPoints[];
 
-    return Array.from(pointsMap.values())
+    return pointsList
       .sort((a, b) => b.points - a.points || b.goals - a.goals)
       .slice(0, 11);
-  }, [players, matchEntries, currentMonth, currentYear]);
+  }, [players, playerMonthlyStats, currentMonth, currentYear]);
 
   const isEmpty = topXI.length === 0;
 

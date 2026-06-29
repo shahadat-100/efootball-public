@@ -51,10 +51,10 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
   const [page, setPage] = useState(1);
 
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
-    let activeWeekStart = 1, activeWeekEnd = 7, activeWeekName = 'Week 1';
-    if (currentDay >= 8  && currentDay <= 14) { activeWeekStart = 8;  activeWeekEnd = 14; activeWeekName = 'Week 2'; }
-    else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; activeWeekName = 'Week 3'; }
-    else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; activeWeekName = 'Week 4'; }
+    let activeWeekName = 'Week 1';
+    if (currentDay >= 8  && currentDay <= 14) { activeWeekName = 'Week 2'; }
+    else if (currentDay >= 15 && currentDay <= 21) { activeWeekName = 'Week 3'; }
+    else if (currentDay >= 22) { activeWeekName = 'Week 4'; }
 
     // Weekly from playerWeeklyStats
     let activeWeekNumber = 1;
