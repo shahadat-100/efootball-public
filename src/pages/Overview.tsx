@@ -170,15 +170,17 @@ export function Overview({ setTab }: OverviewProps) {
       {/* Player Spotlights */}
       <PlayerSpotlights
         players={players}
-        matchEntries={matchEntries}
         playerSeasonStats={playerSeasonStats}
+        playerWeeklyStats={playerWeeklyStats}
+        playerMonthlyStats={playerMonthlyStats}
       />
 
       {/* Top Scorer Spotlights */}
       <TopScorerSpotlights
         players={players}
-        matchEntries={matchEntries}
         playerSeasonStats={playerSeasonStats}
+        playerWeeklyStats={playerWeeklyStats}
+        playerMonthlyStats={playerMonthlyStats}
       />
 
       {/* Main Charts Grid */}

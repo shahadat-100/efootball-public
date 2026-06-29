@@ -5,10 +5,14 @@ import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
 import { Star, Crown, Zap } from 'lucide-react';
 
-interface PlayerSpotlightsProps {
+import { PlayerSpotlightsProps } from './types';
+import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
+
+interface SpotlightsProps {
   players: Player[];
-  matchEntries: MatchEntry[];
   playerSeasonStats: PlayerSeasonStat[];
+  playerWeeklyStats?: PlayerWeeklyStat[];
+  playerMonthlyStats?: PlayerMonthlyStat[];
 }
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -32,17 +36,17 @@ const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
     total + (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks
   , 0);
 
-export function PlayerSpotlights({ players, matchEntries, playerSeasonStats }: PlayerSpotlightsProps) {
+export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats = [], playerMonthlyStats = [] }: SpotlightsProps) {
   const { weekTop, monthTop, seasonTop } = useMemo(() => {
     const today = new Date();
     const currentMonthIndex = today.getMonth();
     const currentYear = today.getFullYear();
     const currentDay = today.getDate();
 
-    let activeWeekStart = 1, activeWeekEnd = 7, weekLabel = 'Week 1';
-    if (currentDay >= 8 && currentDay <= 14) { activeWeekStart = 8; activeWeekEnd = 14; weekLabel = 'Week 2'; }
-    else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; weekLabel = 'Week 3'; }
-    else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; weekLabel = 'Week 4'; }
+    let activeWeekNumber = 1, weekLabel = 'Week 1';
+    if (currentDay >= 8 && currentDay <= 14) { activeWeekNumber = 2; weekLabel = 'Week 2'; }
+    else if (currentDay >= 15 && currentDay <= 21) { activeWeekNumber = 3; weekLabel = 'Week 3'; }
+    else if (currentDay >= 22) { activeWeekNumber = 4; weekLabel = 'Week 4'; }
 
     const weeklyMap = new Map<string, { pts: number; goals: number; motm: number }>();
     const monthlyMap = new Map<string, { pts: number; goals: number; motm: number }>();
@@ -54,27 +58,30 @@ export function PlayerSpotlights({ players, matchEntries, playerSeasonStats }: P
       seasonMap.set(p.id, { pts: 0, goals: 0, motm: 0 });
     });
 
-    matchEntries.forEach(entry => {
-      if (!entry.date) return;
-      const d = new Date(entry.date);
-      const pts = calcEntryPoints(entry);
+    const calcPointsFromStats = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
+      (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
-      // Week
-      const isCurrentWeek = d.getFullYear() === currentYear && d.getMonth() === currentMonthIndex && d.getDate() >= activeWeekStart && d.getDate() <= activeWeekEnd;
-      if (isCurrentWeek && weeklyMap.has(entry.playerId)) {
-        const stats = weeklyMap.get(entry.playerId)!;
-        stats.pts += pts;
-        stats.goals += (entry.goals || 0);
-        stats.motm += (entry.motm ? 1 : 0);
+    // Week
+    playerWeeklyStats.forEach(stat => {
+      if (stat.year === currentYear && stat.monthIndex === currentMonthIndex && stat.week === activeWeekNumber) {
+        if (weeklyMap.has(stat.playerId)) {
+          const wm = weeklyMap.get(stat.playerId)!;
+          wm.pts += calcPointsFromStats(stat);
+          wm.goals += stat.goals;
+          wm.motm += stat.motmCount;
+        }
       }
+    });
 
-      // Month
-      const isMonthMatch = d.getMonth() === currentMonthIndex && d.getFullYear() === currentYear;
-      if (isMonthMatch && monthlyMap.has(entry.playerId)) {
-        const stats = monthlyMap.get(entry.playerId)!;
-        stats.pts += pts;
-        stats.goals += (entry.goals || 0);
-        stats.motm += (entry.motm ? 1 : 0);
+    // Month
+    playerMonthlyStats.forEach(stat => {
+      if (stat.year === currentYear && stat.monthIndex === currentMonthIndex) {
+        if (monthlyMap.has(stat.playerId)) {
+          const mm = monthlyMap.get(stat.playerId)!;
+          mm.pts += calcPointsFromStats(stat);
+          mm.goals += stat.goals;
+          mm.motm += stat.motmCount;
+        }
       }
     });
 
@@ -102,7 +109,7 @@ export function PlayerSpotlights({ players, matchEntries, playerSeasonStats }: P
       monthTop: { data: getTop(monthlyMap), label: `${MONTHS[currentMonthIndex]} ${currentYear}` },
       seasonTop: { data: getTop(seasonMap), label: `Overall Season` },
     };
-  }, [players, matchEntries, playerSeasonStats]);
+  }, [players, playerWeeklyStats, playerMonthlyStats, playerSeasonStats]);
 
   const SpotlightCard = ({ 
     title, subtitle, data, type 
