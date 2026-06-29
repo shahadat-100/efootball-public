@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
-import { MatchEntry } from '@/features/match-entries/types';
+
 import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
 import { Star, Crown, Zap } from 'lucide-react';
