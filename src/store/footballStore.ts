@@ -6,6 +6,26 @@ import { MatchEntry } from '@/features/match-entries/types';
 import { NewsArticle } from '@/features/news/types';
 import { supabase } from '@/lib/supabase';
 
+export interface PlayerMonthlyStat {
+  playerId: string;
+  seasonId: number | null;
+  year: number;
+  monthIndex: number;
+  appearances: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals: number;
+  goalsConceded: number;
+  cleansheets: number;
+  hattricks: number;
+  motmCount: number;
+}
+
+export interface PlayerWeeklyStat extends PlayerMonthlyStat {
+  week: number;
+}
+
 
 export interface HallOfFameEntry {
   id: number;
@@ -145,6 +165,8 @@ interface FootballStore {
   news: NewsArticle[];
   seasons: SeasonDb[];
   playerSeasonStats: PlayerSeasonStat[];
+  playerMonthlyStats: PlayerMonthlyStat[];
+  playerWeeklyStats: PlayerWeeklyStat[];
   competitions: Competition[];
   hallOfFame: HallOfFameEntry[];
   availableRoles: PlayerRole[];
@@ -171,6 +193,8 @@ interface FootballStore {
 
   fetchSeasons: () => Promise<void>;
   fetchPlayerSeasonStats: () => Promise<void>;
+  fetchPlayerMonthlyStats: () => Promise<void>;
+  fetchPlayerWeeklyStats: () => Promise<void>;
   fetchCompetitions: () => Promise<void>;
   fetchAvailableRoles: () => Promise<void>;
   fetchAvailableTags: () => Promise<void>;
@@ -189,6 +213,8 @@ export const useFootballStore = create<FootballStore>()(
       news: [],
       seasons: [],
       playerSeasonStats: [],
+      playerMonthlyStats: [],
+      playerWeeklyStats: [],
       competitions: [],
       hallOfFame: [],
       availableRoles: [],
@@ -428,6 +454,63 @@ export const useFootballStore = create<FootballStore>()(
               goalsConceded: item.goalsconceded || 0,
             };
           })
+        });
+      },
+
+      fetchPlayerMonthlyStats: async () => {
+        if (get().playerMonthlyStats.length > 0) return;
+        const { data, error } = await supabase
+          .from('player_monthly_stats')
+          .select('*');
+        if (error) {
+          console.error('Error fetching player monthly stats:', error);
+          return;
+        }
+        set({
+          playerMonthlyStats: (data ?? []).map(item => ({
+            playerId: item.player_id,
+            seasonId: item.season_id,
+            year: item.year,
+            monthIndex: item.month_index,
+            appearances: item.appearances || 0,
+            goals: item.goals || 0,
+            cleansheets: item.cleansheets || 0,
+            hattricks: item.hattricks || 0,
+            motmCount: item.motmcount || 0,
+            wins: item.wins || 0,
+            draws: item.draws || 0,
+            losses: item.losses || 0,
+            goalsConceded: item.goalsconceded || 0,
+          }))
+        });
+      },
+
+      fetchPlayerWeeklyStats: async () => {
+        if (get().playerWeeklyStats.length > 0) return;
+        const { data, error } = await supabase
+          .from('player_weekly_stats')
+          .select('*');
+        if (error) {
+          console.error('Error fetching player weekly stats:', error);
+          return;
+        }
+        set({
+          playerWeeklyStats: (data ?? []).map(item => ({
+            playerId: item.player_id,
+            seasonId: item.season_id,
+            year: item.year,
+            monthIndex: item.month_index,
+            week: item.week,
+            appearances: item.appearances || 0,
+            goals: item.goals || 0,
+            cleansheets: item.cleansheets || 0,
+            hattricks: item.hattricks || 0,
+            motmCount: item.motmcount || 0,
+            wins: item.wins || 0,
+            draws: item.draws || 0,
+            losses: item.losses || 0,
+            goalsConceded: item.goalsconceded || 0,
+          }))
         });
       },
 

@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { GoalsLeaderboard } from '@/features/overview/components/GoalsLeaderboard';
 import { cn } from '@/shared/lib/cn';
 
 export function Leaderboard() {
-  const { players, matchEntries, seasons, playerSeasonStats } = useFootballStore();
+  const { players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats } = useFootballStore();
   const [activeTab, setActiveTab] = useState<'points' | 'goals'>('points');
+
+  useEffect(() => {
+    fetchPlayerMonthlyStats();
+    fetchPlayerWeeklyStats();
+  }, [fetchPlayerMonthlyStats, fetchPlayerWeeklyStats]);
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -82,6 +87,8 @@ export function Leaderboard() {
           matchEntries={matchEntries}
           seasons={seasons}
           playerSeasonStats={playerSeasonStats}
+          playerMonthlyStats={playerMonthlyStats}
+          playerWeeklyStats={playerWeeklyStats}
         />
       ) : (
         <GoalsLeaderboard
@@ -89,6 +96,8 @@ export function Leaderboard() {
           matchEntries={matchEntries}
           seasons={seasons}
           playerSeasonStats={playerSeasonStats}
+          playerMonthlyStats={playerMonthlyStats}
+          playerWeeklyStats={playerWeeklyStats}
         />
       )}
     </div>

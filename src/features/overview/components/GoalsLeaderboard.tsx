@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Player, PlayerSeasonStat, SeasonDb } from '@/features/players/types';
 import { MatchEntry } from '@/features/match-entries/types';
+import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
 
@@ -9,6 +10,8 @@ interface GoalsLeaderboardProps {
   matchEntries: MatchEntry[];
   seasons: SeasonDb[];
   playerSeasonStats: PlayerSeasonStat[];
+  playerMonthlyStats?: PlayerMonthlyStat[];
+  playerWeeklyStats?: PlayerWeeklyStat[];
   limit?: number;
 }
 
@@ -40,7 +43,7 @@ type ViewMode = 'weekly' | 'monthly' | 'overall';
 
 const PAGE_SIZE = 20;
 
-export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonStats }: GoalsLeaderboardProps) {
+export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats = [], playerWeeklyStats = [] }: GoalsLeaderboardProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
@@ -53,59 +56,51 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
     else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; activeWeekName = 'Week 3'; }
     else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; activeWeekName = 'Week 4'; }
 
-    type StatsMap = Map<string, { goals: number; w: number; d: number; l: number; gc: number; cs: number; ht: number; motm: number }>;
-    const empty = () => ({ goals: 0, w: 0, d: 0, l: 0, gc: 0, cs: 0, ht: 0, motm: 0 });
+    // Weekly from playerWeeklyStats
+    let activeWeekNumber = 1;
+    if (currentDay >= 8  && currentDay <= 14) activeWeekNumber = 2;
+    else if (currentDay >= 15 && currentDay <= 21) activeWeekNumber = 3;
+    else if (currentDay >= 22) activeWeekNumber = 4;
 
-    const weeklyMap: StatsMap  = new Map();
-    const monthlyMap: StatsMap = new Map();
-    players.forEach(p => {
-      weeklyMap.set(p.id, empty());
-      monthlyMap.set(p.id, empty());
-    });
+    const weeklyList: RankedPlayer[] = players.map(p => {
+      const stats = playerWeeklyStats.filter(s =>
+        s.playerId === p.id &&
+        s.year === currentYear &&
+        s.monthIndex === currentMonthIndex &&
+        s.week === activeWeekNumber
+      );
+      const wins = stats.reduce((t, s) => t + s.wins, 0);
+      const draws = stats.reduce((t, s) => t + s.draws, 0);
+      const losses = stats.reduce((t, s) => t + s.losses, 0);
+      const goals = stats.reduce((t, s) => t + s.goals, 0);
+      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+      const cs = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
+      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+      const matches = wins + draws + losses;
+      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
+      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm };
+    }).filter(r => r.matches > 0).sort((a, b) => b.goals - a.goals);
 
-    matchEntries.forEach(entry => {
-      if (!entry.date) return;
-      const d = new Date(entry.date);
-
-      const isCurrentWeek =
-        d.getFullYear() === currentYear &&
-        d.getMonth() === currentMonthIndex &&
-        d.getDate() >= activeWeekStart &&
-        d.getDate() <= activeWeekEnd;
-
-      const isMonthMatch = d.getMonth() === selectedMonthlyMonth;
-      const isSeasonOrYearMatch = selectedMonthlySeasonId !== null
-        ? entry.seasonId === selectedMonthlySeasonId
-        : d.getFullYear() === currentYear;
-
-      const applyTo = (map: StatsMap) => {
-        const s = map.get(entry.playerId);
-        if (!s) return;
-        s.goals += entry.goals || 0;
-        if (entry.result === 'win') s.w++;
-        else if (entry.result === 'draw') s.d++;
-        else if (entry.result === 'loss') s.l++;
-        s.gc += entry.goalsConceded || 0;
-        if (entry.cleanSheet) s.cs++;
-        s.ht += entry.hattricks || 0;
-        if (entry.motm) s.motm++;
-      };
-
-      if (isCurrentWeek && weeklyMap.has(entry.playerId)) applyTo(weeklyMap);
-      if (isMonthMatch && isSeasonOrYearMatch && monthlyMap.has(entry.playerId)) applyTo(monthlyMap);
-    });
-
-    const fromMap = (map: StatsMap): RankedPlayer[] =>
-      Array.from(map.entries())
-        .map(([id, s]) => {
-          const player = players.find(p => p.id === id)!;
-          if (!player) return null;
-          const matches = s.w + s.d + s.l;
-          const winRate = matches > 0 ? Math.round((s.w / matches) * 100) : 0;
-          return { player, goals: s.goals, matches, wins: s.w, draws: s.d, losses: s.l, winRate, gc: s.gc, cs: s.cs, ht: s.ht, motm: s.motm };
-        })
-        .filter(Boolean)
-        .sort((a, b) => b!.goals - a!.goals) as RankedPlayer[];
+    // Monthly from playerMonthlyStats
+    const monthlyList: RankedPlayer[] = players.map(p => {
+      const stats = playerMonthlyStats.filter(s =>
+        s.playerId === p.id &&
+        s.monthIndex === selectedMonthlyMonth &&
+        (selectedMonthlySeasonId !== null ? s.seasonId === selectedMonthlySeasonId : s.year === currentYear)
+      );
+      const wins = stats.reduce((t, s) => t + s.wins, 0);
+      const draws = stats.reduce((t, s) => t + s.draws, 0);
+      const losses = stats.reduce((t, s) => t + s.losses, 0);
+      const goals = stats.reduce((t, s) => t + s.goals, 0);
+      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+      const cs = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
+      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+      const matches = wins + draws + losses;
+      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
+      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm };
+    }).filter(r => r.matches > 0).sort((a, b) => b.goals - a.goals);
 
     // Overall from playerSeasonStats
     const overallList: RankedPlayer[] = players.map(p => {
@@ -131,8 +126,8 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
       : currentYear.toString();
 
     return {
-      weeklyRanking:  { label: activeWeekName, list: fromMap(weeklyMap) },
-      monthlyRanking: { label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`, list: fromMap(monthlyMap) },
+      weeklyRanking:  { label: activeWeekName, list: weeklyList },
+      monthlyRanking: { label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`, list: monthlyList },
       overallRanking: {
         label: selectedOverallSeasonId
           ? (seasons.find(s => s.id === selectedOverallSeasonId)?.name ?? 'Overall')
@@ -140,7 +135,7 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
         list: overallList,
       },
     };
-  }, [players, matchEntries, playerSeasonStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedOverallSeasonId]);
+  }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedOverallSeasonId]);
 
   const activeRanking =
     viewMode === 'weekly' ? weeklyRanking :

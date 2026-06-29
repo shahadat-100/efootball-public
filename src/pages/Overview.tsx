@@ -22,7 +22,7 @@ interface OverviewProps {
 }
 
 export function Overview({ setTab }: OverviewProps) {
-  const { players, matchEntries, matches, playerSeasonStats, seasons, news, fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchNews } = useFootballStore();
+  const { players, matchEntries, matches, playerSeasonStats, seasons, news, playerMonthlyStats, playerWeeklyStats, fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews } = useFootballStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,12 +33,14 @@ export function Overview({ setTab }: OverviewProps) {
         fetchMatches(),
         fetchMatchEntries(),
         fetchPlayerSeasonStats(),
+        fetchPlayerMonthlyStats(),
+        fetchPlayerWeeklyStats(),
         fetchNews(),
       ]);
       setIsLoading(false);
     };
     load();
-  }, [fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchNews]);
+  }, [fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews]);
 
   // ── 1. Stat Cards Data ──
   const totalGoals = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
@@ -214,6 +216,8 @@ export function Overview({ setTab }: OverviewProps) {
           matchEntries={matchEntries}
           seasons={seasons}
           playerSeasonStats={playerSeasonStats}
+          playerMonthlyStats={playerMonthlyStats}
+          playerWeeklyStats={playerWeeklyStats}
           limit={5}
         />
       </div>
