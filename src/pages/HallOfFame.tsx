@@ -7,6 +7,7 @@ export function HallOfFame() {
   const {
     hallOfFame,
     players,
+    fetchPlayers,
     fetchHallOfFame,
   } = useFootballStore();
 
@@ -15,11 +16,14 @@ export function HallOfFame() {
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      await fetchHallOfFame();
+      await Promise.all([
+        fetchHallOfFame(),
+        fetchPlayers(),
+      ]);
       setIsLoading(false);
     };
     load();
-  }, [fetchHallOfFame]);
+  }, [fetchHallOfFame, fetchPlayers]);
 
   const getPlayer = (id: string) => players.find(p => p.id === id);
 
