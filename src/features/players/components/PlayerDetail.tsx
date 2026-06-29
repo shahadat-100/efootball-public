@@ -369,7 +369,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
     seasonRanksList.forEach(s => {
       if (!s?.rank || s.rank < 1 || s.rank > 5) return;
-      if (s.rank === 1 && s.isCurrent) return;
+      if (s.isCurrent) return;
 
       const badge = seasonRankBadges[s.rank as keyof typeof seasonRankBadges];
       trophies.push({
