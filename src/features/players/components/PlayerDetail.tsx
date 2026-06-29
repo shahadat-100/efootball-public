@@ -166,6 +166,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     return {
       seasonName: s.name,
       rank: sRankIndex !== -1 ? sRankIndex + 1 : undefined,
+      isCurrent: s.is_current,
     };
   }).filter(Boolean);
 
@@ -358,25 +359,37 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   const renderTrophyCabinet = () => {
     const trophies = [];
-    const goldSeasons = seasonRanksList.filter(s => s?.rank === 1);
-    goldSeasons.forEach(s => {
-      trophies.push({ icon: '🏆', title: `eFootball ${s?.seasonName} Champion`, color: 'text-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' });
+    const seasonRankBadges = {
+      1: { icon: '🏆', label: 'Champion', color: 'text-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' },
+      2: { icon: '🥈', label: 'Runner-Up', color: 'text-gray-300', bg: 'bg-gray-400/10', border: 'border-gray-400/30' },
+      3: { icon: '🥉', label: 'Bronze Star', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30' },
+      4: { icon: '⭐', label: 'Elite Four', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
+      5: { icon: '🎖️', label: 'Top Five', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+    } as const;
+
+    seasonRanksList.forEach(s => {
+      if (!s?.rank || s.rank < 1 || s.rank > 5) return;
+      if (s.rank === 1 && s.isCurrent) return;
+
+      const badge = seasonRankBadges[s.rank as keyof typeof seasonRankBadges];
+      trophies.push({
+        icon: badge.icon,
+        title: `eFootball ${s?.seasonName} ${badge.label}`,
+        color: badge.color,
+        bg: badge.bg,
+        border: badge.border,
+      });
     });
 
-    const silverSeasons = seasonRanksList.filter(s => s?.rank === 2 || s?.rank === 3);
-    silverSeasons.forEach(s => {
-      trophies.push({ icon: '🥈', title: `eFootball ${s?.seasonName} Podium`, color: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/30' });
-    });
-
-    if (stats.totalMOTM >= 5) {
+    if (stats.totalMOTM >= 20) {
       trophies.push({ icon: '👑', title: `Star Player (${stats.totalMOTM} MOTM)`, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30' });
     }
 
-    if (stats.totalCleanSheets >= 10) {
+    if (stats.totalCleanSheets >= 50) {
       trophies.push({ icon: '🧤', title: `Golden Glove (${stats.totalCleanSheets} CS)`, color: 'text-sky-500', bg: 'bg-sky-500/10', border: 'border-sky-500/30' });
     }
 
-    if (stats.totalHattricks >= 3) {
+    if (stats.totalHattricks >= 50) {
       trophies.push({ icon: '⚽', title: `Hat-trick Hero (${stats.totalHattricks})`, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/30' });
     }
 
