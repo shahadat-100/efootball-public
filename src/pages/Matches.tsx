@@ -3,9 +3,11 @@ import { useFootballStore } from '@/store/footballStore';
 import { Match } from '@/features/matches/types';
 import { Button, Input, Modal, Badge } from '@/shared/components';
 import { fuzzyFilter } from '@/shared/lib/utils';
-import { Search } from 'lucide-react';
-import { STATUS_BADGE } from '@/shared/lib/constants';
+import { CalendarDays, Search, Shield, Swords, Trophy, X } from 'lucide-react';
+import { HOME_TEAM, RESULT_BADGE, STATUS_BADGE } from '@/shared/lib/constants';
 import { cn } from '@/shared/lib/cn';
+
+type MatchResult = 'win' | 'draw' | 'loss';
 
 function formatDateLabel(dateStr: string): string {
   const today = new Date();
@@ -27,9 +29,55 @@ function formatDateLabel(dateStr: string): string {
   });
 }
 
+function sortMatchesByDateDesc(a: Match, b: Match) {
+  const aStamp = `${a.date || ''} ${a.time || ''}`;
+  const bStamp = `${b.date || ''} ${b.time || ''}`;
+  return bStamp.localeCompare(aStamp);
+}
+
+function isClubTeam(team?: string) {
+  const value = team?.toLowerCase() || '';
+  return team === HOME_TEAM || value.includes('elite') || value.includes('enigmatic');
+}
+
+function getOpponentName(match: Match) {
+  if (isClubTeam(match.homeTeam) && !isClubTeam(match.awayTeam)) return match.awayTeam;
+  if (isClubTeam(match.awayTeam) && !isClubTeam(match.homeTeam)) return match.homeTeam;
+  return match.awayTeam || match.homeTeam || 'Opponent';
+}
+
+function getClubResult(match: Match, matchResultsMap: Map<string, string>): MatchResult | undefined {
+  const storedResult = matchResultsMap.get(match.id);
+  if (storedResult === 'win' || storedResult === 'draw' || storedResult === 'loss') return storedResult;
+
+  if (match.status === 'upcoming' || match.homeScore == null || match.awayScore == null) return undefined;
+
+  const clubIsHome = isClubTeam(match.homeTeam);
+  const clubIsAway = isClubTeam(match.awayTeam);
+
+  if (clubIsHome) {
+    if (match.homeScore > match.awayScore) return 'win';
+    if (match.homeScore < match.awayScore) return 'loss';
+    return 'draw';
+  }
+
+  if (clubIsAway) {
+    if (match.awayScore > match.homeScore) return 'win';
+    if (match.awayScore < match.homeScore) return 'loss';
+    return 'draw';
+  }
+
+  return undefined;
+}
+
+function formatShortDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 export function Matches() {
   const { matches, matchEntries, fetchMatches, fetchMatchEntries } = useFootballStore();
-  const [modal, setModal] = useState<{ type: 'info', data?: Match } | null>(null);
+  const [modal, setModal] = useState<{ type: 'info' } | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +126,35 @@ export function Matches() {
     });
     return map;
   }, [matchEntries]);
+
+  const selectedH2H = useMemo(() => {
+    if (!selectedMatch) return null;
+
+    const opponent = getOpponentName(selectedMatch);
+    const opponentKey = opponent.toLowerCase();
+    const opponentMatches = visibleMatches
+      .filter(m => getOpponentName(m).toLowerCase() === opponentKey)
+      .sort(sortMatchesByDateDesc);
+
+    const playedMatches = opponentMatches.filter(m => getClubResult(m, matchResultsMap));
+    const record = playedMatches.reduce(
+      (acc, match) => {
+        const result = getClubResult(match, matchResultsMap);
+        if (result === 'win') acc.wins += 1;
+        if (result === 'draw') acc.draws += 1;
+        if (result === 'loss') acc.losses += 1;
+        return acc;
+      },
+      { wins: 0, draws: 0, losses: 0 }
+    );
+
+    return {
+      opponent,
+      matches: playedMatches,
+      recent: playedMatches.slice(0, 5),
+      ...record,
+    };
+  }, [matchResultsMap, selectedMatch, visibleMatches]);
 
   if (isLoading) {
     return (
@@ -139,6 +216,93 @@ export function Matches() {
         </Modal>
       )}
 
+      {selectedMatch && selectedH2H && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-background/70 backdrop-blur-sm" onClick={() => setSelectedMatch(null)}>
+          <aside
+            className="h-full w-full max-w-md bg-card border-l border-border shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-primary mb-2">
+                    <Swords className="w-4 h-4" />
+                    Head to Head
+                  </div>
+                  <h3 className="font-heading text-[30px] font-bold leading-none">{selectedH2H.opponent}</h3>
+                  <p className="text-[13px] text-muted-foreground mt-2">
+                    {selectedH2H.matches.length} previous matches against this opponent
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSelectedMatch(null)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-5">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4 text-center">
+                  <p className="font-heading text-[30px] font-bold text-emerald-600 leading-none">{selectedH2H.wins}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mt-2">Wins</p>
+                </div>
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-center">
+                  <p className="font-heading text-[30px] font-bold text-amber-600 leading-none">{selectedH2H.draws}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-700 mt-2">Draws</p>
+                </div>
+                <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-center">
+                  <p className="font-heading text-[30px] font-bold text-red-600 leading-none">{selectedH2H.losses}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-red-700 mt-2">Losses</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-muted/25 p-4">
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-primary" />
+                    <h4 className="font-bold text-[14px]">Recent 5 Results</h4>
+                  </div>
+                  <Badge className="bg-card text-muted-foreground border-border">{selectedH2H.wins}W {selectedH2H.draws}D {selectedH2H.losses}L</Badge>
+                </div>
+
+                {selectedH2H.recent.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {selectedH2H.recent.map(match => {
+                      const result = getClubResult(match, matchResultsMap);
+                      const badge = result ? RESULT_BADGE[result] : STATUS_BADGE.finished;
+
+                      return (
+                        <button
+                          key={match.id}
+                          className="w-full rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                          onClick={() => setSelectedMatch(match)}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-[13px] font-bold">{match.homeTeam} vs {match.awayTeam}</p>
+                              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                <CalendarDays className="w-3.5 h-3.5" />
+                                {formatShortDate(match.date)}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-heading text-[22px] font-bold leading-none">{match.homeScore} - {match.awayScore}</p>
+                              <Badge bg={badge.bg} c={badge.c} className="mt-2 capitalize">{result}</Badge>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[13px] text-muted-foreground">No completed H2H matches yet.</p>
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4">
         <div>
           <h2 className="font-heading font-bold text-[28px] tracking-wide mb-1">Matches</h2>
@@ -177,27 +341,24 @@ export function Matches() {
             <div className="space-y-3">
               {group.matches.map(m => {
                 const sb = STATUS_BADGE[m.status as keyof typeof STATUS_BADGE] ?? STATUS_BADGE.finished;
-                const isElitesHome = m.homeTeam?.toLowerCase().includes('elite') || m.homeTeam?.toLowerCase().includes('enigmatic');
-                const isElitesAway = m.awayTeam?.toLowerCase().includes('elite') || m.awayTeam?.toLowerCase().includes('enigmatic');
-
-                let result = matchResultsMap.get(m.id);
-                if (!result && m.status !== 'upcoming' && m.homeScore !== null && m.awayScore !== null && m.homeScore !== undefined && m.awayScore !== undefined) {
-                  if (isElitesHome) {
-                    if (m.homeScore > m.awayScore) result = 'win';
-                    else if (m.homeScore < m.awayScore) result = 'loss';
-                    else result = 'draw';
-                  } else if (isElitesAway) {
-                    if (m.awayScore > m.homeScore) result = 'win';
-                    else if (m.awayScore < m.homeScore) result = 'loss';
-                    else result = 'draw';
-                  }
-                }
+                const isElitesAway = isClubTeam(m.awayTeam);
+                const result = getClubResult(m, matchResultsMap);
+                const resultBadge = result ? RESULT_BADGE[result] : null;
 
                 return (
-                  <div 
+                  <div
                     key={m.id} 
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedMatch(m)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedMatch(m);
+                      }
+                    }}
                     className={cn(
-                      "bg-card border rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm transition-all hover:shadow-md hover:border-border",
+                      "group w-full bg-card border rounded-2xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30",
                       result === 'win' ? 'border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/8 via-card/50 to-card' :
                       result === 'loss' ? 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/8 via-card/50 to-card' :
                       result === 'draw' ? 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/8 via-card/50 to-card' :
@@ -205,45 +366,49 @@ export function Matches() {
                     )}
                   >
                     {/* Home Team */}
-                    <div className="flex-1 flex items-center justify-end gap-3 text-center sm:text-right">
+                    <div className="flex-1 flex items-center justify-center sm:justify-end gap-3 text-center sm:text-right min-w-0">
                       <div>
-                        <p className="font-bold text-[15px]">{m.homeTeam}</p>
+                        <p className="font-bold text-[15px] sm:text-[16px] leading-tight">{m.homeTeam}</p>
                         <p className="text-muted-foreground text-[10px] uppercase tracking-widest mt-0.5 font-bold">Home</p>
                       </div>
-                      {isElitesHome && (
-                        <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border" />
-                      )}
                     </div>
                     
                     {/* Score */}
-                    <div className="flex-shrink-0 text-center px-4 min-w-[130px]">
+                    <div className="flex-shrink-0 text-center px-4 sm:px-6 py-3 rounded-xl bg-background/70 border border-border/70 shadow-inner min-w-[150px]">
                       <p className={cn(
-                        "font-heading font-bold text-[28px] tracking-[6px] text-foreground leading-none",
+                        "font-heading font-bold text-[42px] sm:text-[50px] tracking-wide text-foreground leading-none tabular-nums",
                         m.status === 'upcoming' && "text-muted-foreground"
                       )}>
                         {m.status !== 'upcoming' ? `${m.homeScore} - ${m.awayScore}` : 'VS'}
                       </p>
-                      <div className="flex gap-2 justify-center mt-2.5">
+                      <div className="flex flex-wrap gap-2 justify-center mt-3">
                         <Badge bg={sb.bg} c={sb.c}>{m.status}</Badge>
+                        {resultBadge && <Badge bg={resultBadge.bg} c={resultBadge.c} className="capitalize">{result}</Badge>}
                       </div>
                     </div>
 
                     {/* Away Team */}
-                    <div className="flex-1 flex items-center justify-start gap-3 text-center sm:text-left">
+                    <div className="flex-1 flex items-center justify-center sm:justify-start gap-3 text-center sm:text-left min-w-0">
                       {isElitesAway && (
                         <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border" />
                       )}
                       <div>
-                        <p className="font-bold text-[15px]">{m.awayTeam}</p>
+                        <p className="font-bold text-[15px] sm:text-[16px] leading-tight">{m.awayTeam}</p>
                         <p className="text-muted-foreground text-[10px] uppercase tracking-widest mt-0.5 font-bold">Away</p>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 items-center sm:ml-auto w-full sm:w-auto justify-center sm:justify-end border-t sm:border-none border-border pt-3 sm:pt-0 mt-2 sm:mt-0">
-                      <Badge className="bg-muted text-muted-foreground hidden lg:block mr-2 border border-border/50 font-medium">{m.competition}</Badge>
+                    <div className="flex flex-wrap gap-2 items-center sm:ml-auto w-full sm:w-auto justify-center sm:justify-end border-t sm:border-none border-border pt-3 sm:pt-0 mt-2 sm:mt-0">
+                      <Badge className="bg-muted text-muted-foreground border border-border/50 font-medium">
+                        <Shield className="w-3 h-3 mr-1" />
+                        {m.competition}
+                      </Badge>
                       {m.id.startsWith('bulk-') && (
                         <button 
-                          onClick={() => setModal({ type: 'info' })}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setModal({ type: 'info' });
+                          }}
                           className="text-[11px] text-muted-foreground font-medium px-2.5 py-1 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors"
                         >
                           Generated
