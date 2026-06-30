@@ -47,25 +47,25 @@ function getOpponentName(match: Match) {
 }
 
 function getClubResult(match: Match, matchResultsMap: Map<string, string>): MatchResult | undefined {
+  if (match.status !== 'upcoming' && match.homeScore != null && match.awayScore != null) {
+    const clubIsHome = isClubTeam(match.homeTeam);
+    const clubIsAway = isClubTeam(match.awayTeam);
+
+    if (clubIsHome) {
+      if (match.homeScore > match.awayScore) return 'win';
+      if (match.homeScore < match.awayScore) return 'loss';
+      return 'draw';
+    }
+
+    if (clubIsAway) {
+      if (match.awayScore > match.homeScore) return 'win';
+      if (match.awayScore < match.homeScore) return 'loss';
+      return 'draw';
+    }
+  }
+
   const storedResult = matchResultsMap.get(match.id);
   if (storedResult === 'win' || storedResult === 'draw' || storedResult === 'loss') return storedResult;
-
-  if (match.status === 'upcoming' || match.homeScore == null || match.awayScore == null) return undefined;
-
-  const clubIsHome = isClubTeam(match.homeTeam);
-  const clubIsAway = isClubTeam(match.awayTeam);
-
-  if (clubIsHome) {
-    if (match.homeScore > match.awayScore) return 'win';
-    if (match.homeScore < match.awayScore) return 'loss';
-    return 'draw';
-  }
-
-  if (clubIsAway) {
-    if (match.awayScore > match.homeScore) return 'win';
-    if (match.awayScore < match.homeScore) return 'loss';
-    return 'draw';
-  }
 
   return undefined;
 }
