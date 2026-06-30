@@ -344,6 +344,12 @@ export function Matches() {
                 const isElitesAway = isClubTeam(m.awayTeam);
                 const result = getClubResult(m, matchResultsMap);
                 const resultBadge = result ? RESULT_BADGE[result] : null;
+                const resultTone =
+                  result === 'win' ? 'from-emerald-500 to-emerald-600 text-emerald-700 bg-emerald-500/10 border-emerald-500/25' :
+                  result === 'loss' ? 'from-red-500 to-red-600 text-red-700 bg-red-500/10 border-red-500/25' :
+                  result === 'draw' ? 'from-amber-500 to-amber-600 text-amber-700 bg-amber-500/10 border-amber-500/25' :
+                  'from-zinc-300 to-zinc-400 text-muted-foreground bg-muted/40 border-border';
+                const scoreText = m.status !== 'upcoming' ? `${m.homeScore ?? '-'}:${m.awayScore ?? '-'}` : 'VS';
 
                 return (
                   <div
@@ -358,62 +364,72 @@ export function Matches() {
                       }
                     }}
                     className={cn(
-                      "group w-full bg-card border rounded-2xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30",
-                      result === 'win' ? 'border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/8 via-card/50 to-card' :
-                      result === 'loss' ? 'border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/8 via-card/50 to-card' :
-                      result === 'draw' ? 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/8 via-card/50 to-card' :
+                      "group relative w-full overflow-hidden rounded-xl border bg-card text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/30",
+                      result === 'win' ? 'border-emerald-500/25' :
+                      result === 'loss' ? 'border-red-500/25' :
+                      result === 'draw' ? 'border-amber-500/25' :
                       'border-border'
                     )}
                   >
-                    {/* Home Team */}
-                    <div className="flex-1 flex items-center justify-center sm:justify-end gap-3 text-center sm:text-right min-w-0">
-                      <div>
-                        <p className="font-bold text-[15px] sm:text-[16px] leading-tight">{m.homeTeam}</p>
-                        <p className="text-muted-foreground text-[10px] uppercase tracking-widest mt-0.5 font-bold">Home</p>
-                      </div>
-                    </div>
-                    
-                    {/* Score */}
-                    <div className="flex-shrink-0 text-center px-4 sm:px-6 py-3 rounded-xl bg-background/70 border border-border/70 shadow-inner min-w-[150px]">
-                      <p className={cn(
-                        "font-heading font-bold text-[42px] sm:text-[50px] tracking-wide text-foreground leading-none tabular-nums",
-                        m.status === 'upcoming' && "text-muted-foreground"
-                      )}>
-                        {m.status !== 'upcoming' ? `${m.homeScore} - ${m.awayScore}` : 'VS'}
-                      </p>
-                      <div className="flex flex-wrap gap-2 justify-center mt-3">
-                        <Badge bg={sb.bg} c={sb.c}>{m.status}</Badge>
-                        {resultBadge && <Badge bg={resultBadge.bg} c={resultBadge.c} className="capitalize">{result}</Badge>}
-                      </div>
-                    </div>
+                    <div className={cn("absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b", resultTone)} />
 
-                    {/* Away Team */}
-                    <div className="flex-1 flex items-center justify-center sm:justify-start gap-3 text-center sm:text-left min-w-0">
-                      {isElitesAway && (
-                        <img src="/images/club-logo.jpg" alt="TEE" className="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-border" />
-                      )}
-                      <div>
-                        <p className="font-bold text-[15px] sm:text-[16px] leading-tight">{m.awayTeam}</p>
-                        <p className="text-muted-foreground text-[10px] uppercase tracking-widest mt-0.5 font-bold">Away</p>
+                    <div className="px-4 py-3 sm:px-5 sm:py-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <Badge className="bg-muted text-muted-foreground border border-border/50 font-medium">
+                            <Shield className="w-3 h-3 mr-1" />
+                            {m.competition}
+                          </Badge>
+                          <Badge bg={sb.bg} c={sb.c} className="capitalize">{m.status}</Badge>
+                          {resultBadge && <Badge bg={resultBadge.bg} c={resultBadge.c} className="capitalize">{result}</Badge>}
+                        </div>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors group-hover:text-primary">
+                          H2H Details
+                        </span>
                       </div>
-                    </div>
 
-                    <div className="flex flex-wrap gap-2 items-center sm:ml-auto w-full sm:w-auto justify-center sm:justify-end border-t sm:border-none border-border pt-3 sm:pt-0 mt-2 sm:mt-0">
-                      <Badge className="bg-muted text-muted-foreground border border-border/50 font-medium">
-                        <Shield className="w-3 h-3 mr-1" />
-                        {m.competition}
-                      </Badge>
-                      {m.id.startsWith('bulk-') && (
-                        <button 
-                          onClick={e => {
-                            e.stopPropagation();
-                            setModal({ type: 'info' });
-                          }}
-                          className="text-[11px] text-muted-foreground font-medium px-2.5 py-1 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors"
-                        >
-                          Generated
-                        </button>
-                      )}
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 pt-4">
+                        <div className="min-w-0 text-right">
+                          <p className="truncate text-[15px] font-black leading-tight text-foreground sm:text-[17px]">{m.homeTeam}</p>
+                          <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Home</p>
+                        </div>
+
+                        <div className="flex min-w-[116px] flex-col items-center">
+                          <div className={cn("h-1 w-16 rounded-full bg-gradient-to-r", resultTone)} />
+                          <p className={cn(
+                            "font-heading text-[42px] font-bold leading-none tracking-wide text-foreground tabular-nums sm:text-[52px]",
+                            m.status === 'upcoming' && "text-muted-foreground"
+                          )}>
+                            {scoreText}
+                          </p>
+                          <div className="mt-1 h-1 w-16 rounded-full bg-border" />
+                        </div>
+
+                        <div className="flex min-w-0 items-center gap-2 text-left">
+                          {isElitesAway && (
+                            <img src="/images/club-logo.jpg" alt="TEE" className="h-9 w-9 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-border" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-[15px] font-black leading-tight text-foreground sm:text-[17px]">{m.awayTeam}</p>
+                            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Away</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/60 pt-3">
+                        <p className="text-[12px] font-medium text-muted-foreground">Click to view opponent history and recent form</p>
+                        {m.id.startsWith('bulk-') && (
+                          <button 
+                            onClick={e => {
+                              e.stopPropagation();
+                              setModal({ type: 'info' });
+                            }}
+                            className="shrink-0 text-[11px] text-muted-foreground font-medium px-2.5 py-1 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors"
+                          >
+                            Generated
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
