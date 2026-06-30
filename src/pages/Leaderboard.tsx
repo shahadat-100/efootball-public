@@ -5,13 +5,21 @@ import { GoalsLeaderboard } from '@/features/overview/components/GoalsLeaderboar
 import { cn } from '@/shared/lib/cn';
 
 export function Leaderboard() {
-  const { players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats } = useFootballStore();
+  const {
+    players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats, playerWeeklyStats,
+    fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats,
+    fetchPlayerMonthlyStats, fetchPlayerWeeklyStats,
+  } = useFootballStore();
   const [activeTab, setActiveTab] = useState<'points' | 'goals'>('points');
 
   useEffect(() => {
+    // Fetch everything needed — store guards (length > 0) prevent duplicate network calls
+    fetchPlayers();
+    fetchMatchEntries();
+    fetchPlayerSeasonStats();
     fetchPlayerMonthlyStats();
     fetchPlayerWeeklyStats();
-  }, [fetchPlayerMonthlyStats, fetchPlayerWeeklyStats]);
+  }, [fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats]);
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Avatar, Input } from '@/shared/components';
 import { CompareRadarChart } from '@/features/compare/components/CompareRadarChart';
@@ -48,7 +48,10 @@ function RadarLegendDot({ color, label }: { color: string; label: string }) {
 }
 
 export function Compare() {
-  const { players, matchEntries, playerSeasonStats, seasons } = useFootballStore();
+  const {
+    players, matchEntries, playerSeasonStats, seasons,
+    fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats, fetchSeasons,
+  } = useFootballStore();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | 'all'>('all');
   const [showComparison, setShowComparison] = useState(false);
@@ -56,6 +59,13 @@ export function Compare() {
   const [chartMetric, setChartMetric] = useState<'goals' | 'points' | 'winRate'>('points');
   const [searchQuery, setSearchQuery] = useState('');
   const captureRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchPlayers();
+    fetchMatchEntries();
+    fetchPlayerSeasonStats();
+    fetchSeasons();
+  }, [fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats, fetchSeasons]);
 
   const togglePlayer = (id: string) => {
     setSelectedIds(prev => {

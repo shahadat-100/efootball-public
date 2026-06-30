@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Button, Input, Avatar, Badge } from '@/shared/components';
 import { Search, Trophy, Target, TrendingUp, Star, Zap, Shield } from 'lucide-react';
@@ -6,12 +6,22 @@ import { RESULT_BADGE } from '@/shared/lib/constants';
 import { cn } from '@/shared/lib/cn';
 
 export function MatchEntries() {
-  const { matchEntries, players, playerSeasonStats, matchEntriesHasMore, loadMoreMatchEntries } = useFootballStore();
+  const {
+    matchEntries, players, playerSeasonStats,
+    matchEntriesHasMore, loadMoreMatchEntries,
+    fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats,
+  } = useFootballStore();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'overview' | 'entries'>('overview');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 50;
+
+  useEffect(() => {
+    fetchPlayers();
+    fetchMatchEntries();
+    fetchPlayerSeasonStats();
+  }, [fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats]);
   
   const handleLoadMore = async () => {
     setIsLoadingMore(true);
