@@ -10,19 +10,19 @@ interface AvatarSpeechBubbleProps {
 export function AvatarSpeechBubble({ message, visible, placement = 'right', className }: AvatarSpeechBubbleProps) {
   const placementClass =
     placement === 'above'
-      ? 'left-1/2 -top-[92px] sm:-top-[98px]'
+      ? 'left-1/2 -top-[92px] sm:-top-[98px] -translate-x-1/2'
       :
       placement === 'responsive'
-        ? 'left-1/2 -bottom-[90px] sm:-bottom-[96px] md:left-[unset] md:right-0 md:top-[160px] md:bottom-auto'
+        ? 'left-1/2 -bottom-[90px] sm:-bottom-[96px] md:left-[unset] md:right-0 md:top-[160px] md:bottom-auto md:translate-x-0 -translate-x-1/2'
         : placement === 'right'
           ? 'left-[unset] right-0 top-[160px]'
-          : 'left-1/2 -bottom-[90px] sm:-bottom-[96px]';
+          : 'left-1/2 -bottom-[90px] sm:-bottom-[96px] -translate-x-1/2';
 
   return (
     <div
       aria-hidden={!visible}
       className={cn(
-        'pointer-events-none absolute z-30 max-w-[220px] transition-opacity duration-300 ease-out',
+        'pointer-events-none absolute z-30 max-w-[220px] min-w-[170px] transition-opacity duration-300 ease-out',
         visible ? 'opacity-100 deadpool-bubble-pop' : 'opacity-0',
         placementClass,
         className
@@ -30,12 +30,12 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
       style={
         placement === 'right'
           ? undefined
-          : { transform: visible ? undefined : 'translate(-50%, 10px) scale(0.85)' }
+          : { transform: visible ? 'translateX(-50%)' : 'translateX(-50%) translateY(10px) scale(0.85)' }
       }
     >
-      <div className="relative border-2 border-[#bc0100] bg-[#1a1c1c] px-[14px] py-[10px] text-white shadow-[6px_6px_0px_#bc0100]">
+      <div className="relative border-2 border-[#bc0100] bg-[#1a1c1c] px-[14px] py-[10px] text-white shadow-[6px_6px_0px_#bc0100] min-h-[44px] flex items-center">
         <p
-          className="text-[11px] leading-snug text-white"
+          className="text-[11px] leading-snug text-white w-full text-center"
           style={{ fontFamily: "'DM Mono', monospace" }}
         >
           {message}
