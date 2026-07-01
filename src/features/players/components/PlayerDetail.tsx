@@ -359,7 +359,19 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             monthIndex: period.monthIndex,
           };
     })
-    .filter((item): item is NonNullable<typeof item> => Boolean(item) && item.rank <= 5)
+    .filter((item): item is {
+      label: string;
+      rank: number;
+      wins: number;
+      draws: number;
+      losses: number;
+      goals: number;
+      matches: number;
+      totalPlayers: number;
+      year: number;
+      monthIndex: number;
+    } => item !== null)
+    .filter(item => item.rank <= 5)
     .sort((a, b) => b.year - a.year || b.monthIndex - a.monthIndex || a.rank - b.rank);
 
   const renderTrophyCabinet = () => {
