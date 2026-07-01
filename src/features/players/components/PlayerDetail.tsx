@@ -40,7 +40,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
     return preferred;
   }, [player?.aboutMe, player?.openionAboutClub]);
-  const bubbleSpacerClass = 'h-[96px] sm:h-[104px]';
   const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble, hideBubble } = useAvatarSpeechBubble({
     preferredMessages: playerSpeechMessages,
     active: Boolean(player && playerSpeechMessages.length > 0),
@@ -95,20 +94,26 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const historyEntries = allSortedEntries.slice((historyPage - 1) * ITEMS_PER_PAGE, historyPage * ITEMS_PER_PAGE);
 
 
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const recentWeekEntries = entries.filter(e => e.date && new Date(e.date) >= oneWeekAgo);
-  const latestWeekEntry = [...entries]
-    .filter(e => e.date)
-    .sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
-    })[0];
-  const latestWeekDate = latestWeekEntry?.date ? new Date(latestWeekEntry.date) : null;
-  const latestWeekLabel = latestWeekDate && !Number.isNaN(latestWeekDate.getTime())
-    ? `Week ${Math.ceil(latestWeekDate.getDate() / 7)} ${latestWeekDate.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`
-    : 'Recent Week';
+  const currentDayOfMonth = new Date().getDate();
+  const currentMonthIndexForWeek = new Date().getMonth();
+  const currentYearForWeek = new Date().getFullYear();
+  const activeWeekNumber =
+    currentDayOfMonth >= 22 ? 4 :
+    currentDayOfMonth >= 15 ? 3 :
+    currentDayOfMonth >= 8 ? 2 : 1;
+  const recentWeekEntries = entries.filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    return (
+      d.getFullYear() === currentYearForWeek &&
+      d.getMonth() === currentMonthIndexForWeek &&
+      (() => {
+        const weekNum = d.getDate() >= 22 ? 4 : d.getDate() >= 15 ? 3 : d.getDate() >= 8 ? 2 : 1;
+        return weekNum === activeWeekNumber;
+      })()
+    );
+  });
+  const latestWeekLabel = `Week ${activeWeekNumber} ${new Date().toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`;
   const weekChartData = [
     { label: 'Wins', value: recentWeekEntries.filter(e => e.result === 'win').length, color: '#10b981' },
     { label: 'Draws', value: recentWeekEntries.filter(e => e.result === 'draw').length, color: '#f59e0b' },
@@ -529,11 +534,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px]" style={{ background: 'rgba(59,130,246,0.12)' }} />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start min-h-[320px]">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
           {/* Left side: Avatar + Info */}
-          <div className="flex gap-6 items-center flex-wrap flex-1 min-h-[220px]">
-            <div className="relative shrink-0">
-              <div aria-hidden="true" className={bubbleSpacerClass} />
+          <div className="flex gap-6 items-center flex-wrap flex-1">
+            <div className="relative shrink-0 pt-2">
               <button
                 type="button"
                 onMouseEnter={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
@@ -626,7 +630,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         </div>
 
         {/* HERO ZONE EXPANSION: Quick Stats & Trophies */}
-        <div className="relative z-10 mt-10 pt-10 border-t border-white/10 w-full flex flex-col gap-6">
+        <div className="relative z-10 mt-8 pt-8 border-t border-white/10 w-full flex flex-col gap-6">
           <div className="flex flex-wrap gap-8 items-start justify-between">
             {/* Quick Stats Group */}
             <div className="flex flex-wrap gap-8 flex-1">
