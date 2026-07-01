@@ -37,7 +37,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     })
     : null;
   const avatarSpeechMessages = useMemo(() => [
-    "Ready ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt tt t t t t tt tt. to dominate the match?",
+    "Ready ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt tt t t t t tt tt. to dominate the match?",
     "Watch my moves.",
     "Let's get this win.",
     "Top form today.",
