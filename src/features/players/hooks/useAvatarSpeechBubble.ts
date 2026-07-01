@@ -116,9 +116,16 @@ export function useAvatarSpeechBubble({
     showBubble(nextMessage());
   }, [allMessages.length, nextMessage, showBubble]);
 
+  const hideBubble = useCallback(() => {
+    clearTimer();
+    if (!mountedRef.current) return;
+    setState(current => ({ ...current, visible: false }));
+  }, []);
+
   return {
     message: state.message,
     visible: state.visible,
     triggerBubble,
+    hideBubble,
   };
 }

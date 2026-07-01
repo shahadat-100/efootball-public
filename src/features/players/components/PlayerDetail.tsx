@@ -47,7 +47,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
     return preferred;
   }, [player?.aboutMe, player?.openionAboutClub]);
-  const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble } = useAvatarSpeechBubble({
+  const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble, hideBubble } = useAvatarSpeechBubble({
     preferredMessages: playerSpeechMessages,
     fallbackMessages: avatarSpeechMessages,
     active: Boolean(player),
@@ -530,6 +530,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             <div className="relative">
               <button
                 type="button"
+                onMouseEnter={triggerBubble}
+                onMouseLeave={hideBubble}
+                onFocus={triggerBubble}
+                onBlur={hideBubble}
                 onClick={triggerBubble}
                 className="relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                 aria-label={`Show message for ${player.name}`}
