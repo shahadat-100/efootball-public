@@ -22,7 +22,7 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
     <div
       aria-hidden={!visible}
       className={cn(
-        'pointer-events-none absolute z-30 max-w-[360px] transition-opacity duration-300 ease-out',
+        'pointer-events-none absolute z-30 max-w-[220px] transition-opacity duration-300 ease-out',
         visible ? 'opacity-100 deadpool-bubble-pop' : 'opacity-0',
         placementClass,
         className
@@ -33,7 +33,7 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
           : { transform: visible ? undefined : 'translate(-50%, 10px) scale(0.85)' }
       }
     >
-      <div className="relative border-2 border-primary bg-[#111111] px-[16px] py-[6px] text-white rounded-lg shadow-lg">
+      <div className="relative border-2 border-[#bc0100] bg-[#1a1c1c] px-[14px] py-[10px] text-white shadow-[6px_6px_0px_#bc0100]">
         <p
           className="text-[11px] leading-snug text-white"
           style={{ fontFamily: "'DM Mono', monospace" }}
@@ -44,7 +44,7 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
         {placement === 'above' ? (
           <>
             <span className="absolute left-[28px] -bottom-[8px] h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent" />
-            <span className="absolute left-[27px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#c8102e] border-r-[9px] border-r-transparent -z-10" />
+            <span className="absolute left-[27px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10" />
           </>
         ) : placement === 'right' ? (
           <>
@@ -54,14 +54,14 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
         ) : placement === 'bottom' ? (
           <>
             <span className="absolute left-[25px] -bottom-[8px] h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent" />
-            <span className="absolute left-[24px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#c8102e] border-r-[9px] border-r-transparent -z-10" />
+            <span className="absolute left-[24px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10" />
           </>
         ) : (
           <>
             <span className="absolute left-[25px] -bottom-[8px] h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent md:hidden" />
-            <span className="absolute left-[24px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#c8102e] border-r-[9px] border-r-transparent -z-10 md:hidden" />
+            <span className="absolute left-[24px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10 md:hidden" />
             <span className="absolute left-[33px] -bottom-[8px] hidden h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent md:block" />
-            <span className="absolute left-[32px] -bottom-[11px] hidden h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#c8102e] border-r-[9px] border-r-transparent -z-10 md:block" />
+            <span className="absolute left-[32px] -bottom-[11px] hidden h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10 md:block" />
           </>
         )}
       </div>
