@@ -532,8 +532,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 type="button"
                 onMouseEnter={triggerBubble}
                 onMouseLeave={hideBubble}
-                onFocus={triggerBubble}
-                onBlur={hideBubble}
                 onClick={triggerBubble}
                 className="relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
                 aria-label={`Show message for ${player.name}`}
@@ -544,6 +542,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 message={avatarMessage}
                 visible={avatarSpeechVisible}
                 placement="responsive"
+                className="max-w-[220px]"
               />
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
