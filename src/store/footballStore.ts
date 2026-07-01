@@ -66,7 +66,7 @@ export const mapPlayerFromDb = (p: any): Player => ({
   profileImageUrl: p.profileimageurl || '',
   jerseyNumber: p.jerseynumber ?? undefined,
   email: p.email || '',
-  dateOfBirth: p.dateOFbirth || p.dateofbirth || undefined,
+  dateOfBirth: p.dateOFbirth || undefined,
   education: p.education || '',
   location: p.location || '',
   // Extract role names from the joined junction table data
@@ -315,7 +315,7 @@ export const useFootballStore = create<FootballStore>()(
             coverImageUrl: p.coverimageurl || '',
             jerseyNumber: p.jerseynumber ?? undefined,
             email: p.email || '',
-            dateOfBirth: p.dateOFbirth || p.dateofbirth || undefined,
+            dateOfBirth: p.dateOFbirth || undefined,
             education: p.education || '',
             location: p.location || '',
             playerRoles: playerRolesMap.get(p.id) || [],
