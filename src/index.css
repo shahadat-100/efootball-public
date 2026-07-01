@@ -37,6 +37,7 @@
     caret-color: #c8102e !important;
     color-scheme: light !important;
   }
+
   input::placeholder,
   textarea::placeholder {
     color: #6b7280 !important;
@@ -45,6 +46,7 @@
 }
 
 @layer components {
+
   /* Hide scrollbar for clean internal tables etc */
   ::-webkit-scrollbar {
     width: 8px;
@@ -105,18 +107,17 @@
   .stat-glow {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .stat-glow:hover {
     transform: translateY(-4px) scale(1.02);
   }
 
   /* Skeleton shimmer loading */
   .skeleton-shimmer {
-    background: linear-gradient(
-      90deg,
-      #f3f4f6 25%,
-      #e5e7eb 50%,
-      #f3f4f6 75%
-    );
+    background: linear-gradient(90deg,
+        #f3f4f6 25%,
+        #e5e7eb 50%,
+        #f3f4f6 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
@@ -127,10 +128,12 @@
     color: #422006;
     text-shadow: 0 1px 0 rgba(255, 215, 0, 0.3);
   }
+
   .medal-silver {
     background: linear-gradient(135deg, #94a3b8, #cbd5e1, #94a3b8);
     color: #1e293b;
   }
+
   .medal-bronze {
     background: linear-gradient(135deg, #92400e, #d97706, #b45309);
     color: #fffbeb;
@@ -138,18 +141,17 @@
 
   /* Hero banner overlay */
   .hero-overlay {
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.3) 0%,
-      rgba(0, 0, 0, 0.5) 50%,
-      rgba(0, 0, 0, 0.7) 100%
-    );
+    background: linear-gradient(to bottom,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.7) 100%);
   }
 
   /* Card hover lift effect */
   .card-hover-lift {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .card-hover-lift:hover {
     transform: translateY(-6px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -159,9 +161,11 @@
   .result-bar-win {
     border-left: 4px solid #10b981;
   }
+
   .result-bar-loss {
     border-left: 4px solid #ef4444;
   }
+
   .result-bar-draw {
     border-left: 4px solid #f59e0b;
   }
@@ -176,35 +180,39 @@
   .news-card-player,
   .news-card-league,
   .news-card-transfer,
-  .news-card-injury { transition: box-shadow 0.35s ease, outline 0.35s ease !important; }
+  .news-card-injury {
+    transition: box-shadow 0.35s ease, outline 0.35s ease !important;
+  }
 
   /* Navy / League glow — electric blue */
   .news-card-league:hover {
     box-shadow:
-      0 0 0 2px rgba(96,165,250,0.6),
-      0 0 24px 6px rgba(59,130,246,0.55),
-      0 8px 40px rgba(10,22,40,0.7) !important;
+      0 0 0 2px rgba(96, 165, 250, 0.6),
+      0 0 24px 6px rgba(59, 130, 246, 0.55),
+      0 8px 40px rgba(10, 22, 40, 0.7) !important;
   }
 
   /* Emerald / Transfer / Player glow — neon green */
   .news-card-transfer:hover {
     box-shadow:
-      0 0 0 2px rgba(52,211,153,0.6),
-      0 0 24px 6px rgba(16,185,129,0.55),
-      0 8px 40px rgba(7,26,15,0.7) !important;
+      0 0 0 2px rgba(52, 211, 153, 0.6),
+      0 0 24px 6px rgba(16, 185, 129, 0.55),
+      0 8px 40px rgba(7, 26, 15, 0.7) !important;
   }
 
   /* Crimson / Milestone / default glow — hot red */
   .news-card-injury:hover {
     box-shadow:
-      0 0 0 2px rgba(248,113,113,0.6),
-      0 0 24px 6px rgba(244,63,94,0.55),
-      0 8px 40px rgba(26,0,5,0.7) !important;
+      0 0 0 2px rgba(248, 113, 113, 0.6),
+      0 0 24px 6px rgba(244, 63, 94, 0.55),
+      0 8px 40px rgba(26, 0, 5, 0.7) !important;
   }
 
-  .news-card-league:hover   .news-card-img,
+  .news-card-league:hover .news-card-img,
   .news-card-transfer:hover .news-card-img,
-  .news-card-injury:hover   .news-card-img { transform: scale(1.06); }
+  .news-card-injury:hover .news-card-img {
+    transform: scale(1.06);
+  }
 
   /* Bottom nav for mobile */
   .bottom-nav {
@@ -222,21 +230,52 @@
 }
 
 @layer utilities {
+
   /* Stagger fade-in for child elements */
-  .stagger-children > * {
+  .stagger-children>* {
     opacity: 0;
     animation: staggerFadeIn 0.4s ease-out forwards;
   }
-  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
-  .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
-  .stagger-children > *:nth-child(7) { animation-delay: 360ms; }
-  .stagger-children > *:nth-child(8) { animation-delay: 420ms; }
-  .stagger-children > *:nth-child(9) { animation-delay: 480ms; }
-  .stagger-children > *:nth-child(10) { animation-delay: 540ms; }
+
+  .stagger-children>*:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .stagger-children>*:nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  .stagger-children>*:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  .stagger-children>*:nth-child(4) {
+    animation-delay: 180ms;
+  }
+
+  .stagger-children>*:nth-child(5) {
+    animation-delay: 240ms;
+  }
+
+  .stagger-children>*:nth-child(6) {
+    animation-delay: 300ms;
+  }
+
+  .stagger-children>*:nth-child(7) {
+    animation-delay: 360ms;
+  }
+
+  .stagger-children>*:nth-child(8) {
+    animation-delay: 420ms;
+  }
+
+  .stagger-children>*:nth-child(9) {
+    animation-delay: 480ms;
+  }
+
+  .stagger-children>*:nth-child(10) {
+    animation-delay: 540ms;
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -248,6 +287,7 @@
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -255,13 +295,25 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(200, 16, 46, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(200, 16, 46, 0.4); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(200, 16, 46, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(200, 16, 46, 0.4);
+  }
 }
 
 @keyframes slideUp {
@@ -269,6 +321,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -276,13 +329,25 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes barGrow {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
 }
 
 @keyframes fadeInScale {
@@ -290,6 +355,7 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -298,21 +364,23 @@
 
 @keyframes deadpoolBubblePop {
   0% {
-    transform: scale(0.85) translateY(10px) rotate(-3deg);
+    transform: translate(-50%, 10px) scale(0.85);
+    opacity: 0;
   }
-  55% {
-    transform: scale(1.02) translateY(-2px) rotate(1deg);
+
+  60% {
+    transform: translate(-50%, -4px) scale(1.03);
+    opacity: 1;
   }
-  75% {
-    transform: scale(0.99) translateY(0px) rotate(-0.5deg);
-  }
+
   100% {
-    transform: scale(1) translateY(0) rotate(0deg);
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
   }
 }
 
 .deadpool-bubble-pop {
-  animation: deadpoolBubblePop 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: deadpoolBubblePop 0.3s ease-out forwards;
 }
 
 @keyframes birthdayConfettiFall {
@@ -320,9 +388,11 @@
     opacity: 0;
     transform: translate3d(0, -18px, 0) rotate(0deg);
   }
+
   12% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
     transform: translate3d(var(--confetti-drift, 0px), 140px, 0) rotate(720deg);
