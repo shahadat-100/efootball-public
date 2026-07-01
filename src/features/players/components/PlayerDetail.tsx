@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { Avatar, Badge, Button, PieChart } from '@/shared/components';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
@@ -36,8 +36,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       year: 'numeric',
     })
     : null;
+  const playerSpeechMessages = useMemo(() => {
+    const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
+    return preferred;
+  }, [player?.aboutMe, player?.openionAboutClub]);
   const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble, hideBubble } = useAvatarSpeechBubble({
-    messages: ['In Mystery We Reign'],
+    preferredMessages: playerSpeechMessages,
+    messages: playerSpeechMessages.length === 0 ? ['In Mystery We Reign'] : [],
     active: Boolean(player),
   });
 
@@ -51,6 +56,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (!captureRef.current || !player) return;
     setIsExporting(true);
     try {
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       const dataUrl = await toPng(captureRef.current, {
         cacheBust: true,
         pixelRatio: 2,
@@ -547,12 +553,14 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               >
                 <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl transition-transform duration-300 hover:scale-[1.02]" />
               </button>
-              <AvatarSpeechBubble
-                message={avatarMessage}
-                visible={avatarSpeechVisible}
-                placement="above"
-                className="max-w-[220px]"
-              />
+              {!isExporting && (
+                <AvatarSpeechBubble
+                  message={avatarMessage}
+                  visible={avatarSpeechVisible}
+                  placement="above"
+                  className="max-w-[220px]"
+                />
+              )}
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
                   "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
