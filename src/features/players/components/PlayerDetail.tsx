@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { Avatar, Badge, Button, PieChart } from '@/shared/components';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
@@ -11,6 +11,8 @@ import { AchievementBadges } from './AchievementBadges';
 import { PlayerSnapshot } from './detail-tabs/PlayerSnapshot';
 import { PlayerTimeline } from './detail-tabs/PlayerTimeline';
 import { PlayerOverviewDashboard } from './detail-tabs/PlayerOverviewDashboard';
+import { AvatarSpeechBubble } from './AvatarSpeechBubble';
+import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
 import { Download, User, Activity, BarChart2, Award } from 'lucide-react';
@@ -34,6 +36,22 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         year: 'numeric',
       })
     : null;
+  const avatarSpeechMessages = useMemo(() => [
+    "Ready to dominate the match?",
+    "Watch my moves.",
+    "Let's get this win.",
+    "Top form today.",
+    "You picked a strong player.",
+  ], []);
+  const playerSpeechMessages = useMemo(() => {
+    const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
+    return preferred;
+  }, [player?.aboutMe, player?.openionAboutClub]);
+  const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble } = useAvatarSpeechBubble({
+    preferredMessages: playerSpeechMessages,
+    fallbackMessages: avatarSpeechMessages,
+    active: Boolean(player),
+  });
 
   const captureRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -510,7 +528,19 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
             <div className="relative">
-              <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl" />
+              <button
+                type="button"
+                onClick={triggerBubble}
+                className="relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+                aria-label={`Show message for ${player.name}`}
+              >
+                <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl transition-transform duration-300 hover:scale-[1.02]" />
+              </button>
+              <AvatarSpeechBubble
+                message={avatarMessage}
+                visible={avatarSpeechVisible}
+                placement="responsive"
+              />
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
                   "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
