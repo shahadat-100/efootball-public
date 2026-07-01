@@ -27,6 +27,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
   const player = players.find(p => p.id === playerId);
   const stats = usePlayerStats(playerId);
+  const formattedBirthDate = player?.dateOfBirth
+    ? new Date(player.dateOfBirth).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : null;
 
   const captureRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -528,6 +535,21 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 {(player.customStringTags ?? []).map(t => (
                   <Badge key={`str-${t}`} bg="rgba(59,130,246,0.15)" c="#93c5fd" className="border border-blue-500/20">{t}</Badge>
                 ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1">Date of Birth</p>
+                  <p className="text-[13px] font-bold text-white">{formattedBirthDate || '—'}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1">Education</p>
+                  <p className="text-[13px] font-bold text-white truncate">{player.education || '—'}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1">Location</p>
+                  <p className="text-[13px] font-bold text-white truncate">{player.location || '—'}</p>
+                </div>
               </div>
             </div>
           </div>

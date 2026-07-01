@@ -15,7 +15,7 @@ import { OverviewPointsLeaderboard } from '@/features/overview/components/Overvi
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 
-import { Target, Trophy, XCircle, Users, Activity, Medal } from 'lucide-react';
+import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 
 interface OverviewProps {
   setTab: (tab: string) => void;
@@ -116,6 +116,21 @@ export function Overview({ setTab }: OverviewProps) {
     return matches.map(m => m.date).filter(Boolean) as string[];
   }, [matches]);
 
+  const birthdayPlayers = useMemo(() => {
+    const now = new Date();
+    const today = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    return players.filter(player => {
+      if (!player.dateOfBirth) return false;
+      const rawBirthDate = player.dateOfBirth.slice(0, 10);
+      const birthDate = new Date(rawBirthDate);
+      if (Number.isNaN(birthDate.getTime())) return false;
+      const birthMonthDay = `${String(birthDate.getMonth() + 1).padStart(2, '0')}-${String(birthDate.getDate()).padStart(2, '0')}`;
+
+      return birthMonthDay === today;
+    });
+  }, [players]);
+
   if (isLoading) {
     return (
       <div className="animate-in fade-in duration-300">
@@ -143,6 +158,42 @@ export function Overview({ setTab }: OverviewProps) {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+
+      {birthdayPlayers.length > 0 && (
+        <div className="relative overflow-hidden rounded-3xl mb-8 border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-rose-500/15 shadow-lg">
+          <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.22),_transparent_36%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.16),_transparent_30%)]" />
+          <div className="relative p-5 md:p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                <PartyPopper className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] font-black text-amber-200/80 mb-1">Birthday Alert</p>
+                <h2 className="text-xl md:text-2xl font-black text-foreground leading-tight">
+                  {birthdayPlayers.length === 1
+                    ? `Today is ${birthdayPlayers[0].name}'s birthday`
+                    : `Today is ${birthdayPlayers.length} players' birthday`}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Send them some love and make their day special.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {birthdayPlayers.map(player => (
+                <div
+                  key={player.id}
+                  className="flex items-center gap-2 rounded-2xl border border-amber-500/25 bg-background/70 px-3 py-2 shadow-sm backdrop-blur-sm"
+                >
+                  <Cake className="w-4 h-4 text-amber-500" />
+                  <span className="text-sm font-semibold text-foreground">{player.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Banner Section */}
       <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[3/1] group">

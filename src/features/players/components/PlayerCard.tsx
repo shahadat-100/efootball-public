@@ -14,6 +14,13 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
   const [hover, setHover] = useState(false);
   const stats = usePlayerStats(player.id);
   const { matchEntries, players, playerSeasonStats } = useFootballStore();
+  const formattedBirthDate = player.dateOfBirth
+    ? new Date(player.dateOfBirth).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null;
 
   const calcSeasonPoints = (s: any) =>
     (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
@@ -136,6 +143,17 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
           {(player.customStringTags ?? []).slice(0, 2).map(t => (
             <Badge key={`str-${t}`} bg="#1e3a5f" c="#93c5fd">{t}</Badge>
           ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
+          <div className="rounded-xl border border-border/60 bg-muted/40 px-3 py-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Born</p>
+            <p className="font-semibold text-foreground truncate">{formattedBirthDate || '—'}</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/40 px-3 py-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Location</p>
+            <p className="font-semibold text-foreground truncate">{player.location || '—'}</p>
+          </div>
         </div>
 
         {stats.seasonBreakdown.length > 0 && (
