@@ -21,11 +21,12 @@ interface PlayerDetailProps {
   onBack: () => void;
 }
 export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
-  const { players, matchEntries, playerSeasonStats, seasons, fetchPlayerMatchEntries } = useFootballStore();
+  const { players, matchEntries, playerSeasonStats, playerMonthlyStats, seasons, fetchPlayerMatchEntries, fetchPlayerMonthlyStats } = useFootballStore();
 
   useEffect(() => {
     fetchPlayerMatchEntries(playerId);
-  }, [playerId, fetchPlayerMatchEntries]);
+    fetchPlayerMonthlyStats();
+  }, [playerId, fetchPlayerMatchEntries, fetchPlayerMonthlyStats]);
 
   const player = players.find(p => p.id === playerId);
   const stats = usePlayerStats(playerId);
@@ -218,8 +219,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   const weeklyMap = new Map<string, number>();
-  const monthlyMap = new Map<string, number>();
-  players.forEach(p => { weeklyMap.set(p.id, 0); monthlyMap.set(p.id, 0); });
+  players.forEach(p => { weeklyMap.set(p.id, 0); });
 
   matchEntries.forEach(entry => {
     if (!entry.date) return;
@@ -236,11 +236,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       weeklyMap.set(entry.playerId, weeklyMap.get(entry.playerId)! + pts);
     }
 
-    // Month
-    const isMonthMatch = d.getMonth() === currentMonthIndex && d.getFullYear() === currentYear;
-    if (isMonthMatch && monthlyMap.has(entry.playerId)) {
-      monthlyMap.set(entry.playerId, monthlyMap.get(entry.playerId)! + pts);
-    }
   });
 
   const getRankFromMap = (map: Map<string, number>, pId: string) => {
@@ -250,7 +245,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   const recentWeekRank = getRankFromMap(weeklyMap, player.id);
-  const recentMonthRank = getRankFromMap(monthlyMap, player.id);
 
   // Dynamically calculate the maximum league stats to correctly scale the radar chart
   const maxLeagueStats = players.reduce((max, p) => {
@@ -315,75 +309,58 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     hattricks: stats.totalHattricks
   };
 
-  // ── Monthly & Weekly RANK calculation ──────────────────────────────
+  // ── Monthly rank calculation from DB stats ─────────────────────────
   type PeriodStats = { wins: number; draws: number; losses: number; goals: number; matches: number; points: number };
+  const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
+    s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
-  const buildPeriodKey = (dateStr: string, mode: 'month' | 'week') => {
-    if (!dateStr || dateStr.length < 10) return '';
-    const [year, month, day] = dateStr.split('-');
-    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    if (isNaN(d.getTime())) return '';
-
-    const monthKey = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
-    if (mode === 'month') return monthKey;
-
-    const weekNum = Math.ceil(d.getDate() / 7);
-    return `W${weekNum} ${monthKey}`;
-  };
-
-  // Collect all unique period keys from this player's entries
-  const myMonthKeys = new Set<string>();
-  const myWeekKeys = new Set<string>();
-  entries.forEach(e => {
-    if (!e.date) return;
-    const mk = buildPeriodKey(e.date, 'month');
-    if (mk) myMonthKeys.add(mk);
-    const wk = buildPeriodKey(e.date, 'week');
-    if (wk) myWeekKeys.add(wk);
+  const monthlyPeriodMap = new Map<string, { label: string; year: number; monthIndex: number; seasonId: number | null; playerStats: Map<string, PeriodStats> }>();
+  playerMonthlyStats.forEach(stat => {
+    const key = `${stat.seasonId ?? 'all'}-${stat.year}-${stat.monthIndex}`;
+    if (!monthlyPeriodMap.has(key)) {
+      monthlyPeriodMap.set(key, {
+        label: `${new Date(stat.year, stat.monthIndex, 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}${stat.seasonId ? ` · ${seasons.find(s => s.id === stat.seasonId)?.name ?? `S${stat.seasonId}`}` : ''}`,
+        year: stat.year,
+        monthIndex: stat.monthIndex,
+        seasonId: stat.seasonId,
+        playerStats: new Map<string, PeriodStats>(),
+      });
+    }
+    const period = monthlyPeriodMap.get(key)!;
+    const points = calcPoints(stat);
+    period.playerStats.set(stat.playerId, {
+      wins: stat.wins || 0,
+      draws: stat.draws || 0,
+      losses: stat.losses || 0,
+      goals: stat.goals || 0,
+      matches: (stat.wins || 0) + (stat.draws || 0) + (stat.losses || 0),
+      points,
+    });
   });
 
-  const getRankForPeriod = (periodKey: string, mode: 'month' | 'week'): { rank: number; wins: number; draws: number; losses: number; goals: number; matches: number; totalPlayers: number } => {
-    const playerPoints = new Map<string, PeriodStats>();
-    matchEntries.forEach(e => {
-      if (!e.date) return;
-      const pk = buildPeriodKey(e.date, mode);
-      if (pk !== periodKey) return;
-      if (!playerPoints.has(e.playerId)) {
-        playerPoints.set(e.playerId, { wins: 0, draws: 0, losses: 0, goals: 0, matches: 0, points: 0 });
-      }
-      const ps = playerPoints.get(e.playerId)!;
-      ps.matches += 1;
-      ps.goals += e.goals || 0;
-      if (e.result === 'win') { ps.wins += 1; ps.points += 10; }
-      else if (e.result === 'draw') { ps.draws += 1; ps.points += 5; }
-      else if (e.result === 'loss') { ps.losses += 1; ps.points -= 3; }
-      ps.points += (e.goals || 0);
-      ps.points -= (e.goalsConceded || 0);
-      if (e.motm) ps.points += 4;
-      ps.points += (e.hattricks || 0);
-    });
-
-    const sorted = Array.from(playerPoints.entries()).sort((a, b) => b[1].points - a[1].points || b[1].goals - a[1].goals);
-    const rankIdx = sorted.findIndex(([id]) => id === playerId);
-    const myStats = playerPoints.get(playerId) || { wins: 0, draws: 0, losses: 0, goals: 0, matches: 0, points: 0 };
-    return {
-      rank: rankIdx !== -1 ? rankIdx + 1 : sorted.length + 1,
-      ...myStats,
-      totalPlayers: sorted.length
-    };
-  };
-
-  const monthlyRankData = Array.from(myMonthKeys)
-    .map(key => ({ label: key, ...getRankForPeriod(key, 'month') }))
-    .sort((a, b) => {
-      // Sort by most recent month first, fallback to rank
-      const dateA = new Date(`1 ${a.label}`);
-      const dateB = new Date(`1 ${b.label}`);
-      if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
-        return dateB.getTime() - dateA.getTime();
-      }
-      return a.rank - b.rank;
-    });
+  const monthlyRankData = Array.from(monthlyPeriodMap.values())
+    .map(period => {
+      const sorted = Array.from(period.playerStats.entries())
+        .sort((a, b) => b[1].points - a[1].points || b[1].goals - a[1].goals);
+      const rankIdx = sorted.findIndex(([id]) => id === player.id);
+      const myStats = period.playerStats.get(player.id);
+      return rankIdx === -1 || !myStats
+        ? null
+        : {
+            label: period.label,
+            rank: rankIdx + 1,
+            wins: myStats.wins,
+            draws: myStats.draws,
+            losses: myStats.losses,
+            goals: myStats.goals,
+            matches: myStats.matches,
+            totalPlayers: sorted.length,
+            year: period.year,
+            monthIndex: period.monthIndex,
+          };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item) && item.rank <= 5)
+    .sort((a, b) => b.year - a.year || b.monthIndex - a.monthIndex || a.rank - b.rank);
 
   const renderTrophyCabinet = () => {
     const trophies = [];
@@ -531,7 +508,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
-            <div className="relative">
+            <div className="relative pt-24 sm:pt-28">
               <button
                 type="button"
                 onMouseEnter={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
@@ -674,7 +651,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               {/* Ranks */}
               {[
                 { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.15)' },
-                { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.15)' },
+                { label: 'Month Top 5', value: monthlyRankData.length, color: '#34d399', bgColor: 'rgba(52,211,153,0.15)' },
                 { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.15)' },
               ].map(r => (
                 <div key={r.label}>
@@ -937,13 +914,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
             <SeasonTable data={[...seasonData].reverse()} allTime={allTime} />
 
-            <div className="my-4">
-              <RankTrendCard
-                title="Monthly Rank"
-                subtitle="Monthly performance and rank overview"
-                data={monthlyRankData}
-              />
-            </div>
+              <div className="my-4">
+                <RankTrendCard
+                  title="Monthly Rank"
+                  subtitle="Monthly performance and rank overview. Top 5 months only."
+                  data={monthlyRankData}
+                />
+              </div>
           </>
 
           {/* ═══════════════════════════════════════════
