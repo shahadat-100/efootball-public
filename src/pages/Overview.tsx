@@ -16,6 +16,7 @@ import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
+import { Avatar } from '@/shared/components';
 
 interface OverviewProps {
   setTab: (tab: string) => void;
@@ -131,6 +132,26 @@ export function Overview({ setTab }: OverviewProps) {
     });
   }, [players]);
 
+  const confettiPieces = useMemo(() => {
+    if (birthdayPlayers.length === 0) return [];
+
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#f43f5e'];
+    return Array.from({ length: Math.min(28, birthdayPlayers.length * 10) }, (_, index) => {
+      const size = 6 + Math.random() * 8;
+      return {
+        id: index,
+        left: `${Math.random() * 100}%`,
+        top: `${-10 - Math.random() * 30}px`,
+        delay: `${Math.random() * 1.8}s`,
+        duration: `${2.8 + Math.random() * 1.8}s`,
+        size,
+        color: colors[index % colors.length],
+        rotation: `${Math.random() * 360}deg`,
+        drift: `${-20 + Math.random() * 40}px`,
+      };
+    });
+  }, [birthdayPlayers.length]);
+
   if (isLoading) {
     return (
       <div className="animate-in fade-in duration-300">
@@ -160,15 +181,34 @@ export function Overview({ setTab }: OverviewProps) {
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 
       {birthdayPlayers.length > 0 && (
-        <div className="relative overflow-hidden rounded-3xl mb-8 border border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-rose-500/15 shadow-lg">
-          <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.22),_transparent_36%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.16),_transparent_30%)]" />
+        <div className="relative overflow-hidden rounded-3xl mb-8 border border-border bg-gradient-to-r from-card via-muted/40 to-card shadow-lg">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {confettiPieces.map(piece => (
+              <span
+                key={piece.id}
+                className="absolute rounded-sm opacity-90 birthday-confetti"
+                style={{
+                  left: piece.left,
+                  top: piece.top,
+                  width: `${piece.size}px`,
+                  height: `${piece.size * 0.55}px`,
+                  backgroundColor: piece.color,
+                  animationDelay: piece.delay,
+                  animationDuration: piece.duration,
+                  transform: `rotate(${piece.rotation})`,
+                  ['--confetti-drift' as any]: piece.drift,
+                }}
+              />
+            ))}
+          </div>
+          <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_36%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.10),_transparent_30%)]" />
           <div className="relative p-5 md:p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                <PartyPopper className="w-6 h-6 text-amber-400" />
+              <div className="shrink-0 w-12 h-12 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+                <PartyPopper className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] font-black text-amber-200/80 mb-1">Birthday Alert</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] font-black text-primary/70 mb-1">Birthday Alert</p>
                 <h2 className="text-xl md:text-2xl font-black text-foreground leading-tight">
                   {birthdayPlayers.length === 1
                     ? `Today is ${birthdayPlayers[0].name}'s birthday`
@@ -184,10 +224,16 @@ export function Overview({ setTab }: OverviewProps) {
               {birthdayPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="flex items-center gap-2 rounded-2xl border border-amber-500/25 bg-background/70 px-3 py-2 shadow-sm backdrop-blur-sm"
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-background/80 px-3 py-2 shadow-sm backdrop-blur-sm"
                 >
-                  <Cake className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-semibold text-foreground">{player.name}</span>
+                  <Avatar name={player.name} src={player.profileImageUrl} size={32} className="ring-2 ring-primary/15" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <Cake className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-sm font-semibold text-foreground truncate">{player.name}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground truncate">Wish them a great day</p>
+                  </div>
                 </div>
               ))}
             </div>
