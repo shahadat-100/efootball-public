@@ -568,19 +568,31 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-2xl">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm min-h-[76px]">
-                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1 leading-tight min-h-[2.4em]">Date of Birth</p>
-                  <p className="text-[13px] font-bold text-white leading-snug break-words">{formattedBirthDate || '—'}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm min-h-[76px]">
-                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1 leading-tight min-h-[2.4em]">Education</p>
-                  <p className="text-[13px] font-bold text-white leading-snug break-words">{player.education || '—'}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm min-h-[76px]">
-                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1 leading-tight min-h-[2.4em]">Location</p>
-                  <p className="text-[13px] font-bold text-white leading-snug break-words">{player.location || '—'}</p>
-                </div>
+              <div className="flex flex-wrap gap-2.5 max-w-2xl">
+                <Badge
+                  bg="rgba(59,130,246,0.16)"
+                  c="#dbeafe"
+                  className="border border-blue-400/20 whitespace-normal text-left leading-tight px-3 py-2 max-w-full"
+                >
+                  <span className="block text-[9px] uppercase tracking-widest text-blue-100/70 font-black">Date of Birth</span>
+                  <span className="block mt-1 text-[13px] font-bold text-white">{formattedBirthDate || '—'}</span>
+                </Badge>
+                <Badge
+                  bg="rgba(16,185,129,0.14)"
+                  c="#d1fae5"
+                  className="border border-emerald-400/20 whitespace-normal text-left leading-tight px-3 py-2 max-w-full"
+                >
+                  <span className="block text-[9px] uppercase tracking-widest text-emerald-100/70 font-black">Education</span>
+                  <span className="block mt-1 text-[13px] font-bold text-white">{player.education || '—'}</span>
+                </Badge>
+                <Badge
+                  bg="rgba(245,158,11,0.14)"
+                  c="#fef3c7"
+                  className="border border-amber-400/20 whitespace-normal text-left leading-tight px-3 py-2 max-w-full"
+                >
+                  <span className="block text-[9px] uppercase tracking-widest text-amber-100/70 font-black">Location</span>
+                  <span className="block mt-1 text-[13px] font-bold text-white">{player.location || '—'}</span>
+                </Badge>
               </div>
             </div>
           </div>
