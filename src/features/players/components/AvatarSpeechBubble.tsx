@@ -22,7 +22,7 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
     <div
       aria-hidden={!visible}
       className={cn(
-        'pointer-events-none absolute z-30 max-w-[260px] transition-opacity duration-300 ease-out',
+        'pointer-events-none absolute z-30 max-w-[360px] transition-opacity duration-300 ease-out',
         visible ? 'opacity-100 deadpool-bubble-pop' : 'opacity-0',
         placementClass,
         className
@@ -33,7 +33,7 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
           : { transform: visible ? undefined : 'translate(-50%, 10px) scale(0.85)' }
       }
     >
-      <div className="relative border-2 border-[#bc0100] bg-[#1a1c1c] px-[14px] py-[10px] text-white shadow-[6px_6px_0px_#bc0100]">
+      <div className="relative border-2 border-primary bg-[#111111] px-[16px] py-[6px] text-white rounded-lg shadow-lg">
         <p
           className="text-[11px] leading-snug text-white"
           style={{ fontFamily: "'DM Mono', monospace" }}
