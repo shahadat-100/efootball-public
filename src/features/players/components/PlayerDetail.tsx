@@ -37,6 +37,11 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     })
     : null;
   const avatarSpeechMessages = useMemo(() => [
+    "Ready to dominate the match?",
+    "Watch my moves.",
+    "Let's get this win.",
+    "Top form today.",
+    "You picked a strong player.",
   ], []);
   const playerSpeechMessages = useMemo(() => {
     const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
