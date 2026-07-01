@@ -314,34 +314,35 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
     s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
-  const monthlyPeriodMap = new Map<string, { label: string; year: number; monthIndex: number; seasonId: number | null; playerStats: Map<string, PeriodStats> }>();
+  const monthlyPeriodMap = new Map<string, { label: string; year: number; monthIndex: number; playerStats: Map<string, PeriodStats> }>();
   playerMonthlyStats.forEach(stat => {
-    const key = `${stat.seasonId ?? 'all'}-${stat.year}-${stat.monthIndex}`;
+    const key = `${stat.year}-${stat.monthIndex}`;
     if (!monthlyPeriodMap.has(key)) {
       monthlyPeriodMap.set(key, {
-        label: `${new Date(stat.year, stat.monthIndex, 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}${stat.seasonId ? ` · ${seasons.find(s => s.id === stat.seasonId)?.name ?? `S${stat.seasonId}`}` : ''}`,
+        label: new Date(stat.year, stat.monthIndex, 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
         year: stat.year,
         monthIndex: stat.monthIndex,
-        seasonId: stat.seasonId,
         playerStats: new Map<string, PeriodStats>(),
       });
     }
     const period = monthlyPeriodMap.get(key)!;
+    const previous = period.playerStats.get(stat.playerId);
     const points = calcPoints(stat);
     period.playerStats.set(stat.playerId, {
-      wins: stat.wins || 0,
-      draws: stat.draws || 0,
-      losses: stat.losses || 0,
-      goals: stat.goals || 0,
-      matches: (stat.wins || 0) + (stat.draws || 0) + (stat.losses || 0),
-      points,
+      wins: (previous?.wins || 0) + (stat.wins || 0),
+      draws: (previous?.draws || 0) + (stat.draws || 0),
+      losses: (previous?.losses || 0) + (stat.losses || 0),
+      goals: (previous?.goals || 0) + (stat.goals || 0),
+      matches: (previous?.matches || 0) + (stat.wins || 0) + (stat.draws || 0) + (stat.losses || 0),
+      points: (previous?.points || 0) + points,
     });
   });
 
   const monthlyRankData = Array.from(monthlyPeriodMap.values())
     .map(period => {
       const sorted = Array.from(period.playerStats.entries())
-        .sort((a, b) => b[1].points - a[1].points || b[1].goals - a[1].goals);
+        .filter(([, stat]) => stat.matches > 0)
+        .sort((a, b) => b[1].points - a[1].points);
       const rankIdx = sorted.findIndex(([id]) => id === player.id);
       const myStats = period.playerStats.get(player.id);
       return rankIdx === -1 || !myStats
@@ -517,10 +518,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px]" style={{ background: 'rgba(59,130,246,0.12)' }} />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start pt-24 sm:pt-28">
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
-            <div className="relative pt-24 sm:pt-28">
+            <div className="relative">
               <button
                 type="button"
                 onMouseEnter={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
@@ -1034,9 +1035,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 </div>
                 <div>
                   <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
-                    {monthlyRankData.filter(d => d.rank <= Math.max(3, players.length * 0.1)).length}
+                    {monthlyRankData.length}
                   </p>
-                  <p className="text-[11px] font-bold text-muted-foreground">Month Top 10%</p>
+                  <p className="text-[11px] font-bold text-muted-foreground">Month Top 5</p>
                 </div>
                 <div>
                   <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
