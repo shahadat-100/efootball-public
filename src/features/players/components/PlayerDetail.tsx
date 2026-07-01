@@ -36,21 +36,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       year: 'numeric',
     })
     : null;
-  const avatarSpeechMessages = useMemo(() => [
-    "Ready to dominate the match?",
-    "Watch my moves.",
-    "Let's get this win.",
-    "Top form today.",
-    "You picked a strong player.",
-  ], []);
   const playerSpeechMessages = useMemo(() => {
     const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
     return preferred;
   }, [player?.aboutMe, player?.openionAboutClub]);
   const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble, hideBubble } = useAvatarSpeechBubble({
     preferredMessages: playerSpeechMessages,
-    fallbackMessages: avatarSpeechMessages,
-    active: Boolean(player),
+    active: Boolean(player && playerSpeechMessages.length > 0),
   });
 
   const captureRef = useRef<HTMLDivElement>(null);
@@ -531,20 +523,25 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             <div className="relative">
               <button
                 type="button"
-                onMouseEnter={triggerBubble}
-                onMouseLeave={hideBubble}
-                onClick={triggerBubble}
-                className="relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
-                aria-label={`Show message for ${player.name}`}
+                onMouseEnter={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
+                onMouseLeave={playerSpeechMessages.length > 0 ? hideBubble : undefined}
+                onClick={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
+                className={cn(
+                  "relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900",
+                  playerSpeechMessages.length > 0 ? "cursor-pointer" : "cursor-default"
+                )}
+                aria-label={playerSpeechMessages.length > 0 ? `Show message for ${player.name}` : undefined}
               >
                 <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl transition-transform duration-300 hover:scale-[1.02]" />
               </button>
-              <AvatarSpeechBubble
-                message={avatarMessage}
-                visible={avatarSpeechVisible}
-                placement="above"
-                className="max-w-[220px]"
-              />
+              {playerSpeechMessages.length > 0 && (
+                <AvatarSpeechBubble
+                  message={avatarMessage}
+                  visible={avatarSpeechVisible}
+                  placement="above"
+                  className="max-w-[220px]"
+                />
+              )}
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
                   "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
@@ -571,18 +568,18 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1">Date of Birth</p>
-                  <p className="text-[13px] font-bold text-white">{formattedBirthDate || '—'}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-2xl">
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm min-h-[76px]">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1 leading-tight min-h-[2.4em]">Date of Birth</p>
+                  <p className="text-[13px] font-bold text-white leading-snug break-words">{formattedBirthDate || '—'}</p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1">Education</p>
-                  <p className="text-[13px] font-bold text-white truncate">{player.education || '—'}</p>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm min-h-[76px]">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1 leading-tight min-h-[2.4em]">Education</p>
+                  <p className="text-[13px] font-bold text-white leading-snug break-words">{player.education || '—'}</p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1">Location</p>
-                  <p className="text-[13px] font-bold text-white truncate">{player.location || '—'}</p>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur-sm min-h-[76px]">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-black mb-1 leading-tight min-h-[2.4em]">Location</p>
+                  <p className="text-[13px] font-bold text-white leading-snug break-words">{player.location || '—'}</p>
                 </div>
               </div>
             </div>

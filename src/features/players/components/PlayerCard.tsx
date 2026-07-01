@@ -146,13 +146,13 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
-          <div className="rounded-xl border border-border/60 bg-muted/40 px-3 py-2">
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Born</p>
-            <p className="font-semibold text-foreground truncate">{formattedBirthDate || '—'}</p>
+          <div className="rounded-xl border border-border/60 bg-muted/40 px-2.5 py-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1 leading-tight min-h-[2.2em]">Born</p>
+            <p className="font-semibold text-foreground leading-snug break-words">{formattedBirthDate || '—'}</p>
           </div>
-          <div className="rounded-xl border border-border/60 bg-muted/40 px-3 py-2">
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Location</p>
-            <p className="font-semibold text-foreground truncate">{player.location || '—'}</p>
+          <div className="rounded-xl border border-border/60 bg-muted/40 px-2.5 py-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1 leading-tight min-h-[2.2em]">Location</p>
+            <p className="font-semibold text-foreground leading-snug break-words">{player.location || '—'}</p>
           </div>
         </div>
 
