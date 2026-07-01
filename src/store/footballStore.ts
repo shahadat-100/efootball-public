@@ -69,8 +69,8 @@ export const mapPlayerFromDb = (p: any): Player => ({
   dateOfBirth: p.dateOFbirth || undefined,
   education: p.education || '',
   location: p.location || '',
-  aboutMe: p.aboutMe || p.aboutme || '',
-  openionAboutClub: p.openionAboutClub || p.openionaboutclub || '',
+  aboutMe: p.aboutMe || '',
+  openionAboutClub: p.openionAboutClub || '',
   // Extract role names from the joined junction table data
   playerRoles: (p.player_player_roles ?? []).map((r: any) => r.player_role?.name).filter(Boolean),
   // Extract tag names from the joined junction table data
@@ -322,8 +322,8 @@ export const useFootballStore = create<FootballStore>()(
             dateOfBirth: p.dateOFbirth || undefined,
             education: p.education || '',
             location: p.location || '',
-            aboutMe: p.aboutMe || p.aboutme || '',
-            openionAboutClub: p.openionAboutClub || p.openionaboutclub || '',
+            aboutMe: p.aboutMe || '',
+            openionAboutClub: p.openionAboutClub || '',
             playerRoles: playerRolesMap.get(p.id) || [],
             customTags: playerTagsMap.get(p.id) || [],
             customStringTags: Array.isArray(p.custom_string_tags) ? p.custom_string_tags : [],
