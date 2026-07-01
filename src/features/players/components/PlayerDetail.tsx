@@ -529,10 +529,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px]" style={{ background: 'rgba(59,130,246,0.12)' }} />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start min-h-[320px]">
           {/* Left side: Avatar + Info */}
-          <div className="flex gap-6 items-center flex-wrap flex-1">
-            <div className="relative">
+          <div className="flex gap-6 items-center flex-wrap flex-1 min-h-[220px]">
+            <div className="relative shrink-0">
               <div aria-hidden="true" className={bubbleSpacerClass} />
               <button
                 type="button"
@@ -626,7 +626,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
         </div>
 
         {/* HERO ZONE EXPANSION: Quick Stats & Trophies */}
-        <div className="relative z-10 mt-8 pt-8 border-t border-white/10 w-full flex flex-col gap-6">
+        <div className="relative z-10 mt-10 pt-10 border-t border-white/10 w-full flex flex-col gap-6">
           <div className="flex flex-wrap gap-8 items-start justify-between">
             {/* Quick Stats Group */}
             <div className="flex flex-wrap gap-8 flex-1">
