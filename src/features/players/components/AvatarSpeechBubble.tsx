@@ -3,12 +3,15 @@ import { cn } from '@/shared/lib/cn';
 interface AvatarSpeechBubbleProps {
   message: string;
   visible: boolean;
-  placement?: 'right' | 'bottom' | 'responsive';
+  placement?: 'right' | 'bottom' | 'responsive' | 'above';
   className?: string;
 }
 
 export function AvatarSpeechBubble({ message, visible, placement = 'right', className }: AvatarSpeechBubbleProps) {
   const placementClass =
+    placement === 'above'
+      ? 'left-1/2 -translate-x-1/2 -top-[92px] sm:-top-[98px]'
+      : 
     placement === 'responsive'
       ? 'left-1/2 -translate-x-1/2 -bottom-[90px] sm:-bottom-[96px] md:left-[unset] md:right-0 md:top-[160px] md:translate-x-0 md:translate-y-0 md:bottom-auto'
       : placement === 'right'
@@ -33,7 +36,12 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
           {message}
         </p>
 
-        {placement === 'right' ? (
+        {placement === 'above' ? (
+          <>
+            <span className="absolute left-[28px] -bottom-[8px] h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent" />
+            <span className="absolute left-[27px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10" />
+          </>
+        ) : placement === 'right' ? (
           <>
             <span className="absolute left-[33px] -bottom-[8px] h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent" />
             <span className="absolute left-[32px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10" />

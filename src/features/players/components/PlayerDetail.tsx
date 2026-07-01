@@ -541,7 +541,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               <AvatarSpeechBubble
                 message={avatarMessage}
                 visible={avatarSpeechVisible}
-                placement="responsive"
+                placement="above"
                 className="max-w-[220px]"
               />
               {currentRank && currentRank <= 3 && (
