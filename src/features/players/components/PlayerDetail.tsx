@@ -22,7 +22,7 @@ interface PlayerDetailProps {
 }
 export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const { players, matchEntries, playerSeasonStats, seasons, fetchPlayerMatchEntries } = useFootballStore();
-  
+
   useEffect(() => {
     fetchPlayerMatchEntries(playerId);
   }, [playerId, fetchPlayerMatchEntries]);
@@ -31,10 +31,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const stats = usePlayerStats(playerId);
   const formattedBirthDate = player?.dateOfBirth
     ? new Date(player.dateOfBirth).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })
     : null;
   const avatarSpeechMessages = useMemo(() => [
     "Ready to dominate the match?",
@@ -121,9 +121,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (recentN.length === 0) {
       return { text: 'STABLE / N/A', color: '#9ca3af', icon: '➖' };
     }
-    
+
     let wins = 0;
-    
+
     recentN.forEach(e => {
       if (e.result?.toLowerCase() === 'win') wins++;
     });
@@ -132,10 +132,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
     if (winRate > 0.6) {
       return { text: 'IN FORM', color: '#10b981', icon: '📈' };
-    } 
+    }
     else if (winRate < 0.3) {
       return { text: 'OUT OF FORM', color: '#ef4444', icon: '📉' };
-    } 
+    }
     else {
       return { text: 'STABLE', color: '#f59e0b', icon: '➖' };
     }
@@ -186,7 +186,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       const pS = playerSeasonStats.find(ps => ps.playerId === p.id && ps.seasonId === s.id);
       return { id: p.id, points: pS ? calcSeasonPoints(pS) : 0 };
     }).sort((a, b) => b.points - a.points);
-    
+
     const sRankIndex = ranksForSeason.findIndex(r => r.id === player.id);
     return {
       seasonName: s.name,
@@ -198,7 +198,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   // Compute Recent Week and Recent Month Ranks
 
   let activeWeekStart = 1, activeWeekEnd = 7;
-  if (currentDay >= 8  && currentDay <= 14) { activeWeekStart = 8;  activeWeekEnd = 14; }
+  if (currentDay >= 8 && currentDay <= 14) { activeWeekStart = 8; activeWeekEnd = 14; }
   else if (currentDay >= 15 && currentDay <= 21) { activeWeekStart = 15; activeWeekEnd = 21; }
   else if (currentDay >= 22) { activeWeekStart = 22; activeWeekEnd = 31; }
 
@@ -257,7 +257,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     const motm = pStats.reduce((sum, s) => sum + (s.motmCount || 0), 0);
     const wins = pStats.reduce((sum, s) => sum + (s.wins || 0), 0);
     const matches = pStats.reduce((sum, s) => sum + (s.appearances || 0), 0);
-    
+
     return {
       goals: Math.max(max.goals, goals),
       cleanSheets: Math.max(max.cleanSheets, cleanSheets),
@@ -320,10 +320,10 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     const [year, month, day] = dateStr.split('-');
     const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     if (isNaN(d.getTime())) return '';
-    
+
     const monthKey = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
     if (mode === 'month') return monthKey;
-    
+
     const weekNum = Math.ceil(d.getDate() / 7);
     return `W${weekNum} ${monthKey}`;
   };
@@ -450,7 +450,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       if (nextStep) {
         const prevStep = m.steps.slice().reverse().find(s => s <= m.current) || 0;
         const progress = (m.current - prevStep) / (nextStep - prevStep);
-        
+
         if (progress > highestPercentage) {
           highestPercentage = progress;
           closestMilestone = {
@@ -481,8 +481,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             <span className="text-[12px] font-black text-primary bg-primary/10 px-2 py-1 rounded-lg border border-primary/20">{closestMilestone.current} / {closestMilestone.target}</span>
           </div>
           <div className="h-2.5 bg-border rounded-full overflow-hidden shadow-inner">
-            <div 
-              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 relative" 
+            <div
+              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-1000 relative"
               style={{ width: `${closestMilestone.percent}%` }}
             >
               <div className="absolute inset-0 bg-white/20 animate-pulse" />
@@ -515,15 +515,16 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       {/* ═══════════════════════════════════════════
           HERO ZONE — Player Header
           ═══════════════════════════════════════════ */}
-      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 lg:p-12 min-h-[380px] md:min-h-[450px] lg:min-h-[550px] flex flex-col justify-center mb-6 shadow-xl overflow-hidden" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
-        {player.coverImageUrl && (
-          <img src={player.coverImageUrl} alt={`${player.name} cover`} className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-overlay pointer-events-none" />
-        )}
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')]" />
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none" style={{ background: 'rgba(99,102,241,0.15)' }} />
-        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px] pointer-events-none" style={{ background: 'rgba(59,130,246,0.12)' }} />
-        
+      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 lg:p-12 min-h-[380px] md:min-h-[450px] lg:min-h-[550px] flex flex-col justify-center mb-6 shadow-xl overflow-visible" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+          {player.coverImageUrl && (
+            <img src={player.coverImageUrl} alt={`${player.name} cover`} className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-overlay" />
+          )}
+          <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')]" />
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px]" style={{ background: 'rgba(99,102,241,0.15)' }} />
+          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px]" style={{ background: 'rgba(59,130,246,0.12)' }} />
+        </div>
+
         <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
@@ -553,11 +554,11 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 </div>
               )}
             </div>
-            
+
             <div className="flex-1">
               <h2 className="font-heading font-bold text-[32px] md:text-[38px] text-white tracking-wide leading-none mb-1">{player.name}</h2>
               <p className="text-white/40 text-[14px] font-bold mb-3">👕 {player.jerseyNumber || '—'}</p>
-              
+
               <div className="flex gap-1.5 flex-wrap mb-4">
                 {(player.playerRoles ?? []).map(t => (
                   <Badge key={t} bg="rgba(255,255,255,0.1)" c="#e5e5e5" className="border border-white/10">{t}</Badge>
@@ -589,14 +590,14 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
           {/* Right side: Radar Chart */}
           <div className="w-full lg:w-auto lg:min-w-[250px] flex justify-center">
-            <PlayerRadarChart 
+            <PlayerRadarChart
               stats={{
                 goals: stats.totalGoals,
                 cleanSheets: stats.totalCleanSheets,
                 motm: stats.totalMOTM,
                 wins: stats.totalWins,
                 matches: stats.totalMatches
-              }} 
+              }}
               maxStats={maxLeagueStats}
             />
           </div>
@@ -625,8 +626,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                           style={isWin
                             ? { background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }
                             : isDraw
-                            ? { background: 'rgba(245,158,11,0.15)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.3)' }
-                            : { background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }
+                              ? { background: 'rgba(245,158,11,0.15)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.3)' }
+                              : { background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }
                           }
                           title={`${entry.date}: ${entry.goals ?? 0} goals • ${result.toUpperCase()}`}
                         >
@@ -641,8 +642,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               {/* Form Status */}
               <div>
                 <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-black mb-2">Form Trend</h4>
-                <span 
-                  className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max" 
+                <span
+                  className="font-black text-[13px] px-3 py-1 rounded-lg shadow-md border flex items-center gap-1.5 w-max"
                   style={{ backgroundColor: `${formStatus.color}20`, color: formStatus.color, borderColor: `${formStatus.color}40` }}
                 >
                   <span>{formStatus.icon}</span>
@@ -705,8 +706,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               onClick={() => setActiveTab(t.id as any)}
               className={cn(
                 "flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all whitespace-nowrap",
-                isActive 
-                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                   : "bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
@@ -743,7 +744,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 <h3 className="font-heading font-bold text-[18px] tracking-tight">All-Time Statistics</h3>
                 {currentRank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{currentRank}</p>}
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-3">
                 {[
                   { l: 'M', v: stats.totalMatches },
@@ -773,7 +774,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 ))}
               </div>
             </div>
-            
+
             {/* Latest Season Statistics Overview */}
             {(() => {
               const latestSeasonStats = stats.seasonBreakdown[0];
@@ -785,7 +786,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                     <h3 className="font-heading font-bold text-[18px] tracking-tight">Season {latestSeasonStats.seasonName || latestSeasonStats.year} Stats</h3>
                     {sRanks.rank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{sRanks.rank}</p>}
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-2 mb-3">
                     {[
                       { l: 'M', v: latestSeasonStats.matches },
@@ -819,76 +820,76 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           </div>
 
 
-      {/* ═══════════════════════════════════════════
+          {/* ═══════════════════════════════════════════
           CAREER STATS — Grouped by category
           ═══════════════════════════════════════════ */}
-      <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
-        <h3 className="font-heading font-bold text-[18px] mb-5 tracking-tight">Career Stats</h3>
-        
-        {/* Attack */}
-        <div className="mb-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-3">⚽ Attack</p>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Goals', value: stats.totalGoals, color: '#10b981', icon: '⚽' },
-              { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', icon: '⚽' },
-              { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', icon: '👑' },
-            ].map(({ label, value, color, icon }) => (
-              <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[13px]">{icon}</span>
-                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
-                </div>
-                <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+          <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
+            <h3 className="font-heading font-bold text-[18px] mb-5 tracking-tight">Career Stats</h3>
 
-        {/* Defense */}
-        <div className="mb-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-3">🛡️ Defense</p>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Clean Sheets', value: stats.totalCleanSheets, color: '#38bdf8', icon: '🧤' },
-              { label: 'Goals Conceded', value: stats.totalGoalsConceded, color: '#ef4444', icon: '🥅' },
-              { label: 'Matches', value: stats.totalMatches, color: '#6366f1', icon: '🎮' },
-            ].map(({ label, value, color, icon }) => (
-              <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[13px]">{icon}</span>
-                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
-                </div>
-                <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+            {/* Attack */}
+            <div className="mb-4">
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-3">⚽ Attack</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Goals', value: stats.totalGoals, color: '#10b981', icon: '⚽' },
+                  { label: 'Hat-tricks', value: stats.totalHattricks, color: '#a855f7', icon: '⚽' },
+                  { label: 'MOTM', value: stats.totalMOTM, color: '#f59e0b', icon: '👑' },
+                ].map(({ label, value, color, icon }) => (
+                  <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[13px]">{icon}</span>
+                      <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
+                    </div>
+                    <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Results */}
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-3">📊 Results</p>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Wins', value: stats.totalWins, color: '#22c55e', icon: '🏆' },
-              { label: 'Draws', value: stats.totalDraws, color: '#f59e0b', icon: '🤝' },
-              { label: 'Losses', value: stats.totalLosses, color: '#f87171', icon: '❌' },
-            ].map(({ label, value, color, icon }) => (
-              <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[13px]">{icon}</span>
-                  <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
-                </div>
-                <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+            {/* Defense */}
+            <div className="mb-4">
+              <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-3">🛡️ Defense</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Clean Sheets', value: stats.totalCleanSheets, color: '#38bdf8', icon: '🧤' },
+                  { label: 'Goals Conceded', value: stats.totalGoalsConceded, color: '#ef4444', icon: '🥅' },
+                  { label: 'Matches', value: stats.totalMatches, color: '#6366f1', icon: '🎮' },
+                ].map(({ label, value, color, icon }) => (
+                  <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[13px]">{icon}</span>
+                      <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
+                    </div>
+                    <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
 
-      {/* New Visualizations Section */}
-      <>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Results */}
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-3">📊 Results</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Wins', value: stats.totalWins, color: '#22c55e', icon: '🏆' },
+                  { label: 'Draws', value: stats.totalDraws, color: '#f59e0b', icon: '🤝' },
+                  { label: 'Losses', value: stats.totalLosses, color: '#f87171', icon: '❌' },
+                ].map(({ label, value, color, icon }) => (
+                  <div key={label} className="rounded-xl p-3 transition-transform hover:scale-[1.02] shadow-sm" style={{ background: `${color}08`, border: `1.5px solid ${color}20` }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[13px]">{icon}</span>
+                      <p className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
+                    </div>
+                    <p className="text-[24px] font-heading font-bold" style={{ color }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* New Visualizations Section */}
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               <div className="lg:col-span-1 min-h-[320px]">
                 <SeasonPerformanceChart data={seasonData} />
               </div>
@@ -922,88 +923,88 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             </div>
           </>
 
-      {/* ═══════════════════════════════════════════
+          {/* ═══════════════════════════════════════════
           MATCH HISTORY TABLE — Improved
           ═══════════════════════════════════════════ */}
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <div className="mb-4">
-          <h3 className="font-heading font-bold text-[18px] tracking-tight">Match History</h3>
-        </div>
-        {historyEntries.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-xl">
-            <span className="text-4xl mb-3 block">🎮</span>
-            <p className="text-muted-foreground text-[14px] font-medium">No entries yet — the journey begins here!</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-[12px] text-left">
-              <thead className="bg-muted/50 text-muted-foreground border-b border-border sticky top-0 z-10">
-                <tr>
-                  {['Date', 'Goals', 'Conceded', 'Result', 'Flags', 'Notes'].map(h => (
-                    <th key={h} className="px-4 py-3 font-bold text-[10px] uppercase tracking-widest">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {historyEntries.map((e, idx) => {
-                  const rb = RESULT_BADGE[e.result as keyof typeof RESULT_BADGE] ?? RESULT_BADGE.draw;
-                  const resultClass = e.result === 'win' ? 'result-bar-win' : e.result === 'loss' ? 'result-bar-loss' : 'result-bar-draw';
-                  return (
-                    <tr key={e.id} className={cn(
-                      "hover:bg-muted/30 transition-colors",
-                      resultClass,
-                      idx % 2 === 0 ? "bg-white" : "bg-muted/10"
-                    )}>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap font-medium">{e.date}</td>
-                      <td className="px-4 py-3 font-black text-foreground text-[14px]">{e.goals}</td>
-                      <td className="px-4 py-3 text-red-400 font-bold">{e.goalsConceded}</td>
-                      <td className="px-4 py-3"><Badge bg={rb.bg} c={rb.c}>{e.result}</Badge></td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-1.5 flex-wrap">
-                          {e.hattricks > 0 && <Badge bg="#1a1a1a" c="#e5e5e5" className="border border-gray-500/30 text-[10px] px-1.5 py-0">HT×{e.hattricks}</Badge>}
-                          {e.motm && <Badge bg="#78350f" c="#fcd34d" className="border border-amber-500/30 text-[10px] px-1.5 py-0">MOTM</Badge>}
-                          {e.cleanSheet && <Badge bg="#111111" c="#e5e5e5" className="border border-gray-500/30 text-[10px] px-1.5 py-0">CS</Badge>}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground max-w-[160px] truncate">{e.notes || '—'}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-        
-        {totalPages > 1 && (
-          <div className="mt-6 flex justify-center border-t border-border/50 pt-6">
-            <div className="flex items-center gap-6 bg-muted/30 px-4 py-2 rounded-xl border border-border shadow-sm">
-              <button
-                onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
-                disabled={historyPage === 1}
-                className="text-[13px] font-bold hover:text-primary disabled:opacity-40 disabled:hover:text-inherit transition-all flex items-center gap-2"
-              >
-                ← Previous
-              </button>
-              <div className="px-3 border-x border-border/50">
-                <span className="text-[12px] font-black text-foreground">Page {historyPage} of {totalPages}</span>
-              </div>
-              <button
-                onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))}
-                disabled={historyPage === totalPages}
-                className="text-[13px] font-bold hover:text-primary disabled:opacity-40 disabled:hover:text-inherit transition-all flex items-center gap-2"
-              >
-                Next →
-              </button>
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="mb-4">
+              <h3 className="font-heading font-bold text-[18px] tracking-tight">Match History</h3>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )}
+            {historyEntries.length === 0 ? (
+              <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-xl">
+                <span className="text-4xl mb-3 block">🎮</span>
+                <p className="text-muted-foreground text-[14px] font-medium">No entries yet — the journey begins here!</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="w-full text-[12px] text-left">
+                  <thead className="bg-muted/50 text-muted-foreground border-b border-border sticky top-0 z-10">
+                    <tr>
+                      {['Date', 'Goals', 'Conceded', 'Result', 'Flags', 'Notes'].map(h => (
+                        <th key={h} className="px-4 py-3 font-bold text-[10px] uppercase tracking-widest">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/30">
+                    {historyEntries.map((e, idx) => {
+                      const rb = RESULT_BADGE[e.result as keyof typeof RESULT_BADGE] ?? RESULT_BADGE.draw;
+                      const resultClass = e.result === 'win' ? 'result-bar-win' : e.result === 'loss' ? 'result-bar-loss' : 'result-bar-draw';
+                      return (
+                        <tr key={e.id} className={cn(
+                          "hover:bg-muted/30 transition-colors",
+                          resultClass,
+                          idx % 2 === 0 ? "bg-white" : "bg-muted/10"
+                        )}>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap font-medium">{e.date}</td>
+                          <td className="px-4 py-3 font-black text-foreground text-[14px]">{e.goals}</td>
+                          <td className="px-4 py-3 text-red-400 font-bold">{e.goalsConceded}</td>
+                          <td className="px-4 py-3"><Badge bg={rb.bg} c={rb.c}>{e.result}</Badge></td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-1.5 flex-wrap">
+                              {e.hattricks > 0 && <Badge bg="#1a1a1a" c="#e5e5e5" className="border border-gray-500/30 text-[10px] px-1.5 py-0">HT×{e.hattricks}</Badge>}
+                              {e.motm && <Badge bg="#78350f" c="#fcd34d" className="border border-amber-500/30 text-[10px] px-1.5 py-0">MOTM</Badge>}
+                              {e.cleanSheet && <Badge bg="#111111" c="#e5e5e5" className="border border-gray-500/30 text-[10px] px-1.5 py-0">CS</Badge>}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground max-w-[160px] truncate">{e.notes || '—'}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-  {activeTab === 'achievements' && (
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center border-t border-border/50 pt-6">
+                <div className="flex items-center gap-6 bg-muted/30 px-4 py-2 rounded-xl border border-border shadow-sm">
+                  <button
+                    onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                    disabled={historyPage === 1}
+                    className="text-[13px] font-bold hover:text-primary disabled:opacity-40 disabled:hover:text-inherit transition-all flex items-center gap-2"
+                  >
+                    ← Previous
+                  </button>
+                  <div className="px-3 border-x border-border/50">
+                    <span className="text-[12px] font-black text-foreground">Page {historyPage} of {totalPages}</span>
+                  </div>
+                  <button
+                    onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))}
+                    disabled={historyPage === totalPages}
+                    className="text-[13px] font-bold hover:text-primary disabled:opacity-40 disabled:hover:text-inherit transition-all flex items-center gap-2"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'achievements' && (
         <div className="animate-in fade-in slide-in-from-bottom-2">
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Achievements Summary */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
@@ -1011,7 +1012,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 <h3 className="font-heading font-bold text-[18px] tracking-tight">Achievements Summary</h3>
                 <p className="text-[13px] text-muted-foreground">Official milestones and ranking achievements.</p>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
@@ -1040,7 +1041,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 <h3 className="font-heading font-bold text-[18px] tracking-tight">Rankings Overview</h3>
                 <p className="text-[13px] text-muted-foreground">Season rank and wins by official ranking data.</p>
               </div>
-              
+
               <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
                 <div className="border border-border/50 rounded-xl p-3 min-w-[100px] text-center shrink-0">
                   <p className="text-[9px] font-black uppercase text-muted-foreground mb-1">Overall</p>
