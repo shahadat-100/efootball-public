@@ -36,13 +36,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       year: 'numeric',
     })
     : null;
-  const playerSpeechMessages = useMemo(() => {
-    const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
-    return preferred;
-  }, [player?.aboutMe, player?.openionAboutClub]);
   const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble, hideBubble } = useAvatarSpeechBubble({
-    preferredMessages: playerSpeechMessages,
-    active: Boolean(player && playerSpeechMessages.length > 0),
+    messages: ['In Mystery We Reign'],
+    active: Boolean(player),
   });
 
   const captureRef = useRef<HTMLDivElement>(null);
@@ -540,25 +536,23 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             <div className="relative shrink-0 pt-2">
               <button
                 type="button"
-                onMouseEnter={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
-                onMouseLeave={playerSpeechMessages.length > 0 ? hideBubble : undefined}
-                onClick={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
+                onMouseEnter={triggerBubble}
+                onMouseLeave={hideBubble}
+                onClick={triggerBubble}
                 className={cn(
                   "relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900",
-                  playerSpeechMessages.length > 0 ? "cursor-pointer" : "cursor-default"
+                  "cursor-pointer"
                 )}
-                aria-label={playerSpeechMessages.length > 0 ? `Show message for ${player.name}` : undefined}
+                aria-label={`Show message for ${player.name}`}
               >
                 <Avatar name={player.name} size={110} src={player.profileImageUrl} className="ring-4 ring-white/10 ring-offset-4 ring-offset-gray-900 shadow-2xl transition-transform duration-300 hover:scale-[1.02]" />
               </button>
-              {playerSpeechMessages.length > 0 && (
-                <AvatarSpeechBubble
-                  message={avatarMessage}
-                  visible={avatarSpeechVisible}
-                  placement="above"
-                  className="max-w-[220px]"
-                />
-              )}
+              <AvatarSpeechBubble
+                message={avatarMessage}
+                visible={avatarSpeechVisible}
+                placement="above"
+                className="max-w-[220px]"
+              />
               {currentRank && currentRank <= 3 && (
                 <div className={cn(
                   "absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-lg",
