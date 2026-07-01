@@ -40,6 +40,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     const preferred = [player?.aboutMe, player?.openionAboutClub].filter((message): message is string => Boolean(message && message.trim()));
     return preferred;
   }, [player?.aboutMe, player?.openionAboutClub]);
+  const bubbleSpacerClass = 'h-[96px] sm:h-[104px]';
   const { message: avatarMessage, visible: avatarSpeechVisible, triggerBubble, hideBubble } = useAvatarSpeechBubble({
     preferredMessages: playerSpeechMessages,
     active: Boolean(player && playerSpeechMessages.length > 0),
@@ -532,6 +533,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
             <div className="relative">
+              <div aria-hidden="true" className={bubbleSpacerClass} />
               <button
                 type="button"
                 onMouseEnter={playerSpeechMessages.length > 0 ? triggerBubble : undefined}
