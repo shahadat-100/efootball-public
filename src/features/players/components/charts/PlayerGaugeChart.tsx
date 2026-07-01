@@ -28,8 +28,8 @@ export function PlayerGaugeChart({ stats }: PlayerGaugeChartProps) {
   if (data.length === 0) return null;
 
   return (
-    <div className="w-full h-full min-h-[200px] relative flex flex-col items-center justify-end overflow-hidden pb-4">
-      <ResponsiveContainer width="100%" height="150%">
+    <div className="w-full h-full min-h-[220px] relative flex flex-col items-center justify-end overflow-hidden pb-4">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           {/* Track 1: Win Rate */}
           <Pie
