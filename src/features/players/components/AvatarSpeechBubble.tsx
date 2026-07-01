@@ -43,8 +43,8 @@ export function AvatarSpeechBubble({ message, visible, placement = 'right', clas
 
         {placement === 'above' ? (
           <>
-            <span className="absolute left-[28px] -bottom-[8px] h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent" />
-            <span className="absolute left-[27px] -bottom-[11px] h-0 w-0 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10" />
+            <span className="absolute left-1/2 -bottom-[8px] h-0 w-0 -translate-x-1/2 border-l-[8px] border-l-transparent border-t-[8px] border-t-[#1a1c1c] border-r-[8px] border-r-transparent" />
+            <span className="absolute left-1/2 -bottom-[11px] h-0 w-0 -translate-x-1/2 border-l-[9px] border-l-transparent border-t-[9px] border-t-[#bc0100] border-r-[9px] border-r-transparent -z-10" />
           </>
         ) : placement === 'right' ? (
           <>
