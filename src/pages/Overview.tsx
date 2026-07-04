@@ -14,6 +14,8 @@ import { TopScorerSpotlights } from '@/features/overview/components/TopScorerSpo
 import { OverviewPointsLeaderboard } from '@/features/overview/components/OverviewPointsLeaderboard';
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
+import { ClubRecords } from '@/features/overview/components/ClubRecords';
+import { TeamMilestones } from '@/features/overview/components/TeamMilestones';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -263,6 +265,10 @@ export function Overview({ setTab }: OverviewProps) {
           />
         ))}
       </div>
+
+      {/* Club Records and Milestones */}
+      <ClubRecords players={players} matches={matches} matchEntries={matchEntries} />
+      <TeamMilestones playerSeasonStats={playerSeasonStats} />
 
       {/* Player Spotlights */}
       <PlayerSpotlights

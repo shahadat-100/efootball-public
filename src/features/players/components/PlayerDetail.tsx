@@ -16,6 +16,8 @@ import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
 import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
+import { PlayerProgressionChart } from '@/features/players/components/detail-tabs/PlayerProgressionChart';
+import { PlayerMatchHeatmap } from '@/features/players/components/detail-tabs/PlayerMatchHeatmap';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
@@ -831,7 +833,15 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               );
             })()}
           </div>
-
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <PlayerProgressionChart 
+              playerSeasonStats={playerSeasonStats.filter(s => s.playerId === player.id)} 
+            />
+            <PlayerMatchHeatmap 
+              entries={playerEntries} 
+            />
+          </div>
 
           {/* ═══════════════════════════════════════════
           CAREER STATS — Grouped by category
