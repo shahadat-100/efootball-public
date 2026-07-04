@@ -16,6 +16,7 @@ import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 import { ClubRecords } from '@/features/overview/components/ClubRecords';
 import { TeamMilestones } from '@/features/overview/components/TeamMilestones';
+import { GoldenBootRace } from '@/features/overview/components/GoldenBootRace';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -303,6 +304,15 @@ export function Overview({ setTab }: OverviewProps) {
             playerSeasonStats={playerSeasonStats}
             seasons={seasons}
             matchEntries={matchEntries}
+          />
+        </div>
+
+        {/* Golden Boot Race - full width */}
+        <div className="lg:col-span-1 h-full">
+          <GoldenBootRace
+            players={players}
+            playerSeasonStats={playerSeasonStats}
+            seasons={seasons}
           />
         </div>
 
