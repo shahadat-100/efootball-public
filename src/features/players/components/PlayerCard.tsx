@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Player } from '../types';
-import { Badge, Button } from '@/shared/components';
-import { MapPin, CalendarDays, GraduationCap, Shield, Target, Crown, Star } from 'lucide-react';
+import { MapPin, CalendarDays, GraduationCap, Shield, Target, Star } from 'lucide-react';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
 import { cn } from '@/shared/lib/cn';

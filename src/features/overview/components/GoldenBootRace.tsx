@@ -12,7 +12,22 @@ interface GoldenBootRaceProps {
 
 export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBootRaceProps) {
   const [animate, setAnimate] = useState(false);
+
+  // Default to the current season; fall back to the latest season by id
+  const defaultSeasonId = useMemo(() => {
+    const current = seasons.find(s => s.is_current);
+    if (current) return current.id;
+    return seasons.length > 0 ? seasons[seasons.length - 1].id : null;
+  }, [seasons]);
+
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
+
+  // Once seasons load, set the default season
+  useEffect(() => {
+    if (defaultSeasonId !== null && selectedSeasonId === null) {
+      setSelectedSeasonId(defaultSeasonId);
+    }
+  }, [defaultSeasonId, selectedSeasonId]);
 
   useEffect(() => {
     setAnimate(false);
@@ -21,11 +36,11 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
   }, [selectedSeasonId]);
 
   const scorers = useMemo(() => {
+    if (selectedSeasonId === null) return [];
     return players
       .map(p => {
         const stats = playerSeasonStats.filter(s =>
-          s.playerId === p.id &&
-          (selectedSeasonId === null || s.seasonId === selectedSeasonId)
+          s.playerId === p.id && s.seasonId === selectedSeasonId
         );
         const goals = stats.reduce((acc, s) => acc + (s.goals || 0), 0);
         return { player: p, goals };
@@ -35,7 +50,45 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
       .slice(0, 5);
   }, [players, playerSeasonStats, selectedSeasonId]);
 
-  if (scorers.length === 0) return null;
+  const selectedSeason = seasons.find(s => s.id === selectedSeasonId);
+
+  if (seasons.length === 0) return null;
+
+  // Empty state for seasons with no goal data yet
+  if (scorers.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
+        <div className="relative z-10 flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-500 flex items-center justify-center">
+              <Target className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-heading font-black text-lg text-foreground tracking-tight">Golden Boot Race</h3>
+              <p className="text-[10px] font-bold text-amber-500/70 uppercase tracking-widest">
+                {selectedSeason?.name ?? ''} · Top Scorers
+              </p>
+            </div>
+          </div>
+          <select
+            value={selectedSeasonId ?? ''}
+            onChange={e => setSelectedSeasonId(Number(e.target.value))}
+            className="text-xs bg-muted border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none cursor-pointer"
+          >
+            {seasons.map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <span className="text-4xl mb-3">🥾</span>
+          <p className="text-sm font-bold text-foreground mb-1">No goals scored yet</p>
+          <p className="text-[11px] text-muted-foreground">in {selectedSeason?.name ?? 'this season'}</p>
+        </div>
+      </div>
+    );
+  }
 
   const leader = scorers[0];
   const chasers = scorers.slice(1);
@@ -54,15 +107,17 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
           </div>
           <div>
             <h3 className="font-heading font-black text-lg text-foreground tracking-tight">Golden Boot Race</h3>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Who will score next?</p>
+            <p className="text-[10px] font-bold text-amber-500/70 uppercase tracking-widest">
+              {selectedSeason?.name ?? ''} · Top Scorers
+            </p>
           </div>
         </div>
+        {/* Season-only filter — no All Time */}
         <select
           value={selectedSeasonId ?? ''}
-          onChange={e => setSelectedSeasonId(e.target.value === '' ? null : Number(e.target.value))}
+          onChange={e => setSelectedSeasonId(Number(e.target.value))}
           className="text-xs bg-muted border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none cursor-pointer"
         >
-          <option value="">All Time</option>
           {seasons.map(s => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}

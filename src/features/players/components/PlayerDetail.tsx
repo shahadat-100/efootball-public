@@ -16,7 +16,6 @@ import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
 import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
-import { PlayerProgressionChart } from '@/features/players/components/detail-tabs/PlayerProgressionChart';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
@@ -751,93 +750,99 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
       {activeTab === 'statistics' && (
         <div className="animate-in fade-in slide-in-from-bottom-2">
-          {/* All-Time Statistics Overview */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-              <div className="mb-4">
-                <h3 className="font-heading font-bold text-[18px] tracking-tight">All-Time Statistics</h3>
-                {currentRank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{currentRank}</p>}
-              </div>
 
-              <div className="flex flex-wrap gap-2 mb-3">
-                {[
-                  { l: 'M', v: stats.totalMatches },
-                  { l: 'W', v: stats.totalWins },
-                  { l: 'D', v: stats.totalDraws },
-                  { l: 'L', v: stats.totalLosses },
-                  { l: 'WIN%', v: `${(stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0).toFixed(1)}%` },
-                  { l: 'GF', v: stats.totalGoals },
-                  { l: 'GA', v: stats.totalGoalsConceded },
-                ].map(s => (
-                  <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-1 min-w-[50px]">
-                    <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
-                    <p className="text-[15px] font-black text-foreground">{s.v}</p>
-                  </div>
-                ))}
+          {/* ── All-Time Statistics ── */}
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm mb-6">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="font-heading font-black text-xl tracking-tight text-foreground">All-Time Statistics</h3>
+                {currentRank && <p className="text-[11px] text-muted-foreground font-bold mt-0.5">Overall Rank <span className="text-primary">#{currentRank}</span></p>}
               </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { l: 'CS', v: stats.totalCleanSheets },
-                  { l: 'MOTM', v: stats.totalMOTM },
-                  { l: 'PTS', v: playerRanks.find(r => r.id === player.id)?.points || 0 },
-                ].map(s => (
-                  <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-none min-w-[70px]">
-                    <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
-                    <p className="text-[15px] font-black text-foreground">{s.v}</p>
-                  </div>
-                ))}
+              <div className="text-right">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Points</p>
+                <p className="font-heading font-black text-2xl text-primary">{playerRanks.find(r => r.id === player.id)?.points || 0}</p>
               </div>
             </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 divide-x divide-y divide-border">
+              {[
+                { l: 'Matches',  v: stats.totalMatches,      color: '#6366f1' },
+                { l: 'Goals',    v: stats.totalGoals,         color: '#10b981' },
+                { l: 'Wins',     v: stats.totalWins,          color: '#22c55e' },
+                { l: 'Draws',    v: stats.totalDraws,         color: '#f59e0b' },
+                { l: 'Losses',   v: stats.totalLosses,        color: '#ef4444' },
+                { l: 'Clean Sh.', v: stats.totalCleanSheets, color: '#38bdf8' },
+                { l: 'MOTM',     v: stats.totalMOTM,          color: '#a855f7' },
+              ].map(s => (
+                <div key={s.l} className="flex flex-col items-center justify-center py-5 hover:bg-muted/30 transition-colors">
+                  <p className="font-heading font-black text-2xl leading-none" style={{ color: s.color }}>{s.v}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1.5">{s.l}</p>
+                </div>
+              ))}
+            </div>
+            {/* Win-rate bar */}
+            <div className="px-6 py-3 border-t border-border bg-muted/10">
+              <div className="flex items-center gap-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground shrink-0">Win Rate</p>
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+                    style={{ width: `${stats.totalMatches > 0 ? (stats.totalWins / stats.totalMatches) * 100 : 0}%` }}
+                  />
+                </div>
+                <p className="text-[11px] font-black text-emerald-500 shrink-0">
+                  {stats.totalMatches > 0 ? ((stats.totalWins / stats.totalMatches) * 100).toFixed(1) : 0}%
+                </p>
+              </div>
+            </div>
+          </div>
 
-            {/* Latest Season Statistics Overview */}
-            {(() => {
-              const latestSeasonStats = stats.seasonBreakdown[0];
-              if (!latestSeasonStats) return null;
-              const sRanks = seasonRanksList.find(sr => sr?.seasonName === latestSeasonStats.seasonName) || { rank: undefined };
-              return (
-                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                  <div className="mb-4">
-                    <h3 className="font-heading font-bold text-[18px] tracking-tight">Season {latestSeasonStats.seasonName || latestSeasonStats.year} Stats</h3>
-                    {sRanks.rank && <p className="text-[13px] text-muted-foreground mt-0.5">Rank #{sRanks.rank}</p>}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {[
-                      { l: 'M', v: latestSeasonStats.matches },
-                      { l: 'W', v: latestSeasonStats.wins },
-                      { l: 'D', v: latestSeasonStats.draws },
-                      { l: 'L', v: latestSeasonStats.losses },
-                      { l: 'WIN%', v: `${(latestSeasonStats.matches > 0 ? (latestSeasonStats.wins / latestSeasonStats.matches) * 100 : 0).toFixed(1)}%` },
-                      { l: 'GF', v: latestSeasonStats.goals },
-                      { l: 'GA', v: latestSeasonStats.goalsConceded },
-                    ].map(s => (
-                      <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-1 min-w-[50px]">
-                        <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
-                        <p className="text-[15px] font-black text-foreground">{s.v}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { l: 'CS', v: latestSeasonStats.cleanSheets },
-                      { l: 'MOTM', v: latestSeasonStats.motm },
-                    ].map(s => (
-                      <div key={s.l} className="bg-muted/40 rounded-xl px-4 py-2 border border-border/50 text-center flex-none min-w-[70px]">
-                        <p className="text-[10px] font-bold text-muted-foreground mb-0.5">{s.l}</p>
-                        <p className="text-[15px] font-black text-foreground">{s.v}</p>
-                      </div>
-                    ))}
+          {/* ── Latest Season Statistics ── */}
+          {(() => {
+            const latestSeasonStats = stats.seasonBreakdown[0];
+            if (!latestSeasonStats) return null;
+            const sRanks = seasonRanksList.find(sr => sr?.seasonName === latestSeasonStats.seasonName) || { rank: undefined };
+            const seasonLabel = latestSeasonStats.seasonName || String(latestSeasonStats.year);
+            return (
+              <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm mb-6">
+                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                  <div>
+                    <h3 className="font-heading font-black text-xl tracking-tight text-foreground">{seasonLabel} Stats</h3>
+                    {sRanks.rank && <p className="text-[11px] text-muted-foreground font-bold mt-0.5">Season Rank <span className="text-primary">#{sRanks.rank}</span></p>}
                   </div>
                 </div>
-              );
-            })()}
-          </div>
-          
-          <div className="mb-6">
-            <PlayerProgressionChart 
-              playerSeasonStats={playerSeasonStats.filter(s => s.playerId === player.id)} 
-            />
-          </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 divide-x divide-y divide-border">
+                  {[
+                    { l: 'Matches', v: latestSeasonStats.matches,      color: '#6366f1' },
+                    { l: 'Goals',   v: latestSeasonStats.goals,         color: '#10b981' },
+                    { l: 'Wins',    v: latestSeasonStats.wins,          color: '#22c55e' },
+                    { l: 'Draws',   v: latestSeasonStats.draws,         color: '#f59e0b' },
+                    { l: 'Losses',  v: latestSeasonStats.losses,        color: '#ef4444' },
+                    { l: 'Clean Sh.', v: latestSeasonStats.cleanSheets, color: '#38bdf8' },
+                    { l: 'MOTM',    v: latestSeasonStats.motm,          color: '#a855f7' },
+                  ].map(s => (
+                    <div key={s.l} className="flex flex-col items-center justify-center py-5 hover:bg-muted/30 transition-colors">
+                      <p className="font-heading font-black text-2xl leading-none" style={{ color: s.color }}>{s.v}</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1.5">{s.l}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-6 py-3 border-t border-border bg-muted/10">
+                  <div className="flex items-center gap-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground shrink-0">Win Rate</p>
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+                        style={{ width: `${latestSeasonStats.matches > 0 ? (latestSeasonStats.wins / latestSeasonStats.matches) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] font-black text-emerald-500 shrink-0">
+                      {latestSeasonStats.matches > 0 ? ((latestSeasonStats.wins / latestSeasonStats.matches) * 100).toFixed(1) : 0}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ═══════════════════════════════════════════
           CAREER STATS — Grouped by category
