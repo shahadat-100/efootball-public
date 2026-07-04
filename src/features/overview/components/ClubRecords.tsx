@@ -3,7 +3,7 @@ import { Player } from '@/features/players/types';
 import { Match } from '@/features/matches/types';
 import { MatchEntry } from '@/features/match-entries/types';
 import { Avatar } from '@/shared/components';
-import { Trophy, Flame, ArrowUpRight } from 'lucide-react';
+import { Trophy, Flame } from 'lucide-react';
 
 interface ClubRecordsProps {
   players: Player[];
