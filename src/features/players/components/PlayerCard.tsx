@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Player } from '../types';
-import { MapPin, CalendarDays, GraduationCap, Shield, Target, Star } from 'lucide-react';
+import { Badge } from '@/shared/components';
+import { MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
 import { cn } from '@/shared/lib/cn';
@@ -10,25 +11,15 @@ interface PlayerCardProps {
   onView: () => void;
 }
 
-const RANK_COLORS = [
-  { ring: '#f59e0b', shadow: 'rgba(245,158,11,0.35)', label: 'bg-amber-500' },   // #1
-  { ring: '#94a3b8', shadow: 'rgba(148,163,184,0.30)', label: 'bg-slate-400' },  // #2
-  { ring: '#b45309', shadow: 'rgba(180,83,9,0.30)',    label: 'bg-amber-700' },  // #3
-];
-
-const FORM_STYLE: Record<string, string> = {
-  win:  'bg-emerald-500/20 text-emerald-400 border-emerald-500/20',
-  draw: 'bg-amber-500/20  text-amber-400  border-amber-500/20',
-  loss: 'bg-red-500/20    text-red-400    border-red-500/20',
-};
-
 export function PlayerCard({ player, onView }: PlayerCardProps) {
   const [hover, setHover] = useState(false);
   const stats = usePlayerStats(player.id);
   const { matchEntries, players, playerSeasonStats } = useFootballStore();
 
   const formattedBirthDate = player.dateOfBirth
-    ? new Date(player.dateOfBirth).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    ? new Date(player.dateOfBirth).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      })
     : null;
 
   // ── Rank ──
@@ -41,9 +32,15 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
 
   const rankIndex = playerRanks.findIndex(r => r.id === player.id);
   const rank = rankIndex !== -1 ? rankIndex + 1 : undefined;
-  const rankStyle = rank && rank <= 3 ? RANK_COLORS[rank - 1] : null;
 
-  // ── Form (last 5) ──
+  const rankLabel =
+    rank === 1 ? { text: '🥇 #1', cls: 'bg-amber-500/20 text-amber-400 border-amber-500/30' } :
+    rank === 2 ? { text: '🥈 #2', cls: 'bg-slate-400/20 text-slate-300 border-slate-400/30' } :
+    rank === 3 ? { text: '🥉 #3', cls: 'bg-amber-700/20 text-amber-600 border-amber-700/30' } :
+    rank    ? { text: `#${rank}`, cls: 'bg-muted text-muted-foreground border-border' } :
+    null;
+
+  // ── Last 5 form ──
   const form = matchEntries
     .filter(e => e.playerId === player.id && e.result)
     .sort((a, b) => {
@@ -55,194 +52,162 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
     .map(e => e.result!)
     .reverse();
 
-  // ── Win rate % for the radial progress ──
-  const winRate = stats.totalMatches > 0 ? Math.round((stats.totalWins / stats.totalMatches) * 100) : 0;
-
-  // Radial SVG vars
-  const R = 28;
-  const C = 2 * Math.PI * R;
-  const dash = (winRate / 100) * C;
+  const winRate = stats.totalMatches > 0
+    ? Math.round((stats.totalWins / stats.totalMatches) * 100)
+    : 0;
 
   return (
     <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onClick={onView}
       className={cn(
-        'group relative bg-card border rounded-3xl overflow-hidden transition-all duration-400 flex flex-col shadow-md cursor-pointer',
-        hover ? 'border-primary/50 shadow-glow-red -translate-y-1.5' : 'border-border'
+        'relative bg-card border rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer group',
+        hover ? 'border-primary/40 shadow-xl -translate-y-1' : 'border-border shadow-sm'
       )}
     >
-      {/* ── Ambient glow orb ── */}
-      <div
-        className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100"
-        style={{ background: rankStyle?.ring ? `${rankStyle.ring}30` : 'var(--primary-transparent, rgba(99,102,241,0.15))' }}
-      />
-
-      {/* ══════════════════════════════
-          HERO HEADER
-      ══════════════════════════════ */}
-      <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 px-5 pt-5 pb-4 flex gap-4 items-start overflow-hidden">
-        {/* Grid texture */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: 'repeating-linear-gradient(0deg,#fff 0,#fff 1px,transparent 1px,transparent 24px),repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 1px,transparent 24px)' }}
+      {/* ── HEADER ── */}
+      <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-5 pb-4">
+        {/* Subtle dot texture */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}
         />
+        {/* Glow on hover */}
+        <div className={cn(
+          'absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent transition-opacity duration-300',
+          hover ? 'opacity-100' : 'opacity-0'
+        )} />
 
-        {/* Avatar + radial Win-rate ring */}
-        <div className="relative shrink-0 z-10">
-          {/* Radial Win-rate ring */}
-          <svg width="88" height="88" className="absolute inset-0 -rotate-90" style={{ top: -4, left: -4 }}>
-            <circle cx="44" cy="44" r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
-            <circle
-              cx="44" cy="44" r={R} fill="none"
-              stroke={rankStyle ? rankStyle.ring : '#6366f1'}
-              strokeWidth="4"
-              strokeDasharray={`${dash} ${C}`}
-              strokeLinecap="round"
-              className="transition-all duration-700"
-              style={{ opacity: hover ? 1 : 0.6 }}
-            />
-          </svg>
-          {/* Player photo */}
-          <div
-            className="w-16 h-16 rounded-2xl overflow-hidden border-2 shadow-2xl transition-transform duration-300 group-hover:scale-105 relative z-10"
-            style={{ borderColor: rankStyle ? rankStyle.ring : 'rgba(255,255,255,0.2)' }}
-          >
-            {player.profileImageUrl ? (
-              <img src={player.profileImageUrl} alt={player.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
-                <span className="text-white font-black text-2xl">{player.name.charAt(0)}</span>
+        <div className="relative z-10 flex items-center gap-4">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className={cn(
+              'w-[68px] h-[68px] rounded-2xl overflow-hidden border-2 transition-all duration-300 shadow-lg',
+              hover ? 'border-primary/60 scale-105' : 'border-white/10'
+            )}>
+              {player.profileImageUrl ? (
+                <img src={player.profileImageUrl} alt={player.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-zinc-600 to-zinc-800 flex items-center justify-center">
+                  <span className="text-white font-black text-2xl">{player.name.charAt(0)}</span>
+                </div>
+              )}
+            </div>
+            {/* Jersey badge */}
+            {player.jerseyNumber && (
+              <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-primary rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-md">
+                {player.jerseyNumber}
               </div>
             )}
           </div>
 
-          {/* Rank badge */}
-          {rank && rank <= 3 && (
-            <div className={cn('absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-lg z-20', rankStyle?.label)}>
-              {rank === 1 ? '👑' : `#${rank}`}
+          {/* Name + rank + form */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="font-heading font-black text-[17px] text-white leading-tight truncate">
+                {player.name}
+              </h3>
+              {rankLabel && (
+                <span className={cn('shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full border', rankLabel.cls)}>
+                  {rankLabel.text}
+                </span>
+              )}
             </div>
-          )}
-          {rank && rank > 3 && (
-            <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black bg-white/10 text-white/70 border border-white/10 z-20">
-              #{rank}
-            </div>
-          )}
-        </div>
 
-        {/* Name + jersey + form */}
-        <div className="relative z-10 flex-1 min-w-0 pt-0.5">
-          <p className="font-heading font-black text-[17px] text-white tracking-wide truncate leading-tight">
-            {player.name}
-          </p>
-          <p className="text-white/40 text-[11px] font-bold mt-0.5">
-            #{player.jerseyNumber || '—'}
-          </p>
-
-          {/* Form dots */}
-          {form.length > 0 && (
-            <div className="flex items-center gap-1 mt-2.5">
-              {form.map((r, i) => (
-                <div
-                  key={i}
-                  className={cn('w-[22px] h-[22px] rounded-md flex items-center justify-center text-[9px] font-black border', FORM_STYLE[r] || '')}
-                >
-                  {r.charAt(0).toUpperCase()}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Win-rate label */}
-        <div className="relative z-10 shrink-0 text-right">
-          <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-0.5">Win%</p>
-          <p className="font-heading font-black text-xl" style={{ color: rankStyle ? rankStyle.ring : '#6366f1' }}>
-            {winRate}%
-          </p>
+            {/* Form dots */}
+            {form.length > 0 && (
+              <div className="flex items-center gap-1 mt-2">
+                {form.map((r, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'w-[20px] h-[20px] rounded flex items-center justify-center text-[8px] font-black',
+                      r === 'win'  ? 'bg-emerald-500/30 text-emerald-400' :
+                      r === 'draw' ? 'bg-amber-500/30  text-amber-400' :
+                                     'bg-red-500/30    text-red-400'
+                    )}
+                  >
+                    {r[0].toUpperCase()}
+                  </div>
+                ))}
+                <span className="text-[10px] text-white/30 font-medium ml-1">Last 5</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ══════════════════════════════
-          STATS ROW
-      ══════════════════════════════ */}
-      <div className="grid grid-cols-4 divide-x divide-border border-b border-border">
+      {/* ── STATS STRIP ── */}
+      <div className="grid grid-cols-4 border-b border-border">
         {[
-          { label: 'MP',    value: stats.totalMatches,    color: '#6366f1', icon: Shield },
-          { label: 'Goals', value: stats.totalGoals,      color: '#10b981', icon: Target },
-          { label: 'CS',    value: stats.totalCleanSheets,color: '#3b82f6', icon: Shield },
-          { label: 'MOTM',  value: stats.totalMOTM,       color: '#f59e0b', icon: Star },
-        ].map(({ label, value, color, icon: Icon }) => (
-          <div
-            key={label}
-            className="flex flex-col items-center justify-center py-3 hover:bg-muted/40 transition-colors"
-          >
-            <Icon className="w-3 h-3 mb-1 opacity-60" style={{ color }} />
-            <p className="font-heading font-black text-base leading-none" style={{ color }}>{value}</p>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-0.5">{label}</p>
+          { label: 'MP',    value: stats.totalMatches,     color: '#818cf8' },
+          { label: 'Goals', value: stats.totalGoals,       color: '#34d399' },
+          { label: 'MOTM',  value: stats.totalMOTM,        color: '#fbbf24' },
+          { label: 'Win%',  value: `${winRate}%`,          color: '#38bdf8' },
+        ].map(s => (
+          <div key={s.label} className="flex flex-col items-center py-3 hover:bg-muted/30 transition-colors">
+            <span className="font-heading font-black text-lg leading-none" style={{ color: s.color }}>
+              {s.value}
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+              {s.label}
+            </span>
           </div>
         ))}
       </div>
 
-      {/* ══════════════════════════════
-          BODY
-      ══════════════════════════════ */}
+      {/* ── BODY ── */}
       <div className="p-4 flex-1 flex flex-col gap-3">
 
-        {/* Roles + tags */}
-        {((player.playerRoles ?? []).length > 0 || (player.customTags ?? []).length > 0 || (player.customStringTags ?? []).length > 0) && (
+        {/* Roles / Tags */}
+        {((player.playerRoles?.length ?? 0) > 0 || (player.customTags?.length ?? 0) > 0 || (player.customStringTags?.length ?? 0) > 0) && (
           <div className="flex flex-wrap gap-1.5">
             {(player.playerRoles ?? []).slice(0, 2).map(t => (
-              <span key={t} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{t}</span>
+              <Badge key={t} bg="#1e1b4b" c="#a5b4fc">{t}</Badge>
             ))}
             {(player.customTags ?? []).slice(0, 2).map(t => (
-              <span key={t} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">{t}</span>
+              <Badge key={t} bg="#1a1a1a" c="#9ca3af">{t}</Badge>
             ))}
             {(player.customStringTags ?? []).slice(0, 1).map(t => (
-              <span key={`str-${t}`} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">{t}</span>
+              <Badge key={`str-${t}`} bg="#0c1a2e" c="#60a5fa">{t}</Badge>
             ))}
           </div>
         )}
 
-        {/* Info pills */}
-        <div className="space-y-1.5">
+        {/* Info */}
+        <div className="space-y-1.5 text-[11px]">
           {formattedBirthDate && (
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <CalendarDays className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-              <span className="font-medium text-foreground truncate">{formattedBirthDate}</span>
+              <span className="text-foreground font-medium truncate">{formattedBirthDate}</span>
             </div>
           )}
           {player.education && (
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <GraduationCap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="font-medium text-foreground truncate">{player.education}</span>
+              <span className="text-foreground font-medium truncate">{player.education}</span>
             </div>
           )}
           {player.location && (
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="font-medium text-foreground truncate">{player.location}</span>
+              <span className="text-foreground font-medium truncate">{player.location}</span>
             </div>
           )}
         </div>
 
         {/* CTA */}
-        <div className="mt-auto pt-3 border-t border-border/50">
-          <button
-            onClick={onView}
-            className="w-full rounded-xl py-2.5 text-[12px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2"
-            style={{
-              background: hover
-                ? 'linear-gradient(90deg, var(--primary), #a855f7)'
-                : 'rgba(99,102,241,0.1)',
-              color: hover ? '#fff' : 'var(--primary)',
-              border: '1.5px solid rgba(99,102,241,0.3)',
-              boxShadow: hover ? '0 4px 20px rgba(99,102,241,0.4)' : 'none',
-            }}
-          >
-            View Profile
-            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-          </button>
-        </div>
+        <button
+          onClick={e => { e.stopPropagation(); onView(); }}
+          className={cn(
+            'mt-auto w-full py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest border transition-all duration-300',
+            hover
+              ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
+              : 'bg-transparent text-primary border-primary/30 hover:bg-primary/10'
+          )}
+        >
+          View Profile →
+        </button>
       </div>
     </div>
   );
