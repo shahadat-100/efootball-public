@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { MatchEntry } from '@/features/match-entries/types';
 import { CalendarDays } from 'lucide-react';
-import { cn } from '@/shared/lib/cn';
 
 interface PlayerMatchHeatmapProps {
   entries: MatchEntry[];

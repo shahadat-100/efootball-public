@@ -839,7 +839,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               playerSeasonStats={playerSeasonStats.filter(s => s.playerId === player.id)} 
             />
             <PlayerMatchHeatmap 
-              entries={playerEntries} 
+              entries={matchEntries.filter(m => m.playerId === player?.id)} 
             />
           </div>
 

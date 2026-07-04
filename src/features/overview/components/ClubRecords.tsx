@@ -24,7 +24,7 @@ export function ClubRecords({ players, matches, matchEntries }: ClubRecordsProps
     let maxDiff = -1;
     let bestMatch: Match | null = null;
 
-    matches.forEach(m => {
+    for (const m of matches) {
       const result = matchResultsMap.get(m.id as string);
       if (result === 'win' && m.status === 'finished') {
         const diff = Math.abs((m.homeScore || 0) - (m.awayScore || 0));
@@ -33,7 +33,7 @@ export function ClubRecords({ players, matches, matchEntries }: ClubRecordsProps
           bestMatch = m;
         }
       }
-    });
+    }
 
     if (!bestMatch) return null;
 
@@ -54,12 +54,12 @@ export function ClubRecords({ players, matches, matchEntries }: ClubRecordsProps
     let maxGoals = -1;
     let topEntry: MatchEntry | null = null;
 
-    matchEntries.forEach(e => {
+    for (const e of matchEntries) {
       if ((e.goals || 0) > maxGoals) {
         maxGoals = e.goals || 0;
         topEntry = e;
       }
-    });
+    }
 
     if (!topEntry || maxGoals <= 0) return null;
 

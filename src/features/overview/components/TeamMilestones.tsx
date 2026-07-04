@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { PlayerSeasonStat } from '@/features/players/types';
 import { Target, Trophy, Activity, ArrowRight } from 'lucide-react';
-import { cn } from '@/shared/lib/cn';
 
 interface TeamMilestonesProps {
   playerSeasonStats: PlayerSeasonStat[];
