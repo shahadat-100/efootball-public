@@ -17,7 +17,6 @@ import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
 import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 import { PlayerProgressionChart } from '@/features/players/components/detail-tabs/PlayerProgressionChart';
-import { PlayerImpactGauge } from '@/features/players/components/detail-tabs/PlayerImpactGauge';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
@@ -834,12 +833,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             })()}
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="mb-6">
             <PlayerProgressionChart 
               playerSeasonStats={playerSeasonStats.filter(s => s.playerId === player.id)} 
-            />
-            <PlayerImpactGauge 
-              entries={matchEntries.filter(m => m.playerId === player?.id)} 
             />
           </div>
 
