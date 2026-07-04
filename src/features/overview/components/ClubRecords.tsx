@@ -104,10 +104,6 @@ export function ClubRecords({ players, matches, matchEntries }: ClubRecordsProps
                 <p className="text-[11px] text-muted-foreground font-medium mb-1">
                   {biggestVictory.match.competition}
                 </p>
-                <div className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
-                  <ArrowUpRight className="w-3 h-3" />
-                  +{biggestVictory.diff} Goal Difference
-                </div>
               </div>
             </div>
           </div>
