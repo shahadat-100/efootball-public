@@ -10,7 +10,7 @@ interface AvatarSpeechBubbleProps {
 export function AvatarSpeechBubble({ message, visible, placement = 'right', className }: AvatarSpeechBubbleProps) {
   const placementClass =
     placement === 'above'
-      ? 'left-1/2 -top-[92px] sm:-top-[98px] -translate-x-1/2'
+      ? 'left-1/2 bottom-[100%] mb-3 -translate-x-1/2'
       :
       placement === 'responsive'
         ? 'left-1/2 -bottom-[90px] sm:-bottom-[96px] md:left-[unset] md:right-0 md:top-[160px] md:bottom-auto md:translate-x-0 -translate-x-1/2'

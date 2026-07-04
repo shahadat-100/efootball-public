@@ -15,7 +15,7 @@ import { AvatarSpeechBubble } from './AvatarSpeechBubble';
 import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
-import { Download, User, Activity, BarChart2, Award } from 'lucide-react';
+import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
@@ -584,31 +584,19 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 ))}
               </div>
 
-              <div className="flex flex-wrap gap-2.5 max-w-2xl">
-                <Badge
-                  bg="rgba(59,130,246,0.16)"
-                  c="#dbeafe"
-                  className="border border-blue-400/20 whitespace-normal text-left leading-tight px-3 py-2 max-w-full"
-                >
-                  <span className="block text-[9px] uppercase tracking-widest text-blue-100/70 font-black">Date of Birth</span>
-                  <span className="block mt-1 text-[13px] font-bold text-white">{formattedBirthDate || '—'}</span>
-                </Badge>
-                <Badge
-                  bg="rgba(16,185,129,0.14)"
-                  c="#d1fae5"
-                  className="border border-emerald-400/20 whitespace-normal text-left leading-tight px-3 py-2 max-w-full"
-                >
-                  <span className="block text-[9px] uppercase tracking-widest text-emerald-100/70 font-black">Education</span>
-                  <span className="block mt-1 text-[13px] font-bold text-white">{player.education || '—'}</span>
-                </Badge>
-                <Badge
-                  bg="rgba(245,158,11,0.14)"
-                  c="#fef3c7"
-                  className="border border-amber-400/20 whitespace-normal text-left leading-tight px-3 py-2 max-w-full"
-                >
-                  <span className="block text-[9px] uppercase tracking-widest text-amber-100/70 font-black">Location</span>
-                  <span className="block mt-1 text-[13px] font-bold text-white">{player.location || '—'}</span>
-                </Badge>
+              <div className="flex flex-wrap gap-3 max-w-2xl">
+                <div className="flex items-center gap-1.5 text-white/70 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
+                  <CalendarDays className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-[11px] font-medium">{formattedBirthDate || '—'}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-white/70 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
+                  <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[11px] font-medium">{player.education || '—'}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-white/70 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[11px] font-medium">{player.location || '—'}</span>
+                </div>
               </div>
             </div>
           </div>

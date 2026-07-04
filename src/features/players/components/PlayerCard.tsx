@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Player } from '../types';
 import { Avatar, Badge, Button } from '@/shared/components';
+import { MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
 import { cn } from '@/shared/lib/cn';
@@ -145,14 +146,18 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
-          <div className="rounded-xl border border-border/60 bg-muted/40 px-2.5 py-2">
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1 leading-tight min-h-[2.2em]">Born</p>
-            <p className="font-semibold text-foreground leading-snug break-words">{formattedBirthDate || '—'}</p>
+        <div className="flex flex-col gap-1.5 mb-3 text-[11px]">
+          <div className="flex items-center gap-2 text-muted-foreground bg-muted/40 border border-border/60 px-2.5 py-1.5 rounded-lg">
+            <CalendarDays className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+            <span className="font-medium text-foreground truncate">{formattedBirthDate || '—'}</span>
           </div>
-          <div className="rounded-xl border border-border/60 bg-muted/40 px-2.5 py-2">
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1 leading-tight min-h-[2.2em]">Location</p>
-            <p className="font-semibold text-foreground leading-snug break-words">{player.location || '—'}</p>
+          <div className="flex items-center gap-2 text-muted-foreground bg-muted/40 border border-border/60 px-2.5 py-1.5 rounded-lg">
+            <GraduationCap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="font-medium text-foreground truncate">{player.education || '—'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground bg-muted/40 border border-border/60 px-2.5 py-1.5 rounded-lg">
+            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="font-medium text-foreground truncate">{player.location || '—'}</span>
           </div>
         </div>
 
