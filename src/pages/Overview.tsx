@@ -17,6 +17,8 @@ import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards'
 import { ClubRecords } from '@/features/overview/components/ClubRecords';
 import { TeamMilestones } from '@/features/overview/components/TeamMilestones';
 import { GoldenBootRace } from '@/features/overview/components/GoldenBootRace';
+import { DynamicTrivia } from '@/features/overview/components/DynamicTrivia';
+import { HallOfFameCarousel } from '@/features/overview/components/HallOfFameCarousel';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -26,7 +28,7 @@ interface OverviewProps {
 }
 
 export function Overview({ setTab }: OverviewProps) {
-  const { players, matchEntries, matches, playerSeasonStats, seasons, news, playerMonthlyStats, playerWeeklyStats, fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews } = useFootballStore();
+  const { players, matchEntries, matches, playerSeasonStats, seasons, news, playerMonthlyStats, playerWeeklyStats, hallOfFame, fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews, fetchHallOfFame } = useFootballStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -40,11 +42,12 @@ export function Overview({ setTab }: OverviewProps) {
         fetchPlayerMonthlyStats(),
         fetchPlayerWeeklyStats(),
         fetchNews(),
+        fetchHallOfFame(),
       ]);
       setIsLoading(false);
     };
     load();
-  }, [fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews]);
+  }, [fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews, fetchHallOfFame]);
 
   // ── 1. Stat Cards Data ──
   const totalGoals = playerSeasonStats.reduce((s, e) => s + (e.goals || 0), 0);
@@ -321,6 +324,24 @@ export function Overview({ setTab }: OverviewProps) {
         </div>
         <div className="lg:col-span-1 h-full">
           <ActivityTimeline dates={matchDates} />
+        </div>
+        
+        {/* Filling the 2-column gap next to ActivityTimeline */}
+        <div className="lg:col-span-2 h-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
+            <DynamicTrivia 
+              players={players} 
+              playerSeasonStats={playerSeasonStats} 
+              matchEntries={matchEntries} 
+            />
+            {hallOfFame.length > 0 ? (
+               <HallOfFameCarousel />
+            ) : (
+               <div className="bg-gradient-to-br from-[#1f1700] to-[#120a00] border border-amber-500/20 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center shadow-lg">
+                 <p className="text-amber-500/50 text-sm font-semibold">Hall of Fame Awaits...</p>
+               </div>
+            )}
+          </div>
         </div>
       </div>
 
