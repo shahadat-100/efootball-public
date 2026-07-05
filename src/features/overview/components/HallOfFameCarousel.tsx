@@ -15,7 +15,15 @@ export function HallOfFameCarousel() {
     return () => clearInterval(interval);
   }, [hallOfFame.length]);
 
-  if (hallOfFame.length === 0) return null;
+  if (hallOfFame.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center gap-3">
+        <Award className="w-8 h-8 text-muted-foreground/30" />
+        <p className="text-sm text-muted-foreground/50 font-semibold">Hall of Fame Awaits...</p>
+        <p className="text-xs text-muted-foreground/30">Legends will be inducted here</p>
+      </div>
+    );
+  }
 
   const currentLegend = hallOfFame[currentIndex];
   const player = players.find(p => p.id === currentLegend.playerId);

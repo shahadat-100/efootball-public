@@ -28,7 +28,7 @@ interface OverviewProps {
 }
 
 export function Overview({ setTab }: OverviewProps) {
-  const { players, matchEntries, matches, playerSeasonStats, seasons, news, playerMonthlyStats, playerWeeklyStats, hallOfFame, fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews, fetchHallOfFame } = useFootballStore();
+  const { players, matchEntries, matches, playerSeasonStats, seasons, news, playerMonthlyStats, playerWeeklyStats, fetchPlayers, fetchMatches, fetchMatchEntries, fetchPlayerSeasonStats, fetchPlayerMonthlyStats, fetchPlayerWeeklyStats, fetchNews, fetchHallOfFame } = useFootballStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -322,19 +322,17 @@ export function Overview({ setTab }: OverviewProps) {
         <div className="lg:col-span-2 h-full">
           <AwardsLeaderboard data={awardsData} />
         </div>
+
+        {/* Row 3: ActivityTimeline (1 col) + HallOfFame (2 cols) — always rendered */}
         <div className="lg:col-span-1 h-full">
           <ActivityTimeline dates={matchDates} />
         </div>
-
-        {/* Hall of Fame fills the 2-column gap */}
-        {hallOfFame.length > 0 && (
-          <div className="lg:col-span-2 h-full">
-            <HallOfFameCarousel />
-          </div>
-        )}
+        <div className="lg:col-span-2 h-full">
+          <HallOfFameCarousel />
+        </div>
       </div>
 
-      {/* Did You Know? — full width hero trivia card */}
+      {/* Did You Know? — full-width hero trivia banner */}
       <div className="mb-8">
         <DynamicTrivia
           players={players}
