@@ -169,32 +169,27 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
         <Zap className="w-48 h-48" style={{ color: fact.accentColor }} />
       </div>
 
-      <div className={`relative z-10 flex flex-col sm:flex-row items-stretch h-full transition-opacity duration-300 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-        {/* Left/Top Player Avatar (eFootball Card Style Sidebar) */}
+      <div className={`relative z-10 flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 h-full transition-opacity duration-300 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+        {/* Left: Large Avatar (Golden Boot Race Style) */}
         {fact.player && (
-          <div className="relative w-full sm:w-48 flex-shrink-0 bg-black/50 sm:border-r border-white/10 flex items-center justify-center p-6 group backdrop-blur-sm">
-            {/* Backdrop glow */}
-            <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at center, ${fact.accentColor} 0%, transparent 70%)` }} />
-            
-            <div className="relative z-10 flex flex-col items-center gap-3 text-center">
-              <div 
-                className="w-[68px] h-[68px] rounded-2xl overflow-hidden border-2 shadow-lg transition-transform duration-500 group-hover:scale-105"
-                style={{ borderColor: `${fact.accentColor}88` }}
-              >
-                {fact.player.profileImageUrl 
-                  ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-white font-black text-2xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
-                }
-              </div>
-              <span className="font-heading font-black text-white/90 text-[14px] leading-tight drop-shadow-md">
-                {fact.player.name}
-              </span>
+          <div className="relative shrink-0 flex flex-col items-center gap-3">
+            <div 
+              className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 shadow-2xl transition-transform duration-500 group-hover:scale-105"
+              style={{ borderColor: `${fact.accentColor}88`, boxShadow: `0 0 40px ${fact.accentColor}55` }}
+            >
+              {fact.player.profileImageUrl 
+                ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex items-center justify-center text-white font-black text-4xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
+              }
             </div>
+            <span className="font-heading font-black text-white/90 text-[15px] leading-tight bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
+              {fact.player.name}
+            </span>
           </div>
         )}
 
-        {/* Right/Bottom Content */}
-        <div className="flex-1 p-6 sm:p-8 flex flex-col justify-center">
+        {/* Right: Text Content */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
           
           <div className="flex items-center gap-2 mb-3">
             <div className="p-1.5 rounded-full" style={{ backgroundColor: `${fact.accentColor}22` }}>
@@ -203,22 +198,22 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
             <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: fact.accentColor }}>{fact.label}</span>
           </div>
 
-          <div className="flex items-end gap-4 mb-2 flex-wrap">
-            <div className="font-black text-white leading-none tracking-tighter" style={{ fontSize: 'clamp(3rem, 6vw, 4.5rem)', textShadow: `0 4px 20px ${fact.accentColor}44` }}>
+          <div className="flex flex-col mb-2">
+            <div className="font-black text-white leading-none tracking-tighter break-words" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', textShadow: `0 4px 20px ${fact.accentColor}44` }}>
               {fact.highlight}
             </div>
-            <div className="pb-2">
+            <div className="mt-2">
               <div className="font-black text-white/90 uppercase tracking-wider text-xl leading-none mb-1">
                 {fact.headline}
               </div>
-              <p className="text-sm text-white/60 font-medium leading-snug max-w-[280px]">
+              <p className="text-sm text-white/60 font-medium leading-snug max-w-[320px]">
                 {fact.suffix}
               </p>
             </div>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-4 mt-6">
+          <div className="flex items-center gap-4 mt-4">
             <div className="flex items-center gap-1">
               <button onClick={() => go(-1)} className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all border border-white/5">
                 <ChevronLeft className="w-4 h-4" />
