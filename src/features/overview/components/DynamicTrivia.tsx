@@ -160,57 +160,81 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-3xl bg-gradient-to-r ${fact.bgGradient} transition-all duration-500`}
-      style={{ minHeight: '220px', border: `1px solid ${fact.accentColor}22` }}
+      className={`relative w-full overflow-hidden rounded-2xl bg-gradient-to-br ${fact.bgGradient} transition-all duration-500 shadow-xl`}
+      style={{ minHeight: '180px', border: `1px solid ${fact.accentColor}33` }}
     >
-      {/* Glow blob */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 0% 50%, ${fact.accentColor}22 0%, transparent 60%)` }} />
+      {/* Background FX */}
+      <div className="absolute inset-0 pointer-events-none opacity-50" style={{ background: `radial-gradient(circle at 100% 0%, ${fact.accentColor}44 0%, transparent 50%)` }} />
+      <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none translate-x-1/4 -translate-y-1/4">
+        <Zap className="w-48 h-48" style={{ color: fact.accentColor }} />
+      </div>
 
-      {/* Content */}
-      <div className={`relative z-10 flex items-stretch h-full transition-opacity duration-150 ${animating ? 'opacity-0' : 'opacity-100'}`}>
-
-        {/* Left — Text */}
-        <div className="flex-1 flex flex-col justify-center gap-2 p-8">
-          <div className="flex items-center gap-2 mb-1">
-            <Zap className="w-3.5 h-3.5" style={{ color: fact.accentColor }} />
-            <span className="text-[10px] font-black uppercase tracking-[0.25em]" style={{ color: fact.accentColor }}>{fact.label}</span>
+      <div className={`relative z-10 flex flex-col sm:flex-row items-stretch h-full transition-opacity duration-300 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+        
+        {/* Left/Top Content */}
+        <div className="flex-1 p-6 sm:p-8 flex flex-col justify-center">
+          
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 rounded-full" style={{ backgroundColor: `${fact.accentColor}22` }}>
+              <Zap className="w-4 h-4" style={{ color: fact.accentColor }} />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: fact.accentColor }}>{fact.label}</span>
           </div>
 
-          {/* Player avatar — circular */}
-          {fact.player && (
-            <div className="flex items-center gap-3 mb-1">
-              <div
-                className="flex-shrink-0 rounded-full overflow-hidden"
-                style={{ width: 48, height: 48, border: `2px solid ${fact.accentColor}66`, boxShadow: `0 0 14px ${fact.accentColor}44` }}
+          <div className="flex items-end gap-4 mb-2 flex-wrap">
+            <div className="font-black text-white leading-none tracking-tighter" style={{ fontSize: 'clamp(3rem, 6vw, 4.5rem)', textShadow: `0 4px 20px ${fact.accentColor}44` }}>
+              {fact.highlight}
+            </div>
+            <div className="pb-2">
+              <div className="font-black text-white/90 uppercase tracking-wider text-xl leading-none mb-1">
+                {fact.headline}
+              </div>
+              <p className="text-sm text-white/60 font-medium leading-snug max-w-[280px]">
+                {fact.suffix}
+              </p>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-4 mt-6">
+            <div className="flex items-center gap-1">
+              <button onClick={() => go(-1)} className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all border border-white/5">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => go(1)} className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all border border-white/5">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <span className="text-xs font-semibold text-white/30 tabular-nums bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+              {triviaIndex + 1} of {trivias.length}
+            </span>
+          </div>
+
+        </div>
+
+        {/* Right/Bottom Player Avatar */}
+        {fact.player && (
+          <div className="relative w-full sm:w-64 h-32 sm:h-auto flex-shrink-0 bg-black/20 sm:border-l border-white/5 flex items-center justify-center overflow-hidden group">
+            {/* Backdrop glow */}
+            <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at center, ${fact.accentColor} 0%, transparent 70%)` }} />
+            
+            <div className="relative z-10 flex flex-col items-center gap-3">
+              <div 
+                className="w-20 h-20 rounded-full overflow-hidden border-2 shadow-2xl transition-transform duration-500 group-hover:scale-110"
+                style={{ borderColor: `${fact.accentColor}88`, boxShadow: `0 0 30px ${fact.accentColor}33` }}
               >
-                {fact.player.profileImageUrl
+                {fact.player.profileImageUrl 
                   ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg" style={{ background: fact.accentColor + '33' }}>{fact.player.name[0]}</div>
+                  : <div className="w-full h-full flex items-center justify-center text-white font-bold text-2xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
                 }
               </div>
-              <span className="text-sm font-bold text-white/70">{fact.player.name}</span>
+              <span className="font-bold text-white/90 text-sm tracking-wide bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                {fact.player.name}
+              </span>
             </div>
-          )}
-
-          {/* Big bold stat */}
-          <div className="leading-none font-black text-white" style={{ fontSize: 'clamp(2.8rem, 7vw, 5rem)', textShadow: `0 0 40px ${fact.accentColor}55` }}>
-            {fact.highlight}
           </div>
+        )}
 
-          {/* Headline */}
-          <div className="font-black text-white/80 uppercase tracking-widest" style={{ fontSize: 'clamp(0.85rem, 1.8vw, 1.2rem)' }}>
-            {fact.headline}
-          </div>
-
-          <p className="text-sm text-white/40 font-medium mt-1 line-clamp-2">{fact.suffix}</p>
-
-          {/* Prev/Next + counter only */}
-          <div className="flex items-center gap-3 mt-4">
-            <button onClick={() => go(-1)} className="text-white/30 hover:text-white transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-            <span className="text-[11px] font-bold text-white/25 tabular-nums">{triviaIndex + 1} / {trivias.length}</span>
-            <button onClick={() => go(1)} className="text-white/30 hover:text-white transition-colors"><ChevronRight className="w-4 h-4" /></button>
-          </div>
-        </div>
       </div>
     </div>
   );
