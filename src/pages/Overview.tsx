@@ -339,7 +339,6 @@ export function Overview({ setTab }: OverviewProps) {
           playerSeasonStats={playerSeasonStats}
           playerMonthlyStats={playerMonthlyStats}
           playerWeeklyStats={playerWeeklyStats}
-          matchEntries={matchEntries}
           matches={matches}
           news={news}
         />

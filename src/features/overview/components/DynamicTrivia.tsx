@@ -1,6 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
-import { MatchEntry } from '@/features/match-entries/types';
 import { Match } from '@/features/matches/types';
 import { NewsArticle } from '@/features/news/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
@@ -11,7 +10,6 @@ interface DynamicTriviaProps {
   playerSeasonStats: PlayerSeasonStat[];
   playerMonthlyStats: PlayerMonthlyStat[];
   playerWeeklyStats: PlayerWeeklyStat[];
-  matchEntries: MatchEntry[];
   matches: Match[];
   news: NewsArticle[];
 }
@@ -28,7 +26,7 @@ interface TriviaFact {
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, matchEntries, matches, news }: DynamicTriviaProps) {
+export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, matches, news }: DynamicTriviaProps) {
   const [triviaIndex, setTriviaIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
 
@@ -89,106 +87,37 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     if (gpmAll?.v > 0) { const p = getP(gpmAll.id); if (p) push({ label: 'Most Clinical Finisher', headline: 'GOALS/GAME', highlight: String(gpmAll.v), suffix: 'average goals per match', player: p, accentColor: '#f43f5e', bgGradient: 'from-rose-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
 
     // ─────────────────────────────────────
-    // 2. PER-SEASON facts
+    // 2. BEST-EVER MONTH RECORDS
     // ─────────────────────────────────────
-    const seasonIds = [...new Set(playerSeasonStats.map(s => s.seasonId))];
-    seasonIds.forEach(seasonId => {
-      const season = playerSeasonStats.find(s => s.seasonId === seasonId);
-      const label = season?.seasonName || `Season ${seasonId}`;
-      const rows = playerSeasonStats.filter(s => s.seasonId === seasonId);
+    const monthRecords = playerMonthlyStats.filter(s => s.appearances > 0);
+    if (monthRecords.length > 0) {
+      const topMonthGoals = monthRecords.sort((a, b) => b.goals - a.goals)[0];
+      if (topMonthGoals?.goals > 0) { const p = getP(topMonthGoals.playerId); if (p) push({ label: 'Best Goalscoring Month', headline: 'RECORD MONTH', highlight: String(topMonthGoals.goals), suffix: `goals in ${MONTH_NAMES[topMonthGoals.monthIndex]} ${topMonthGoals.year}`, player: p, accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
 
-      const aggS = new Map<string, AggStat>();
-      rows.forEach(s => { aggS.set(s.playerId, { goals: s.goals, wins: s.wins, losses: s.losses, draws: s.draws, cleansheets: s.cleansheets, hattricks: s.hattricks, motmCount: s.motmCount, appearances: s.appearances, goalsConceded: s.goalsConceded }); });
-      const sArr = [...aggS.entries()];
+      const topMonthWins = monthRecords.sort((a, b) => b.wins - a.wins)[0];
+      if (topMonthWins?.wins > 0) { const p = getP(topMonthWins.playerId); if (p) push({ label: 'Most Wins in a Month', headline: 'WIN RECORD', highlight: String(topMonthWins.wins), suffix: `wins in ${MONTH_NAMES[topMonthWins.monthIndex]} ${topMonthWins.year}`, player: p, accentColor: '#22c55e', bgGradient: 'from-green-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
 
-      const sg = topOf([...sArr], 'goals'); if (sg?.[1].goals > 0) { const p = getP(sg[0]); if (p) push({ label: `${label} Top Scorer`, headline: 'SEASON GOALS', highlight: String(sg[1].goals), suffix: `goals in ${label}`, player: p, accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const sw = topOf([...sArr], 'wins'); if (sw?.[1].wins > 0) { const p = getP(sw[0]); if (p) push({ label: `${label} Win Leader`, headline: 'SEASON WINS', highlight: String(sw[1].wins), suffix: `wins in ${label}`, player: p, accentColor: '#22c55e', bgGradient: 'from-green-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const sm = topOf([...sArr], 'motmCount'); if (sm?.[1].motmCount > 0) { const p = getP(sm[0]); if (p) push({ label: `${label} MOTM Leader`, headline: 'SEASON MOTM', highlight: String(sm[1].motmCount), suffix: `MOTM awards in ${label}`, player: p, accentColor: '#f59e0b', bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const sc = topOf([...sArr], 'cleansheets'); if (sc?.[1].cleansheets > 0) { const p = getP(sc[0]); if (p) push({ label: `${label} Clean Sheet Leader`, headline: 'SEASON CS', highlight: String(sc[1].cleansheets), suffix: `clean sheets in ${label}`, player: p, accentColor: '#3b82f6', bgGradient: 'from-blue-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const calcPts = (s: AggStat) => s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
-      const sp = [...sArr].map(([id, s]) => ({ id, pts: calcPts(s) })).sort((a, b) => b.pts - a.pts)[0];
-      if (sp?.pts > 0) { const p = getP(sp.id); if (p) push({ label: `${label} Points Leader`, headline: 'SEASON RANK', highlight: String(sp.pts), suffix: `points in ${label}`, player: p, accentColor: '#8b5cf6', bgGradient: 'from-violet-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-    });
+      const topMonthCS = monthRecords.sort((a, b) => b.cleansheets - a.cleansheets)[0];
+      if (topMonthCS?.cleansheets > 0) { const p = getP(topMonthCS.playerId); if (p) push({ label: 'Best Defensive Month', headline: 'CLEAN SHEETS', highlight: String(topMonthCS.cleansheets), suffix: `clean sheets in ${MONTH_NAMES[topMonthCS.monthIndex]} ${topMonthCS.year}`, player: p, accentColor: '#3b82f6', bgGradient: 'from-blue-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
+
+      const topMonthMotm = monthRecords.sort((a, b) => b.motmCount - a.motmCount)[0];
+      if (topMonthMotm?.motmCount > 0) { const p = getP(topMonthMotm.playerId); if (p) push({ label: 'Most MOTMs in a Month', headline: 'MONTHLY MOTM', highlight: String(topMonthMotm.motmCount), suffix: `MOTMs in ${MONTH_NAMES[topMonthMotm.monthIndex]} ${topMonthMotm.year}`, player: p, accentColor: '#f59e0b', bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
+    }
 
     // ─────────────────────────────────────
-    // 3. EVERY MONTH that has data
+    // 3. BEST-EVER WEEK RECORDS
     // ─────────────────────────────────────
-    const monthKeys = [...new Set(playerMonthlyStats.map(s => `${s.year}-${s.monthIndex}`))];
-    monthKeys.forEach(key => {
-      const [yr, mi] = key.split('-').map(Number);
-      const mLabel = `${MONTH_NAMES[mi]} ${yr}`;
-      const rows = playerMonthlyStats.filter(s => s.year === yr && s.monthIndex === mi);
-
-      type MS = typeof rows[0];
-      const top = <K extends keyof MS>(key: K) => [...rows].sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0))[0];
-      const calcPts = (s: MS) => s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
-
-      const mg = top('goals'); if (mg?.goals > 0) { const p = getP(mg.playerId); if (p) push({ label: `${mLabel} Top Scorer`, headline: 'MONTHLY GOALS', highlight: String(mg.goals), suffix: `goals in ${mLabel}`, player: p, accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const mw = top('wins'); if (mw?.wins > 0) { const p = getP(mw.playerId); if (p) push({ label: `${mLabel} Win Leader`, headline: 'MONTHLY WINS', highlight: String(mw.wins), suffix: `wins in ${mLabel}`, player: p, accentColor: '#22c55e', bgGradient: 'from-green-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const mm = top('motmCount'); if (mm?.motmCount > 0) { const p = getP(mm.playerId); if (p) push({ label: `${mLabel} MOTM Leader`, headline: 'MONTHLY MOTM', highlight: String(mm.motmCount), suffix: `MOTM awards in ${mLabel}`, player: p, accentColor: '#f59e0b', bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const mc = top('cleansheets'); if (mc?.cleansheets > 0) { const p = getP(mc.playerId); if (p) push({ label: `${mLabel} Clean Sheet King`, headline: 'MONTHLY CS', highlight: String(mc.cleansheets), suffix: `clean sheets in ${mLabel}`, player: p, accentColor: '#3b82f6', bgGradient: 'from-blue-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const mh = top('hattricks'); if (mh?.hattricks > 0) { const p = getP(mh.playerId); if (p) push({ label: `${mLabel} Hat-Trick Hero`, headline: 'MONTHLY HT', highlight: String(mh.hattricks), suffix: `hat-tricks in ${mLabel}`, player: p, accentColor: '#a855f7', bgGradient: 'from-purple-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const mp = [...rows].map(s => ({ ...s, pts: calcPts(s) })).sort((a, b) => b.pts - a.pts)[0];
-      if (mp?.pts > 0) { const p = getP(mp.playerId); if (p) push({ label: `${mLabel} Points Leader`, headline: 'MONTHLY RANK', highlight: String(mp.pts), suffix: `points in ${mLabel}`, player: p, accentColor: '#8b5cf6', bgGradient: 'from-violet-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const ma = top('appearances'); if (ma?.appearances > 0) { const p = getP(ma.playerId); if (p) push({ label: `${mLabel} Most Active`, headline: 'MONTHLY APPS', highlight: String(ma.appearances), suffix: `matches played in ${mLabel}`, player: p, accentColor: '#06b6d4', bgGradient: 'from-cyan-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-    });
+    const weekRecords = playerWeeklyStats.filter(s => s.appearances > 0);
+    if (weekRecords.length > 0) {
+      const topWeekGoals = weekRecords.sort((a, b) => b.goals - a.goals)[0];
+      if (topWeekGoals?.goals > 0) { const p = getP(topWeekGoals.playerId); if (p) push({ label: 'Best Scoring Week', headline: 'WEEKLY RECORD', highlight: String(topWeekGoals.goals), suffix: `goals in Week ${topWeekGoals.week} (${MONTH_NAMES[topWeekGoals.monthIndex]} ${topWeekGoals.year})`, player: p, accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
+      
+      const topWeekWins = weekRecords.sort((a, b) => b.wins - a.wins)[0];
+      if (topWeekWins?.wins > 0) { const p = getP(topWeekWins.playerId); if (p) push({ label: 'Most Wins in a Week', headline: 'WEEKLY RECORD', highlight: String(topWeekWins.wins), suffix: `wins in Week ${topWeekWins.week} (${MONTH_NAMES[topWeekWins.monthIndex]} ${topWeekWins.year})`, player: p, accentColor: '#22c55e', bgGradient: 'from-green-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
+    }
 
     // ─────────────────────────────────────
-    // 4. EVERY WEEK that has data
-    // ─────────────────────────────────────
-    const weekKeys = [...new Set(playerWeeklyStats.map(s => `${s.year}-${s.monthIndex}-${s.week}`))];
-    weekKeys.forEach(key => {
-      const [yr, mi, wk] = key.split('-').map(Number);
-      const wLabel = `Week ${wk} · ${MONTH_NAMES[mi]} ${yr}`;
-      const rows = playerWeeklyStats.filter(s => s.year === yr && s.monthIndex === mi && s.week === wk);
-
-      type WS = typeof rows[0];
-      const top = <K extends keyof WS>(key: K) => [...rows].sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0))[0];
-      const calcPts = (s: WS) => s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
-
-      const wg = top('goals'); if (wg?.goals > 0) { const p = getP(wg.playerId); if (p) push({ label: `${wLabel} Top Scorer`, headline: 'WEEKLY GOALS', highlight: String(wg.goals), suffix: `goals in ${wLabel}`, player: p, accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const ww = top('wins'); if (ww?.wins > 0) { const p = getP(ww.playerId); if (p) push({ label: `${wLabel} Win Leader`, headline: 'WEEKLY WINS', highlight: String(ww.wins), suffix: `wins in ${wLabel}`, player: p, accentColor: '#22c55e', bgGradient: 'from-green-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const wm = top('motmCount'); if (wm?.motmCount > 0) { const p = getP(wm.playerId); if (p) push({ label: `${wLabel} MOTM`, headline: 'WEEKLY MOTM', highlight: String(wm.motmCount), suffix: `MOTM awards in ${wLabel}`, player: p, accentColor: '#f59e0b', bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const wc = top('cleansheets'); if (wc?.cleansheets > 0) { const p = getP(wc.playerId); if (p) push({ label: `${wLabel} Clean Sheet`, headline: 'WEEKLY CS', highlight: String(wc.cleansheets), suffix: `clean sheets in ${wLabel}`, player: p, accentColor: '#3b82f6', bgGradient: 'from-blue-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-      const wp = [...rows].map(s => ({ ...s, pts: calcPts(s) })).sort((a, b) => b.pts - a.pts)[0];
-      if (wp?.pts > 0) { const p = getP(wp.playerId); if (p) push({ label: `${wLabel} Points Leader`, headline: 'WEEKLY RANK', highlight: String(wp.pts), suffix: `points in ${wLabel}`, player: p, accentColor: '#8b5cf6', bgGradient: 'from-violet-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-    });
-
-    // ─────────────────────────────────────
-    // 5. INDIVIDUAL MATCH ENTRIES
-    // ─────────────────────────────────────
-    // Every entry with 3+ goals gets its own fact
-    matchEntries
-      .filter(e => (e.goals ?? 0) >= 3)
-      .forEach(e => {
-        const p = getP(e.playerId);
-        if (!p) return;
-        const dateStr = e.date ? ` (${e.date})` : '';
-        if ((e.goals ?? 0) >= 5) push({ label: '🔥 Legendary Performance', headline: 'IN ONE MATCH', highlight: String(e.goals), suffix: `goals by ${p.name}${dateStr}`, player: p, accentColor: '#f59e0b', bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
-        else if ((e.goals ?? 0) >= 4) push({ label: '⚡ Unstoppable Game', headline: 'IN ONE MATCH', highlight: String(e.goals), suffix: `goals by ${p.name}${dateStr}`, player: p, accentColor: '#f97316', bgGradient: 'from-orange-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
-        else push({ label: '🎩 Hat-Trick Alert', headline: 'HAT-TRICK', highlight: String(e.goals), suffix: `goals by ${p.name}${dateStr}`, player: p, accentColor: '#a855f7', bgGradient: 'from-purple-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
-      });
-
-    // Win streak per player
-    const entriesByPlayer = new Map<string, MatchEntry[]>();
-    matchEntries.forEach(e => { if (!entriesByPlayer.has(e.playerId)) entriesByPlayer.set(e.playerId, []); entriesByPlayer.get(e.playerId)!.push(e); });
-    let bestStreak = 0, bestStreakPid = '';
-    entriesByPlayer.forEach((entries, pid) => {
-      const sorted = [...entries].sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
-      let streak = 0, max = 0;
-      sorted.forEach(e => { if (e.result === 'win') { streak++; max = Math.max(max, streak); } else streak = 0; });
-      if (max > bestStreak) { bestStreak = max; bestStreakPid = pid; }
-    });
-    if (bestStreak >= 3) { const p = getP(bestStreakPid); if (p) push({ label: 'Longest Win Streak Ever', headline: 'WIN STREAK', highlight: String(bestStreak), suffix: 'wins in a row', player: p, accentColor: '#22c55e', bgGradient: 'from-green-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-
-    // Most opponents faced (match entry notes)
-    const opMap = new Map<string, Set<string>>();
-    matchEntries.forEach(e => { if (!e.notes || !e.playerId) return; if (!opMap.has(e.playerId)) opMap.set(e.playerId, new Set()); opMap.get(e.playerId)!.add(e.notes.split('(')[0].trim()); });
-    const topOp = [...opMap.entries()].sort((a, b) => b[1].size - a[1].size)[0];
-    if (topOp?.[1].size > 2) { const p = getP(topOp[0]); if (p) push({ label: 'Most Battle-Hardened', headline: 'OPPONENTS FACED', highlight: String(topOp[1].size), suffix: 'different opponents', player: p, accentColor: '#8b5cf6', bgGradient: 'from-violet-950/80 via-[#0d0d0d] to-[#0d0d0d]' }); }
-
-    // ─────────────────────────────────────
-    // 6. CLUB MATCH RECORDS
+    // 5. CLUB MATCH RECORDS
     // ─────────────────────────────────────
     const done = matches.filter(m => m.status === 'finished' && m.homeScore !== null && m.awayScore !== null);
     const bigW = [...done].map(m => ({ m, d: (m.homeScore ?? 0) - (m.awayScore ?? 0) })).sort((a, b) => b.d - a.d)[0];
@@ -208,7 +137,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     });
 
     return facts.sort(() => 0.5 - Math.random());
-  }, [players, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, matchEntries, matches, news, agg]);
+  }, [players, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, matches, news, agg]);
 
   const go = useCallback((dir: 1 | -1) => {
     setAnimating(true);
