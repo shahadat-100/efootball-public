@@ -325,24 +325,26 @@ export function Overview({ setTab }: OverviewProps) {
         <div className="lg:col-span-1 h-full">
           <ActivityTimeline dates={matchDates} />
         </div>
-        
-        {/* Filling the 2-column gap next to ActivityTimeline */}
-        <div className="lg:col-span-2 h-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
-            <DynamicTrivia 
-              players={players} 
-              playerSeasonStats={playerSeasonStats} 
-              matchEntries={matchEntries} 
-            />
-            {hallOfFame.length > 0 ? (
-               <HallOfFameCarousel />
-            ) : (
-               <div className="bg-gradient-to-br from-[#1f1700] to-[#120a00] border border-amber-500/20 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center shadow-lg">
-                 <p className="text-amber-500/50 text-sm font-semibold">Hall of Fame Awaits...</p>
-               </div>
-            )}
+
+        {/* Hall of Fame fills the 2-column gap */}
+        {hallOfFame.length > 0 && (
+          <div className="lg:col-span-2 h-full">
+            <HallOfFameCarousel />
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Did You Know? — full width hero trivia card */}
+      <div className="mb-8">
+        <DynamicTrivia
+          players={players}
+          playerSeasonStats={playerSeasonStats}
+          playerMonthlyStats={playerMonthlyStats}
+          playerWeeklyStats={playerWeeklyStats}
+          matchEntries={matchEntries}
+          matches={matches}
+          news={news}
+        />
       </div>
 
       {/* Points Leaderboard — 3 cards: Weekly / Monthly / Overall */}
