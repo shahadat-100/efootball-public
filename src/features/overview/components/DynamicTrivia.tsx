@@ -133,102 +133,98 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     // ─────────────────────────────────────
     const latestN = [...news].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')).slice(0, 3);
     latestN.forEach(n => {
-      if (n.title) push({ label: n.hot ? '🔥 Trending News' : '📰 Latest News', headline: n.category?.toUpperCase() ?? 'NEWS', highlight: '🗞️', suffix: n.title, accentColor: n.hot ? '#f97316' : '#8b5cf6', bgGradient: n.hot ? 'from-orange-950/80 via-[#0d0d0d] to-[#0d0d0d]' : 'from-violet-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
+      if (n.title) push({ label: n.hot ? '🔥 Trending News' : '📰 Latest News', headline: n.category?.toUpperCase() ?? 'NEWS', highlight: '🗞️', suffix: n.title, accentColor: n.hot ? '#f97316' : '#8b5cf6', bgGradient: n.hot ? 'from-orange-950/80 via-[#0d0d0d] to-[#0d0d0d]' : 'from-purple-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
     });
 
-    return facts.sort(() => 0.5 - Math.random());
-  }, [players, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, matches, news, agg]);
+    return facts;
+  }, [players, agg, playerMonthlyStats, playerWeeklyStats, matches, news]);
 
-  const go = useCallback((dir: 1 | -1) => {
+  const go = (dir: number) => {
     setAnimating(true);
     setTimeout(() => {
-      setTriviaIndex(prev => (prev + dir + trivias.length) % trivias.length);
+      setTriviaIndex((prev) => (prev + dir + trivias.length) % trivias.length);
       setAnimating(false);
     }, 150);
-  }, [trivias.length]);
-
-  useEffect(() => {
-    if (trivias.length > 1) {
-      const t = setInterval(() => go(1), 7000);
-      return () => clearInterval(t);
-    }
-  }, [trivias.length, go]);
-
-  if (trivias.length === 0) return null;
+  };
 
   const fact = trivias[triviaIndex];
 
+  if (!fact) return null;
+
   return (
-    <div
-      className={`relative w-full overflow-hidden rounded-2xl bg-gradient-to-br ${fact.bgGradient} transition-all duration-500 shadow-xl`}
-      style={{ minHeight: '180px', border: `1px solid ${fact.accentColor}33` }}
-    >
-      {/* Background FX */}
-      <div className="absolute inset-0 pointer-events-none opacity-50" style={{ background: `radial-gradient(circle at 100% 0%, ${fact.accentColor}44 0%, transparent 50%)` }} />
-      <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none translate-x-1/4 -translate-y-1/4">
-        <Zap className="w-48 h-48" style={{ color: fact.accentColor }} />
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+      {/* Glow behind */}
+      <div className="absolute top-0 left-0 w-full h-40 pointer-events-none opacity-20 transition-all duration-500" style={{ background: `linear-gradient(to bottom, ${fact.accentColor}55, transparent)` }} />
+      <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-40 rounded-full blur-3xl pointer-events-none opacity-20 transition-all duration-500" style={{ background: fact.accentColor }} />
+
+      {/* Header */}
+      <div className="relative z-10 flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-500" style={{ backgroundColor: `${fact.accentColor}22`, color: fact.accentColor }}>
+            <Zap className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="font-heading font-black text-lg text-foreground tracking-tight transition-colors duration-500">{fact.label}</h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest transition-colors duration-500" style={{ color: fact.accentColor }}>
+              {fact.headline}
+            </p>
+          </div>
+        </div>
+        {/* Controls */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs font-semibold text-muted-foreground mr-2 tabular-nums">
+            {triviaIndex + 1} / {trivias.length}
+          </span>
+          <button onClick={() => go(-1)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all border border-border">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button onClick={() => go(1)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all border border-border">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      <div className={`relative z-10 flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 h-full transition-opacity duration-300 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-        {/* Left: Large Avatar (Golden Boot Race Style) */}
+      {/* Main Fact Area (Like Golden Boot Leader Row) */}
+      <div className={`relative z-10 flex items-center gap-5 sm:gap-6 p-5 sm:p-6 rounded-2xl border transition-all duration-500 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+        style={{ background: `linear-gradient(135deg, ${fact.accentColor}12, ${fact.accentColor}03)`, borderColor: `${fact.accentColor}30` }}>
+        
+        {/* Badge */}
+        <div className="absolute -top-3 left-6 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg transition-colors duration-500" style={{ backgroundColor: fact.accentColor }}>
+          <Zap className="w-3 h-3" /> Spotlight
+        </div>
+        
+        {/* Big Avatar */}
         {fact.player && (
-          <div className="relative shrink-0 flex flex-col items-center gap-3">
+          <div className="relative shrink-0">
             <div 
-              className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 shadow-2xl transition-transform duration-500 group-hover:scale-105"
-              style={{ borderColor: `${fact.accentColor}88`, boxShadow: `0 0 40px ${fact.accentColor}55` }}
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl border-4 transition-all duration-500 group-hover:scale-105" 
+              style={{ borderColor: `${fact.accentColor}80` }}
             >
               {fact.player.profileImageUrl 
                 ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-white font-black text-4xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
+                : <div className="w-full h-full flex items-center justify-center text-white font-black text-3xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
               }
             </div>
-            <span className="font-heading font-black text-white/90 text-[15px] leading-tight bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
-              {fact.player.name}
-            </span>
           </div>
         )}
 
-        {/* Right: Text Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center">
-          
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-full" style={{ backgroundColor: `${fact.accentColor}22` }}>
-              <Zap className="w-4 h-4" style={{ color: fact.accentColor }} />
-            </div>
-            <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: fact.accentColor }}>{fact.label}</span>
-          </div>
-
-          <div className="flex flex-col mb-2">
-            <div className="font-black text-white leading-none tracking-tighter break-words" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', textShadow: `0 4px 20px ${fact.accentColor}44` }}>
+        <div className="flex-1 min-w-0">
+          {fact.player && (
+            <p className="font-heading font-black text-xl text-foreground truncate">{fact.player.name}</p>
+          )}
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className="text-4xl sm:text-5xl font-black leading-none tracking-tighter transition-colors duration-500" style={{ color: fact.accentColor }}>
               {fact.highlight}
-            </div>
-            <div className="mt-2">
-              <div className="font-black text-white/90 uppercase tracking-wider text-xl leading-none mb-1">
-                {fact.headline}
-              </div>
-              <p className="text-sm text-white/60 font-medium leading-snug max-w-[320px]">
-                {fact.suffix}
-              </p>
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center gap-4 mt-4">
-            <div className="flex items-center gap-1">
-              <button onClick={() => go(-1)} className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all border border-white/5">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button onClick={() => go(1)} className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all border border-white/5">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <span className="text-xs font-semibold text-white/30 tabular-nums bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
-              {triviaIndex + 1} of {trivias.length}
             </span>
           </div>
-
+          <p className="text-sm text-muted-foreground font-medium mt-1.5 leading-snug max-w-[90%]">
+            {fact.suffix}
+          </p>
         </div>
-
+        
+        <div className="hidden sm:block shrink-0 opacity-5 select-none transition-colors duration-500" style={{ color: fact.accentColor }}>
+          <Zap className="w-20 h-20" fill="currentColor" />
+        </div>
       </div>
     </div>
   );
