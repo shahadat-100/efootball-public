@@ -54,27 +54,26 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
-  const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
-    let activeWeekName = 'Week 1';
-    if (currentDay >= 8  && currentDay <= 14) { activeWeekName = 'Week 2'; }
-    else if (currentDay >= 15 && currentDay <= 21) { activeWeekName = 'Week 3'; }
-    else if (currentDay >= 22) { activeWeekName = 'Week 4'; }
+  const [selectedWeeklySeasonId, setSelectedWeeklySeasonId] = useState<number | null>(null);
+  const [selectedWeeklyMonth, setSelectedWeeklyMonth] = useState<number>(currentMonthIndex);
+  const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState<number>(() => {
+    if (currentDay >= 8 && currentDay <= 14) return 2;
+    if (currentDay >= 15 && currentDay <= 21) return 3;
+    if (currentDay >= 22) return 4;
+    return 1;
+  });
 
+  const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
     const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
       s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
     // Weekly from playerWeeklyStats
-    let activeWeekNumber = 1;
-    if (currentDay >= 8  && currentDay <= 14) activeWeekNumber = 2;
-    else if (currentDay >= 15 && currentDay <= 21) activeWeekNumber = 3;
-    else if (currentDay >= 22) activeWeekNumber = 4;
-
     const weeklyList: RankedPlayer[] = players.map(p => {
       const stats = playerWeeklyStats.filter(s =>
         s.playerId === p.id &&
-        s.year === currentYear &&
-        s.monthIndex === currentMonthIndex &&
-        s.week === activeWeekNumber
+        s.monthIndex === selectedWeeklyMonth &&
+        s.week === selectedWeeklyWeek &&
+        (selectedWeeklySeasonId !== null ? s.seasonId === selectedWeeklySeasonId : s.year === currentYear)
       );
       const wins = stats.reduce((t, s) => t + s.wins, 0);
       const draws = stats.reduce((t, s) => t + s.draws, 0);
@@ -135,8 +134,12 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       ? seasons.find(s => s.id === selectedMonthlySeasonId)?.name ?? ''
       : currentYear.toString();
 
+    const weeklySeasonLabel = selectedWeeklySeasonId
+      ? seasons.find(s => s.id === selectedWeeklySeasonId)?.name ?? ''
+      : currentYear.toString();
+
     return {
-      weeklyRanking:  { label: activeWeekName, list: weeklyList },
+      weeklyRanking:  { label: `Week ${selectedWeeklyWeek} · ${MONTHS[selectedWeeklyMonth]} · ${weeklySeasonLabel}`, list: weeklyList },
       monthlyRanking: { label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`, list: monthlyList },
       overallRanking: {
         label: selectedOverallSeasonId
@@ -145,7 +148,7 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
         list: overallList,
       },
     };
-  }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedOverallSeasonId]);
+  }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedWeeklySeasonId, selectedWeeklyMonth, selectedWeeklyWeek, selectedOverallSeasonId]);
 
   const activeRanking =
     viewMode === 'weekly' ? weeklyRanking :
@@ -193,6 +196,34 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
             </button>
           ))}
         </div>
+
+        {/* Weekly filters */}
+        {viewMode === 'weekly' && (
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedWeeklySeasonId ?? ''}
+              onChange={e => { setSelectedWeeklySeasonId(e.target.value === '' ? null : Number(e.target.value)); setPage(1); }}
+              className={selectCls}
+            >
+              <option value="">{currentYear} (Current)</option>
+              {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            <select
+              value={selectedWeeklyMonth}
+              onChange={e => { setSelectedWeeklyMonth(Number(e.target.value)); setPage(1); }}
+              className={selectCls}
+            >
+              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+            </select>
+            <select
+              value={selectedWeeklyWeek}
+              onChange={e => { setSelectedWeeklyWeek(Number(e.target.value)); setPage(1); }}
+              className={selectCls}
+            >
+              {[1, 2, 3, 4].map(w => <option key={w} value={w}>Week {w}</option>)}
+            </select>
+          </div>
+        )}
 
         {/* Monthly filters */}
         {viewMode === 'monthly' && (
