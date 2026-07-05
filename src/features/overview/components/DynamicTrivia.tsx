@@ -170,8 +170,30 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
       </div>
 
       <div className={`relative z-10 flex flex-col sm:flex-row items-stretch h-full transition-opacity duration-300 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-        
-        {/* Left/Top Content */}
+        {/* Left/Top Player Avatar (eFootball Card Style Sidebar) */}
+        {fact.player && (
+          <div className="relative w-full sm:w-48 flex-shrink-0 bg-black/50 sm:border-r border-white/10 flex items-center justify-center p-6 group backdrop-blur-sm">
+            {/* Backdrop glow */}
+            <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at center, ${fact.accentColor} 0%, transparent 70%)` }} />
+            
+            <div className="relative z-10 flex flex-col items-center gap-3 text-center">
+              <div 
+                className="w-[68px] h-[68px] rounded-2xl overflow-hidden border-2 shadow-lg transition-transform duration-500 group-hover:scale-105"
+                style={{ borderColor: `${fact.accentColor}88` }}
+              >
+                {fact.player.profileImageUrl 
+                  ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-white font-black text-2xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
+                }
+              </div>
+              <span className="font-heading font-black text-white/90 text-[14px] leading-tight drop-shadow-md">
+                {fact.player.name}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Right/Bottom Content */}
         <div className="flex-1 p-6 sm:p-8 flex flex-col justify-center">
           
           <div className="flex items-center gap-2 mb-3">
@@ -211,29 +233,6 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
           </div>
 
         </div>
-
-        {/* Right/Bottom Player Avatar */}
-        {fact.player && (
-          <div className="relative w-full sm:w-64 h-32 sm:h-auto flex-shrink-0 bg-black/20 sm:border-l border-white/5 flex items-center justify-center overflow-hidden group">
-            {/* Backdrop glow */}
-            <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at center, ${fact.accentColor} 0%, transparent 70%)` }} />
-            
-            <div className="relative z-10 flex flex-col items-center gap-3">
-              <div 
-                className="w-20 h-20 rounded-full overflow-hidden border-2 shadow-2xl transition-transform duration-500 group-hover:scale-110"
-                style={{ borderColor: `${fact.accentColor}88`, boxShadow: `0 0 30px ${fact.accentColor}33` }}
-              >
-                {fact.player.profileImageUrl 
-                  ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-white font-bold text-2xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
-                }
-              </div>
-              <span className="font-bold text-white/90 text-sm tracking-wide bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
-                {fact.player.name}
-              </span>
-            </div>
-          </div>
-        )}
 
       </div>
     </div>
