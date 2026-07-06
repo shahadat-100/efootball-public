@@ -37,6 +37,7 @@ interface TriviaFact {
   highlight: string;
   suffix: string;
   player?: Player;
+  rankImageUrl?: string | null;
   accentColor: string;
   bgGradient: string;
 }
@@ -171,6 +172,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
         headline: r.subtitle?.toUpperCase() ?? 'RANK TIER',
         highlight: r.title,
         suffix: r.description ?? 'Official club rank tier',
+        rankImageUrl: r.image_url,
         accentColor: '#f59e0b',
         bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]',
       });
@@ -277,17 +279,20 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
           <Zap className="w-3 h-3" /> Spotlight
         </div>
         
-        {/* Big Avatar */}
-        {fact.player && (
+        {/* Big Avatar — player image OR rank badge image */}
+        {(fact.player || fact.rankImageUrl) && (
           <div className="relative shrink-0">
             <div 
               className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl border-4 transition-all duration-500 group-hover:scale-105" 
               style={{ borderColor: `${fact.accentColor}80` }}
             >
-              {fact.player.profileImageUrl 
-                ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-white font-black text-3xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
-              }
+              {fact.player ? (
+                fact.player.profileImageUrl 
+                  ? <img src={fact.player.profileImageUrl} alt={fact.player.name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-white font-black text-3xl" style={{ background: fact.accentColor + '44' }}>{fact.player.name[0]}</div>
+              ) : fact.rankImageUrl ? (
+                <img src={fact.rankImageUrl} alt={fact.highlight} className="w-full h-full object-cover" />
+              ) : null}
             </div>
           </div>
         )}

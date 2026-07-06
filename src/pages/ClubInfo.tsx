@@ -573,51 +573,81 @@ function ErrorBanner({ message }: { message: string }) {
   );
 }
 
-// ─── Rank Card ────────────────────────────────────────────────────────────────
+// ─── Rank Card — Trivia-style dark glowing card ───────────────────────────────
+const RANK_ACCENT = '#f59e0b';
+
 function RankCard({ item }: { item: ClubRank }) {
   const [imgError, setImgError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const hasLongDesc = (item.description?.length ?? 0) > 120;
 
   return (
-    <div className="group relative bg-white border border-border/60 rounded-2xl overflow-hidden
-                    shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
+    <div className="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
+      style={{ background: 'linear-gradient(135deg, #0d0d0d, #120e00)' }}>
 
-      {/* Badge image — dark bg, square placeholder */}
-      <div className="relative flex flex-col items-center justify-center pt-8 pb-6 px-6
-                      bg-[#0e1117]">
-        {item.image_url && !imgError ? (
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-white/15">
+      {/* Top accent glow bar */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
+        style={{ background: `linear-gradient(to right, transparent, ${RANK_ACCENT}, transparent)` }} />
+
+      {/* Background glow blob */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 rounded-full blur-3xl pointer-events-none opacity-20 transition-all duration-500"
+        style={{ background: RANK_ACCENT }} />
+
+      {/* Spotlight badge */}
+      <div className="absolute top-3 left-4 z-20 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg"
+        style={{ backgroundColor: RANK_ACCENT }}>
+        <Star className="w-3 h-3" /> Rank
+      </div>
+
+      {/* Image area */}
+      <div className="relative flex flex-col items-center justify-center pt-10 pb-6 px-6">
+        <div
+          className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 shadow-xl transition-all duration-500 group-hover:scale-105"
+          style={{ borderColor: `${RANK_ACCENT}80` }}
+        >
+          {item.image_url && !imgError ? (
             <img
               src={item.image_url}
               alt={item.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover"
               onError={() => setImgError(true)}
             />
-          </div>
-        ) : (
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full
-                          bg-white/5 border-2 border-white/10
-                          flex items-center justify-center">
-            <ImageIcon className="w-10 h-10 text-white/20" />
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full flex items-center justify-center font-black text-3xl text-white"
+              style={{ background: `${RANK_ACCENT}44` }}>
+              {item.title[0]}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-5 flex flex-col flex-1 text-center">
-        <h3 className="font-bold text-[15px] sm:text-[16px] text-foreground tracking-tight leading-tight">
-          {item.title}
-        </h3>
+      <div
+        className="relative z-10 mx-3 mb-3 flex flex-col flex-1 p-4 sm:p-5 rounded-xl border"
+        style={{
+          background: `linear-gradient(135deg, ${RANK_ACCENT}12, ${RANK_ACCENT}03)`,
+          borderColor: `${RANK_ACCENT}30`,
+        }}
+      >
+        {/* Title as big highlight */}
+        <div className="text-center">
+          <span className="text-3xl sm:text-4xl font-black leading-none tracking-tighter"
+            style={{ color: RANK_ACCENT }}>
+            {item.title}
+          </span>
+        </div>
+
         {item.subtitle && (
-          <p className="text-amber-500 text-[11px] sm:text-[12px] font-semibold uppercase tracking-wider mt-1.5">
+          <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-widest mt-2 text-center"
+            style={{ color: RANK_ACCENT }}>
             {item.subtitle}
           </p>
         )}
+
         {item.description && (
-          <div className="mt-3 text-left">
+          <div className="mt-3">
             <p className={cn(
-              "text-muted-foreground text-[12px] sm:text-[13px] leading-relaxed transition-all",
+              "text-white/60 text-[12px] sm:text-[13px] leading-relaxed transition-all text-center",
               !expanded && hasLongDesc && "line-clamp-3"
             )}>
               {item.description}
@@ -625,7 +655,8 @@ function RankCard({ item }: { item: ClubRank }) {
             {hasLongDesc && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-amber-500 hover:text-amber-600 transition-colors"
+                className="mt-2 mx-auto flex items-center gap-1 text-[11px] font-semibold transition-colors"
+                style={{ color: RANK_ACCENT }}
               >
                 {expanded ? 'Show less' : 'Read more'}
                 {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -634,6 +665,10 @@ function RankCard({ item }: { item: ClubRank }) {
           </div>
         )}
       </div>
+
+      {/* Bottom accent bar on hover */}
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-b-2xl"
+        style={{ background: RANK_ACCENT }} />
     </div>
   );
 }
