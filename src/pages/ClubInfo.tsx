@@ -503,6 +503,7 @@ interface ClubRank {
   title: string;
   subtitle: string | null;
   description: string | null;
+  theme_color?: string | null;
   created_at: string;
 }
 interface ClubAchievement {
@@ -598,7 +599,12 @@ function RankCard({ item, index }: { item: ClubRank; index: number }) {
   const [imgError, setImgError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const hasLongDesc = (item.description?.length ?? 0) > 120;
-  const { accent, bg } = RANK_PALETTE[index % RANK_PALETTE.length];
+  
+  const fallback = RANK_PALETTE[index % RANK_PALETTE.length];
+  const accent = item.theme_color || fallback.accent;
+  const bg = item.theme_color 
+    ? `linear-gradient(135deg, ${item.theme_color}20, #0a0a0a)` 
+    : fallback.bg;
 
   return (
     <div className="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
@@ -843,7 +849,10 @@ export function ClubInfo() {
           if (error) throw error;
           setRules(data ?? []);
         } else if (activeTab === 'ranks') {
-          const { data, error } = await supabase.from('club_ranks').select('id, image_url, title, subtitle, description, created_at').order('created_at', { ascending: false });
+          const { data, error } = await supabase
+            .from('club_ranks')
+            .select('id, image_url, title, subtitle, description, created_at, theme_color')
+            .order('created_at', { ascending: true });
           if (error) throw error;
           setRanks(data ?? []);
         } else if (activeTab === 'achievements') {

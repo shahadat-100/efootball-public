@@ -12,6 +12,7 @@ interface ClubRank {
   subtitle: string | null;
   description: string | null;
   image_url: string | null;
+  theme_color?: string | null;
 }
 
 interface ClubAchievement {
@@ -54,7 +55,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
   useEffect(() => {
     supabase
       .from('club_ranks')
-      .select('id, title, subtitle, description, image_url')
+      .select('id, title, subtitle, description, image_url, theme_color')
       .order('created_at', { ascending: false })
       .then(({ data }) => { if (data) setClubRanks(data); });
 
@@ -173,7 +174,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
         highlight: r.title,
         suffix: r.description ?? 'Official club rank tier',
         rankImageUrl: r.image_url,
-        accentColor: '#f59e0b',
+        accentColor: r.theme_color || '#f59e0b',
         bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]',
       });
     });
