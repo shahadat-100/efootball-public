@@ -125,7 +125,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     const hiS = [...done].map(m => ({ m, t: (m.homeScore ?? 0) + (m.awayScore ?? 0) })).sort((a, b) => b.t - a.t)[0];
     if (hiS?.t >= 6) push({ label: 'Most Goals in One Match', headline: 'EPIC GAME', highlight: String(hiS.t), suffix: `goals! ${hiS.m.homeTeam} ${hiS.m.homeScore}–${hiS.m.awayScore} ${hiS.m.awayTeam}`, accentColor: '#f97316', bgGradient: 'from-orange-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
     if (done.length > 0) push({ label: 'Club Journey So Far', headline: 'TOTAL MATCHES', highlight: String(done.length), suffix: 'competitive matches played', accentColor: '#06b6d4', bgGradient: 'from-cyan-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
-    const clubGoals = done.reduce((s, m) => s + (m.homeScore ?? 0), 0);
+    const clubGoals = [...agg.values()].reduce((s, v) => s + (v.goals || 0), 0);
     if (clubGoals > 0) push({ label: 'Total Club Goals', headline: 'GOALS SCORED', highlight: String(clubGoals), suffix: 'goals scored as a club', accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
 
     // ─────────────────────────────────────
@@ -172,9 +172,6 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
         </div>
         {/* Controls */}
         <div className="flex items-center gap-1">
-          <span className="text-xs font-semibold text-muted-foreground mr-2 tabular-nums">
-            {triviaIndex + 1} / {trivias.length}
-          </span>
           <button onClick={() => go(-1)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all border border-border">
             <ChevronLeft className="w-4 h-4" />
           </button>
