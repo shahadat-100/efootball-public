@@ -574,28 +574,47 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 // ─── Rank Card — Trivia-style dark glowing card ───────────────────────────────
-const RANK_ACCENT = '#f59e0b';
+// Each rank gets a unique theme from this palette (cycles)
+const RANK_PALETTE: { accent: string; bg: string }[] = [
+  // 0 — Crimson (app primary, #c8102e)
+  { accent: '#c8102e', bg: 'linear-gradient(135deg, #1a0005, #0d0000)' },
+  // 1 — Royal Blue
+  { accent: '#3b82f6', bg: 'linear-gradient(135deg, #020c1b, #000d1a)' },
+  // 2 — Emerald
+  { accent: '#10b981', bg: 'linear-gradient(135deg, #001a0e, #00120a)' },
+  // 3 — Violet
+  { accent: '#8b5cf6', bg: 'linear-gradient(135deg, #0d0018, #0a0012)' },
+  // 4 — Amber / Gold
+  { accent: '#f59e0b', bg: 'linear-gradient(135deg, #1a1000, #120c00)' },
+  // 5 — Cyan
+  { accent: '#06b6d4', bg: 'linear-gradient(135deg, #001519, #000e12)' },
+  // 6 — Rose
+  { accent: '#f43f5e', bg: 'linear-gradient(135deg, #1a0010, #12000a)' },
+  // 7 — Teal-Slate
+  { accent: '#14b8a6', bg: 'linear-gradient(135deg, #001614, #00100f)' },
+];
 
-function RankCard({ item }: { item: ClubRank }) {
+function RankCard({ item, index }: { item: ClubRank; index: number }) {
   const [imgError, setImgError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const hasLongDesc = (item.description?.length ?? 0) > 120;
+  const { accent, bg } = RANK_PALETTE[index % RANK_PALETTE.length];
 
   return (
     <div className="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
-      style={{ background: 'linear-gradient(135deg, #0d0d0d, #120e00)' }}>
+      style={{ background: bg }}>
 
       {/* Top accent glow bar */}
       <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
-        style={{ background: `linear-gradient(to right, transparent, ${RANK_ACCENT}, transparent)` }} />
+        style={{ background: `linear-gradient(to right, transparent, ${accent}, transparent)` }} />
 
       {/* Background glow blob */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 rounded-full blur-3xl pointer-events-none opacity-20 transition-all duration-500"
-        style={{ background: RANK_ACCENT }} />
+        style={{ background: accent }} />
 
       {/* Spotlight badge */}
       <div className="absolute top-3 left-4 z-20 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg"
-        style={{ backgroundColor: RANK_ACCENT }}>
+        style={{ backgroundColor: accent }}>
         <Star className="w-3 h-3" /> Rank
       </div>
 
@@ -603,7 +622,7 @@ function RankCard({ item }: { item: ClubRank }) {
       <div className="relative flex flex-col items-center justify-center pt-10 pb-6 px-6">
         <div
           className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 shadow-xl transition-all duration-500 group-hover:scale-105"
-          style={{ borderColor: `${RANK_ACCENT}80` }}
+          style={{ borderColor: `${accent}80` }}
         >
           {item.image_url && !imgError ? (
             <img
@@ -614,7 +633,7 @@ function RankCard({ item }: { item: ClubRank }) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center font-black text-3xl text-white"
-              style={{ background: `${RANK_ACCENT}44` }}>
+              style={{ background: `${accent}44` }}>
               {item.title[0]}
             </div>
           )}
@@ -625,21 +644,21 @@ function RankCard({ item }: { item: ClubRank }) {
       <div
         className="relative z-10 mx-3 mb-3 flex flex-col flex-1 p-4 sm:p-5 rounded-xl border"
         style={{
-          background: `linear-gradient(135deg, ${RANK_ACCENT}12, ${RANK_ACCENT}03)`,
-          borderColor: `${RANK_ACCENT}30`,
+          background: `linear-gradient(135deg, ${accent}12, ${accent}03)`,
+          borderColor: `${accent}30`,
         }}
       >
         {/* Title as big highlight */}
         <div className="text-center">
           <span className="text-3xl sm:text-4xl font-black leading-none tracking-tighter"
-            style={{ color: RANK_ACCENT }}>
+            style={{ color: accent }}>
             {item.title}
           </span>
         </div>
 
         {item.subtitle && (
           <p className="text-[11px] sm:text-[12px] font-bold uppercase tracking-widest mt-2 text-center"
-            style={{ color: RANK_ACCENT }}>
+            style={{ color: accent }}>
             {item.subtitle}
           </p>
         )}
@@ -656,7 +675,7 @@ function RankCard({ item }: { item: ClubRank }) {
               <button
                 onClick={() => setExpanded(!expanded)}
                 className="mt-2 mx-auto flex items-center gap-1 text-[11px] font-semibold transition-colors"
-                style={{ color: RANK_ACCENT }}
+                style={{ color: accent }}
               >
                 {expanded ? 'Show less' : 'Read more'}
                 {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -668,7 +687,7 @@ function RankCard({ item }: { item: ClubRank }) {
 
       {/* Bottom accent bar on hover */}
       <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-b-2xl"
-        style={{ background: RANK_ACCENT }} />
+        style={{ background: accent }} />
     </div>
   );
 }
@@ -937,7 +956,7 @@ export function ClubInfo() {
           ) : ranks.length === 0 && !error ? (
             <div className="col-span-full"><EmptyState label="Ranks" /></div>
           ) : (
-            ranks.map(rank => <RankCard key={rank.id} item={rank} />)
+            ranks.map((rank, i) => <RankCard key={rank.id} item={rank} index={i} />)
           )}
         </div>
       )}
