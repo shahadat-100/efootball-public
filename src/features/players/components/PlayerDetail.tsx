@@ -322,75 +322,84 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     hattricks: stats.totalHattricks
   };
 
-  // ── Monthly & Weekly RANK calculation ──────────────────────────────
-  type PeriodStats = { wins: number; draws: number; losses: number; goals: number; matches: number; points: number };
-
-  const buildPeriodKey = (dateStr: string, mode: 'month' | 'week') => {
-    if (!dateStr || dateStr.length < 10) return '';
-    const [year, month, day] = dateStr.split('-');
-    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    if (isNaN(d.getTime())) return '';
-
-    const monthKey = d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
-    if (mode === 'month') return monthKey;
-
-    const weekNum = Math.ceil(d.getDate() / 7);
-    return `W${weekNum} ${monthKey}`;
+  // ── Monthly & Weekly RANK calculation (Using pre-aggregated stats) ──────────────────────────────
+  const aggregateMonth = (m: any) => {
+    return (m.weeklyStats || []).reduce((acc: any, w: any) => {
+      acc.win += w.win || 0;
+      acc.draw += w.draw || 0;
+      acc.loss += w.loss || 0;
+      acc.goalsScored += w.goalsScored || 0;
+      acc.goalsConceded += w.goalsConceded || 0;
+      acc.motm += w.motm || 0;
+      acc.hattricks += w.hattricks || 0;
+      acc.matches += w.matches || 0;
+      return acc;
+    }, { win: 0, draw: 0, loss: 0, goalsScored: 0, goalsConceded: 0, motm: 0, hattricks: 0, matches: 0 });
   };
 
-  // Collect all unique period keys from this player's entries
-  const myMonthKeys = new Set<string>();
-  const myWeekKeys = new Set<string>();
-  entries.forEach(e => {
-    if (!e.date) return;
-    const mk = buildPeriodKey(e.date, 'month');
-    if (mk) myMonthKeys.add(mk);
-    const wk = buildPeriodKey(e.date, 'week');
-    if (wk) myWeekKeys.add(wk);
+  const calcMonthlyPoints = (s: any) => 
+    (s.win * 10) + (s.draw * 5) - (s.loss * 3) + s.goalsScored - s.goalsConceded + (s.motm * 4) + s.hattricks;
+
+  const monthlyRankData: any[] = [];
+  
+  // Find current active season safely without 'seasonId' if not in scope, or fallback to current year
+  // Let's assume we want the stats for all available years/seasons or just the most recent one.
+  // We can just iterate over all seasons this player has.
+  player.seasons?.forEach(mySeason => {
+    if (mySeason && mySeason.monthlyStats) {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      
+      mySeason.monthlyStats.forEach(myMonthStat => {
+        const aggregatedMyMonth = aggregateMonth(myMonthStat);
+        if (aggregatedMyMonth.matches > 0) {
+          // Calculate points for all players for this specific year and month
+          const monthPlayers = players.map(p => {
+            const pSeason = p.seasons?.find(s => s.year === mySeason.year);
+            const pMonthStat = pSeason?.monthlyStats?.find(m => m.month === myMonthStat.month);
+            
+            if (!pMonthStat) return null;
+            
+            const aggregatedPMonth = aggregateMonth(pMonthStat);
+            if (aggregatedPMonth.matches === 0) return null;
+            
+            return {
+              playerId: p.id,
+              points: calcMonthlyPoints(aggregatedPMonth),
+              goals: aggregatedPMonth.goalsScored
+            };
+          }).filter(Boolean) as { playerId: string, points: number, goals: number }[];
+          
+          // Sort to get rank
+          monthPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
+          
+          const myRank = monthPlayers.findIndex(p => p.playerId === player.id) + 1;
+          
+          if (myRank > 0) {
+            monthlyRankData.push({
+              label: `${monthNames[myMonthStat.month - 1]} ${mySeason.year}`,
+              rank: myRank,
+              wins: aggregatedMyMonth.win,
+              draws: aggregatedMyMonth.draw,
+              losses: aggregatedMyMonth.loss,
+              goals: aggregatedMyMonth.goalsScored,
+              matches: aggregatedMyMonth.matches,
+              totalPlayers: monthPlayers.length
+            });
+          }
+        }
+      });
+    }
   });
 
-  const getRankForPeriod = (periodKey: string, mode: 'month' | 'week'): { rank: number; wins: number; draws: number; losses: number; goals: number; matches: number; totalPlayers: number } => {
-    const playerPoints = new Map<string, PeriodStats>();
-    matchEntries.forEach(e => {
-      if (!e.date) return;
-      const pk = buildPeriodKey(e.date, mode);
-      if (pk !== periodKey) return;
-      if (!playerPoints.has(e.playerId)) {
-        playerPoints.set(e.playerId, { wins: 0, draws: 0, losses: 0, goals: 0, matches: 0, points: 0 });
-      }
-      const ps = playerPoints.get(e.playerId)!;
-      ps.matches += 1;
-      ps.goals += e.goals || 0;
-      if (e.result === 'win') { ps.wins += 1; ps.points += 10; }
-      else if (e.result === 'draw') { ps.draws += 1; ps.points += 5; }
-      else if (e.result === 'loss') { ps.losses += 1; ps.points -= 3; }
-      ps.points += (e.goals || 0);
-      ps.points -= (e.goalsConceded || 0);
-      if (e.motm) ps.points += 4;
-      ps.points += (e.hattricks || 0);
-    });
-
-    const sorted = Array.from(playerPoints.entries()).sort((a, b) => b[1].points - a[1].points || b[1].goals - a[1].goals);
-    const rankIdx = sorted.findIndex(([id]) => id === playerId);
-    const myStats = playerPoints.get(playerId) || { wins: 0, draws: 0, losses: 0, goals: 0, matches: 0, points: 0 };
-    return {
-      rank: rankIdx !== -1 ? rankIdx + 1 : sorted.length + 1,
-      ...myStats,
-      totalPlayers: sorted.length
-    };
-  };
-
-  const monthlyRankData = Array.from(myMonthKeys)
-    .map(key => ({ label: key, ...getRankForPeriod(key, 'month') }))
-    .sort((a, b) => {
-      // Sort by most recent month first, fallback to rank
-      const dateA = new Date(`1 ${a.label}`);
-      const dateB = new Date(`1 ${b.label}`);
-      if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
-        return dateB.getTime() - dateA.getTime();
-      }
-      return a.rank - b.rank;
-    });
+  // Sort by date descending
+  monthlyRankData.sort((a, b) => {
+    const dateA = new Date(`1 ${a.label}`);
+    const dateB = new Date(`1 ${b.label}`);
+    if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+      return dateB.getTime() - dateA.getTime();
+    }
+    return a.rank - b.rank;
+  });
 
   const renderTrophyCabinet = () => {
     const trophies = [];
