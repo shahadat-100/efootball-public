@@ -364,36 +364,96 @@ export function Overview({ setTab }: OverviewProps) {
         </div>
 
         <div className="xl:col-span-1">
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col w-full">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col w-full h-full">
             <div className="flex items-center justify-between mb-6">
-              <p className="font-semibold text-base text-foreground tracking-tight">Recent Matches</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-primary" />
+                </div>
+                <p className="font-heading font-bold text-[18px] text-foreground tracking-wide">Recent Matches</p>
+              </div>
               <Badge bg="#1a1a1a" c="#e5e5e5">Live</Badge>
             </div>
+            
             {matches.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center my-auto">No matches yet</p>
+              <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3 opacity-50">
+                <Trophy className="w-10 h-10 text-muted-foreground" />
+                <p className="text-muted-foreground text-sm font-medium">No matches yet</p>
+              </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {([...matches].reverse().slice(0, 8)).map(m => {
                   const sb = STATUS_BADGE[m.status as keyof typeof STATUS_BADGE] ?? STATUS_BADGE.finished;
                   const result = uniqueMatchesResults.matchResultsMap.get(m.id);
+                  
+                  // Accent colors based on result
+                  let accentColor = '#3b82f6'; // Default blue for upcoming/live
+                  let bgTint = 'bg-blue-500/5';
+                  let borderTint = 'border-blue-500/10';
+                  
+                  if (m.status === 'finished' && result) {
+                    if (result === 'win') { accentColor = '#10b981'; bgTint = 'bg-emerald-500/5'; borderTint = 'border-emerald-500/20'; }
+                    else if (result === 'draw') { accentColor = '#f59e0b'; bgTint = 'bg-amber-500/5'; borderTint = 'border-amber-500/20'; }
+                    else { accentColor = '#ef4444'; bgTint = 'bg-red-500/5'; borderTint = 'border-red-500/20'; }
+                  }
 
                   return (
-                    <div key={m.id} className="py-4 border-b border-border/50 last:border-0 group transition-colors">
-                      <div className="flex justify-between items-center gap-4 mb-2">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-[13px] font-bold text-foreground leading-tight">{m.homeTeam} <span className="text-muted-foreground font-normal mx-1">vs</span> {m.awayTeam}</span>
-                          {m.status === 'finished' && result && (
-                            <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-sm tracking-wider ${result === 'win' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                              result === 'draw' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                'bg-red-500/10 text-red-500 border border-red-500/20'
-                              }`}>
-                              {result === 'loss' ? 'lost' : result}
-                            </span>
-                          )}
+                    <div 
+                      key={m.id} 
+                      className={`group relative flex items-center justify-between p-3.5 sm:p-4 rounded-xl border ${borderTint} hover:border-border transition-all duration-300 ${bgTint} hover:shadow-sm overflow-hidden`}
+                    >
+                      {/* Left result accent bar */}
+                      <div 
+                        className="absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-300 group-hover:w-1.5"
+                        style={{ backgroundColor: accentColor }}
+                      />
+
+                      {/* Info side (Left) */}
+                      <div className="flex flex-col gap-1.5 pl-2.5 min-w-0 flex-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground truncate">
+                          {m.competition}
+                        </p>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-[13px] font-bold text-foreground truncate max-w-[90px] sm:max-w-none text-right flex-1 sm:flex-none">
+                            {m.homeTeam}
+                          </span>
+                          
+                          {/* Score Pill */}
+                          <div 
+                            className="flex items-center justify-center px-2 min-w-[48px] h-6 rounded-md border text-[13px] font-black tracking-widest shrink-0 shadow-sm"
+                            style={{ 
+                              backgroundColor: m.status === 'finished' ? `${accentColor}15` : 'transparent', 
+                              borderColor: m.status === 'finished' ? `${accentColor}40` : 'var(--border)',
+                              color: m.status === 'finished' ? accentColor : 'var(--muted-foreground)'
+                            }}
+                          >
+                            {m.status === 'finished' ? `${m.homeScore ?? '-'} - ${m.awayScore ?? '-'}` : 'VS'}
+                          </div>
+
+                          <span className="text-[13px] font-bold text-foreground truncate max-w-[90px] sm:max-w-none flex-1 sm:flex-none">
+                            {m.awayTeam}
+                          </span>
                         </div>
-                        <Badge bg={sb.bg} c={sb.c}>{m.status}</Badge>
+                        
+                        <div className="flex items-center mt-0.5">
+                          <p className="text-[11px] font-medium text-muted-foreground/80">
+                            {m.date} {m.time ? `• ${m.time}` : ''}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[11px] font-medium text-muted-foreground">{m.competition} · {m.date}</p>
+
+                      {/* Status side (Right) */}
+                      <div className="shrink-0 flex flex-col items-end justify-center gap-2 pl-3 border-l border-border/40 ml-2 py-1">
+                        <Badge bg={sb.bg} c={sb.c}>{m.status}</Badge>
+                        {m.status === 'finished' && result && (
+                          <span 
+                            className="text-[9px] uppercase font-black tracking-widest"
+                            style={{ color: accentColor }}
+                          >
+                            {result === 'loss' ? 'lost' : result}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
