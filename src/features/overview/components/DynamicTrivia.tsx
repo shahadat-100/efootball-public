@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { Match } from '@/features/matches/types';
 import { NewsArticle } from '@/features/news/types';
