@@ -101,8 +101,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const currentYearForWeek = new Date().getFullYear();
   const activeWeekNumber =
     currentDayOfMonth >= 22 ? 4 :
-    currentDayOfMonth >= 15 ? 3 :
-    currentDayOfMonth >= 8 ? 2 : 1;
+      currentDayOfMonth >= 15 ? 3 :
+        currentDayOfMonth >= 8 ? 2 : 1;
   const recentWeekEntries = entries.filter(e => {
     if (!e.date) return false;
     const d = new Date(e.date);
@@ -324,37 +324,37 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   // ── Monthly & Weekly RANK calculation (Using pre-aggregated stats) ──────────────────────────────
-  const calcMonthlyPoints = (s: any) => 
+  const calcMonthlyPoints = (s: any) =>
     (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
   const monthlyRankData: any[] = [];
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
+
   // Find all unique (year, monthIndex) combinations where the current player has matches
   const myMonthlyStats = playerMonthlyStats.filter(s => s.playerId === player.id && s.appearances > 0);
-  
+
   myMonthlyStats.forEach(myStat => {
     const year = myStat.year;
     const monthIndex = myStat.monthIndex; // 0-indexed (0 to 11)
-    
+
     // Get all players stats for this year & month
     const playersInMonth = playerMonthlyStats.filter(
       s => s.year === year && s.monthIndex === monthIndex && s.appearances > 0
     );
-    
+
     // Calculate points and goals
     const rankedPlayers = playersInMonth.map(ps => ({
       playerId: ps.playerId,
       points: calcMonthlyPoints(ps),
       goals: ps.goals
     }));
-    
+
     // Sort by points desc, goals desc
     rankedPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
-    
+
     const myRank = rankedPlayers.findIndex(p => p.playerId === player.id) + 1;
-    
-    if (myRank > 0) {
+
+    if (myRank > 0 && myRank <= 10) {
       monthlyRankData.push({
         label: `${monthNames[monthIndex]} ${year}`,
         rank: myRank,
@@ -751,13 +751,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 divide-x divide-y divide-border">
               {[
-                { l: 'Matches',  v: stats.totalMatches,      color: '#6366f1' },
-                { l: 'Goals',    v: stats.totalGoals,         color: '#10b981' },
-                { l: 'Wins',     v: stats.totalWins,          color: '#22c55e' },
-                { l: 'Draws',    v: stats.totalDraws,         color: '#f59e0b' },
-                { l: 'Losses',   v: stats.totalLosses,        color: '#ef4444' },
+                { l: 'Matches', v: stats.totalMatches, color: '#6366f1' },
+                { l: 'Goals', v: stats.totalGoals, color: '#10b981' },
+                { l: 'Wins', v: stats.totalWins, color: '#22c55e' },
+                { l: 'Draws', v: stats.totalDraws, color: '#f59e0b' },
+                { l: 'Losses', v: stats.totalLosses, color: '#ef4444' },
                 { l: 'Clean Sh.', v: stats.totalCleanSheets, color: '#38bdf8' },
-                { l: 'MOTM',     v: stats.totalMOTM,          color: '#a855f7' },
+                { l: 'MOTM', v: stats.totalMOTM, color: '#a855f7' },
               ].map(s => (
                 <div key={s.l} className="flex flex-col items-center justify-center py-5 hover:bg-muted/30 transition-colors">
                   <p className="font-heading font-black text-2xl leading-none" style={{ color: s.color }}>{s.v}</p>
@@ -798,13 +798,13 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 divide-x divide-y divide-border">
                   {[
-                    { l: 'Matches', v: latestSeasonStats.matches,      color: '#6366f1' },
-                    { l: 'Goals',   v: latestSeasonStats.goals,         color: '#10b981' },
-                    { l: 'Wins',    v: latestSeasonStats.wins,          color: '#22c55e' },
-                    { l: 'Draws',   v: latestSeasonStats.draws,         color: '#f59e0b' },
-                    { l: 'Losses',  v: latestSeasonStats.losses,        color: '#ef4444' },
+                    { l: 'Matches', v: latestSeasonStats.matches, color: '#6366f1' },
+                    { l: 'Goals', v: latestSeasonStats.goals, color: '#10b981' },
+                    { l: 'Wins', v: latestSeasonStats.wins, color: '#22c55e' },
+                    { l: 'Draws', v: latestSeasonStats.draws, color: '#f59e0b' },
+                    { l: 'Losses', v: latestSeasonStats.losses, color: '#ef4444' },
                     { l: 'Clean Sh.', v: latestSeasonStats.cleanSheets, color: '#38bdf8' },
-                    { l: 'MOTM',    v: latestSeasonStats.motm,          color: '#a855f7' },
+                    { l: 'MOTM', v: latestSeasonStats.motm, color: '#a855f7' },
                   ].map(s => (
                     <div key={s.l} className="flex flex-col items-center justify-center py-5 hover:bg-muted/30 transition-colors">
                       <p className="font-heading font-black text-2xl leading-none" style={{ color: s.color }}>{s.v}</p>
@@ -929,8 +929,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
             <div className="my-4">
               <RankTrendCard
-                title="Monthly Rank"
-                subtitle="Monthly performance and rank overview"
+                title="Monthly Rank 🏅"
+                subtitle="Months where player ranked in the Top 10"
                 data={monthlyRankData}
               />
             </div>
