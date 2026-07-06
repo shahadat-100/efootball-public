@@ -1,9 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { Match } from '@/features/matches/types';
 import { NewsArticle } from '@/features/news/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 import { ChevronLeft, ChevronRight, Zap } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+interface ClubRank {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  image_url: string | null;
+}
+
+interface ClubAchievement {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  image_url: string | null;
+}
 
 interface DynamicTriviaProps {
   players: Player[];
@@ -29,6 +46,23 @@ const MONTH_NAMES = ['January','February','March','April','May','June','July','A
 export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, matches, news }: DynamicTriviaProps) {
   const [triviaIndex, setTriviaIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [clubRanks, setClubRanks] = useState<ClubRank[]>([]);
+  const [clubAchievements, setClubAchievements] = useState<ClubAchievement[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('club_ranks')
+      .select('id, title, subtitle, description, image_url')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setClubRanks(data); });
+
+    supabase
+      .from('club_achievements')
+      .select('id, title, subtitle, description, image_url')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setClubAchievements(data); });
+  }, []);
 
   // ── Aggregate season stats per player ──
   const agg = useMemo(() => {
@@ -129,7 +163,35 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     if (clubGoals > 0) push({ label: 'Total Club Goals', headline: 'GOALS SCORED', highlight: String(clubGoals), suffix: 'goals scored as a club', accentColor: '#ef4444', bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]' });
 
     // ─────────────────────────────────────
-    // 7. NEWS
+    // 6. CLUB RANKS
+    // ─────────────────────────────────────
+    clubRanks.forEach(r => {
+      push({
+        label: '🏅 Club Rank',
+        headline: r.subtitle?.toUpperCase() ?? 'RANK TIER',
+        highlight: r.title,
+        suffix: r.description ?? 'Official club rank tier',
+        accentColor: '#f59e0b',
+        bgGradient: 'from-amber-950/80 via-[#0d0d0d] to-[#0d0d0d]',
+      });
+    });
+
+    // ─────────────────────────────────────
+    // 7. CLUB ACHIEVEMENTS
+    // ─────────────────────────────────────
+    clubAchievements.forEach(a => {
+      push({
+        label: '🏆 Club Achievement',
+        headline: a.subtitle?.toUpperCase() ?? 'ACHIEVEMENT',
+        highlight: a.title,
+        suffix: a.description ?? 'A proud club milestone',
+        accentColor: '#c8102e',
+        bgGradient: 'from-red-950/80 via-[#0d0d0d] to-[#0d0d0d]',
+      });
+    });
+
+    // ─────────────────────────────────────
+    // 8. NEWS
     // ─────────────────────────────────────
     const latestN = [...news].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')).slice(0, 3);
     latestN.forEach(n => {
@@ -137,7 +199,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     });
 
     return facts;
-  }, [players, agg, playerMonthlyStats, playerWeeklyStats, matches, news]);
+  }, [players, agg, playerMonthlyStats, playerWeeklyStats, matches, news, clubRanks, clubAchievements]);
 
   const go = (dir: number) => {
     setAnimating(true);
@@ -147,12 +209,37 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
     }, 150);
   };
 
+  // Auto-advance every 3 seconds, pauses on hover
+  useEffect(() => {
+    if (paused || trivias.length <= 1) return;
+    const id = setInterval(() => go(1), 3000);
+    return () => clearInterval(id);
+  }, [paused, trivias.length, triviaIndex]);
+
   const fact = trivias[triviaIndex];
 
   if (!fact) return null;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+    <div
+      className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Auto-advance progress bar */}
+      {!paused && (
+        <div className="absolute top-0 left-0 right-0 h-[2px] z-20 overflow-hidden rounded-t-2xl">
+          <div
+            key={triviaIndex}
+            className="h-full rounded-full"
+            style={{
+              background: fact.accentColor,
+              animation: 'trivia-progress 3s linear forwards',
+            }}
+          />
+        </div>
+      )}
+      <style>{`@keyframes trivia-progress { from { width: 0% } to { width: 100% } }`}</style>
       {/* Glow behind */}
       <div className="absolute top-0 left-0 w-full h-40 pointer-events-none opacity-20 transition-all duration-500" style={{ background: `linear-gradient(to bottom, ${fact.accentColor}55, transparent)` }} />
       <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-40 rounded-full blur-3xl pointer-events-none opacity-20 transition-all duration-500" style={{ background: fact.accentColor }} />
