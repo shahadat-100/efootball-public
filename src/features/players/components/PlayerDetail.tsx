@@ -21,11 +21,12 @@ interface PlayerDetailProps {
   onBack: () => void;
 }
 export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
-  const { players, matchEntries, playerSeasonStats, seasons, fetchPlayerMatchEntries } = useFootballStore();
+  const { players, matchEntries, playerSeasonStats, seasons, playerMonthlyStats, fetchPlayerMatchEntries, fetchPlayerMonthlyStats } = useFootballStore();
 
   useEffect(() => {
     fetchPlayerMatchEntries(playerId);
-  }, [playerId, fetchPlayerMatchEntries]);
+    fetchPlayerMonthlyStats();
+  }, [playerId, fetchPlayerMatchEntries, fetchPlayerMonthlyStats]);
 
   const player = players.find(p => p.id === playerId);
   const stats = usePlayerStats(playerId);
@@ -323,76 +324,46 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   // ── Monthly & Weekly RANK calculation (Using pre-aggregated stats) ──────────────────────────────
-
+  const calcMonthlyPoints = (s: any) => 
+    (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
   const monthlyRankData: any[] = [];
-  
-  // Aggregate all matches by month and year
-  const matchMonths = new Set<string>();
-  matchEntries.forEach(entry => {
-    if (entry.date) {
-      const d = new Date(entry.date);
-      if (!isNaN(d.getTime())) {
-        matchMonths.add(`${d.getFullYear()}-${d.getMonth() + 1}`);
-      }
-    }
-  });
-
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  matchMonths.forEach(monthKey => {
-    const [yearStr, monthStr] = monthKey.split('-');
-    const year = parseInt(yearStr, 10);
-    const month = parseInt(monthStr, 10); // 1-indexed
-
-    // Compute stats for all players in this month
-    const monthPlayers = players.map(p => {
-      let win = 0, draw = 0, loss = 0, goalsScored = 0, goalsConceded = 0, motm = 0, hattricks = 0, matches = 0;
-      
-      matchEntries.forEach(entry => {
-        if (entry.playerId === p.id && entry.date) {
-          const d = new Date(entry.date);
-          if (d.getFullYear() === year && (d.getMonth() + 1) === month) {
-            matches++;
-            if (entry.result === 'win') win++;
-            else if (entry.result === 'draw') draw++;
-            else if (entry.result === 'loss') loss++;
-            
-            goalsScored += (entry.goals || 0);
-            goalsConceded += (entry.goalsConceded || 0);
-            if (entry.motm) motm++;
-            hattricks += (entry.hattricks || 0);
-          }
-        }
-      });
-
-      if (matches === 0) return null;
-
-      const points = (win * 10) + (draw * 5) - (loss * 3) + goalsScored - goalsConceded + (motm * 4) + hattricks;
-
-      return {
-        playerId: p.id,
-        points,
-        goals: goalsScored,
-        stats: { win, draw, loss, goalsScored, matches }
-      };
-    }).filter(Boolean) as any[];
-
-    // Sort to get rank
-    monthPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
+  
+  // Find all unique (year, monthIndex) combinations where the current player has matches
+  const myMonthlyStats = playerMonthlyStats.filter(s => s.playerId === player.id && s.appearances > 0);
+  
+  myMonthlyStats.forEach(myStat => {
+    const year = myStat.year;
+    const monthIndex = myStat.monthIndex; // usually 1-12
     
-    const myPlayerStats = monthPlayers.find(p => p.playerId === player.id);
-    if (myPlayerStats) {
-      const myRank = monthPlayers.findIndex(p => p.playerId === player.id) + 1;
+    // Get all players stats for this year & month
+    const playersInMonth = playerMonthlyStats.filter(
+      s => s.year === year && s.monthIndex === monthIndex && s.appearances > 0
+    );
+    
+    // Calculate points and goals
+    const rankedPlayers = playersInMonth.map(ps => ({
+      playerId: ps.playerId,
+      points: calcMonthlyPoints(ps),
+      goals: ps.goals
+    }));
+    
+    // Sort by points desc, goals desc
+    rankedPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
+    
+    const myRank = rankedPlayers.findIndex(p => p.playerId === player.id) + 1;
+    
+    if (myRank > 0) {
       monthlyRankData.push({
-        label: `${monthNames[month - 1]} ${year}`,
+        label: `${monthNames[monthIndex - 1]} ${year}`,
         rank: myRank,
-        wins: myPlayerStats.stats.win,
-        draws: myPlayerStats.stats.draw,
-        losses: myPlayerStats.stats.loss,
-        goals: myPlayerStats.stats.goalsScored,
-        matches: myPlayerStats.stats.matches,
-        totalPlayers: monthPlayers.length
+        wins: myStat.wins,
+        draws: myStat.draws,
+        losses: myStat.losses,
+        goals: myStat.goals,
+        matches: myStat.appearances,
+        totalPlayers: rankedPlayers.length
       });
     }
   });
