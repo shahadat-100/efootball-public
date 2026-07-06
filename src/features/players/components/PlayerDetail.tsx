@@ -323,70 +323,76 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   // ── Monthly & Weekly RANK calculation (Using pre-aggregated stats) ──────────────────────────────
-  const aggregateMonth = (m: any) => {
-    return (m.weeklyStats || []).reduce((acc: any, w: any) => {
-      acc.win += w.win || 0;
-      acc.draw += w.draw || 0;
-      acc.loss += w.loss || 0;
-      acc.goalsScored += w.goalsScored || 0;
-      acc.goalsConceded += w.goalsConceded || 0;
-      acc.motm += w.motm || 0;
-      acc.hattricks += w.hattricks || 0;
-      acc.matches += w.matches || 0;
-      return acc;
-    }, { win: 0, draw: 0, loss: 0, goalsScored: 0, goalsConceded: 0, motm: 0, hattricks: 0, matches: 0 });
-  };
 
-  const calcMonthlyPoints = (s: any) => 
-    (s.win * 10) + (s.draw * 5) - (s.loss * 3) + s.goalsScored - s.goalsConceded + (s.motm * 4) + s.hattricks;
 
   const monthlyRankData: any[] = [];
   
-  // Find current active season safely without 'seasonId' if not in scope, or fallback to current year
-  // Let's assume we want the stats for all available years/seasons or just the most recent one.
-  // We can just iterate over all seasons this player has.
-  player.seasons?.forEach(mySeason => {
-    if (mySeason && mySeason.monthlyStats) {
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  // Aggregate all matches by month and year
+  const matchMonths = new Set<string>();
+  matchEntries.forEach(entry => {
+    if (entry.date) {
+      const d = new Date(entry.date);
+      if (!isNaN(d.getTime())) {
+        matchMonths.add(`${d.getFullYear()}-${d.getMonth() + 1}`);
+      }
+    }
+  });
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  matchMonths.forEach(monthKey => {
+    const [yearStr, monthStr] = monthKey.split('-');
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10); // 1-indexed
+
+    // Compute stats for all players in this month
+    const monthPlayers = players.map(p => {
+      let win = 0, draw = 0, loss = 0, goalsScored = 0, goalsConceded = 0, motm = 0, hattricks = 0, matches = 0;
       
-      mySeason.monthlyStats.forEach(myMonthStat => {
-        const aggregatedMyMonth = aggregateMonth(myMonthStat);
-        if (aggregatedMyMonth.matches > 0) {
-          // Calculate points for all players for this specific year and month
-          const monthPlayers = players.map(p => {
-            const pSeason = p.seasons?.find(s => s.year === mySeason.year);
-            const pMonthStat = pSeason?.monthlyStats?.find(m => m.month === myMonthStat.month);
+      matchEntries.forEach(entry => {
+        if (entry.playerId === p.id && entry.date) {
+          const d = new Date(entry.date);
+          if (d.getFullYear() === year && (d.getMonth() + 1) === month) {
+            matches++;
+            if (entry.result === 'win') win++;
+            else if (entry.result === 'draw') draw++;
+            else if (entry.result === 'loss') loss++;
             
-            if (!pMonthStat) return null;
-            
-            const aggregatedPMonth = aggregateMonth(pMonthStat);
-            if (aggregatedPMonth.matches === 0) return null;
-            
-            return {
-              playerId: p.id,
-              points: calcMonthlyPoints(aggregatedPMonth),
-              goals: aggregatedPMonth.goalsScored
-            };
-          }).filter(Boolean) as { playerId: string, points: number, goals: number }[];
-          
-          // Sort to get rank
-          monthPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
-          
-          const myRank = monthPlayers.findIndex(p => p.playerId === player.id) + 1;
-          
-          if (myRank > 0) {
-            monthlyRankData.push({
-              label: `${monthNames[myMonthStat.month - 1]} ${mySeason.year}`,
-              rank: myRank,
-              wins: aggregatedMyMonth.win,
-              draws: aggregatedMyMonth.draw,
-              losses: aggregatedMyMonth.loss,
-              goals: aggregatedMyMonth.goalsScored,
-              matches: aggregatedMyMonth.matches,
-              totalPlayers: monthPlayers.length
-            });
+            goalsScored += (entry.goals || 0);
+            goalsConceded += (entry.goalsConceded || 0);
+            if (entry.motm) motm++;
+            hattricks += (entry.hattricks || 0);
           }
         }
+      });
+
+      if (matches === 0) return null;
+
+      const points = (win * 10) + (draw * 5) - (loss * 3) + goalsScored - goalsConceded + (motm * 4) + hattricks;
+
+      return {
+        playerId: p.id,
+        points,
+        goals: goalsScored,
+        stats: { win, draw, loss, goalsScored, matches }
+      };
+    }).filter(Boolean) as any[];
+
+    // Sort to get rank
+    monthPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
+    
+    const myPlayerStats = monthPlayers.find(p => p.playerId === player.id);
+    if (myPlayerStats) {
+      const myRank = monthPlayers.findIndex(p => p.playerId === player.id) + 1;
+      monthlyRankData.push({
+        label: `${monthNames[month - 1]} ${year}`,
+        rank: myRank,
+        wins: myPlayerStats.stats.win,
+        draws: myPlayerStats.stats.draw,
+        losses: myPlayerStats.stats.loss,
+        goals: myPlayerStats.stats.goalsScored,
+        matches: myPlayerStats.stats.matches,
+        totalPlayers: monthPlayers.length
       });
     }
   });
