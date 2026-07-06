@@ -335,7 +335,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   
   myMonthlyStats.forEach(myStat => {
     const year = myStat.year;
-    const monthIndex = myStat.monthIndex; // usually 1-12
+    const monthIndex = myStat.monthIndex; // 0-indexed (0 to 11)
     
     // Get all players stats for this year & month
     const playersInMonth = playerMonthlyStats.filter(
@@ -356,7 +356,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     
     if (myRank > 0) {
       monthlyRankData.push({
-        label: `${monthNames[monthIndex - 1]} ${year}`,
+        label: `${monthNames[monthIndex]} ${year}`,
         rank: myRank,
         wins: myStat.wins,
         draws: myStat.draws,
