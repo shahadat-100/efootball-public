@@ -67,27 +67,71 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
     const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
       s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
-    // Weekly from playerWeeklyStats
+    // ── Helper: compute week number (1-4) from a date string ──────────────
+    const getWeek = (dateStr: string): number => {
+      const day = new Date(dateStr).getDate();
+      if (day >= 22) return 4;
+      if (day >= 15) return 3;
+      if (day >= 8)  return 2;
+      return 1;
+    };
+
+    // ── Weekly — HYBRID: matchEntries (accurate) + playerWeeklyStats (historical fallback) ──
+    // Problem 1: playerWeeklyStats table may be incomplete for recent data (missing players)
+    // Problem 2: matchEntries only has 500 most-recent rows (old weeks have no entries in memory)
+    // Solution: use matchEntries if available for the period; otherwise fall back to playerWeeklyStats
     const weeklyList: RankedPlayer[] = players.map(p => {
+      // Step 1: check matchEntries for this period (covers recent weeks accurately)
+      const entries = matchEntries.filter(e => {
+        if (e.playerId !== p.id) return false;
+        if (!e.date) return false;
+        const d = new Date(e.date);
+        if (isNaN(d.getTime())) return false;
+        const monthMatch = d.getMonth() === selectedWeeklyMonth;
+        const weekMatch  = getWeek(e.date) === selectedWeeklyWeek;
+        const yearMatch  = selectedWeeklySeasonId !== null
+          ? e.seasonId === selectedWeeklySeasonId
+          : d.getFullYear() === currentYear;
+        return monthMatch && weekMatch && yearMatch;
+      });
+
+      if (entries.length > 0) {
+        // Use live entry data — most accurate source
+        const wins   = entries.filter(e => e.result === 'win').length;
+        const draws  = entries.filter(e => e.result === 'draw').length;
+        const losses = entries.filter(e => e.result === 'loss').length;
+        const gf     = entries.reduce((t, e) => t + (e.goals || 0), 0);
+        const gc     = entries.reduce((t, e) => t + (e.goalsConceded || 0), 0);
+        const cs     = entries.filter(e => e.cleanSheet).length;
+        const ht     = entries.reduce((t, e) => t + (e.hattricks || 0), 0);
+        const motm   = entries.filter(e => e.motm).length;
+        const matches = wins + draws + losses;
+        const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
+        const points  = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
+        return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
+      }
+
+      // Step 2: fallback to pre-computed playerWeeklyStats (covers older weeks)
       const stats = playerWeeklyStats.filter(s =>
         s.playerId === p.id &&
         s.monthIndex === selectedWeeklyMonth &&
         s.week === selectedWeeklyWeek &&
         (selectedWeeklySeasonId !== null ? s.seasonId === selectedWeeklySeasonId : s.year === currentYear)
       );
-      const wins = stats.reduce((t, s) => t + s.wins, 0);
-      const draws = stats.reduce((t, s) => t + s.draws, 0);
+      const wins   = stats.reduce((t, s) => t + s.wins, 0);
+      const draws  = stats.reduce((t, s) => t + s.draws, 0);
       const losses = stats.reduce((t, s) => t + s.losses, 0);
-      const gf = stats.reduce((t, s) => t + s.goals, 0);
-      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
-      const cs = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
-      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
-      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+      const gf     = stats.reduce((t, s) => t + s.goals, 0);
+      const gc     = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+      const cs     = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
+      const ht     = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+      const motm   = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
+      const points  = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
       return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
     }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points);
+
 
     // Monthly from playerMonthlyStats
     const monthlyList: RankedPlayer[] = players.map(p => {

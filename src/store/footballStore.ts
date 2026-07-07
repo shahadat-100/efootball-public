@@ -280,11 +280,11 @@ export const useFootballStore = create<FootballStore>()(
           // ৫টি টেবিল প্যারালাল ফেচ করা হচ্ছে (Nested Join বাদ দিয়ে)
           // Fix: project only needed columns on junction/lookup tables
           const [playersRes, junctionRolesRes, rolesRes, junctionTagsRes, tagsRes] = await Promise.all([
-            supabase.from('players').select('id, name, jerseynumber, email, custom_string_tags, createdat, profileimageurl, coverimageurl, dateOFbirth, education, location, "aboutMe", "openionAboutClub"'),
-            supabase.from('player_player_roles').select('player_id, role_id'),
-            supabase.from('player_role').select('id, name'),
-            supabase.from('player_custom_tags').select('player_id, tag_id'),
-            supabase.from('custom_tags').select('id, name')
+            supabase.from('players').select('id, name, jerseynumber, email, custom_string_tags, createdat, profileimageurl, coverimageurl, dateOFbirth, education, location, "aboutMe", "openionAboutClub"').order('createdat', { ascending: true }).limit(2000),
+            supabase.from('player_player_roles').select('player_id, role_id').limit(5000),
+            supabase.from('player_role').select('id, name').limit(200),
+            supabase.from('player_custom_tags').select('player_id, tag_id').limit(5000),
+            supabase.from('custom_tags').select('id, name').limit(200)
           ]);
           if (playersRes.error) throw playersRes.error;
           const players = playersRes.data || [];
@@ -342,7 +342,9 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: project only columns mapMatchFromDb reads — drops created_at, updated_at, etc.
         const { data, error } = await supabase
           .from('matches')
-          .select('id, season_id, hometeam, awayteam, homescore, awayscore, date, time, status, competition_id, competitions(name)');
+          .select('id, season_id, hometeam, awayteam, homescore, awayscore, date, time, status, competition_id, competitions(name)')
+          .order('date', { ascending: false })
+          .limit(2000);
         if (data) set({ matches: data.map(mapMatchFromDb) });
         if (error) console.error('Error fetching matches:', error);
       },
@@ -446,7 +448,8 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: project only the columns the mapper reads.
         const { data, error } = await supabase
           .from('player_season_stats')
-          .select('id, player_id, season_id, appearances, goals, cleansheets, hattricks, motmcount, wins, draws, losses, goalsconceded, season:season_id(name)');
+          .select('id, player_id, season_id, appearances, goals, cleansheets, hattricks, motmcount, wins, draws, losses, goalsconceded, season:season_id(name)')
+          .limit(2000);
         if (error) {
           console.error('Error fetching player season stats:', error);
           return;
@@ -474,9 +477,14 @@ export const useFootballStore = create<FootballStore>()(
 
       fetchPlayerMonthlyStats: async () => {
         if (get().playerMonthlyStats.length > 0) return;
+        // Fix: same Supabase 1000-row default limit issue as weekly stats.
+        // Order newest-first so recent months are always included.
         const { data, error } = await supabase
           .from('player_monthly_stats')
-          .select('*');
+          .select('*')
+          .order('year', { ascending: false })
+          .order('month_index', { ascending: false })
+          .limit(5000);
         if (error) {
           console.error('Error fetching player monthly stats:', error);
           return;
@@ -500,11 +508,19 @@ export const useFootballStore = create<FootballStore>()(
         });
       },
 
+
       fetchPlayerWeeklyStats: async () => {
         if (get().playerWeeklyStats.length > 0) return;
+        // Fix: Supabase default limit = 1000 rows. Without .order(), it returns the
+        // oldest 1000 rows (insertion order), silently dropping recent data.
+        // Solution: order newest-first + set a high limit to load all rows.
         const { data, error } = await supabase
           .from('player_weekly_stats')
-          .select('*');
+          .select('*')
+          .order('year', { ascending: false })
+          .order('month_index', { ascending: false })
+          .order('week', { ascending: false })
+          .limit(5000);
         if (error) {
           console.error('Error fetching player weekly stats:', error);
           return;
@@ -528,6 +544,7 @@ export const useFootballStore = create<FootballStore>()(
           }))
         });
       },
+
 
       fetchCompetitions: async () => {
         if (get().competitions.length > 0) return;
@@ -591,10 +608,12 @@ export const useFootballStore = create<FootballStore>()(
 
       fetchHallOfFame: async () => {
         if (get().hallOfFame.length > 0) return;
-        // Fix: project only columns mapHallOfFameFromDb reads
+        // Fix: project only columns mapHallOfFameFromDb reads + order + explicit limit
         const { data, error } = await supabase
           .from('hall_of_frame')
-          .select('id, created_at, player_id, category, season_text, sub_title, descriptions');
+          .select('id, created_at, player_id, category, season_text, sub_title, descriptions')
+          .order('created_at', { ascending: false })
+          .limit(500);
         if (data) {
           set({ hallOfFame: data.map(mapHallOfFameFromDb) });
         }
