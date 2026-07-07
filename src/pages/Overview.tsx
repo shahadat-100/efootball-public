@@ -1,9 +1,6 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { StatCard } from '@/features/overview/components/StatCard';
-import { Badge } from '@/shared/components';
-import { STATUS_BADGE } from '@/shared/lib/constants';
-
 // New visual components
 import { WinRateDonut } from '@/features/overview/components/WinRateDonut';
 import { TopScorersBars } from '@/features/overview/components/TopScorersBars';
