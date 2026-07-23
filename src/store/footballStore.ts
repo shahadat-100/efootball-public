@@ -180,6 +180,7 @@ interface FootballStore {
   competitions: Competition[];
   hallOfFame: HallOfFameEntry[];
   availableRoles: PlayerRole[];
+  availableTags: PlayerRole[];
   matchEntriesLoaded: boolean; // lazy-load guard
   recentMatchEntriesCount: number;
   
