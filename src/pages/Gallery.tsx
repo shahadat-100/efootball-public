@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { PlayerProfileCard } from '@/features/gallery/components/templates/PlayerProfileCard';
 import { TopScorerCard } from '@/features/gallery/components/templates/TopScorerCard';
@@ -10,7 +10,7 @@ import {
   getCurrentWeekLabel,
   getCurrentMonthLabel,
 } from '@/features/gallery/utils/galleryStats';
-import { Download, Image as ImageIcon, Sparkles, User, Flame, Award } from 'lucide-react';
+import { Download, Image as ImageIcon, Sparkles, User, Award } from 'lucide-react';
 
 type TemplateType =
   | 'player-profile'

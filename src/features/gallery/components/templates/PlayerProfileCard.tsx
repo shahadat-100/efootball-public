@@ -2,7 +2,7 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { Avatar } from '@/shared/components';
 import { CardFrame } from '../shared/CardFrame';
-import { Award, Crown, Shield, Star, Zap } from 'lucide-react';
+import { Crown } from 'lucide-react';
 
 interface PlayerProfileCardProps {
   player: Player;
@@ -14,7 +14,6 @@ export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerP
   // Aggregate stats across seasons
   const totalApps = seasonStats.reduce((acc, s) => acc + (s.appearances || 0), 0);
   const totalGoals = seasonStats.reduce((acc, s) => acc + (s.goals || 0), 0);
-  const totalCleanSheets = seasonStats.reduce((acc, s) => acc + (s.cleansheets || 0), 0);
   const totalMotm = seasonStats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
   const totalWins = seasonStats.reduce((acc, s) => acc + (s.wins || 0), 0);
 

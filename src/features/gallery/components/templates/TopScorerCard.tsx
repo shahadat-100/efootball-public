@@ -2,7 +2,7 @@ import React from 'react';
 import { RankedPlayer } from '../../utils/galleryStats';
 import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Trophy, Flame, Zap } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface TopScorerCardProps {
   data: RankedPlayer | null;
