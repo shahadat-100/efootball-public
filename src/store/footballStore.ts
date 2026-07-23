@@ -356,10 +356,9 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: lazy-load guard — only fetch once per session
         if (!force && get().matchEntriesLoaded) return;
         
-        // Fetch the 500 most recent match entries, and the top 20 match entries by goals
-        // (using nullsFirst: false so Postgres puts nulls at the end)
-        // to ensure the "Most Goals in a Match" record is always correct on load.
-        const [recentRes, topGoalsRes] = await Promise.all([
+        // Fetch the 500 most recent match entries, top 20 match entries by goals,
+        // and top winning match entries to ensure club records (Most Goals & Biggest Victory) are 100% accurate.
+        const [recentRes, topGoalsRes, winRes] = await Promise.all([
           supabase
             .from('match_entries')
             .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
@@ -369,19 +368,26 @@ export const useFootballStore = create<FootballStore>()(
             .from('match_entries')
             .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
             .order('goals', { ascending: false, nullsFirst: false })
-            .limit(20)
+            .limit(20),
+          supabase
+            .from('match_entries')
+            .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
+            .eq('result', 'win')
+            .limit(200)
         ]);
 
         if (recentRes.data) {
           const recentEntries = recentRes.data.map(mapMatchEntryFromDb);
           const topGoalsEntries = (topGoalsRes.data || []).map(mapMatchEntryFromDb);
+          const winEntries = (winRes.data || []).map(mapMatchEntryFromDb);
           
           // Merge avoiding duplicates
           const mergedEntries = [...recentEntries];
           const existingIds = new Set(recentEntries.map(e => e.id));
-          topGoalsEntries.forEach(e => {
+          [...topGoalsEntries, ...winEntries].forEach(e => {
             if (!existingIds.has(e.id)) {
               mergedEntries.push(e);
+              existingIds.add(e.id);
             }
           });
 
@@ -512,7 +518,7 @@ export const useFootballStore = create<FootballStore>()(
           .select('*')
           .order('year', { ascending: false })
           .order('month_index', { ascending: false })
-          .limit(5000);
+          .limit(50000);
         if (error) {
           console.error('Error fetching player monthly stats:', error);
           return;
@@ -548,7 +554,7 @@ export const useFootballStore = create<FootballStore>()(
           .order('year', { ascending: false })
           .order('month_index', { ascending: false })
           .order('week', { ascending: false })
-          .limit(5000);
+          .limit(50000);
         if (error) {
           console.error('Error fetching player weekly stats:', error);
           return;
