@@ -5,7 +5,6 @@ import { TopScorerCard } from '@/features/gallery/components/templates/TopScorer
 import { PodiumCard } from '@/features/gallery/components/templates/PodiumCard';
 import { Top10Card } from '@/features/gallery/components/templates/Top10Card';
 import { BirthdayCard } from '@/features/gallery/components/templates/BirthdayCard';
-import { SeasonLeadersCard } from '@/features/gallery/components/templates/SeasonLeadersCard';
 import { downloadCard } from '@/features/gallery/components/shared/downloadCard';
 import {
   getTopScorerWeekly,
@@ -13,7 +12,6 @@ import {
   getTopScorerSeason,
   getTopPlayersWeekly,
   getTopPlayersMonthly,
-  getSeasonLeaders,
   getCurrentWeekLabel,
   getCurrentMonthLabel,
 } from '@/features/gallery/utils/galleryStats';
@@ -28,7 +26,6 @@ type TemplateType =
   | 'podium-monthly'
   | 'top10-weekly'
   | 'top10-monthly'
-  | 'season-leaders'
   | 'player-week'
   | 'player-month'
   | 'birthday';
@@ -45,7 +42,6 @@ const TEMPLATES: { id: TemplateType; label: string; category: string; defaultAsp
   { id: 'podium-monthly', label: 'Top 3 Podium (Monthly)', category: 'Leaderboard', defaultAspect: '4:5' },
   { id: 'top10-weekly', label: 'Top 10 Squad (Weekly)', category: 'Leaderboard', defaultAspect: '16:9' },
   { id: 'top10-monthly', label: 'Top 10 Squad (Monthly)', category: 'Leaderboard', defaultAspect: '16:9' },
-  { id: 'season-leaders', label: 'Club Season Leaders', category: 'Leaderboard', defaultAspect: '4:5' },
 
   { id: 'top-scorer-weekly', label: 'Top Scorer of the Week', category: 'Golden Boot', defaultAspect: '4:5' },
   { id: 'top-scorer-monthly', label: 'Top Scorer of the Month', category: 'Golden Boot', defaultAspect: '4:5' },
@@ -84,8 +80,6 @@ export function Gallery() {
   const top3Monthly = useMemo(() => getTopPlayersMonthly(players, playerMonthlyStats, 3), [players, playerMonthlyStats]);
   const top10Weekly = useMemo(() => getTopPlayersWeekly(players, playerWeeklyStats, 10), [players, playerWeeklyStats]);
   const top10Monthly = useMemo(() => getTopPlayersMonthly(players, playerMonthlyStats, 10), [players, playerMonthlyStats]);
-
-  const seasonLeaders = useMemo(() => getSeasonLeaders(players, playerSeasonStats), [players, playerSeasonStats]);
 
   const handleTemplateChange = (tmplId: TemplateType) => {
     setActiveTemplate(tmplId);
@@ -321,14 +315,6 @@ export function Gallery() {
                 topPlayers={top10Monthly}
                 title="TOP 10 SQUAD OF THE MONTH"
                 subtitle={getCurrentMonthLabel()}
-                aspect={aspectRatio}
-              />
-            )}
-
-            {activeTemplate === 'season-leaders' && (
-              <SeasonLeadersCard
-                cardRef={cardRef}
-                leaders={seasonLeaders}
                 aspect={aspectRatio}
               />
             )}
