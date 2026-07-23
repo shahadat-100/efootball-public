@@ -44,6 +44,7 @@ export function PodiumCard({ topPlayers, title, subtitle, aspect = '4:5', cardRe
             </div>
             <p className="font-extrabold text-xs text-white truncate max-w-[90px] text-center">{second.player.name}</p>
             <p className="text-[10px] font-black text-amber-300">{second.points} PTS</p>
+            <p className="text-[9px] font-semibold text-slate-400">⚽ {second.goals}G · 🌟 {second.motm}M</p>
             <div className="w-20 h-24 bg-gradient-to-b from-slate-700/80 to-slate-900/90 border border-slate-500/40 rounded-t-2xl mt-2 flex items-center justify-center">
               <span className="text-2xl font-black text-slate-300">2</span>
             </div>
@@ -65,6 +66,7 @@ export function PodiumCard({ topPlayers, title, subtitle, aspect = '4:5', cardRe
             </div>
             <p className="font-black text-sm text-amber-300 truncate max-w-[110px] text-center">{first.player.name}</p>
             <p className="text-xs font-black text-white">{first.points} PTS</p>
+            <p className="text-[9px] font-bold text-amber-400/90">⚽ {first.goals}G · 🌟 {first.motm}M</p>
             <div className="w-24 h-32 bg-gradient-to-b from-amber-600/90 via-amber-700/80 to-slate-950 border border-amber-400/50 rounded-t-2xl mt-2 flex items-center justify-center">
               <span className="text-4xl font-black text-amber-300">1</span>
             </div>
@@ -86,6 +88,7 @@ export function PodiumCard({ topPlayers, title, subtitle, aspect = '4:5', cardRe
             </div>
             <p className="font-extrabold text-xs text-white truncate max-w-[90px] text-center">{third.player.name}</p>
             <p className="text-[10px] font-black text-amber-300">{third.points} PTS</p>
+            <p className="text-[9px] font-semibold text-slate-400">⚽ {third.goals}G · 🌟 {third.motm}M</p>
             <div className="w-20 h-16 bg-gradient-to-b from-amber-900/80 to-slate-950 border border-amber-700/40 rounded-t-2xl mt-2 flex items-center justify-center">
               <span className="text-xl font-black text-amber-600">3</span>
             </div>

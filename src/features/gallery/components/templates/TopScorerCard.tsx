@@ -56,18 +56,22 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           </div>
 
           {/* Stat Callout Footer */}
-          <div className="relative z-10 grid grid-cols-3 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 text-center">
+          <div className="relative z-10 grid grid-cols-4 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 text-center">
             <div>
               <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">GOALS</p>
-              <p className="text-xl font-black text-amber-300">{data.goals}</p>
+              <p className="text-lg font-black text-amber-300">{data.goals}</p>
             </div>
             <div>
               <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MOTM</p>
-              <p className="text-xl font-black text-amber-300">{data.motm}</p>
+              <p className="text-lg font-black text-amber-300">{data.motm}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MATCHES</p>
+              <p className="text-lg font-black text-amber-300">{data.appearances}</p>
             </div>
             <div>
               <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">POINTS</p>
-              <p className="text-xl font-black text-amber-300">{data.points}</p>
+              <p className="text-lg font-black text-amber-300">{data.points}</p>
             </div>
           </div>
         </>

@@ -49,16 +49,6 @@ export function CardFrame({ children, aspect = '4:5', bgImage, cardRef, classNam
       <div className="relative z-10 w-full h-full flex flex-col justify-between p-6">
         {children}
       </div>
-
-      {/* Club logo watermark — bottom right */}
-      <div className="absolute bottom-3 right-3 z-50 opacity-80 pointer-events-none">
-        <img
-          src="/images/club-logo.jpg"
-          alt="Club"
-          crossOrigin="anonymous"
-          style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover' }}
-        />
-      </div>
     </div>
   );
 }

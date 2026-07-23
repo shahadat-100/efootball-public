@@ -46,6 +46,7 @@ export function Top10Card({ topPlayers, title, subtitle, aspect = '16:9', cardRe
 
             <p className="font-extrabold text-[11px] text-white truncate w-full mt-1">{r.player.name}</p>
             <p className="text-[10px] font-black text-cyan-300 mt-0.5">{r.points} PTS</p>
+            <p className="text-[9px] font-medium text-slate-400">⚽ {r.goals}G · 🌟 {r.motm}M</p>
           </div>
         ))}
 

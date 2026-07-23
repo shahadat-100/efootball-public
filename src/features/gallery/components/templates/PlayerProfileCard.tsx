@@ -17,6 +17,11 @@ export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerP
   const totalMotm = seasonStats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
   const totalWins = seasonStats.reduce((acc, s) => acc + (s.wins || 0), 0);
 
+  const totalCleanSheets = seasonStats.reduce((acc, s) => acc + (s.cleansheets || 0), 0);
+  const totalDraws = seasonStats.reduce((acc, s) => acc + (s.draws || 0), 0);
+  const totalLosses = seasonStats.reduce((acc, s) => acc + (s.losses || 0), 0);
+  const totalHattricks = seasonStats.reduce((acc, s) => acc + (s.hattricks || 0), 0);
+
   const primaryRole = player.playerRoles?.[0] || 'Player';
 
   return (
@@ -46,12 +51,12 @@ export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerP
       </div>
 
       {/* Main Content Body */}
-      <div className="relative z-10 my-auto flex flex-col items-center text-center py-4">
-        {/* Large Avatar with glowing gradient ring */}
-        <div className="relative mb-4">
-          <div className="rounded-full p-1.5 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 shadow-2xl">
-            <div className="rounded-full overflow-hidden bg-slate-950 p-1" style={{ width: 120, height: 120 }}>
-              <Avatar name={player.name} src={player.profileImageUrl} size={120} />
+      <div className="relative z-10 my-auto flex flex-col items-center text-center py-3">
+        {/* Avatar Frame (rounded rectangle style) */}
+        <div className="relative mb-3">
+          <div className="rounded-2xl p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 shadow-2xl">
+            <div className="rounded-xl overflow-hidden bg-slate-950" style={{ width: 110, height: 110 }}>
+              <Avatar name={player.name} src={player.profileImageUrl} size={110} className="rounded-xl" />
             </div>
           </div>
 
@@ -65,10 +70,17 @@ export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerP
           {player.name}
         </h2>
 
+        {/* Location & Email info */}
+        {(player.location || player.email) && (
+          <p className="text-[11px] font-medium text-slate-400 mt-0.5">
+            {player.location ? `📍 ${player.location}` : player.email}
+          </p>
+        )}
+
         {/* Tags / Subtitle */}
         {player.customTags && player.customTags.length > 0 && (
           <div className="flex items-center justify-center gap-1.5 flex-wrap mt-2">
-            {player.customTags.slice(0, 3).map((tag, idx) => (
+            {player.customTags.slice(0, 4).map((tag, idx) => (
               <span key={idx} className="text-[10px] font-extrabold bg-slate-900 border border-amber-500/30 text-amber-300 px-2.5 py-0.5 rounded-full">
                 #{tag}
               </span>
@@ -77,23 +89,31 @@ export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerP
         )}
       </div>
 
-      {/* Stats Grid Footer */}
-      <div className="relative z-10 grid grid-cols-4 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 backdrop-blur-md">
+      {/* Expanded Stats Grid Footer (6 Metrics) */}
+      <div className="relative z-10 grid grid-cols-3 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 backdrop-blur-md">
         <div className="text-center">
           <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MATCHES</p>
-          <p className="text-base font-black text-amber-300">{totalApps}</p>
+          <p className="text-sm font-black text-amber-300">{totalApps}</p>
         </div>
         <div className="text-center">
           <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">GOALS</p>
-          <p className="text-base font-black text-amber-300">{totalGoals}</p>
+          <p className="text-sm font-black text-amber-300">{totalGoals}</p>
         </div>
         <div className="text-center">
           <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MOTM</p>
-          <p className="text-base font-black text-amber-300">{totalMotm}</p>
+          <p className="text-sm font-black text-amber-300">{totalMotm}</p>
         </div>
         <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">WINS</p>
-          <p className="text-base font-black text-amber-300">{totalWins}</p>
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">RECORD (W-D-L)</p>
+          <p className="text-sm font-black text-amber-300">{totalWins}-{totalDraws}-{totalLosses}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">CLEAN SHEETS</p>
+          <p className="text-sm font-black text-amber-300">{totalCleanSheets}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">HAT-TRICKS</p>
+          <p className="text-sm font-black text-amber-300">{totalHattricks}</p>
         </div>
       </div>
     </CardFrame>
