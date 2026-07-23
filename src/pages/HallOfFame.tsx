@@ -83,63 +83,61 @@ export function HallOfFame() {
           return (
             <div
               key={entry.id}
-              className="group relative bg-gradient-to-b from-slate-900/90 via-slate-950/95 to-black border border-amber-500/20 rounded-2xl overflow-hidden shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
+              className="group relative bg-white border border-slate-100/80 rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between"
               style={{
-                boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(245, 158, 11, 0.05)',
+                boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.boxShadow =
-                  `0 15px 35px -5px rgba(0, 0, 0, 0.7), 0 0 25px 2px ${accent}40`;
-                (e.currentTarget as HTMLElement).style.borderColor = `${accent}60`;
+                  `0 20px 40px -15px ${accent}25, 0 8px 16px -6px rgba(0,0,0,0.04)`;
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLElement).style.boxShadow =
-                  '0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(245, 158, 11, 0.05)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245, 158, 11, 0.2)';
+                  '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02)';
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
               }}
             >
-              {/* Background ambient shine */}
+              {/* Subtle top subtle gradient ring blur effect */}
               <div
-                className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-15 transition-all duration-500 group-hover:opacity-30"
+                className="absolute top-0 right-0 w-36 h-36 rounded-full blur-2xl pointer-events-none opacity-10 transition-opacity duration-300 group-hover:opacity-25"
                 style={{ background: accent }}
               />
 
-              {/* Top Accent Metallic Bar */}
-              <div
-                className="h-1.5 w-full transition-all duration-300"
-                style={{ background: `linear-gradient(90deg, ${accent}, #f59e0b, ${accent}88)` }}
-              />
-
-              {/* Card Header & Content */}
-              <div className="relative z-10 p-5 flex flex-col gap-4 flex-1">
-                {/* Header row: Season Chip & Category */}
-                <div className="flex items-center justify-between gap-2">
+              {/* Card Main Header */}
+              <div>
+                {/* Top Chips Row */}
+                <div className="flex items-center justify-between gap-2 mb-5">
+                  {/* Floating Category Badge */}
                   <span
-                    className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border shadow-sm"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs transition-transform group-hover:scale-105 duration-300"
                     style={{
                       color: accent,
-                      borderColor: `${accent}40`,
-                      background: `linear-gradient(135deg, ${accent}15, ${accent}05)`,
+                      background: `${accent}12`,
+                      border: `1px solid ${accent}25`,
                     }}
                   >
-                    <Award className="w-3 h-3 shrink-0" />
+                    <Award className="w-3.5 h-3.5 shrink-0" />
                     {entry.category}
                   </span>
 
-                  <span className="text-[11px] font-extrabold text-amber-300/90 bg-amber-950/60 border border-amber-500/30 px-2.5 py-0.5 rounded-md tracking-wider flex items-center gap-1">
+                  {/* Season Badge */}
+                  <span className="text-[11px] font-bold text-slate-600 bg-slate-100/80 border border-slate-200/60 px-3 py-1 rounded-full flex items-center gap-1">
                     <span>🏆</span> {entry.seasonText}
                   </span>
                 </div>
 
-                {/* Main Player Profile Box */}
-                <div className="flex items-center gap-4 my-1">
-                  {/* Glowing Avatar Frame */}
+                {/* Player Profile Header */}
+                <div className="flex items-center gap-4 mb-4">
+                  {/* Glowing Pastel Avatar Frame */}
                   <div className="relative shrink-0">
                     <div
-                      className="rounded-full p-1 transition-all duration-300 shadow-md"
-                      style={{ background: `linear-gradient(135deg, ${accent}, #f59e0b 50%, ${accent}33)` }}
+                      className="rounded-full p-1 transition-all duration-300"
+                      style={{
+                        background: `linear-gradient(135deg, ${accent}, ${accent}40)`,
+                      }}
                     >
-                      <div className="rounded-full overflow-hidden bg-slate-950 p-0.5">
+                      <div className="rounded-full overflow-hidden bg-white p-0.5 shadow-inner">
                         <Avatar
                           name={player?.name ?? 'Legend'}
                           src={player?.profileImageUrl}
@@ -148,40 +146,53 @@ export function HallOfFame() {
                       </div>
                     </div>
 
-                    {/* Crown badge pin */}
+                    {/* Floating Crown Badge */}
                     <div
-                      className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-slate-950"
-                      style={{ background: `linear-gradient(135deg, ${accent}, #d97706)` }}
+                      className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-md border-2 border-white"
+                      style={{ background: accent }}
                     >
                       <Crown className="w-3.5 h-3.5 text-white" />
                     </div>
                   </div>
 
-                  {/* Player info */}
+                  {/* Player Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-lg text-white tracking-tight truncate group-hover:text-amber-300 transition-colors">
+                    <h3 className="font-extrabold text-lg text-slate-900 tracking-tight truncate group-hover:text-slate-950 transition-colors">
                       {player?.name ?? 'Unknown Legend'}
                     </h3>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-1">
                       {player?.jerseyNumber && (
-                        <span className="text-[11px] font-bold text-amber-400/90 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                        <span
+                          className="text-[11px] font-black px-2 py-0.5 rounded-md border"
+                          style={{
+                            color: accent,
+                            background: `${accent}10`,
+                            borderColor: `${accent}25`,
+                          }}
+                        >
                           #{player.jerseyNumber}
                         </span>
                       )}
-                      {player?.primaryRole && (
-                        <span className="text-[12px] font-semibold text-slate-400">
-                          {player.primaryRole}
+                      {player?.playerRoles?.[0] && (
+                        <span className="text-[12px] font-medium text-slate-500">
+                          {player.playerRoles[0]}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Subtitle / Achievement highlight */}
+                {/* Subtitle / Key Achievement */}
                 {entry.subTitle && (
-                  <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 flex items-start gap-2.5">
-                    <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-[13px] font-bold text-amber-200/90 leading-snug tracking-wide">
+                  <div
+                    className="rounded-2xl p-3.5 border mb-3 flex items-start gap-2.5 transition-colors duration-300"
+                    style={{
+                      background: `${accent}08`,
+                      borderColor: `${accent}18`,
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: accent }} />
+                    <p className="text-[13px] font-bold leading-snug tracking-wide" style={{ color: accent }}>
                       {entry.subTitle}
                     </p>
                   </div>
@@ -189,18 +200,18 @@ export function HallOfFame() {
 
                 {/* Description */}
                 {entry.descriptions && (
-                  <div className="bg-slate-900/40 border border-white/5 rounded-xl p-3.5 mt-auto">
-                    <p className="text-[12px] leading-relaxed text-slate-300 font-normal">
+                  <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-4">
+                    <p className="text-[13px] leading-relaxed text-slate-600 font-normal">
                       {entry.descriptions}
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Bottom Card Accent Footer */}
+              {/* Bottom Subtle Accent Bar */}
               <div
-                className="h-[2px] w-full opacity-60 group-hover:opacity-100 transition-all duration-300"
-                style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+                className="h-1 w-full rounded-full mt-5 transition-all duration-300 opacity-40 group-hover:opacity-100"
+                style={{ background: `linear-gradient(90deg, ${accent}, ${accent}30)` }}
               />
             </div>
           );
@@ -208,14 +219,13 @@ export function HallOfFame() {
 
         {/* Empty state */}
         {hallOfFame.length === 0 && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center gap-4
-                          border-2 border-dashed border-slate-800 rounded-2xl bg-slate-950/50">
+          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center gap-4 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
             <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-              <Crown className="w-8 h-8 text-amber-400" />
+              <Crown className="w-8 h-8 text-amber-500" />
             </div>
             <div>
-              <p className="font-semibold text-white">No legends inducted yet</p>
-              <p className="text-sm text-slate-400 mt-1">Greatness awaits! 🏆</p>
+              <p className="font-semibold text-slate-900">No legends inducted yet</p>
+              <p className="text-sm text-slate-500 mt-1">Greatness awaits! 🏆</p>
             </div>
           </div>
         )}
