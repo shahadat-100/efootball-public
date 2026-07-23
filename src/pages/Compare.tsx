@@ -50,7 +50,7 @@ function RadarLegendDot({ color, label }: { color: string; label: string }) {
 export function Compare() {
   const {
     players, matchEntries, playerSeasonStats, seasons,
-    fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats, fetchSeasons,
+    fetchPlayers, fetchMatchEntries, fetchPlayerMatchEntries, fetchPlayerSeasonStats, fetchSeasons,
   } = useFootballStore();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | 'all'>('all');
@@ -66,6 +66,12 @@ export function Compare() {
     fetchPlayerSeasonStats();
     fetchSeasons();
   }, [fetchPlayers, fetchMatchEntries, fetchPlayerSeasonStats, fetchSeasons]);
+
+  useEffect(() => {
+    selectedIds.forEach(id => {
+      fetchPlayerMatchEntries(id);
+    });
+  }, [selectedIds, fetchPlayerMatchEntries]);
 
   const togglePlayer = (id: string) => {
     setSelectedIds(prev => {

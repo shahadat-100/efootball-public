@@ -180,8 +180,8 @@ interface FootballStore {
   competitions: Competition[];
   hallOfFame: HallOfFameEntry[];
   availableRoles: PlayerRole[];
-  availableTags: CustomTag[];
   matchEntriesLoaded: boolean; // lazy-load guard
+  recentMatchEntriesCount: number;
   
   globalCounts: Record<string, number>;
   fetchGlobalCounts: () => Promise<void>;
@@ -350,11 +350,14 @@ export const useFootballStore = create<FootballStore>()(
       },
       setMatches: (matches: Match[]) => set({ matches }),
       
+      recentMatchEntriesCount: 0,
+      
       fetchMatchEntries: async (force = false) => {
         // Fix: lazy-load guard — only fetch once per session
         if (!force && get().matchEntriesLoaded) return;
         
-        // Fetch the 500 most recent match entries, and the top 10 match entries by goals
+        // Fetch the 500 most recent match entries, and the top 20 match entries by goals
+        // (using nullsFirst: false so Postgres puts nulls at the end)
         // to ensure the "Most Goals in a Match" record is always correct on load.
         const [recentRes, topGoalsRes] = await Promise.all([
           supabase
@@ -365,8 +368,8 @@ export const useFootballStore = create<FootballStore>()(
           supabase
             .from('match_entries')
             .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
-            .order('goals', { ascending: false })
-            .limit(10)
+            .order('goals', { ascending: false, nullsFirst: false })
+            .limit(20)
         ]);
 
         if (recentRes.data) {
@@ -384,6 +387,7 @@ export const useFootballStore = create<FootballStore>()(
 
           set({ 
             matchEntries: mergedEntries, 
+            recentMatchEntriesCount: recentRes.data.length,
             matchEntriesLoaded: true,
             matchEntriesHasMore: recentRes.data.length === 500
           });
@@ -418,7 +422,7 @@ export const useFootballStore = create<FootballStore>()(
       
       loadMoreMatchEntries: async () => {
         const currentEntries = get().matchEntries;
-        const offset = currentEntries.length;
+        const offset = get().recentMatchEntriesCount || currentEntries.length;
         const limit = 500;
         
         const { data, error } = await supabase
@@ -435,6 +439,7 @@ export const useFootballStore = create<FootballStore>()(
           
           set({ 
             matchEntries: [...currentEntries, ...uniqueNewEntries],
+            recentMatchEntriesCount: offset + data.length,
             matchEntriesHasMore: data.length === limit
           });
         }
