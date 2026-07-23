@@ -12,54 +12,84 @@ interface Top10CardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
+const RANK_COLORS = ['#f59e0b', '#94a3b8', '#b45309'];
+
 export function Top10Card({ topPlayers, title, subtitle, aspect = '16:9', cardRef }: Top10CardProps) {
   return (
     <CardFrame aspect={aspect} cardRef={cardRef}>
-      {/* Header Overlay */}
-      <div className="flex items-center justify-between border-b border-cyan-500/30 pb-3 -mx-6 -mt-6 p-5 bg-slate-950/80 backdrop-blur-md">
-        <div>
-          <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block">{subtitle}</span>
-          <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-400" /> {title}
-          </h3>
-        </div>
-        <div className="text-right">
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">THE ENIGMATIC ELITE</span>
-          <span className="text-xs font-black text-cyan-300">TOP 10 LEADERBOARD</span>
-        </div>
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#0a0a0a] to-black" />
+        <div className="absolute -top-10 -left-10 w-80 h-80 rounded-full blur-3xl opacity-15"
+          style={{ background: 'radial-gradient(circle, #ef4444, transparent)' }} />
+        <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle, #ef4444, transparent)' }} />
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
       </div>
 
-      {/* Grid of 10 Players */}
-      <div className="my-auto grid grid-cols-5 gap-3 py-4">
-        {topPlayers.slice(0, 10).map((r, idx) => (
-          <div key={r.player.id || idx} className="bg-slate-900/80 border border-cyan-500/20 rounded-2xl p-2.5 flex flex-col items-center text-center relative backdrop-blur-sm">
-            {/* Rank Pill */}
-            <span className={`absolute top-2 left-2 text-[9px] font-black px-1.5 py-0.2 rounded-md ${
-              idx === 0 ? 'bg-amber-400 text-slate-950' : idx === 1 ? 'bg-slate-300 text-slate-950' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-slate-800 text-slate-300'
-            }`}>
-              #{idx + 1}
-            </span>
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-3 border-b border-red-900/30">
+          <div>
+            <p className="text-[8px] font-black tracking-[0.3em] text-red-400 uppercase">The Enigmatic Elites</p>
+            <h2 className="text-sm font-black text-white uppercase tracking-tight flex items-center gap-1.5 mt-0.5">
+              <Trophy className="w-3.5 h-3.5 text-red-400" /> {title}
+            </h2>
+          </div>
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider border border-slate-800 bg-slate-900/80 px-2 py-1 rounded-lg">
+            {subtitle}
+          </span>
+        </div>
 
-            <div className="rounded-full p-0.5 bg-gradient-to-tr from-cyan-500 to-pink-500 my-1">
-              <Avatar name={r.player.name} src={r.player.profileImageUrl} size={48} />
+        {/* Player grid */}
+        <div className="flex-1 grid grid-cols-5 gap-2 p-4 content-center">
+          {topPlayers.slice(0, 10).map((r, idx) => {
+            const rankColor = idx < 3 ? RANK_COLORS[idx] : '#475569';
+            return (
+              <div
+                key={r.player.id || idx}
+                className="flex flex-col items-center text-center bg-slate-900/60 rounded-xl p-2 border relative"
+                style={{ borderColor: `${rankColor}30` }}
+              >
+                {/* Rank badge */}
+                <div
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-black px-1.5 rounded-md text-black"
+                  style={{ background: rankColor }}
+                >
+                  #{idx + 1}
+                </div>
+
+                {/* Avatar — square, not circle */}
+                <div
+                  className="overflow-hidden border-2 mt-2"
+                  style={{ width: 48, height: 48, borderRadius: 8, borderColor: `${rankColor}60` }}
+                >
+                  <Avatar name={r.player.name} src={r.player.profileImageUrl} size={48} />
+                </div>
+
+                <p className="font-black text-[10px] text-white truncate w-full mt-1.5 leading-tight">
+                  {r.player.name.split(' ').slice(-1)[0].toUpperCase()}
+                </p>
+                <p className="text-[9px] font-black mt-0.5" style={{ color: rankColor }}>{r.points}</p>
+                <p className="text-[8px] text-slate-600 font-bold uppercase tracking-wide">pts</p>
+                {r.goals > 0 && (
+                  <p className="text-[8px] text-slate-500 mt-0.5">{r.goals}⚽</p>
+                )}
+              </div>
+            );
+          })}
+
+          {topPlayers.length === 0 && (
+            <div className="col-span-5 flex items-center justify-center text-slate-600 text-xs py-10">
+              No leaderboard data for this period.
             </div>
+          )}
+        </div>
 
-            <p className="font-extrabold text-[11px] text-white truncate w-full mt-1">{r.player.name}</p>
-            <p className="text-[10px] font-black text-cyan-300 mt-0.5">{r.points} PTS</p>
-          </div>
-        ))}
-
-        {topPlayers.length === 0 && (
-          <div className="col-span-5 text-center text-slate-400 py-10 text-xs">
-            No stats recorded for this period yet.
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Footer */}
-      <div className="border-t border-cyan-500/20 pt-2 -mx-6 -mb-6 p-4 bg-slate-950/80 flex justify-between text-[10px] font-extrabold text-slate-400">
-        <span>OFFICIAL CLUB GALLERY</span>
-        <span>THE ENIGMATIC ELITES</span>
+        {/* Footer strip */}
+        <div className="h-[3px] w-full"
+          style={{ background: 'linear-gradient(90deg, transparent, #ef4444, transparent)' }} />
       </div>
     </CardFrame>
   );
