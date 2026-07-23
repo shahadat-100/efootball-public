@@ -353,21 +353,44 @@ export const useFootballStore = create<FootballStore>()(
       fetchMatchEntries: async (force = false) => {
         // Fix: lazy-load guard — only fetch once per session
         if (!force && get().matchEntriesLoaded) return;
-        // Fix: limit to 500 most-recent, project only columns mapMatchEntryFromDb reads,
-        // Fix: limit to 500 most-recent, project only columns mapMatchEntryFromDb reads.
-        const { data, error } = await supabase
-          .from('match_entries')
-          .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
-          .order('date', { ascending: false })
-          .limit(500);
-        if (data) {
+        
+        // Fetch the 500 most recent match entries, and the top 10 match entries by goals
+        // to ensure the "Most Goals in a Match" record is always correct on load.
+        const [recentRes, topGoalsRes] = await Promise.all([
+          supabase
+            .from('match_entries')
+            .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
+            .order('date', { ascending: false })
+            .limit(500),
+          supabase
+            .from('match_entries')
+            .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
+            .order('goals', { ascending: false })
+            .limit(10)
+        ]);
+
+        if (recentRes.data) {
+          const recentEntries = recentRes.data.map(mapMatchEntryFromDb);
+          const topGoalsEntries = (topGoalsRes.data || []).map(mapMatchEntryFromDb);
+          
+          // Merge avoiding duplicates
+          const mergedEntries = [...recentEntries];
+          const existingIds = new Set(recentEntries.map(e => e.id));
+          topGoalsEntries.forEach(e => {
+            if (!existingIds.has(e.id)) {
+              mergedEntries.push(e);
+            }
+          });
+
           set({ 
-            matchEntries: data.map(mapMatchEntryFromDb), 
+            matchEntries: mergedEntries, 
             matchEntriesLoaded: true,
-            matchEntriesHasMore: data.length === 500
+            matchEntriesHasMore: recentRes.data.length === 500
           });
         }
-        if (error) console.error('Error fetching match entries:', error);
+        
+        if (recentRes.error) console.error('Error fetching recent match entries:', recentRes.error);
+        if (topGoalsRes.error) console.error('Error fetching top goals match entries:', topGoalsRes.error);
       },
       setMatchEntries: (matchEntries: MatchEntry[]) => set({ matchEntries }),
 
