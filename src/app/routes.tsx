@@ -10,6 +10,7 @@ import { HallOfFame } from '@/pages/HallOfFame';
 import { Compare } from '@/pages/Compare';
 import { Leaderboard } from '@/pages/Leaderboard';
 import { ClubInfo } from '@/pages/ClubInfo';
+import { Gallery } from '@/pages/Gallery';
 
 // A proxy component so Overview can still call `setTab` logically, mapped to navigate since we use React Router now.
 function OverviewRouterProxy() {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "news/:id", element: <NewsDetail /> },
       { path: "hall-of-fame", element: <HallOfFame /> },
       { path: "club-info", element: <ClubInfo /> },
+      { path: "gallery", element: <Gallery /> },
     ]
   }
 ]);

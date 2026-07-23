@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useFootballStore } from '@/store/footballStore';
-import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3, Medal, Shield } from 'lucide-react';
+import { Hexagon, Users, ClipboardList, Trophy, Newspaper, Award, Menu, X, BarChart3, Medal, Shield, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -12,6 +12,7 @@ const NAV = [
   { id: 'matches', label: 'Matches', icon: Trophy },
   { id: 'compare', label: 'Compare', icon: BarChart3 },
   { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
+  { id: 'gallery', label: 'Gallery', icon: ImageIcon },
   { id: 'news', label: 'News', icon: Newspaper },
   { id: 'hall-of-fame', label: 'Hall of Fame', icon: Award },
   { id: 'club-info', label: 'Club Info', icon: Shield },
@@ -22,7 +23,7 @@ const BOTTOM_NAV = [
   { id: 'overview', label: 'Overview', icon: Hexagon },
   { id: 'players', label: 'Players', icon: Users },
   { id: 'matches', label: 'Matches', icon: Trophy },
-  { id: 'compare', label: 'Compare', icon: BarChart3 },
+  { id: 'gallery', label: 'Gallery', icon: ImageIcon },
   { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
 ];
 
@@ -34,6 +35,7 @@ const PAGE_TITLES: Record<string, string> = {
   matches: 'Matches',
   compare: 'Compare',
   leaderboard: 'Leaderboard',
+  gallery: 'Gallery & Card Generator',
   news: 'News',
   'hall-of-fame': 'Hall of Fame',
   'club-info': 'Club Info',
