@@ -12,117 +12,91 @@ interface PodiumCardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-const PODIUM = [
-  { label: '1ST', color: '#f59e0b', glow: '#78350f', size: 96, height: 'h-32' },
-  { label: '2ND', color: '#94a3b8', glow: '#334155', size: 76, height: 'h-24' },
-  { label: '3RD', color: '#b45309', glow: '#431407', size: 70, height: 'h-16' },
-];
-
 export function PodiumCard({ topPlayers, title, subtitle, aspect = '4:5', cardRef }: PodiumCardProps) {
-  // Order: 2nd, 1st, 3rd  for podium layout
-  const ordered = [topPlayers[1], topPlayers[0], topPlayers[2]];
-  const podiumOrder = [PODIUM[1], PODIUM[0], PODIUM[2]];
+  const first = topPlayers[0];
+  const second = topPlayers[1];
+  const third = topPlayers[2];
 
   return (
     <CardFrame aspect={aspect} cardRef={cardRef}>
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#111] via-[#0d0d0d] to-black" />
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-72 rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, #f59e0b, #78350f, transparent)' }} />
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+      {/* Header Overlay */}
+      <div className="text-center pt-2 pb-4 bg-black/60 backdrop-blur-md border-b border-amber-500/30 -mx-6 -mt-6 p-4">
+        <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-0.5">{subtitle}</span>
+        <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center justify-center gap-2">
+          <Trophy className="w-5 h-5 text-amber-400" /> {title}
+        </h3>
       </div>
 
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-amber-900/30">
-          <div>
-            <p className="text-[9px] font-black tracking-[0.3em] text-amber-400 uppercase">The Enigmatic Elites</p>
-            <h2 className="text-base font-black text-white uppercase tracking-tight flex items-center gap-1.5 mt-0.5">
-              <Trophy className="w-4 h-4 text-amber-400" />
-              {title}
-            </h2>
-          </div>
-          <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider bg-slate-900/80 border border-slate-800 px-2 py-1 rounded-lg">
-            {subtitle}
-          </span>
-        </div>
-
-        {/* Podium section */}
-        <div className="flex-1 flex items-end justify-center gap-3 px-4 pb-0 pt-4">
-          {ordered.map((player, i) => {
-            const cfg = podiumOrder[i];
-            if (!player) {
-              return (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="w-20 rounded-t-xl bg-slate-900/50 border border-slate-800 flex items-center justify-center text-slate-600 text-xs font-bold"
-                    style={{ height: i === 1 ? 128 : i === 0 ? 96 : 64 }}>—</div>
-                </div>
-              );
-            }
-            return (
-              <div key={player.player.id || i} className="flex flex-col items-center">
-                {/* Avatar */}
-                <div className="relative mb-2">
-                  <div
-                    className="overflow-hidden border-[2.5px] shadow-xl"
-                    style={{
-                      width: cfg.size, height: cfg.size,
-                      borderRadius: '50%',
-                      borderColor: cfg.color,
-                      boxShadow: `0 0 24px ${cfg.color}50`,
-                    }}
-                  >
-                    <Avatar name={player.player.name} src={player.player.profileImageUrl} size={cfg.size} />
-                  </div>
-                  <div
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-black text-black border border-white/20 whitespace-nowrap"
-                    style={{ background: cfg.color }}
-                  >
-                    {cfg.label}
-                  </div>
-                </div>
-
-                {/* Name */}
-                <p className="font-extrabold text-[11px] text-white truncate max-w-[90px] text-center mt-3">
-                  {player.player.name.split(' ').slice(-1)[0].toUpperCase()}
-                </p>
-                <p className="text-[10px] font-black mt-0.5" style={{ color: cfg.color }}>
-                  {player.points} PTS
-                </p>
-                {player.goals > 0 && (
-                  <p className="text-[9px] text-slate-500 font-bold">{player.goals} goals</p>
-                )}
-
-                {/* Podium block */}
-                <div
-                  className="w-24 rounded-t-xl border border-t-0 flex items-center justify-center mt-2"
-                  style={{
-                    height: i === 1 ? 128 : i === 0 ? 96 : 64,
-                    background: `linear-gradient(180deg, ${cfg.color}30, ${cfg.color}08)`,
-                    borderColor: `${cfg.color}40`,
-                  }}
-                >
-                  <span className="text-3xl font-black" style={{ color: cfg.color, opacity: 0.6 }}>
-                    {i === 1 ? '1' : i === 0 ? '2' : '3'}
-                  </span>
+      {/* Podium Grid Layout */}
+      <div className="my-auto flex items-end justify-center gap-3 pt-6 pb-2">
+        {/* 2nd Place (Silver) */}
+        {second ? (
+          <div className="flex flex-col items-center">
+            <div className="relative mb-2">
+              <div className="rounded-full p-1 bg-gradient-to-tr from-slate-400 to-slate-200 shadow-xl">
+                <div className="rounded-full overflow-hidden bg-slate-950 p-0.5" style={{ width: 70, height: 70 }}>
+                  <Avatar name={second.player.name} src={second.player.profileImageUrl} size={70} />
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Empty state */}
-        {topPlayers.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">
-            No leaderboard data for this period.
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-300 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full border border-white shadow">
+                2ND
+              </span>
+            </div>
+            <p className="font-extrabold text-xs text-white truncate max-w-[90px] text-center">{second.player.name}</p>
+            <p className="text-[10px] font-black text-amber-300">{second.points} PTS</p>
+            <div className="w-20 h-24 bg-gradient-to-b from-slate-700/80 to-slate-900/90 border border-slate-500/40 rounded-t-2xl mt-2 flex items-center justify-center">
+              <span className="text-2xl font-black text-slate-300">2</span>
+            </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Footer strip */}
-        <div className="h-[3px] w-full"
-          style={{ background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)' }} />
+        {/* 1st Place (Gold) */}
+        {first ? (
+          <div className="flex flex-col items-center -mt-6">
+            <div className="relative mb-2">
+              <div className="rounded-full p-1.5 bg-gradient-to-tr from-amber-500 via-yellow-300 to-amber-200 shadow-2xl">
+                <div className="rounded-full overflow-hidden bg-slate-950 p-0.5" style={{ width: 90, height: 90 }}>
+                  <Avatar name={first.player.name} src={first.player.profileImageUrl} size={90} />
+                </div>
+              </div>
+              <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-[11px] px-3 py-0.5 rounded-full border border-white shadow-lg">
+                👑 1ST
+              </span>
+            </div>
+            <p className="font-black text-sm text-amber-300 truncate max-w-[110px] text-center">{first.player.name}</p>
+            <p className="text-xs font-black text-white">{first.points} PTS</p>
+            <div className="w-24 h-32 bg-gradient-to-b from-amber-600/90 via-amber-700/80 to-slate-950 border border-amber-400/50 rounded-t-2xl mt-2 flex items-center justify-center">
+              <span className="text-4xl font-black text-amber-300">1</span>
+            </div>
+          </div>
+        ) : null}
+
+        {/* 3rd Place (Bronze) */}
+        {third ? (
+          <div className="flex flex-col items-center">
+            <div className="relative mb-2">
+              <div className="rounded-full p-1 bg-gradient-to-tr from-amber-700 to-amber-900 shadow-xl">
+                <div className="rounded-full overflow-hidden bg-slate-950 p-0.5" style={{ width: 70, height: 70 }}>
+                  <Avatar name={third.player.name} src={third.player.profileImageUrl} size={70} />
+                </div>
+              </div>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-700 text-white font-black text-[10px] px-2 py-0.5 rounded-full border border-white shadow">
+                3RD
+              </span>
+            </div>
+            <p className="font-extrabold text-xs text-white truncate max-w-[90px] text-center">{third.player.name}</p>
+            <p className="text-[10px] font-black text-amber-300">{third.points} PTS</p>
+            <div className="w-20 h-16 bg-gradient-to-b from-amber-900/80 to-slate-950 border border-amber-700/40 rounded-t-2xl mt-2 flex items-center justify-center">
+              <span className="text-xl font-black text-amber-600">3</span>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Footer info banner */}
+      <div className="bg-black/70 backdrop-blur-md border border-amber-500/20 rounded-xl p-3 -mx-2 -mb-2 flex justify-between items-center text-[10px] font-bold text-slate-300">
+        <span>ENIGMATIC ELITES RANKING</span>
+        <span className="text-amber-400">OFFICIAL LEADERBOARD</span>
       </div>
     </CardFrame>
   );

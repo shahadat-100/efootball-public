@@ -2,138 +2,98 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { Avatar } from '@/shared/components';
 import { CardFrame } from '../shared/CardFrame';
+import { Crown } from 'lucide-react';
 
 interface PlayerProfileCardProps {
   player: Player;
   seasonStats?: PlayerSeasonStat[];
   cardRef?: React.RefObject<HTMLDivElement>;
-  aspect?: '4:5' | '1:1' | '9:16' | '16:9';
 }
 
-export function PlayerProfileCard({ player, seasonStats = [], cardRef, aspect = '4:5' }: PlayerProfileCardProps) {
-  const totalApps   = seasonStats.reduce((a, s) => a + (s.appearances || 0), 0);
-  const totalGoals  = seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
-  const totalMotm   = seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
-  const totalWins   = seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
-  const primaryRole = player.playerRoles?.[0] || 'PLAYER';
-  const nameParts   = player.name.trim().toUpperCase().split(' ');
-  const firstName   = nameParts.slice(0, -1).join(' ') || nameParts[0];
-  const lastName    = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerProfileCardProps) {
+  // Aggregate stats across seasons
+  const totalApps = seasonStats.reduce((acc, s) => acc + (s.appearances || 0), 0);
+  const totalGoals = seasonStats.reduce((acc, s) => acc + (s.goals || 0), 0);
+  const totalMotm = seasonStats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
+  const totalWins = seasonStats.reduce((acc, s) => acc + (s.wins || 0), 0);
+
+  const primaryRole = player.playerRoles?.[0] || 'Player';
 
   return (
-    <CardFrame aspect={aspect} cardRef={cardRef}>
-      {/* ── Dark grunge gradient overlay ────────────────────────────────── */}
-      <div className="absolute inset-0 z-0">
-        {/* Base dark background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-[#0d0d0d] to-black" />
-        {/* Red/crimson accent splatter top-right */}
-        <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, #ef4444, #7f1d1d, transparent)' }} />
-        {/* Subtle left glow */}
-        <div className="absolute bottom-0 -left-10 w-56 h-56 rounded-full blur-3xl opacity-15"
-          style={{ background: 'radial-gradient(circle, #ef4444, transparent)' }} />
-        {/* Diagonal halftone dots — decorative */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-            backgroundSize: '18px 18px',
-          }} />
+    <CardFrame aspect="4:5" cardRef={cardRef} className="bg-slate-950 text-white rounded-3xl p-6 flex flex-col justify-between border border-amber-500/30 shadow-2xl overflow-hidden">
+      {/* Dynamic ambient backlights */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Top Header */}
+      <div className="relative z-10 flex items-center justify-between border-b border-amber-500/20 pb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+            <Crown className="w-4 h-4 text-amber-400" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Official Card</p>
+            <p className="text-[13px] font-extrabold text-white tracking-tight leading-snug">PLAYER PROFILE</p>
+          </div>
+        </div>
+
+        {player.jerseyNumber && (
+          <div className="bg-amber-500/20 border border-amber-500/40 rounded-2xl px-3 py-1 text-center">
+            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block">JERSEY</span>
+            <span className="text-lg font-black text-amber-300 leading-none">#{player.jerseyNumber}</span>
+          </div>
+        )}
       </div>
 
-      {/* ── Layout ──────────────────────────────────────────────────────── */}
-      <div className="relative z-10 flex flex-col h-full">
-
-        {/* Top bar: Club label + jersey */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-0">
-          <div>
-            <p className="text-[9px] font-black tracking-[0.3em] text-red-400 uppercase">The Enigmatic Elites</p>
-            <p className="text-[11px] font-black tracking-[0.15em] text-slate-300 uppercase">Player Profile</p>
-          </div>
-          {player.jerseyNumber && (
-            <div className="bg-red-600 text-white font-black text-2xl w-12 h-12 rounded-xl flex items-center justify-center border-2 border-red-400 shadow-lg shadow-red-900/50">
-              {player.jerseyNumber}
-            </div>
-          )}
-        </div>
-
-        {/* Giant background name (watermark style) */}
-        <div className="relative flex-1 flex flex-col items-center justify-center px-4">
-          {/* Oversized last name — behind avatar */}
-          {lastName && (
-            <div
-              className="absolute inset-x-0 flex items-center justify-center select-none pointer-events-none"
-              style={{ top: '50%', transform: 'translateY(-50%)' }}
-            >
-              <span
-                className="font-black uppercase leading-none text-white"
-                style={{
-                  fontSize: 120,
-                  letterSpacing: '-0.04em',
-                  opacity: 0.07,
-                  lineHeight: 0.85,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  maxWidth: '100%',
-                }}
-              >
-                {lastName}
-              </span>
-            </div>
-          )}
-
-          {/* Player Avatar — large, centred, square crop */}
-          <div className="relative mt-2 mb-3">
-            <div
-              className="overflow-hidden bg-slate-800 border-[3px] border-red-600 shadow-2xl shadow-red-900/40"
-              style={{ width: 180, height: 180, borderRadius: 16 }}
-            >
-              <Avatar name={player.name} src={player.profileImageUrl} size={180} />
-            </div>
-
-            {/* Role tag — overlaid bottom of photo */}
-            <div className="absolute bottom-0 inset-x-0 flex justify-center">
-              <span className="bg-red-600 text-white font-black text-[10px] uppercase tracking-widest px-3 py-1 shadow-md">
-                {primaryRole}
-              </span>
+      {/* Main Content Body */}
+      <div className="relative z-10 my-auto flex flex-col items-center text-center py-4">
+        {/* Large Avatar with glowing gradient ring */}
+        <div className="relative mb-4">
+          <div className="rounded-full p-1.5 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 shadow-2xl">
+            <div className="rounded-full overflow-hidden bg-slate-950 p-1" style={{ width: 120, height: 120 }}>
+              <Avatar name={player.name} src={player.profileImageUrl} size={120} />
             </div>
           </div>
 
-          {/* First name */}
-          {firstName && (
-            <p className="text-[13px] font-black tracking-[0.25em] text-red-400 uppercase mt-1">{firstName}</p>
-          )}
-          {/* Last name (readable) */}
-          {lastName && (
-            <h1
-              className="font-black uppercase text-white leading-none mt-0.5"
-              style={{ fontSize: 42, letterSpacing: '-0.02em' }}
-            >
-              {lastName}
-            </h1>
-          )}
-          {!lastName && (
-            <h1 className="font-black uppercase text-white leading-none mt-0.5" style={{ fontSize: 38 }}>
-              {firstName}
-            </h1>
-          )}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest px-3 py-0.5 rounded-full border border-amber-300 shadow-lg whitespace-nowrap">
+            {primaryRole}
+          </div>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-4 border-t border-red-900/60 bg-black/70 backdrop-blur-sm">
-          {[
-            { label: 'Matches', value: totalApps },
-            { label: 'Goals', value: totalGoals },
-            { label: 'MOTM', value: totalMotm },
-            { label: 'Wins', value: totalWins },
-          ].map((stat, i) => (
-            <div
-              key={stat.label}
-              className={`flex flex-col items-center py-3 ${i < 3 ? 'border-r border-red-900/40' : ''}`}
-            >
-              <span className="text-2xl font-black text-red-400 leading-none">{stat.value}</span>
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider mt-0.5">{stat.label}</span>
-            </div>
-          ))}
+        {/* Player Name */}
+        <h2 className="text-2xl font-black text-white tracking-tight leading-tight uppercase mt-2">
+          {player.name}
+        </h2>
+
+        {/* Tags / Subtitle */}
+        {player.customTags && player.customTags.length > 0 && (
+          <div className="flex items-center justify-center gap-1.5 flex-wrap mt-2">
+            {player.customTags.slice(0, 3).map((tag, idx) => (
+              <span key={idx} className="text-[10px] font-extrabold bg-slate-900 border border-amber-500/30 text-amber-300 px-2.5 py-0.5 rounded-full">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Stats Grid Footer */}
+      <div className="relative z-10 grid grid-cols-4 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 backdrop-blur-md">
+        <div className="text-center">
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MATCHES</p>
+          <p className="text-base font-black text-amber-300">{totalApps}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">GOALS</p>
+          <p className="text-base font-black text-amber-300">{totalGoals}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MOTM</p>
+          <p className="text-base font-black text-amber-300">{totalMotm}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">WINS</p>
+          <p className="text-base font-black text-amber-300">{totalWins}</p>
         </div>
       </div>
     </CardFrame>
