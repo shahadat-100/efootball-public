@@ -132,12 +132,12 @@ export function HallOfFame() {
                   {/* Glowing Pastel Avatar Frame */}
                   <div className="relative shrink-0">
                     <div
-                      className="rounded-full p-1 transition-all duration-300"
+                      className="rounded-full p-[3px] transition-all duration-300"
                       style={{
                         background: `linear-gradient(135deg, ${accent}, ${accent}40)`,
                       }}
                     >
-                      <div className="rounded-full overflow-hidden bg-white p-0.5 shadow-inner">
+                      <div className="rounded-full overflow-hidden bg-white" style={{ width: 64, height: 64 }}>
                         <Avatar
                           name={player?.name ?? 'Legend'}
                           src={player?.profileImageUrl}
