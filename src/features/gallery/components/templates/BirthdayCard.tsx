@@ -12,7 +12,7 @@ interface BirthdayCardProps {
 
 export function BirthdayCard({ player, aspect = '4:5', cardRef }: BirthdayCardProps) {
   return (
-    <CardFrame aspect={aspect} bgImage="/images/gallery-bg/bg-player-of-month.png" cardRef={cardRef}>
+    <CardFrame aspect={aspect} cardRef={cardRef}>
       {/* Top Header */}
       <div className="text-center pt-2 pb-4 bg-amber-950/70 border-b border-amber-500/30 -mx-6 -mt-6 p-4 backdrop-blur-md">
         <span className="text-[10px] font-black text-amber-300 uppercase tracking-widest block mb-0.5">CLUB CELEBRATIONS</span>

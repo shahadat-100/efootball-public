@@ -18,7 +18,7 @@ export function PodiumCard({ topPlayers, title, subtitle, aspect = '4:5', cardRe
   const third = topPlayers[2];
 
   return (
-    <CardFrame aspect={aspect} bgImage="/images/gallery-bg/bg-golden-boot.jpg" cardRef={cardRef}>
+    <CardFrame aspect={aspect} cardRef={cardRef}>
       {/* Header Overlay */}
       <div className="text-center pt-2 pb-4 bg-black/60 backdrop-blur-md border-b border-amber-500/30 -mx-6 -mt-6 p-4">
         <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-0.5">{subtitle}</span>

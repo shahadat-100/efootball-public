@@ -5,7 +5,6 @@ import { TopScorerCard } from '@/features/gallery/components/templates/TopScorer
 import { PodiumCard } from '@/features/gallery/components/templates/PodiumCard';
 import { Top10Card } from '@/features/gallery/components/templates/Top10Card';
 import { BirthdayCard } from '@/features/gallery/components/templates/BirthdayCard';
-import { MilestoneCard } from '@/features/gallery/components/templates/MilestoneCard';
 import { SeasonLeadersCard } from '@/features/gallery/components/templates/SeasonLeadersCard';
 import { downloadCard } from '@/features/gallery/components/shared/downloadCard';
 import {
@@ -32,8 +31,7 @@ type TemplateType =
   | 'season-leaders'
   | 'player-week'
   | 'player-month'
-  | 'birthday'
-  | 'milestone';
+  | 'birthday';
 
 type AspectRatioType = '4:5' | '1:1' | '16:9' | '9:16';
 
@@ -42,7 +40,6 @@ const TEMPLATES: { id: TemplateType; label: string; category: string; defaultAsp
   { id: 'player-week', label: 'Player of the Week MVP', category: 'Individual', defaultAspect: '4:5' },
   { id: 'player-month', label: 'Player of the Month MVP', category: 'Individual', defaultAspect: '4:5' },
   { id: 'birthday', label: 'Birthday Celebration Card', category: 'Individual', defaultAspect: '4:5' },
-  { id: 'milestone', label: 'Milestone Achievement Card', category: 'Individual', defaultAspect: '4:5' },
 
   { id: 'podium-weekly', label: 'Top 3 Podium (Weekly)', category: 'Leaderboard', defaultAspect: '4:5' },
   { id: 'podium-monthly', label: 'Top 3 Podium (Monthly)', category: 'Leaderboard', defaultAspect: '4:5' },
@@ -62,9 +59,6 @@ export function Gallery() {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>(players[0]?.id || '');
   const [playerSearchQuery, setPlayerSearchQuery] = useState('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatioType>('4:5');
-
-  const [milestoneTitle, setMilestoneTitle] = useState('50 GOALS SCORED');
-  const [milestoneValue, setMilestoneValue] = useState('50 GOALS');
   const [isDownloading, setIsDownloading] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -103,7 +97,7 @@ export function Gallery() {
     if (!cardRef.current) return;
     setIsDownloading(true);
     let filename = `card-${activeTemplate}`;
-    if (selectedPlayer && ['player-profile', 'player-week', 'player-month', 'birthday', 'milestone'].includes(activeTemplate)) {
+    if (selectedPlayer && ['player-profile', 'player-week', 'player-month', 'birthday'].includes(activeTemplate)) {
       filename = `${selectedPlayer.name.toLowerCase().replace(/\s+/g, '-')}-${activeTemplate}`;
     }
     await downloadCard(cardRef.current, filename, format);
@@ -120,7 +114,7 @@ export function Gallery() {
             Social Media Gallery & Card Generator
           </h2>
           <p className="text-muted-foreground text-sm font-medium mt-1">
-            Generate and export high-resolution custom cards with custom background graphics.
+            Generate and export high-resolution custom cards for social media sharing.
           </p>
         </div>
       </div>
@@ -179,8 +173,8 @@ export function Gallery() {
             </div>
           </div>
 
-          {/* Player Search & Selection (Replaces dropdown) */}
-          {['player-profile', 'player-week', 'player-month', 'birthday', 'milestone'].includes(activeTemplate) && (
+          {/* Player Search & Selection */}
+          {['player-profile', 'player-week', 'player-month', 'birthday'].includes(activeTemplate) && (
             <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm">
               <h3 className="font-bold text-base flex items-center gap-2">
                 <User className="w-4 h-4 text-amber-500" />
@@ -221,27 +215,6 @@ export function Gallery() {
                   <p className="p-3 text-xs text-muted-foreground text-center">No player found matching search</p>
                 )}
               </div>
-            </div>
-          )}
-
-          {/* Milestone Custom Controls */}
-          {activeTemplate === 'milestone' && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-3 shadow-sm">
-              <h3 className="font-bold text-sm">Milestone Details</h3>
-              <input
-                type="text"
-                placeholder="Title e.g. 50 GOALS SCORED"
-                value={milestoneTitle}
-                onChange={e => setMilestoneTitle(e.target.value)}
-                className="w-full bg-background border border-input rounded-xl px-3 py-2 text-xs font-semibold"
-              />
-              <input
-                type="text"
-                placeholder="Value e.g. 50 GOALS"
-                value={milestoneValue}
-                onChange={e => setMilestoneValue(e.target.value)}
-                className="w-full bg-background border border-input rounded-xl px-3 py-2 text-xs font-semibold"
-              />
             </div>
           )}
 
@@ -308,16 +281,6 @@ export function Gallery() {
               <BirthdayCard
                 cardRef={cardRef}
                 player={selectedPlayer}
-                aspect={aspectRatio}
-              />
-            )}
-
-            {activeTemplate === 'milestone' && selectedPlayer && (
-              <MilestoneCard
-                cardRef={cardRef}
-                player={selectedPlayer}
-                milestoneTitle={milestoneTitle}
-                milestoneValue={milestoneValue}
                 aspect={aspectRatio}
               />
             )}

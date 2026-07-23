@@ -14,7 +14,7 @@ interface MilestoneCardProps {
 
 export function MilestoneCard({ player, milestoneTitle, milestoneValue, aspect = '4:5', cardRef }: MilestoneCardProps) {
   return (
-    <CardFrame aspect={aspect} bgImage="/images/gallery-bg/bg-top-scorer-week.png" cardRef={cardRef}>
+    <CardFrame aspect={aspect} cardRef={cardRef}>
       {/* Top Header */}
       <div className="text-center pt-2 pb-4 bg-slate-950/80 border-b border-slate-700 -mx-6 -mt-6 p-4 backdrop-blur-md">
         <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block mb-0.5">CLUB MILESTONE</span>

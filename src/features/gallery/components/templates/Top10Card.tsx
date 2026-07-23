@@ -14,7 +14,7 @@ interface Top10CardProps {
 
 export function Top10Card({ topPlayers, title, subtitle, aspect = '16:9', cardRef }: Top10CardProps) {
   return (
-    <CardFrame aspect={aspect} bgImage="/images/gallery-bg/bg-enigmatic-elite.png" cardRef={cardRef}>
+    <CardFrame aspect={aspect} cardRef={cardRef}>
       {/* Header Overlay */}
       <div className="flex items-center justify-between border-b border-cyan-500/30 pb-3 -mx-6 -mt-6 p-5 bg-slate-950/80 backdrop-blur-md">
         <div>
