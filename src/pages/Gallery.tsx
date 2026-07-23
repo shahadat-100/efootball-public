@@ -18,7 +18,7 @@ import {
   getCurrentWeekLabel,
   getCurrentMonthLabel,
 } from '@/features/gallery/utils/galleryStats';
-import { Download, Image as ImageIcon, Sparkles, User, Award, Search, AspectRatio } from 'lucide-react';
+import { Download, Image as ImageIcon, Sparkles, User, Award, Search, Maximize2 } from 'lucide-react';
 
 type TemplateType =
   | 'player-profile'
@@ -132,7 +132,7 @@ export function Gallery() {
           {/* Aspect Ratio Selector */}
           <div className="bg-card border border-border rounded-2xl p-5 space-y-3 shadow-sm">
             <h3 className="font-bold text-sm flex items-center gap-2">
-              <AspectRatio className="w-4 h-4 text-amber-500" />
+              <Maximize2 className="w-4 h-4 text-amber-500" />
               Aspect Ratio / Dimensions
             </h3>
             <div className="grid grid-cols-4 gap-2">

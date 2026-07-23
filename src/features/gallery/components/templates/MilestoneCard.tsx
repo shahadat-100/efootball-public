@@ -2,7 +2,7 @@ import React from 'react';
 import { Player } from '@/features/players/types';
 import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Award, Zap, Star } from 'lucide-react';
+import { Award } from 'lucide-react';
 
 interface MilestoneCardProps {
   player: Player;

@@ -2,7 +2,7 @@ import React from 'react';
 import { Player } from '@/features/players/types';
 import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Cake, Sparkles, Trophy } from 'lucide-react';
+import { Cake, Sparkles } from 'lucide-react';
 
 interface BirthdayCardProps {
   player: Player;

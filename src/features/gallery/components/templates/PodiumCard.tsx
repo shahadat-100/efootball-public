@@ -2,7 +2,7 @@ import React from 'react';
 import { RankedPlayer } from '../../utils/galleryStats';
 import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Trophy, Star, Award, Shield } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface PodiumCardProps {
   topPlayers: RankedPlayer[];
