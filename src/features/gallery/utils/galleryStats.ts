@@ -29,6 +29,9 @@ export interface RankedPlayer {
   goals: number;
   motm: number;
   appearances: number;
+  wins: number;
+  draws: number;
+  losses: number;
 }
 
 // ── Top players by weekly stats ────────────────────────────────────────────
@@ -38,9 +41,9 @@ export function getTopPlayersWeekly(
   count = 10
 ): RankedPlayer[] {
   const { year, monthIndex, week } = getCurrentPeriod();
-  const map = new Map<string, { pts: number; goals: number; motm: number; apps: number }>();
+  const map = new Map<string, { pts: number; goals: number; motm: number; apps: number; wins: number; draws: number; losses: number }>();
 
-  players.forEach(p => map.set(p.id, { pts: 0, goals: 0, motm: 0, apps: 0 }));
+  players.forEach(p => map.set(p.id, { pts: 0, goals: 0, motm: 0, apps: 0, wins: 0, draws: 0, losses: 0 }));
 
   weeklyStats.forEach(stat => {
     if (stat.year === year && stat.monthIndex === monthIndex && stat.week === week) {
@@ -50,6 +53,9 @@ export function getTopPlayersWeekly(
         entry.goals += stat.goals;
         entry.motm += stat.motmCount;
         entry.apps += stat.appearances;
+        entry.wins += stat.wins;
+        entry.draws += stat.draws;
+        entry.losses += stat.losses;
       }
     }
   });
@@ -64,8 +70,12 @@ export function getTopPlayersWeekly(
       goals: v.goals,
       motm: v.motm,
       appearances: v.apps,
+      wins: v.wins,
+      draws: v.draws,
+      losses: v.losses,
     }))
     .filter(r => r.player);
+}
 }
 
 // ── Top players by monthly stats ───────────────────────────────────────────
@@ -75,9 +85,9 @@ export function getTopPlayersMonthly(
   count = 10
 ): RankedPlayer[] {
   const { year, monthIndex } = getCurrentPeriod();
-  const map = new Map<string, { pts: number; goals: number; motm: number; apps: number }>();
+  const map = new Map<string, { pts: number; goals: number; motm: number; apps: number; wins: number; draws: number; losses: number }>();
 
-  players.forEach(p => map.set(p.id, { pts: 0, goals: 0, motm: 0, apps: 0 }));
+  players.forEach(p => map.set(p.id, { pts: 0, goals: 0, motm: 0, apps: 0, wins: 0, draws: 0, losses: 0 }));
 
   monthlyStats.forEach(stat => {
     if (stat.year === year && stat.monthIndex === monthIndex) {
@@ -87,6 +97,9 @@ export function getTopPlayersMonthly(
         entry.goals += stat.goals;
         entry.motm += stat.motmCount;
         entry.apps += stat.appearances;
+        entry.wins += stat.wins;
+        entry.draws += stat.draws;
+        entry.losses += stat.losses;
       }
     }
   });
@@ -101,8 +114,12 @@ export function getTopPlayersMonthly(
       goals: v.goals,
       motm: v.motm,
       appearances: v.apps,
+      wins: v.wins,
+      draws: v.draws,
+      losses: v.losses,
     }))
     .filter(r => r.player);
+}
 }
 
 // ── Top scorer (by goals) — weekly ─────────────────────────────────────────

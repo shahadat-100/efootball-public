@@ -1,10 +1,12 @@
 import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
+import { RankedPlayer } from '@/features/gallery/utils/galleryStats';
 import { Avatar } from '@/shared/components';
 
 interface PlayerProfileCardProps {
   player: Player;
   seasonStats?: PlayerSeasonStat[];
+  periodData?: RankedPlayer;  // When set, shows period-specific stats instead of career totals
   title?: string;
   subtitle?: string;
   cardRef?: React.RefObject<HTMLDivElement>;
@@ -13,15 +15,17 @@ interface PlayerProfileCardProps {
 export function PlayerProfileCard({
   player,
   seasonStats = [],
+  periodData,
   subtitle = 'Player of the Week',
   cardRef,
 }: PlayerProfileCardProps) {
-  const totalApps   = seasonStats.reduce((a, s) => a + (s.appearances || 0), 0);
-  const totalGoals  = seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
-  const totalMotm   = seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
-  const totalWins   = seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
-  const totalDraws  = seasonStats.reduce((a, s) => a + (s.draws || 0), 0);
-  const totalLosses = seasonStats.reduce((a, s) => a + (s.losses || 0), 0);
+  // Use period-specific data if provided, otherwise fall back to career totals
+  const totalApps   = periodData ? periodData.appearances : seasonStats.reduce((a, s) => a + (s.appearances || 0), 0);
+  const totalGoals  = periodData ? periodData.goals       : seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
+  const totalMotm   = periodData ? periodData.motm        : seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
+  const totalWins   = periodData ? periodData.wins        : seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
+  const totalDraws  = periodData ? periodData.draws       : seasonStats.reduce((a, s) => a + (s.draws || 0), 0);
+  const totalLosses = periodData ? periodData.losses      : seasonStats.reduce((a, s) => a + (s.losses || 0), 0);
 
   const nameParts = player.name.trim().split(' ');
   const lastName  = nameParts.pop() || '';
