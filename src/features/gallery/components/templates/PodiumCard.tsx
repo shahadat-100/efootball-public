@@ -12,94 +12,57 @@ interface PodiumCardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-export function PodiumCard({ topPlayers, title, subtitle, aspect = '4:5', cardRef }: PodiumCardProps) {
-  const first = topPlayers[0];
-  const second = topPlayers[1];
-  const third = topPlayers[2];
-
+export function PodiumCard({ topPlayers, title, subtitle, aspect = '16:9', cardRef }: PodiumCardProps) {
   return (
     <CardFrame aspect={aspect} cardRef={cardRef}>
       {/* Header Overlay */}
-      <div className="text-center pt-2 pb-4 bg-black/60 backdrop-blur-md border-b border-amber-500/30 -mx-6 -mt-6 p-4">
-        <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-0.5">{subtitle}</span>
-        <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center justify-center gap-2">
-          <Trophy className="w-5 h-5 text-amber-400" /> {title}
-        </h3>
+      <div className="flex items-center justify-between border-b border-cyan-500/30 pb-3 -mx-6 -mt-6 p-5 bg-slate-950/80 backdrop-blur-md">
+        <div>
+          <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block">{subtitle}</span>
+          <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-400" /> {title}
+          </h3>
+        </div>
+        <div className="text-right">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">THE ENIGMATIC ELITE</span>
+          <span className="text-xs font-black text-cyan-300">TOP 3 PODIUM</span>
+        </div>
       </div>
 
-      {/* Podium Grid Layout */}
-      <div className="my-auto flex items-end justify-center gap-3 pt-6 pb-2">
-        {/* 2nd Place (Silver) */}
-        {second ? (
-          <div className="flex flex-col items-center">
-            <div className="relative mb-2">
-              <div className="rounded-full p-1 bg-gradient-to-tr from-slate-400 to-slate-200 shadow-xl">
-                <div className="rounded-full overflow-hidden bg-slate-950 p-0.5" style={{ width: 70, height: 70 }}>
-                  <Avatar name={second.player.name} src={second.player.profileImageUrl} size={70} />
-                </div>
-              </div>
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-300 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full border border-white shadow">
-                2ND
-              </span>
-            </div>
-            <p className="font-extrabold text-xs text-white truncate max-w-[90px] text-center">{second.player.name}</p>
-            <p className="text-[10px] font-black text-amber-300">{second.points} PTS</p>
-            <p className="text-[9px] font-semibold text-slate-400">⚽ {second.goals}G · 🌟 {second.motm}M</p>
-            <div className="w-20 h-24 bg-gradient-to-b from-slate-700/80 to-slate-900/90 border border-slate-500/40 rounded-t-2xl mt-2 flex items-center justify-center">
-              <span className="text-2xl font-black text-slate-300">2</span>
-            </div>
-          </div>
-        ) : null}
+      {/* Grid of 3 Players */}
+      <div className="my-auto flex justify-center gap-6 py-4">
+        {topPlayers.slice(0, 3).map((r, idx) => (
+          <div key={r.player.id || idx} className="bg-slate-900/80 border border-cyan-500/20 rounded-3xl p-6 flex flex-col items-center text-center relative backdrop-blur-sm w-48 shadow-lg shadow-cyan-900/20">
+            {/* Rank Pill */}
+            <span className={`absolute top-3 left-3 text-[12px] font-black px-2.5 py-0.5 rounded-md shadow-md ${
+              idx === 0 ? 'bg-amber-400 text-slate-950' : idx === 1 ? 'bg-slate-300 text-slate-950' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-slate-800 text-slate-300'
+            }`}>
+              #{idx + 1}
+            </span>
 
-        {/* 1st Place (Gold) */}
-        {first ? (
-          <div className="flex flex-col items-center -mt-6">
-            <div className="relative mb-2">
-              <div className="rounded-full p-1.5 bg-gradient-to-tr from-amber-500 via-yellow-300 to-amber-200 shadow-2xl">
-                <div className="rounded-full overflow-hidden bg-slate-950 p-0.5" style={{ width: 90, height: 90 }}>
-                  <Avatar name={first.player.name} src={first.player.profileImageUrl} size={90} />
-                </div>
-              </div>
-              <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-[11px] px-3 py-0.5 rounded-full border border-white shadow-lg">
-                👑 1ST
-              </span>
+            <div className="rounded-full p-1 bg-gradient-to-tr from-cyan-500 to-pink-500 my-2 shadow-lg">
+              <Avatar name={r.player.name} src={r.player.profileImageUrl} size={84} />
             </div>
-            <p className="font-black text-sm text-amber-300 truncate max-w-[110px] text-center">{first.player.name}</p>
-            <p className="text-xs font-black text-white">{first.points} PTS</p>
-            <p className="text-[9px] font-bold text-amber-400/90">⚽ {first.goals}G · 🌟 {first.motm}M</p>
-            <div className="w-24 h-32 bg-gradient-to-b from-amber-600/90 via-amber-700/80 to-slate-950 border border-amber-400/50 rounded-t-2xl mt-2 flex items-center justify-center">
-              <span className="text-4xl font-black text-amber-300">1</span>
-            </div>
-          </div>
-        ) : null}
 
-        {/* 3rd Place (Bronze) */}
-        {third ? (
-          <div className="flex flex-col items-center">
-            <div className="relative mb-2">
-              <div className="rounded-full p-1 bg-gradient-to-tr from-amber-700 to-amber-900 shadow-xl">
-                <div className="rounded-full overflow-hidden bg-slate-950 p-0.5" style={{ width: 70, height: 70 }}>
-                  <Avatar name={third.player.name} src={third.player.profileImageUrl} size={70} />
-                </div>
-              </div>
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-700 text-white font-black text-[10px] px-2 py-0.5 rounded-full border border-white shadow">
-                3RD
-              </span>
-            </div>
-            <p className="font-extrabold text-xs text-white truncate max-w-[90px] text-center">{third.player.name}</p>
-            <p className="text-[10px] font-black text-amber-300">{third.points} PTS</p>
-            <p className="text-[9px] font-semibold text-slate-400">⚽ {third.goals}G · 🌟 {third.motm}M</p>
-            <div className="w-20 h-16 bg-gradient-to-b from-amber-900/80 to-slate-950 border border-amber-700/40 rounded-t-2xl mt-2 flex items-center justify-center">
-              <span className="text-xl font-black text-amber-600">3</span>
-            </div>
+            <p className="font-extrabold text-base text-white truncate w-full mt-3">{r.player.name}</p>
+            <p className="text-sm font-black text-cyan-300 mt-1">{r.points} PTS</p>
+            <p className="text-[11px] font-medium text-slate-400 mt-1.5 bg-slate-950/50 px-3 py-1 rounded-full border border-slate-700/50">
+              ⚽ {r.goals}G · 🌟 {r.motm}M
+            </p>
           </div>
-        ) : null}
+        ))}
+
+        {topPlayers.length === 0 && (
+          <div className="text-center text-slate-400 py-10 text-xs w-full">
+            No stats recorded for this period yet.
+          </div>
+        )}
       </div>
 
-      {/* Footer info banner */}
-      <div className="bg-black/70 backdrop-blur-md border border-amber-500/20 rounded-xl p-3 -mx-2 -mb-2 flex justify-between items-center text-[10px] font-bold text-slate-300">
-        <span>ENIGMATIC ELITES RANKING</span>
-        <span className="text-amber-400">OFFICIAL LEADERBOARD</span>
+      {/* Bottom Footer */}
+      <div className="border-t border-cyan-500/20 pt-2 -mx-6 -mb-6 p-4 bg-slate-950/80 flex justify-between text-[10px] font-extrabold text-slate-400">
+        <span>OFFICIAL CLUB GALLERY</span>
+        <span>THE ENIGMATIC ELITES</span>
       </div>
     </CardFrame>
   );

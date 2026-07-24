@@ -21,7 +21,6 @@ type TemplateType =
   | 'player-profile'
   | 'top-scorer-weekly'
   | 'top-scorer-monthly'
-  | 'top-scorer-season'
   | 'podium-weekly'
   | 'podium-monthly'
   | 'top10-weekly'
@@ -38,14 +37,13 @@ const TEMPLATES: { id: TemplateType; label: string; category: string; defaultAsp
   { id: 'player-month', label: 'Player of the Month MVP', category: 'Individual', defaultAspect: '4:5' },
   { id: 'birthday', label: 'Birthday Celebration Card', category: 'Individual', defaultAspect: '4:5' },
 
-  { id: 'podium-weekly', label: 'Top 3 Podium (Weekly)', category: 'Leaderboard', defaultAspect: '4:5' },
-  { id: 'podium-monthly', label: 'Top 3 Podium (Monthly)', category: 'Leaderboard', defaultAspect: '4:5' },
+  { id: 'podium-weekly', label: 'Top 3 Podium (Weekly)', category: 'Leaderboard', defaultAspect: '16:9' },
+  { id: 'podium-monthly', label: 'Top 3 Podium (Monthly)', category: 'Leaderboard', defaultAspect: '16:9' },
   { id: 'top10-weekly', label: 'Top 10 Squad (Weekly)', category: 'Leaderboard', defaultAspect: '16:9' },
   { id: 'top10-monthly', label: 'Top 10 Squad (Monthly)', category: 'Leaderboard', defaultAspect: '16:9' },
 
   { id: 'top-scorer-weekly', label: 'Top Scorer of the Week', category: 'Golden Boot', defaultAspect: '4:5' },
   { id: 'top-scorer-monthly', label: 'Top Scorer of the Month', category: 'Golden Boot', defaultAspect: '4:5' },
-  { id: 'top-scorer-season', label: 'Golden Boot (Season)', category: 'Golden Boot', defaultAspect: '4:5' },
 ];
 
 export function Gallery() {
@@ -74,7 +72,6 @@ export function Gallery() {
   // Derived stats calculations
   const weeklyScorer = useMemo(() => getTopScorerWeekly(players, playerWeeklyStats), [players, playerWeeklyStats]);
   const monthlyScorer = useMemo(() => getTopScorerMonthly(players, playerMonthlyStats), [players, playerMonthlyStats]);
-  const seasonScorer = useMemo(() => getTopScorerSeason(players, playerSeasonStats), [players, playerSeasonStats]);
 
   const top3Weekly = useMemo(() => getTopPlayersWeekly(players, playerWeeklyStats, 3), [players, playerWeeklyStats]);
   const top3Monthly = useMemo(() => getTopPlayersMonthly(players, playerMonthlyStats, 3), [players, playerMonthlyStats]);
@@ -91,8 +88,12 @@ export function Gallery() {
     if (!cardRef.current) return;
     setIsDownloading(true);
     let filename = `card-${activeTemplate}`;
-    if (selectedPlayer && ['player-profile', 'player-week', 'player-month', 'birthday'].includes(activeTemplate)) {
+    if (selectedPlayer && ['player-profile', 'birthday'].includes(activeTemplate)) {
       filename = `${selectedPlayer.name.toLowerCase().replace(/\s+/g, '-')}-${activeTemplate}`;
+    } else if (activeTemplate === 'player-week' && top3Weekly[0]) {
+      filename = `${top3Weekly[0].player.name.toLowerCase().replace(/\s+/g, '-')}-mvp-week`;
+    } else if (activeTemplate === 'player-month' && top3Monthly[0]) {
+      filename = `${top3Monthly[0].player.name.toLowerCase().replace(/\s+/g, '-')}-mvp-month`;
     }
     await downloadCard(cardRef.current, filename, format);
     setIsDownloading(false);
@@ -147,28 +148,25 @@ export function Gallery() {
               Choose Template ({TEMPLATES.length})
             </h3>
 
-            <div className="grid grid-cols-1 gap-2 max-h-[320px] overflow-y-auto pr-1">
+            <div className="flex flex-wrap gap-2 max-h-[320px] overflow-y-auto pr-1">
               {TEMPLATES.map(t => (
                 <button
                   key={t.id}
                   onClick={() => handleTemplateChange(t.id)}
-                  className={`text-left p-3 rounded-xl border transition-all text-xs font-bold flex items-center justify-between ${
+                  className={`text-left px-4 py-2 rounded-full border transition-all text-[11px] font-bold flex items-center gap-2 ${
                     activeTemplate === t.id
-                      ? 'bg-amber-500/10 border-amber-500 text-amber-500 shadow-xs'
-                      : 'bg-background border-border text-foreground hover:border-amber-500/30'
+                      ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-md'
+                      : 'bg-background border-border text-foreground hover:border-amber-500/40 hover:bg-amber-500/10'
                   }`}
                 >
                   <span>{t.label}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold bg-muted px-2 py-0.5 rounded-md">
-                    {t.category}
-                  </span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Player Search & Selection */}
-          {['player-profile', 'player-week', 'player-month', 'birthday'].includes(activeTemplate) && (
+          {['player-profile', 'birthday'].includes(activeTemplate) && (
             <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm">
               <h3 className="font-bold text-base flex items-center gap-2">
                 <User className="w-4 h-4 text-amber-500" />
@@ -219,34 +217,27 @@ export function Gallery() {
               Export Image
             </h3>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div>
               <button
                 disabled={isDownloading}
                 onClick={() => handleDownload('png')}
                 className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
-                Download PNG
-              </button>
-              <button
-                disabled={isDownloading}
-                onClick={() => handleDownload('jpg')}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 border border-slate-700 disabled:opacity-50"
-              >
-                <Download className="w-4 h-4 text-amber-400" />
-                Download JPG
+                Download Card (PNG)
               </button>
             </div>
           </div>
         </div>
 
         {/* Right Column: Live Card Preview (Scrollable & Responsive) */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-950/5 rounded-3xl p-4 sm:p-8 border border-dashed border-border min-h-[600px] overflow-x-auto">
-          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-1.5">
+        <div className="lg:col-span-7 flex flex-col items-center bg-slate-950/5 rounded-3xl p-4 sm:p-8 border border-dashed border-border min-h-[600px] overflow-hidden">
+          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 shrink-0 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Live Preview ({aspectRatio})
           </p>
 
-          <div className="shadow-2xl rounded-3xl overflow-hidden scale-75 sm:scale-90 md:scale-100 origin-center transition-all">
+          <div className="w-full flex justify-center overflow-x-auto overflow-y-visible pb-12 pt-2">
+            <div className="shadow-2xl rounded-3xl overflow-hidden origin-top scale-[0.4] sm:scale-[0.6] md:scale-[0.75] lg:scale-[0.65] xl:scale-[0.85] 2xl:scale-100 transition-transform flex-shrink-0">
             {activeTemplate === 'player-profile' && selectedPlayer && (
               <PlayerProfileCard
                 cardRef={cardRef}
@@ -255,20 +246,32 @@ export function Gallery() {
               />
             )}
 
-            {activeTemplate === 'player-week' && selectedPlayer && (
-              <PlayerProfileCard
-                cardRef={cardRef}
-                player={selectedPlayer}
-                seasonStats={selectedStats}
-              />
+            {activeTemplate === 'player-week' && (
+              top3Weekly[0] ? (
+                <PlayerProfileCard
+                  cardRef={cardRef}
+                  player={top3Weekly[0].player}
+                  seasonStats={playerSeasonStats.filter(s => s.playerId === top3Weekly[0].player.id)}
+                  title="PLAYER OF THE WEEK"
+                  subtitle={getCurrentWeekLabel()}
+                />
+              ) : (
+                <div className="text-center text-slate-400 py-20 text-xs w-full">No MVP stats recorded for this week yet.</div>
+              )
             )}
 
-            {activeTemplate === 'player-month' && selectedPlayer && (
-              <PlayerProfileCard
-                cardRef={cardRef}
-                player={selectedPlayer}
-                seasonStats={selectedStats}
-              />
+            {activeTemplate === 'player-month' && (
+              top3Monthly[0] ? (
+                <PlayerProfileCard
+                  cardRef={cardRef}
+                  player={top3Monthly[0].player}
+                  seasonStats={playerSeasonStats.filter(s => s.playerId === top3Monthly[0].player.id)}
+                  title="PLAYER OF THE MONTH"
+                  subtitle={getCurrentMonthLabel()}
+                />
+              ) : (
+                <div className="text-center text-slate-400 py-20 text-xs w-full">No MVP stats recorded for this month yet.</div>
+              )
             )}
 
             {activeTemplate === 'birthday' && selectedPlayer && (
@@ -336,18 +339,10 @@ export function Gallery() {
                 type="monthly"
               />
             )}
-
-            {activeTemplate === 'top-scorer-season' && (
-              <TopScorerCard
-                cardRef={cardRef}
-                data={seasonScorer}
-                periodLabel="All-Time / Season"
-                type="season"
-              />
-            )}
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

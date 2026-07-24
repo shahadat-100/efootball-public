@@ -7,10 +7,12 @@ import { Crown } from 'lucide-react';
 interface PlayerProfileCardProps {
   player: Player;
   seasonStats?: PlayerSeasonStat[];
+  title?: string;
+  subtitle?: string;
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerProfileCardProps) {
+export function PlayerProfileCard({ player, seasonStats = [], title = 'PLAYER PROFILE', subtitle = 'Official Card', cardRef }: PlayerProfileCardProps) {
   // Aggregate stats across seasons
   const totalApps = seasonStats.reduce((acc, s) => acc + (s.appearances || 0), 0);
   const totalGoals = seasonStats.reduce((acc, s) => acc + (s.goals || 0), 0);
@@ -37,8 +39,8 @@ export function PlayerProfileCard({ player, seasonStats = [], cardRef }: PlayerP
             <Crown className="w-4 h-4 text-amber-400" />
           </div>
           <div>
-            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">Official Card</p>
-            <p className="text-[13px] font-extrabold text-white tracking-tight leading-snug">PLAYER PROFILE</p>
+            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">{subtitle}</p>
+            <p className="text-[13px] font-extrabold text-white tracking-tight leading-snug">{title}</p>
           </div>
         </div>
 
