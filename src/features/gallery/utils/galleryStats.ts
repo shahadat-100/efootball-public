@@ -168,7 +168,7 @@ export function getTopScorerSeason(
   const [id, v] = sorted[0];
   const player = players.find(p => p.id === id);
   if (!player) return null;
-  return { player, points: v.pts, goals: v.goals, motm: v.motm, appearances: v.apps };
+  return { player, points: v.pts, goals: v.goals, motm: v.motm, appearances: v.apps, wins: 0, draws: 0, losses: 0 };
 }
 
 // ── Season leaders (best scorer, most MOTM, best win record) ───────────────
@@ -205,7 +205,7 @@ export function getSeasonLeaders(
     const [id, v] = sorted[0];
     const player = players.find(p => p.id === id);
     if (!player) return null;
-    return { player, points: v.pts, goals: v.goals, motm: v.motm, appearances: v.apps };
+    return { player, points: v.pts, goals: v.goals, motm: v.motm, appearances: v.apps, wins: v.wins ?? 0, draws: 0, losses: 0 };
   };
 
   return {

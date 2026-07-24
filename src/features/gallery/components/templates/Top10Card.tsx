@@ -110,7 +110,6 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
         gridTemplateRows: 'repeat(2, 1fr)',
-        gap: 0,
         zIndex: 10,
         padding: '14px 14px 14px 12px',
         gap: 8,
