@@ -34,19 +34,34 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
         boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
       }}
     >
-      {/* Dark grunge texture overlay */}
+      {/* Dark grunge texture overlay with gold/red highlights */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 120% 70% at 70% 40%, #2a0808 0%, transparent 65%), radial-gradient(ellipse 80% 60% at 30% 80%, #1a0404 0%, transparent 60%)',
+        background: 'radial-gradient(ellipse 120% 70% at 75% 30%, rgba(212,175,55,0.18) 0%, transparent 65%), radial-gradient(ellipse 80% 60% at 20% 80%, rgba(200,20,20,0.15) 0%, transparent 60%)',
         zIndex: 1,
       }} />
 
-      {/* Red diagonal brush strokes */}
+      {/* Soccer-net-style grid overlay for sporty feel */}
       <div style={{
-        position: 'absolute', left: -40, top: '45%',
-        width: 280, height: 120,
-        background: 'linear-gradient(105deg, rgba(180,10,10,0.28) 0%, transparent 100%)',
-        transform: 'rotate(-12deg)',
+        position: 'absolute', inset: 0,
+        backgroundImage: 'linear-gradient(rgba(200,20,20,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(200,20,20,0.02) 1px, transparent 1px)',
+        backgroundSize: '30px 30px',
+        zIndex: 2,
+      }} />
+
+      {/* Gold & Red slashes on the right */}
+      <div style={{
+        position: 'absolute', right: -30, bottom: '25%',
+        width: 250, height: 80,
+        background: 'linear-gradient(255deg, rgba(212,175,55,0.2) 0%, transparent 100%)',
+        transform: 'rotate(-8deg)',
+        zIndex: 2,
+      }} />
+      <div style={{
+        position: 'absolute', right: -50, bottom: '20%',
+        width: 300, height: 60,
+        background: 'linear-gradient(255deg, rgba(200,20,20,0.2) 0%, transparent 100%)',
+        transform: 'rotate(-8deg)',
         zIndex: 2,
       }} />
 
@@ -55,17 +70,18 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
         position: 'absolute',
         bottom: 60, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 220,
+        fontSize: 150,
         fontWeight: 900,
-        fontFamily: "'Impact', 'Arial Black', sans-serif",
-        color: 'rgba(255,255,255,0.07)',
-        letterSpacing: -8,
+        fontFamily: "'Neon Sans', 'Impact', sans-serif",
+        color: 'rgba(255,255,255,0.09)',
+        letterSpacing: 2,
         lineHeight: 1,
         userSelect: 'none',
         pointerEvents: 'none',
         zIndex: 3,
+        textShadow: '0 0 15px rgba(255,255,255,0.1)',
       }}>
-        {watermark}
+        SCORER
       </div>
 
       {/* Top header */}
@@ -81,8 +97,13 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             alt="Club Logo"
             style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', border: '1.5px solid rgba(200,20,20,0.4)' }}
           />
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>
-            In Mystery We Reign
+          <div>
+            <div style={{ fontSize: 12, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              THE ENIGMATIC ELITE
+            </div>
+            <div style={{ fontSize: 9, color: '#FF6B6B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>
+              In Mystery We Reign
+            </div>
           </div>
         </div>
 
@@ -90,7 +111,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           <div style={{
             background: '#CC1A1A', color: '#fff',
             fontSize: 22, fontWeight: 900,
-            fontFamily: "'Impact', 'Arial Black', sans-serif",
+            fontFamily: "'Neon Sans', 'Impact', sans-serif",
             width: 46, height: 46, borderRadius: 10,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
@@ -103,14 +124,13 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
       <div style={{
         position: 'absolute', top: 74, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 19,
-        fontStyle: 'italic',
-        fontFamily: 'Georgia, serif',
+        fontSize: 22,
+        fontFamily: "'Golden Varsity Script', Georgia, serif",
         fontWeight: 700,
-        color: '#FF6B6B',
+        color: '#FFD700',
         letterSpacing: 1.5,
         zIndex: 20,
-        textShadow: '0 2px 20px rgba(255,60,60,0.7), 0 0 40px rgba(200,20,20,0.5)',
+        textShadow: '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)',
       }}>
         {subtitle}
       </div>
@@ -167,7 +187,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
                   color: '#fff',
                   fontSize: i === 0 ? 26 : 20,
                   fontWeight: 900,
-                  fontFamily: "'Impact', 'Arial Black', sans-serif",
+                  fontFamily: "'Neon Sans', 'Impact', sans-serif",
                   minWidth: i === 0 ? 60 : 52,
                   textAlign: 'center',
                   padding: i === 0 ? '8px 0' : '6px 0',

@@ -31,6 +31,21 @@ export function PlayerProfileCard({
   const lastName  = nameParts.pop() || '';
   const firstName = nameParts.join(' ');
 
+  const isMonthly = subtitle.toLowerCase().includes('month');
+
+  // Background and Accent colors based on type
+  const bgGradient = isMonthly
+    ? 'radial-gradient(ellipse 120% 70% at 70% 40%, rgba(184,134,11,0.2) 0%, transparent 65%), radial-gradient(ellipse 80% 60% at 30% 80%, #151005 0%, transparent 60%)'
+    : 'radial-gradient(ellipse 120% 70% at 70% 40%, #2a0808 0%, transparent 65%), radial-gradient(ellipse 80% 60% at 30% 80%, #1a0404 0%, transparent 60%)';
+
+  const strokeGradient1 = isMonthly
+    ? 'linear-gradient(105deg, rgba(212,175,55,0.18) 0%, transparent 100%)'
+    : 'linear-gradient(105deg, rgba(180,10,10,0.28) 0%, transparent 100%)';
+
+  const strokeGradient2 = isMonthly
+    ? 'linear-gradient(255deg, rgba(212,175,55,0.12) 0%, transparent 100%)'
+    : 'linear-gradient(255deg, rgba(160,10,10,0.18) 0%, transparent 100%)';
+
   return (
     /* 600 × 750 — matches CardFrame 4:5 export size */
     <div
@@ -49,22 +64,22 @@ export function PlayerProfileCard({
       {/* ── Dark grunge texture overlay ───────────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 120% 70% at 70% 40%, #2a0808 0%, transparent 65%), radial-gradient(ellipse 80% 60% at 30% 80%, #1a0404 0%, transparent 60%)',
+        background: bgGradient,
         zIndex: 1,
       }} />
 
-      {/* ── Red diagonal brush strokes ────────────────────────────── */}
+      {/* ── Diagonal brush strokes ────────────────────────────── */}
       <div style={{
         position: 'absolute', left: -40, top: '45%',
         width: 280, height: 120,
-        background: 'linear-gradient(105deg, rgba(180,10,10,0.28) 0%, transparent 100%)',
+        background: strokeGradient1,
         transform: 'rotate(-12deg)',
         zIndex: 2,
       }} />
       <div style={{
         position: 'absolute', right: -20, top: '30%',
         width: 180, height: 80,
-        background: 'linear-gradient(255deg, rgba(160,10,10,0.18) 0%, transparent 100%)',
+        background: strokeGradient2,
         transform: 'rotate(8deg)',
         zIndex: 2,
       }} />
@@ -94,7 +109,7 @@ export function PlayerProfileCard({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 20,
       }}>
-        {/* Club logo + club name */}
+        {/* Club logo + club name & slogan */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <img
             src="/images/club-logo.jpg"
@@ -106,7 +121,14 @@ export function PlayerProfileCard({
               border: '1.5px solid rgba(200,20,20,0.4)',
             }}
           />
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>In Mystery We Reign</div>
+          <div>
+            <div style={{ fontSize: 12, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              THE ENIGMATIC ELITE
+            </div>
+            <div style={{ fontSize: 9, color: '#FF6B6B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>
+              In Mystery We Reign
+            </div>
+          </div>
         </div>
 
         {/* Jersey number */}
@@ -129,14 +151,13 @@ export function PlayerProfileCard({
       <div style={{
         position: 'absolute', top: 74, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 20,
-        fontStyle: 'italic',
-        fontFamily: 'Georgia, serif',
+        fontSize: 22,
+        fontFamily: "'Golden Varsity Script', Georgia, serif",
         fontWeight: 700,
-        color: '#FF6B6B',
+        color: '#FFD700',
         letterSpacing: 1.5,
         zIndex: 20,
-        textShadow: '0 2px 20px rgba(255,60,60,0.7), 0 0 40px rgba(200,20,20,0.5)',
+        textShadow: '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)',
       }}>
         {subtitle}
       </div>
@@ -152,9 +173,13 @@ export function PlayerProfileCard({
         <div style={{
           width: 240, height: 240,
           borderRadius: '50%',
-          background: 'linear-gradient(145deg, #CC1A1A 0%, #8b0000 60%, transparent 100%)',
+          background: isMonthly
+            ? 'linear-gradient(145deg, #FFD700 0%, #b8860b 60%, transparent 100%)'
+            : 'linear-gradient(145deg, #CC1A1A 0%, #8b0000 60%, transparent 100%)',
           padding: 4,
-          boxShadow: '0 0 60px rgba(200,20,20,0.5), 0 20px 60px rgba(0,0,0,0.7)',
+          boxShadow: isMonthly
+            ? '0 0 60px rgba(212,175,55,0.45), 0 20px 60px rgba(0,0,0,0.7)'
+            : '0 0 60px rgba(200,20,20,0.5), 0 20px 60px rgba(0,0,0,0.7)',
         }}>
           <div style={{
             width: '100%', height: '100%',

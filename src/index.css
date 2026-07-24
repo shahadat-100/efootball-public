@@ -1,5 +1,75 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap');
 
+@font-face {
+  font-family: 'Golden Varsity Regular';
+  src: url('./features/gallery/components/templates/golden_varsity/Golden Varsity Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Golden Varsity Script';
+  src: url('./features/gallery/components/templates/golden_varsity/Golden Varsity Script.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Golden Varsity Outline';
+  src: url('./features/gallery/components/templates/golden_varsity/Golden Varsity Outline.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Elegant Bloom';
+  src: url('./features/gallery/components/templates/elegant_bloom/Elegant Bloom.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Maximum Voltage';
+  src: url('./features/gallery/components/templates/maximum_voltage/Maximum Voltage.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Maximum Voltage Italic';
+  src: url('./features/gallery/components/templates/maximum_voltage/Maximum Voltage Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hoshiko Satsuki';
+  src: url('./features/gallery/components/templates/hoshiko_satsuki/Hoshiko Satsuki.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'The Bandit';
+  src: url('./features/gallery/components/templates/the_bandit_and_the_lone_rider/The Bandit and the Lone Rider.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bunny Cartoon';
+  src: url('./features/gallery/components/templates/Bunny Cartoon.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Neon Sans';
+  src: url('./features/gallery/components/templates/neon_sans/NeonSans.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

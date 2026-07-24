@@ -252,7 +252,7 @@ export function Gallery() {
                 <PlayerProfileCard
                   cardRef={cardRef}
                   player={top3Weekly[0].player}
-                  seasonStats={playerSeasonStats.filter(s => s.playerId === top3Weekly[0].player.id)}
+                  periodData={top3Weekly[0]}
                   title="MVP"
                   subtitle={`Player of the Week · ${getCurrentWeekLabel()}`}
                 />
@@ -266,7 +266,7 @@ export function Gallery() {
                 <PlayerProfileCard
                   cardRef={cardRef}
                   player={top3Monthly[0].player}
-                  seasonStats={playerSeasonStats.filter(s => s.playerId === top3Monthly[0].player.id)}
+                  periodData={top3Monthly[0]}
                   title="MVP"
                   subtitle={`Player of the Month · ${getCurrentMonthLabel()}`}
                 />
