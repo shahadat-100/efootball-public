@@ -2,7 +2,6 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { Avatar } from '@/shared/components';
 import { CardFrame } from '../shared/CardFrame';
-import { Crown } from 'lucide-react';
 
 interface PlayerProfileCardProps {
   player: Player;
@@ -17,107 +16,96 @@ export function PlayerProfileCard({ player, seasonStats = [], title = 'PLAYER PR
   const totalApps = seasonStats.reduce((acc, s) => acc + (s.appearances || 0), 0);
   const totalGoals = seasonStats.reduce((acc, s) => acc + (s.goals || 0), 0);
   const totalMotm = seasonStats.reduce((acc, s) => acc + (s.motmCount || 0), 0);
+  
   const totalWins = seasonStats.reduce((acc, s) => acc + (s.wins || 0), 0);
-
-  const totalCleanSheets = seasonStats.reduce((acc, s) => acc + (s.cleansheets || 0), 0);
   const totalDraws = seasonStats.reduce((acc, s) => acc + (s.draws || 0), 0);
   const totalLosses = seasonStats.reduce((acc, s) => acc + (s.losses || 0), 0);
-  const totalHattricks = seasonStats.reduce((acc, s) => acc + (s.hattricks || 0), 0);
 
-  const primaryRole = player.playerRoles?.[0] || 'Player';
+  // Name splitting
+  const nameParts = player.name.trim().split(' ');
+  const lastName = nameParts.pop() || '';
+  const firstName = nameParts.join(' ');
 
   return (
-    <CardFrame aspect="4:5" cardRef={cardRef} className="bg-slate-950 text-white rounded-3xl p-6 flex flex-col justify-between border border-amber-500/30 shadow-2xl overflow-hidden">
-      {/* Dynamic ambient backlights */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+    <CardFrame aspect="4:5" cardRef={cardRef} className="bg-white text-gray-900 rounded-[20px] border border-gray-200 shadow-2xl relative overflow-hidden font-sans">
+      
+      {/* Giant Ghost Text */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[52%] text-[130px] font-black text-[#CC1A1A] opacity-[0.07] tracking-tighter leading-none whitespace-nowrap pointer-events-none select-none z-0" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+        TEE
+      </div>
 
       {/* Top Header */}
-      <div className="relative z-10 flex items-center justify-between border-b border-amber-500/20 pb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-            <Crown className="w-4 h-4 text-amber-400" />
+      <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-10">
+        <div className="flex items-center gap-1.5">
+          <div className="w-[26px] h-[26px] bg-[#CC1A1A] rounded-md flex items-center justify-center text-[10px] font-black text-white" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+            TEE
           </div>
-          <div>
-            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-none">{subtitle}</p>
-            <p className="text-[13px] font-extrabold text-white tracking-tight leading-snug">{title}</p>
+          <div className="leading-tight">
+            <div className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.12em]">{subtitle}</div>
+            <div className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">{title}</div>
           </div>
         </div>
 
         {player.jerseyNumber && (
-          <div className="bg-amber-500/20 border border-amber-500/40 rounded-2xl px-3 py-1 text-center">
-            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block">JERSEY</span>
-            <span className="text-lg font-black text-amber-300 leading-none">#{player.jerseyNumber}</span>
+          <div className="w-9 h-9 bg-[#CC1A1A] text-white text-[18px] font-black rounded-[10px] flex items-center justify-center leading-none" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+            {player.jerseyNumber}
           </div>
         )}
       </div>
 
-      {/* Main Content Body */}
-      <div className="relative z-10 my-auto flex flex-col items-center text-center py-3">
-        {/* Avatar Frame (rounded rectangle style) */}
-        <div className="relative mb-3">
-          <div className="rounded-2xl p-1 bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 shadow-2xl">
-            <div className="rounded-xl overflow-hidden bg-slate-950" style={{ width: 110, height: 110 }}>
-              <Avatar name={player.name} src={player.profileImageUrl} size={110} className="rounded-xl" />
-            </div>
-          </div>
-
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest px-3 py-0.5 rounded-full border border-amber-300 shadow-lg whitespace-nowrap">
-            {primaryRole}
+      {/* Center Avatar Area */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[54%] z-10 flex flex-col items-center">
+        <div className="w-[110px] h-[110px] rounded-full bg-[#CC1A1A] p-[3px] shadow-2xl">
+          <div className="w-full h-full rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+            <Avatar name={player.name} src={player.profileImageUrl} size={110} />
           </div>
         </div>
-
-        {/* Player Name */}
-        <h2 className="text-2xl font-black text-white tracking-tight leading-tight uppercase mt-2">
-          {player.name}
-        </h2>
-
-        {/* Location & Email info */}
-        {(player.location || player.email) && (
-          <p className="text-[11px] font-medium text-slate-400 mt-0.5">
-            {player.location ? `📍 ${player.location}` : player.email}
-          </p>
-        )}
-
-        {/* Tags / Subtitle */}
-        {player.customTags && player.customTags.length > 0 && (
-          <div className="flex items-center justify-center gap-1.5 flex-wrap mt-2">
-            {player.customTags.slice(0, 4).map((tag, idx) => (
-              <span key={idx} className="text-[10px] font-extrabold bg-slate-900 border border-amber-500/30 text-amber-300 px-2.5 py-0.5 rounded-full">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Expanded Stats Grid Footer (6 Metrics) */}
-      <div className="relative z-10 grid grid-cols-3 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 backdrop-blur-md">
-        <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MATCHES</p>
-          <p className="text-sm font-black text-amber-300">{totalApps}</p>
+      {/* Left Stats Badges */}
+      <div className="absolute left-3 bottom-[70px] flex flex-col gap-1.5 z-10">
+        <div className="flex items-center bg-gray-50 border border-gray-200 rounded-none overflow-hidden w-[90px] shadow-sm">
+          <div className="text-[14px] font-black text-white bg-[#CC1A1A] min-w-[32px] text-center py-1 leading-none" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+            {totalApps}
+          </div>
+          <div className="text-[8px] font-bold text-gray-600 uppercase tracking-[0.08em] px-1.5">
+            Matches
+          </div>
         </div>
-        <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">GOALS</p>
-          <p className="text-sm font-black text-amber-300">{totalGoals}</p>
+
+        <div className="flex items-center bg-gray-50 border border-gray-200 rounded-none overflow-hidden w-[90px] shadow-sm">
+          <div className="text-[14px] font-black text-white bg-[#CC1A1A] min-w-[32px] text-center py-1 leading-none" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+            {totalGoals}
+          </div>
+          <div className="text-[8px] font-bold text-gray-600 uppercase tracking-[0.08em] px-1.5">
+            Goals
+          </div>
         </div>
-        <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MOTM</p>
-          <p className="text-sm font-black text-amber-300">{totalMotm}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">RECORD (W-D-L)</p>
-          <p className="text-sm font-black text-amber-300">{totalWins}-{totalDraws}-{totalLosses}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">CLEAN SHEETS</p>
-          <p className="text-sm font-black text-amber-300">{totalCleanSheets}</p>
-        </div>
-        <div className="text-center">
-          <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">HAT-TRICKS</p>
-          <p className="text-sm font-black text-amber-300">{totalHattricks}</p>
+
+        <div className="flex items-center bg-gray-50 border border-gray-200 rounded-none overflow-hidden w-[90px] shadow-sm">
+          <div className="text-[14px] font-black text-white bg-[#CC1A1A] min-w-[32px] text-center py-1 leading-none" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+            {totalMotm}
+          </div>
+          <div className="text-[8px] font-bold text-gray-600 uppercase tracking-[0.08em] px-1.5">
+            MOTM
+          </div>
         </div>
       </div>
+
+      {/* Diagonal Accent Line */}
+      <div className="absolute right-0 bottom-[60px] w-1 h-20 bg-[#CC1A1A] rounded-l-sm z-[5] opacity-60"></div>
+
+      {/* Bottom Name Area */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 pt-5 bg-gradient-to-t from-white via-white/90 to-transparent border-t border-gray-100 z-10">
+        <div className="text-[20px] font-black text-gray-900 uppercase tracking-tighter leading-[1.1]" style={{ fontFamily: "'Arial Black', sans-serif" }}>
+          {firstName && <span>{firstName} </span>}
+          <span className="text-[#CC1A1A]">{lastName}</span>
+        </div>
+        <div className="text-[9px] text-gray-500 uppercase tracking-[0.1em] mt-0.5 font-bold">
+          {totalWins}W · {totalDraws}D · {totalLosses}L
+        </div>
+      </div>
+
     </CardFrame>
   );
 }
