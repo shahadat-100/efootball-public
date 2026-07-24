@@ -9,7 +9,6 @@ import { downloadCard } from '@/features/gallery/components/shared/downloadCard'
 import {
   getTopScorerWeekly,
   getTopScorerMonthly,
-  getTopScorerSeason,
   getTopPlayersWeekly,
   getTopPlayersMonthly,
   getCurrentWeekLabel,
