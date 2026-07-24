@@ -14,7 +14,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
     ? `Top Scorer of the Week · ${periodLabel}`
     : `Top Scorer of the Month · ${periodLabel}`;
 
-  const watermark = type === 'weekly' ? 'GOAL' : 'BOOT';
+
 
   const nameParts = (data?.player.name ?? '').trim().split(' ');
   const lastName  = nameParts.pop() || '';
