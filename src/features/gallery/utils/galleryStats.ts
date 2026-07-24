@@ -76,7 +76,6 @@ export function getTopPlayersWeekly(
     }))
     .filter(r => r.player);
 }
-}
 
 // ── Top players by monthly stats ───────────────────────────────────────────
 export function getTopPlayersMonthly(
@@ -119,7 +118,6 @@ export function getTopPlayersMonthly(
       losses: v.losses,
     }))
     .filter(r => r.player);
-}
 }
 
 // ── Top scorer (by goals) — weekly ─────────────────────────────────────────
