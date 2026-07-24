@@ -242,6 +242,8 @@ export function Gallery() {
                 cardRef={cardRef}
                 player={selectedPlayer}
                 seasonStats={selectedStats}
+                title="MVP"
+                subtitle="Player Profile"
               />
             )}
 
@@ -251,8 +253,8 @@ export function Gallery() {
                   cardRef={cardRef}
                   player={top3Weekly[0].player}
                   seasonStats={playerSeasonStats.filter(s => s.playerId === top3Weekly[0].player.id)}
-                  title="PLAYER OF THE WEEK"
-                  subtitle={getCurrentWeekLabel()}
+                  title="MVP"
+                  subtitle={`Player of the Week · ${getCurrentWeekLabel()}`}
                 />
               ) : (
                 <div className="text-center text-slate-400 py-20 text-xs w-full">No MVP stats recorded for this week yet.</div>
@@ -265,8 +267,8 @@ export function Gallery() {
                   cardRef={cardRef}
                   player={top3Monthly[0].player}
                   seasonStats={playerSeasonStats.filter(s => s.playerId === top3Monthly[0].player.id)}
-                  title="PLAYER OF THE MONTH"
-                  subtitle={getCurrentMonthLabel()}
+                  title="MVP"
+                  subtitle={`Player of the Month · ${getCurrentMonthLabel()}`}
                 />
               ) : (
                 <div className="text-center text-slate-400 py-20 text-xs w-full">No MVP stats recorded for this month yet.</div>
