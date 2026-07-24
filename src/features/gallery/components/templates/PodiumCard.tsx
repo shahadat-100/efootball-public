@@ -1,8 +1,6 @@
 import React from 'react';
 import { RankedPlayer } from '../../utils/galleryStats';
-import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Trophy } from 'lucide-react';
 
 interface PodiumCardProps {
   topPlayers: RankedPlayer[];
@@ -12,100 +10,207 @@ interface PodiumCardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-const RANK_BADGE_STYLE = [
-  { bg: 'linear-gradient(135deg, #b8860b, #FFD700)', text: '#0C0C10', glow: 'shadow-yellow-500/20' },
-  { bg: 'linear-gradient(135deg, #888, #C0C0C0)', text: '#0C0C10', glow: 'shadow-slate-400/20' },
-  { bg: 'linear-gradient(135deg, #7a3d00, #CC6600)', text: '#fff', glow: 'shadow-amber-700/20' }
+const MEDAL = ['🥇', '🥈', '🥉'];
+const RANK_RING = [
+  { ring: 'linear-gradient(145deg, #FFD700, #b8860b)', glow: 'rgba(255,215,0,0.5)', pts: '#FFD700' },
+  { ring: 'linear-gradient(145deg, #C0C0C0, #777)', glow: 'rgba(192,192,192,0.4)', pts: '#C0C0C0' },
+  { ring: 'linear-gradient(145deg, #CD7F32, #7a3d00)', glow: 'rgba(205,127,50,0.4)', pts: '#CD7F32' },
 ];
 
-export function PodiumCard({ topPlayers, title, subtitle, aspect = '16:9', cardRef }: PodiumCardProps) {
+export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardProps) {
   return (
-    <CardFrame aspect={aspect} cardRef={cardRef} className="bg-[#0C0C10] border border-red-950/60 shadow-2xl relative overflow-hidden font-sans select-none flex flex-col justify-between">
-      {/* Background spotlights */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-red-600/5 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-900/10 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div
+      ref={cardRef}
+      style={{
+        width: 960,
+        height: 540,
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 24,
+        background: '#08080C',
+        fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+        boxShadow: '0 30px 80px rgba(0,0,0,0.9)',
+      }}
+    >
+      {/* ── Deep dark atmospheric background ───────────────────────── */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 80% 100% at 50% 110%, rgba(204,26,26,0.22) 0%, transparent 60%), radial-gradient(ellipse 120% 60% at 50% -10%, rgba(30,10,10,0.9) 0%, transparent 70%)',
+        zIndex: 1,
+      }} />
 
-      {/* Vertical spotlights behind podium columns */}
-      <div className="absolute inset-0 flex justify-around pointer-events-none opacity-30 z-0">
-        <div style={{ width: 120, height: '100%', background: 'linear-gradient(to top, rgba(204,26,26,0.15), transparent)' }} />
-        <div style={{ width: 120, height: '100%', background: 'linear-gradient(to top, rgba(255,215,0,0.12), transparent)' }} />
-        <div style={{ width: 120, height: '100%', background: 'linear-gradient(to top, rgba(204,26,26,0.15), transparent)' }} />
+      {/* ── Stage floor light sweep ─────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 180,
+        background: 'linear-gradient(to top, rgba(204,26,26,0.18) 0%, transparent 100%)',
+        zIndex: 2,
+      }} />
+
+      {/* ── Giant watermark "TOP 3" ─────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 340, fontWeight: 900,
+        fontFamily: "'Impact', 'Arial Black', sans-serif",
+        color: 'rgba(255,255,255,0.03)',
+        letterSpacing: -16, lineHeight: 1,
+        userSelect: 'none', pointerEvents: 'none',
+        zIndex: 3,
+      }}>
+        TOP3
       </div>
 
-      {/* Header Overlay */}
-      <div className="flex items-center justify-between border-b border-red-900/30 pb-3 -mx-6 -mt-6 p-5 bg-slate-950/70 backdrop-blur-md relative z-20">
+      {/* ── Top-left: Club branding ─────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', top: 22, left: 28,
+        display: 'flex', alignItems: 'center', gap: 10,
+        zIndex: 30,
+      }}>
+        <img
+          src="/images/club-logo.jpg"
+          alt="Club Logo"
+          style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', border: '1.5px solid rgba(200,20,20,0.5)' }}
+        />
         <div>
-          <span className="text-[14px] font-bold text-[#FFD700] block mb-0.5" style={{ fontFamily: "'Elegant Bloom', Georgia, serif", textShadow: '0 2px 10px rgba(255,215,0,0.4)', letterSpacing: '0.05em' }}>{subtitle}</span>
-          <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}>
-            <Trophy className="w-5 h-5 text-red-500" /> {title}
-          </h3>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <img
-            src="/images/club-logo.jpg"
-            alt="Club Logo"
-            className="w-9 h-9 rounded-md object-cover border border-red-800/40"
-          />
-          <div className="text-left">
-            <span className="text-[10px] font-black text-white uppercase tracking-wider block leading-none">THE ENIGMATIC ELITE</span>
-            <span className="text-[8px] font-bold text-red-500 uppercase tracking-widest italic mt-0.5 block">In Mystery We Reign</span>
+          <div style={{ fontSize: 11, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5, lineHeight: 1 }}>
+            THE ENIGMATIC ELITE
+          </div>
+          <div style={{ fontSize: 9, color: '#FF6B6B', textTransform: 'uppercase', letterSpacing: 2, fontFamily: "'Elegant Bloom', Georgia, serif" }}>
+            In Mystery We Reign
           </div>
         </div>
       </div>
 
-      {/* Grid of 3 Players */}
-      <div className="my-auto flex justify-center gap-6 py-4 relative z-10">
-        {topPlayers.slice(0, 3).map((r, idx) => {
-          const style = RANK_BADGE_STYLE[idx] || RANK_BADGE_STYLE[2];
-          return (
-            <div key={r.player.id || idx} className="bg-[#121318] border border-red-900/30 rounded-2xl p-5 flex flex-col items-center text-center relative w-48 shadow-xl">
-              {/* Rank Pill */}
-              <span 
-                className="absolute top-3 left-3 text-[11px] font-black px-2.5 py-0.5 rounded-md shadow-md"
-                style={{ background: style.bg, color: style.text }}
-              >
-                #{idx + 1}
-              </span>
+      {/* ── Top-right: Title block ──────────────────────────────────── */}
+      <div style={{ position: 'absolute', top: 18, right: 28, textAlign: 'right', zIndex: 30 }}>
+        <div style={{
+          fontSize: 11, color: '#FFD700',
+          fontFamily: "'Elegant Bloom', Georgia, serif",
+          letterSpacing: 1.5, lineHeight: 1, marginBottom: 3,
+          textShadow: '0 0 12px rgba(255,215,0,0.5)',
+        }}>
+          {subtitle}
+        </div>
+        <div style={{
+          fontSize: 28, fontWeight: 900, lineHeight: 1,
+          fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+          color: '#fff', textTransform: 'uppercase',
+          letterSpacing: 1,
+        }}>
+          {title}
+        </div>
+      </div>
 
-              {/* Avatar Frame */}
-              <div className={`rounded-full p-1 my-1 shadow-lg ${style.glow}`} style={{ background: style.bg }}>
-                <div className="rounded-full overflow-hidden bg-[#1a1520] p-0.5" style={{ width: 80, height: 80 }}>
-                  <Avatar name={r.player.name} src={r.player.profileImageUrl} size={80} />
+      {/* ── Red horizontal accent line ──────────────────────────────── */}
+      <div style={{
+        position: 'absolute', top: 80, left: 28, right: 28, height: 1.5,
+        background: 'linear-gradient(90deg, #CC1A1A, rgba(204,26,26,0.2), transparent)',
+        zIndex: 30,
+      }} />
+
+      {/* ── Three player columns ────────────────────────────────────── */}
+      {topPlayers.length === 0 ? (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'rgba(255,255,255,0.3)', fontSize: 14,
+        }}>
+          No stats recorded for this period yet.
+        </div>
+      ) : (
+        <div style={{
+          position: 'absolute', top: 88, left: 20, right: 20, bottom: 20,
+          display: 'flex', gap: 12, alignItems: 'flex-end',
+          zIndex: 20,
+        }}>
+          {topPlayers.slice(0, 3).map((r, idx) => {
+            const rr = RANK_RING[idx] || RANK_RING[2];
+            // Center (1st place) column is taller
+            const colHeight = idx === 0 ? '100%' : idx === 1 ? '88%' : '78%';
+            return (
+              <div key={r.player.id || idx} style={{
+                flex: 1,
+                height: colHeight,
+                position: 'relative',
+                background: idx === 0
+                  ? 'linear-gradient(180deg, rgba(204,26,26,0.15) 0%, rgba(204,26,26,0.05) 100%)'
+                  : 'rgba(255,255,255,0.03)',
+                border: idx === 0
+                  ? '1px solid rgba(204,26,26,0.4)'
+                  : '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 16,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: 8, padding: '16px 10px',
+                backdropFilter: 'blur(4px)',
+              }}>
+                {/* Medal */}
+                <div style={{ fontSize: 22, position: 'absolute', top: 10, left: 12 }}>{MEDAL[idx]}</div>
+
+                {/* Avatar Ring */}
+                <div style={{
+                  width: idx === 0 ? 100 : 80,
+                  height: idx === 0 ? 100 : 80,
+                  borderRadius: '50%',
+                  background: rr.ring,
+                  padding: 3,
+                  boxShadow: `0 0 30px ${rr.glow}, 0 0 60px ${rr.glow}`,
+                }}>
+                  <div style={{
+                    width: '100%', height: '100%',
+                    borderRadius: '50%', background: '#131318',
+                    overflow: 'hidden',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Avatar name={r.player.name} src={r.player.profileImageUrl} size={idx === 0 ? 94 : 74} />
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div style={{
+                  fontSize: idx === 0 ? 15 : 12, fontWeight: 900,
+                  fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
+                  color: '#fff', textTransform: 'uppercase',
+                  textAlign: 'center', lineHeight: 1.1,
+                }}>
+                  {r.player.name}
+                </div>
+
+                {/* Points */}
+                <div style={{
+                  fontSize: idx === 0 ? 26 : 20, fontWeight: 900,
+                  fontFamily: "'Impact', 'Arial Black', sans-serif",
+                  color: rr.pts, lineHeight: 1,
+                }}>
+                  {r.points}
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginLeft: 3 }}>PTS</span>
+                </div>
+
+                {/* Mini stats */}
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {[
+                    { v: r.goals, l: 'G' },
+                    { v: r.appearances, l: 'A' },
+                    { v: r.motm, l: 'M' },
+                  ].map(({ v, l }) => (
+                    <div key={l} style={{
+                      background: 'rgba(204,26,26,0.2)',
+                      border: '1px solid rgba(204,26,26,0.3)',
+                      borderRadius: 5,
+                      padding: '2px 6px',
+                      fontSize: 10, fontWeight: 900,
+                      color: '#fff', lineHeight: 1.3,
+                      textAlign: 'center',
+                    }}>
+                      {v}
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', display: 'block', letterSpacing: 1, fontFamily: "'Golden Varsity Regular', sans-serif" }}>{l}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              <p className="font-black text-sm text-white truncate w-full mt-3 uppercase" style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}>
-                {r.player.name}
-              </p>
-              
-              <p className="text-lg font-black text-red-500 mt-0.5" style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}>
-                {r.points} <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">PTS</span>
-              </p>
-              
-              <div className="flex gap-1.5 mt-2">
-                <span className="text-[8px] font-bold bg-[#1C0808] border border-[#3a1212] text-slate-300 px-2 py-0.5 rounded-md">
-                  ⚽ {r.goals} G
-                </span>
-                <span className="text-[8px] font-bold bg-[#1C0808] border border-[#3a1212] text-slate-300 px-2 py-0.5 rounded-md">
-                  ★ {r.motm} M
-                </span>
-              </div>
-            </div>
-          );
-        })}
-
-        {topPlayers.length === 0 && (
-          <div className="text-center text-slate-500 py-10 text-xs w-full">
-            No stats recorded for this period yet.
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Footer */}
-      <div className="border-t border-red-900/20 pt-2 -mx-6 -mb-6 p-4 bg-slate-950/80 flex justify-between text-[9px] font-extrabold text-slate-500 tracking-wider relative z-20">
-        <span>OFFICIAL CLUB GALLERY</span>
-        <span>THE ENIGMATIC ELITES</span>
-      </div>
-    </CardFrame>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

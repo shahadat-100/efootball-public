@@ -68,13 +68,12 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
       {/* Giant watermark */}
       <div style={{
         position: 'absolute',
-        bottom: 50, left: 0, right: 0,
+        bottom: 40, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 120,
-        fontWeight: 900,
-        fontFamily: "'Impact', 'Arial Black', sans-serif",
-        color: 'rgba(255,255,255,0.08)',
-        letterSpacing: -2,
+        fontSize: 110,
+        fontFamily: "'Doctor Glitch', 'Impact', sans-serif",
+        color: 'rgba(255,255,255,0.07)',
+        letterSpacing: 4,
         lineHeight: 1,
         userSelect: 'none',
         pointerEvents: 'none',
@@ -215,7 +214,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           {/* Bottom left quote */}
           <div style={{ position: 'absolute', bottom: 22, left: 28, maxWidth: 200, zIndex: 20 }}>
             <div style={{ color: '#CC1A1A', fontSize: 12, fontWeight: 900, marginBottom: 4 }}>✖</div>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 8, fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 8, fontFamily: "'Helvetica Punk', sans-serif", lineHeight: 1.5, margin: 0 }}>
               "Mystery is our game. Elite is our name."
             </p>
           </div>
@@ -224,18 +223,17 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           <div style={{ position: 'absolute', bottom: 22, right: 28, textAlign: 'right', zIndex: 20 }}>
             {firstName && (
               <div style={{
-                fontSize: 28, fontWeight: 900,
-                fontFamily: "'Impact', 'Arial Black', sans-serif",
+                fontSize: 30,
+                fontFamily: "'Doctor Glitch', 'Impact', sans-serif",
                 color: '#fff', textTransform: 'uppercase',
-                letterSpacing: -1, lineHeight: 1,
+                letterSpacing: 2, lineHeight: 1,
               }}>
                 {firstName}
               </div>
             )}
             <div style={{
-              fontSize: 30, fontWeight: 700,
-              fontFamily: 'Georgia, serif',
-              fontStyle: 'italic',
+              fontSize: 32,
+              fontFamily: "'The Wildeast', Georgia, serif",
               color: '#CC1A1A', lineHeight: 1, marginTop: 2,
               textShadow: '0 2px 16px rgba(200,20,20,0.6)',
             }}>

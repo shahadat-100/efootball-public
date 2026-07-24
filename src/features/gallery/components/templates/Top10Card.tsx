@@ -1,8 +1,6 @@
 import React from 'react';
 import { RankedPlayer } from '../../utils/galleryStats';
-import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Trophy } from 'lucide-react';
 
 interface Top10CardProps {
   topPlayers: RankedPlayer[];
@@ -12,96 +10,190 @@ interface Top10CardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-const RANK_BADGE_STYLE = (idx: number) => {
-  if (idx === 0) return { bg: 'linear-gradient(135deg, #b8860b, #FFD700)', text: '#0C0C10', glow: 'shadow-yellow-500/20' };
-  if (idx === 1) return { bg: 'linear-gradient(135deg, #888, #C0C0C0)', text: '#0C0C10', glow: 'shadow-slate-400/20' };
-  if (idx === 2) return { bg: 'linear-gradient(135deg, #7a3d00, #CC6600)', text: '#fff', glow: 'shadow-amber-700/20' };
-  return { bg: 'rgba(255,255,255,0.08)', text: 'rgba(255,255,255,0.5)', glow: '' };
+const RANK_COLOR: Record<number, string> = {
+  0: '#FFD700',
+  1: '#C0C0C0',
+  2: '#CD7F32',
 };
 
-export function Top10Card({ topPlayers, title, subtitle, aspect = '16:9', cardRef }: Top10CardProps) {
+export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardProps) {
+  const firstCol = topPlayers.slice(0, 5);
+  const secondCol = topPlayers.slice(5, 10);
+
   return (
-    <CardFrame aspect={aspect} cardRef={cardRef} className="bg-[#0C0C10] border border-red-950/60 shadow-2xl relative overflow-hidden font-sans select-none flex flex-col justify-between">
-      {/* Background spotlights */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-red-600/5 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-900/10 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div
+      ref={cardRef}
+      style={{
+        width: 960,
+        height: 540,
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 24,
+        background: '#08080C',
+        fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+        boxShadow: '0 30px 80px rgba(0,0,0,0.9)',
+      }}
+    >
+      {/* ── Atmospheric background ──────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: [
+          'radial-gradient(ellipse 60% 60% at 0% 100%, rgba(204,26,26,0.18) 0%, transparent 60%)',
+          'radial-gradient(ellipse 50% 50% at 100% 0%, rgba(184,134,11,0.1) 0%, transparent 55%)',
+          'radial-gradient(ellipse 100% 40% at 50% 50%, rgba(20,5,5,0.95) 0%, transparent 100%)',
+        ].join(', '),
+        zIndex: 1,
+      }} />
 
-      {/* Carbon fiber grid overlay for power wall look */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-40 z-0" 
-        style={{
-          backgroundImage: 'linear-gradient(45deg, rgba(204,26,26,0.03) 25%, transparent 25%, transparent 75%, rgba(204,26,26,0.03) 75%), linear-gradient(45deg, rgba(204,26,26,0.03) 25%, transparent 25%, transparent 75%, rgba(204,26,26,0.03) 75%)',
-          backgroundSize: '16px 16px',
-          backgroundPosition: '0 0, 8px 8px'
-        }}
-      />
+      {/* ── Giant ghost rank "10" ────────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', right: -40, bottom: -40,
+        fontSize: 400, fontWeight: 900,
+        fontFamily: "'Impact', 'Arial Black', sans-serif",
+        color: 'rgba(255,255,255,0.025)',
+        lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
+        zIndex: 2,
+      }}>
+        10
+      </div>
 
-      {/* Header Overlay */}
-      <div className="flex items-center justify-between border-b border-red-900/30 pb-3 -mx-6 -mt-6 p-5 bg-slate-950/70 backdrop-blur-md relative z-20">
-        <div>
-          <span className="text-[14px] font-bold text-[#FFD700] block mb-0.5" style={{ fontFamily: "'Elegant Bloom', Georgia, serif", textShadow: '0 2px 10px rgba(255,215,0,0.4)', letterSpacing: '0.05em' }}>{subtitle}</span>
-          <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}>
-            <Trophy className="w-5 h-5 text-red-500" /> {title}
-          </h3>
-        </div>
-        <div className="flex items-center gap-2.5">
+      {/* ── Vertical red accent stripe ───────────────────────────────── */}
+      <div style={{
+        position: 'absolute', top: 0, left: 340, width: 2, height: '100%',
+        background: 'linear-gradient(180deg, transparent, rgba(204,26,26,0.5) 30%, rgba(204,26,26,0.5) 70%, transparent)',
+        zIndex: 10,
+      }} />
+
+      {/* ── Left panel: Club branding + Title ──────────────────────── */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, width: 340, height: '100%',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: '0 28px',
+        zIndex: 20,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <img
             src="/images/club-logo.jpg"
             alt="Club Logo"
-            className="w-9 h-9 rounded-md object-cover border border-red-800/40"
+            style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', border: '1.5px solid rgba(200,20,20,0.5)' }}
           />
-          <div className="text-left">
-            <span className="text-[10px] font-black text-white uppercase tracking-wider block leading-none">THE ENIGMATIC ELITE</span>
-            <span className="text-[8px] font-bold text-red-500 uppercase tracking-widest italic mt-0.5 block">In Mystery We Reign</span>
+          <div>
+            <div style={{ fontSize: 10, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5, lineHeight: 1 }}>
+              THE ENIGMATIC ELITE
+            </div>
+            <div style={{ fontSize: 8, color: '#FF6B6B', fontFamily: "'Elegant Bloom', Georgia, serif", letterSpacing: 1.5 }}>
+              In Mystery We Reign
+            </div>
           </div>
+        </div>
+
+        {/* Subtitle */}
+        <div style={{
+          fontSize: 13, color: '#FFD700',
+          fontFamily: "'Elegant Bloom', Georgia, serif",
+          letterSpacing: 1.5, lineHeight: 1, marginBottom: 6,
+          textShadow: '0 0 12px rgba(255,215,0,0.5)',
+        }}>
+          {subtitle}
+        </div>
+
+        {/* Main title */}
+        <div style={{
+          fontSize: 36, fontWeight: 900, lineHeight: 1,
+          fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+          color: '#fff', textTransform: 'uppercase',
+          letterSpacing: 1, marginBottom: 16,
+        }}>
+          {title}
+        </div>
+
+        {/* Red divider */}
+        <div style={{ width: 60, height: 3, background: '#CC1A1A', borderRadius: 2, marginBottom: 16 }} />
+
+        {/* League tagline */}
+        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', fontFamily: "'Maximum Voltage Italic', 'Impact', sans-serif", letterSpacing: 2, lineHeight: 1.6 }}>
+          Squad Rankings<br />Performance Index
         </div>
       </div>
 
-      {/* Grid of 10 Players */}
-      <div className="my-auto grid grid-cols-5 gap-3 py-4 relative z-10">
-        {topPlayers.slice(0, 10).map((r, idx) => {
-          const style = RANK_BADGE_STYLE(idx);
-          return (
-            <div key={r.player.id || idx} className="bg-[#121318] border border-red-900/20 rounded-2xl p-2.5 flex flex-col items-center text-center relative shadow-lg">
-              {/* Rank Pill */}
-              <span 
-                className="absolute top-2 left-2 text-[9px] font-black px-1.5 py-0.2 rounded-md"
-                style={{ background: style.bg, color: style.text }}
-              >
-                #{idx + 1}
-              </span>
+      {/* ── Right panel: Two columns of players ─────────────────────── */}
+      <div style={{
+        position: 'absolute', top: 0, left: 356, right: 0, height: '100%',
+        display: 'flex', gap: 6,
+        padding: '16px 20px',
+        zIndex: 20,
+      }}>
+        {[firstCol, secondCol].map((col, cIdx) => (
+          <div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {col.map((r, rowIdx) => {
+              const absIdx = cIdx * 5 + rowIdx;
+              const rankColor = RANK_COLOR[absIdx] || 'rgba(255,255,255,0.6)';
+              const isTop3 = absIdx < 3;
+              return (
+                <div key={r.player.id || absIdx} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  background: isTop3
+                    ? `linear-gradient(90deg, rgba(204,26,26,0.18), rgba(204,26,26,0.06), transparent)`
+                    : 'rgba(255,255,255,0.03)',
+                  borderLeft: `2.5px solid ${rankColor}`,
+                  borderRadius: '0 8px 8px 0',
+                  padding: '5px 8px 5px 10px',
+                  transition: 'all 0.2s',
+                }}>
+                  {/* Rank number */}
+                  <div style={{
+                    fontSize: isTop3 ? 18 : 13,
+                    fontWeight: 900,
+                    fontFamily: "'Impact', 'Arial Black', sans-serif",
+                    color: rankColor,
+                    minWidth: isTop3 ? 22 : 16,
+                    lineHeight: 1,
+                    textAlign: 'center',
+                  }}>
+                    {absIdx + 1}
+                  </div>
 
-              <div className={`rounded-full p-0.5 my-1 ${style.glow}`} style={{ background: style.bg }}>
-                <div className="rounded-full overflow-hidden bg-[#1a1520] p-0.5" style={{ width: 44, height: 44 }}>
-                  <Avatar name={r.player.name} src={r.player.profileImageUrl} size={44} />
+                  {/* Avatar */}
+                  <div style={{
+                    width: isTop3 ? 34 : 28, height: isTop3 ? 34 : 28,
+                    borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+                    border: `1.5px solid ${isTop3 ? rankColor : 'rgba(255,255,255,0.1)'}`,
+                    boxShadow: isTop3 ? `0 0 8px ${rankColor}60` : 'none',
+                  }}>
+                    <Avatar name={r.player.name} src={r.player.profileImageUrl} size={isTop3 ? 34 : 28} />
+                  </div>
+
+                  {/* Name */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: isTop3 ? 10 : 9, fontWeight: 900,
+                      fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
+                      color: '#fff', textTransform: 'uppercase',
+                      lineHeight: 1, letterSpacing: 0.5,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {r.player.name}
+                    </div>
+                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginTop: 1 }}>
+                      {r.goals}G · {r.appearances}A · {r.motm}M
+                    </div>
+                  </div>
+
+                  {/* Points */}
+                  <div style={{
+                    fontSize: isTop3 ? 16 : 12, fontWeight: 900,
+                    fontFamily: "'Impact', 'Arial Black', sans-serif",
+                    color: rankColor, lineHeight: 1, flexShrink: 0,
+                  }}>
+                    {r.points}
+                    <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', display: 'block', textAlign: 'right' }}>PTS</span>
+                  </div>
                 </div>
-              </div>
-
-              <p className="font-extrabold text-[11px] text-white truncate w-full mt-1 uppercase">{r.player.name}</p>
-              
-              <p className="text-xs font-black text-red-500 mt-0.5" style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}>
-                {r.points} <span className="text-[8px] font-bold text-slate-400">PTS</span>
-              </p>
-              
-              <p className="text-[9px] font-medium text-slate-400 mt-0.5 bg-[#1C0808]/50 px-2 py-0.5 rounded border border-[#3a1212]/30">
-                ⚽{r.goals} · ★{r.motm}
-              </p>
-            </div>
-          );
-        })}
-
-        {topPlayers.length === 0 && (
-          <div className="col-span-5 text-center text-slate-500 py-10 text-xs">
-            No stats recorded for this period yet.
+              );
+            })}
           </div>
-        )}
+        ))}
       </div>
-
-      {/* Bottom Footer */}
-      <div className="border-t border-red-900/20 pt-2 -mx-6 -mb-6 p-4 bg-slate-950/80 flex justify-between text-[9px] font-extrabold text-slate-500 tracking-wider relative z-20">
-        <span>OFFICIAL CLUB GALLERY</span>
-        <span>THE ENIGMATIC ELITES</span>
-      </div>
-    </CardFrame>
+    </div>
   );
 }

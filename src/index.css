@@ -70,6 +70,69 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Doctor Glitch';
+  src: url('./features/gallery/components/templates/Doctor Glitch.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica Punk';
+  src: url('./features/gallery/components/templates/Helvetica Punk.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Malvinas Sans';
+  src: url('./features/gallery/components/templates/Malvinas Sans (Free For Personal Use).ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Supersonic Rocketship';
+  src: url('./features/gallery/components/templates/Supersonic Rocketship.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Action Comics';
+  src: url('./features/gallery/components/templates/action_comics/Action Comics.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Action Comics Black';
+  src: url('./features/gallery/components/templates/action_comics/Action Comics Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'The Bandit';
+  src: url('./features/gallery/components/templates/the_bandit_and_the_lone_rider/The Bandit and the Lone Rider.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'The Wildeast';
+  src: url('./features/gallery/components/templates/the_wildeast/The Wildeast.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hoshiko Satsuki';
+  src: url('./features/gallery/components/templates/hoshiko_satsuki/Hoshiko Satsuki.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

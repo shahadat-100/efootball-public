@@ -67,13 +67,12 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
       {/* ── Giant Outline Watermark: "LEGEND" ───────────────────────────── */}
       <div style={{
         position: 'absolute',
-        bottom: 50, left: 0, right: 0,
+        bottom: 40, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 160,
-        fontWeight: 900,
-        fontFamily: "'Golden Varsity Outline', 'Impact', sans-serif",
-        color: 'rgba(212,175,55,0.06)',
-        letterSpacing: 4,
+        fontSize: 150,
+        fontFamily: "'Supersonic Rocketship', 'Impact', sans-serif",
+        color: 'rgba(212,175,55,0.07)',
+        letterSpacing: 6,
         lineHeight: 1,
         userSelect: 'none',
         pointerEvents: 'none',
@@ -125,14 +124,14 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         </div>
       </div>
 
-      {/* ── Premium Birthday Script Subtitle ────────────────────────────── */}
+      {/* ── Premium Birthday Script Subtitle ────────────────────────────────────── */}
       <div style={{
-        position: 'absolute', top: 80, left: 0, right: 0,
+        position: 'absolute', top: 78, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 32,
-        fontFamily: "'Elegant Bloom', Georgia, serif",
+        fontSize: 38,
+        fontFamily: "'Bunny Cartoon', Georgia, serif",
         color: '#FFD700',
-        letterSpacing: 2,
+        letterSpacing: 3,
         zIndex: 20,
         textShadow: '0 3px 25px rgba(212,175,55,0.7), 0 0 50px rgba(184,134,11,0.5)',
       }}>
@@ -211,7 +210,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         {firstName && (
           <div style={{
             fontSize: 34, fontWeight: 900,
-            fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
+            fontFamily: "'Hoshiko Satsuki', 'Impact', sans-serif",
             color: '#fff', textTransform: 'uppercase',
             letterSpacing: 0.5, lineHeight: 0.95,
           }}>

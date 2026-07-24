@@ -273,6 +273,7 @@ export function PlayerProfileCard({
         <p style={{
           color: 'rgba(255,255,255,0.45)',
           fontSize: 8,
+          fontFamily: "'Malvinas Sans', Georgia, serif",
           fontStyle: 'italic',
           lineHeight: 1.5,
           margin: 0,
@@ -310,9 +311,9 @@ export function PlayerProfileCard({
           {lastName}
         </div>
         <div style={{
-          fontSize: 9, color: 'rgba(255,255,255,0.35)',
-          fontWeight: 700, textTransform: 'uppercase',
-          letterSpacing: 2, marginTop: 6,
+          fontSize: 11, color: 'rgba(255,255,255,0.45)',
+          fontFamily: "'The Bandit', 'Impact', sans-serif",
+          letterSpacing: 3, marginTop: 6,
         }}>
           {totalWins}W · {totalDraws}D · {totalLosses}L
         </div>
