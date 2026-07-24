@@ -65,7 +65,7 @@ export function PlayerProfileCard({
         zIndex: 2,
       }} />
 
-      {/* ── Giant MVP watermark text ──────────────────────────────── */}
+      {/* ── Giant watermark text (TEE for profile, POTW for weekly) ── */}
       <div style={{
         position: 'absolute',
         bottom: 60, left: 0, right: 0,
@@ -80,7 +80,7 @@ export function PlayerProfileCard({
         pointerEvents: 'none',
         zIndex: 3,
       }}>
-        MVP
+        {subtitle.includes('Week') ? 'POTW' : subtitle.includes('Month') ? 'POTM' : 'TEE'}
       </div>
 
       {/* ── Top header bar ────────────────────────────────────────── */}
@@ -90,20 +90,19 @@ export function PlayerProfileCard({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 20,
       }}>
-        {/* Club badge + league name */}
+        {/* Club logo + club name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34,
-            background: '#CC1A1A',
-            borderRadius: 8,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 10, fontWeight: 900, color: '#fff',
-            letterSpacing: 1,
-          }}>TEE</div>
-          <div>
-            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 2 }}>Efootball League</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>The Enigmatic Elite</div>
-          </div>
+          <img
+            src="/images/club-logo.jpg"
+            alt="Club Logo"
+            style={{
+              width: 40, height: 40,
+              borderRadius: 8,
+              objectFit: 'cover',
+              border: '1.5px solid rgba(200,20,20,0.4)',
+            }}
+          />
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>In Mystery We Reign</div>
         </div>
 
         {/* Jersey number */}
@@ -122,17 +121,18 @@ export function PlayerProfileCard({
         )}
       </div>
 
-      {/* ── Cursive subtitle ("Man of the Match") ─────────────────── */}
+      {/* ── Cursive subtitle ("Player of the Week · Week 4, July") ── */}
       <div style={{
         position: 'absolute', top: 74, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 22,
+        fontSize: 20,
         fontStyle: 'italic',
         fontFamily: 'Georgia, serif',
-        color: '#CC1A1A',
-        letterSpacing: 1,
+        fontWeight: 700,
+        color: '#FF6B6B',
+        letterSpacing: 1.5,
         zIndex: 20,
-        textShadow: '0 2px 12px rgba(200,20,20,0.5)',
+        textShadow: '0 2px 20px rgba(255,60,60,0.7), 0 0 40px rgba(200,20,20,0.5)',
       }}>
         {subtitle}
       </div>
@@ -230,16 +230,6 @@ export function PlayerProfileCard({
           margin: 0,
         }}>
           "Mystery is our game. Elite is our name."
-        </p>
-        <p style={{
-          color: 'rgba(200,20,20,0.7)',
-          fontSize: 7.5,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: 2,
-          marginTop: 4,
-        }}>
-          @efootball.league
         </p>
       </div>
 

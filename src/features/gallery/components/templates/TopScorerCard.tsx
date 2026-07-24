@@ -1,8 +1,6 @@
 import React from 'react';
 import { RankedPlayer } from '../../utils/galleryStats';
-import { CardFrame } from '../shared/CardFrame';
 import { Avatar } from '@/shared/components';
-import { Trophy } from 'lucide-react';
 
 interface TopScorerCardProps {
   data: RankedPlayer | null;
@@ -12,74 +10,237 @@ interface TopScorerCardProps {
 }
 
 export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCardProps) {
-  const typeTitles = {
-    weekly: 'TOP SCORER OF THE WEEK',
-    monthly: 'TOP SCORER OF THE MONTH',
-    season: 'SEASON GOLDEN BOOT LEADER',
-  };
+  const subtitle = type === 'weekly'
+    ? `Top Scorer of the Week · ${periodLabel}`
+    : `Top Scorer of the Month · ${periodLabel}`;
+
+  const watermark = type === 'weekly' ? 'GOAL' : 'BOOT';
+
+  const nameParts = (data?.player.name ?? '').trim().split(' ');
+  const lastName  = nameParts.pop() || '';
+  const firstName = nameParts.join(' ');
 
   return (
-    <CardFrame aspect="4:5" cardRef={cardRef} className="bg-slate-950 text-white rounded-3xl p-6 flex flex-col justify-between border border-amber-500/40 shadow-2xl overflow-hidden">
-      {/* Background radial spotlights */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div
+      ref={cardRef}
+      style={{
+        width: 600,
+        height: 750,
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 28,
+        background: '#0C0C10',
+        fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+        boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
+      }}
+    >
+      {/* Dark grunge texture overlay */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 120% 70% at 70% 40%, #2a0808 0%, transparent 65%), radial-gradient(ellipse 80% 60% at 30% 80%, #1a0404 0%, transparent 60%)',
+        zIndex: 1,
+      }} />
 
-      {/* Top Title Header */}
-      <div className="relative z-10 text-center border-b border-amber-500/20 pb-4">
-        <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full mb-2">
-          <Trophy className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-[10px] font-black text-amber-300 uppercase tracking-widest">{periodLabel}</span>
+      {/* Red diagonal brush strokes */}
+      <div style={{
+        position: 'absolute', left: -40, top: '45%',
+        width: 280, height: 120,
+        background: 'linear-gradient(105deg, rgba(180,10,10,0.28) 0%, transparent 100%)',
+        transform: 'rotate(-12deg)',
+        zIndex: 2,
+      }} />
+
+      {/* Giant watermark */}
+      <div style={{
+        position: 'absolute',
+        bottom: 60, left: 0, right: 0,
+        textAlign: 'center',
+        fontSize: 220,
+        fontWeight: 900,
+        fontFamily: "'Impact', 'Arial Black', sans-serif",
+        color: 'rgba(255,255,255,0.07)',
+        letterSpacing: -8,
+        lineHeight: 1,
+        userSelect: 'none',
+        pointerEvents: 'none',
+        zIndex: 3,
+      }}>
+        {watermark}
+      </div>
+
+      {/* Top header */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0,
+        padding: '20px 28px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        zIndex: 20,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img
+            src="/images/club-logo.jpg"
+            alt="Club Logo"
+            style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', border: '1.5px solid rgba(200,20,20,0.4)' }}
+          />
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>
+            In Mystery We Reign
+          </div>
         </div>
-        <h3 className="text-lg font-black text-white uppercase tracking-tight">{typeTitles[type]}</h3>
+
+        {data?.player.jerseyNumber && (
+          <div style={{
+            background: '#CC1A1A', color: '#fff',
+            fontSize: 22, fontWeight: 900,
+            fontFamily: "'Impact', 'Arial Black', sans-serif",
+            width: 46, height: 46, borderRadius: 10,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {data.player.jerseyNumber}
+          </div>
+        )}
+      </div>
+
+      {/* Cursive subtitle */}
+      <div style={{
+        position: 'absolute', top: 74, left: 0, right: 0,
+        textAlign: 'center',
+        fontSize: 19,
+        fontStyle: 'italic',
+        fontFamily: 'Georgia, serif',
+        fontWeight: 700,
+        color: '#FF6B6B',
+        letterSpacing: 1.5,
+        zIndex: 20,
+        textShadow: '0 2px 20px rgba(255,60,60,0.7), 0 0 40px rgba(200,20,20,0.5)',
+      }}>
+        {subtitle}
       </div>
 
       {data ? (
         <>
-          {/* Main Scorer Profile */}
-          <div className="relative z-10 my-auto flex flex-col items-center text-center py-4">
-            <div className="relative mb-3">
-              <div className="rounded-full p-1.5 bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 shadow-2xl">
-                <div className="rounded-full overflow-hidden bg-slate-950 p-1" style={{ width: 110, height: 110 }}>
-                  <Avatar name={data.player.name} src={data.player.profileImageUrl} size={110} />
-                </div>
-              </div>
-              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[11px] uppercase tracking-wider px-3.5 py-0.5 rounded-full border border-amber-300 shadow-lg">
-                ★ 1ST PLACE
+          {/* Player avatar */}
+          <div style={{
+            position: 'absolute',
+            top: '48%', left: '50%',
+            transform: 'translate(-45%, -52%)',
+            zIndex: 15,
+          }}>
+            <div style={{
+              width: 220, height: 220,
+              borderRadius: '50%',
+              background: 'linear-gradient(145deg, #CC1A1A 0%, #8b0000 60%, transparent 100%)',
+              padding: 4,
+              boxShadow: '0 0 60px rgba(200,20,20,0.5), 0 20px 60px rgba(0,0,0,0.7)',
+            }}>
+              <div style={{
+                width: '100%', height: '100%',
+                borderRadius: '50%',
+                background: '#1a1520',
+                overflow: 'hidden',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Avatar name={data.player.name} src={data.player.profileImageUrl} size={212} />
               </div>
             </div>
-
-            <h2 className="text-2xl font-black text-white tracking-tight leading-tight uppercase mt-2">
-              {data.player.name}
-            </h2>
-            {data.player.jerseyNumber && (
-              <p className="text-xs font-bold text-amber-400/90 mt-0.5">#{data.player.jerseyNumber}</p>
-            )}
           </div>
 
-          {/* Stat Callout Footer */}
-          <div className="relative z-10 grid grid-cols-4 gap-2 bg-slate-900/90 border border-amber-500/20 rounded-2xl p-3 text-center">
-            <div>
-              <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">GOALS</p>
-              <p className="text-lg font-black text-amber-300">{data.goals}</p>
+          {/* Left stats — Goals highlighted large */}
+          <div style={{
+            position: 'absolute', left: 28, bottom: 110,
+            display: 'flex', flexDirection: 'column', gap: 8,
+            zIndex: 20,
+          }}>
+            {[
+              { val: data.goals,       lbl: 'Goals'   },
+              { val: data.appearances, lbl: 'Apps'    },
+              { val: data.motm,        lbl: 'MOTM'    },
+            ].map(({ val, lbl }, i) => (
+              <div key={lbl} style={{
+                display: 'flex', alignItems: 'center',
+                transform: 'skewX(-12deg)',
+                overflow: 'hidden',
+                borderRadius: 4,
+                boxShadow: '0 4px 20px rgba(200,20,20,0.4)',
+                width: i === 0 ? 150 : 130,
+              }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #CC1A1A, #8b0000)',
+                  color: '#fff',
+                  fontSize: i === 0 ? 26 : 20,
+                  fontWeight: 900,
+                  fontFamily: "'Impact', 'Arial Black', sans-serif",
+                  minWidth: i === 0 ? 60 : 52,
+                  textAlign: 'center',
+                  padding: i === 0 ? '8px 0' : '6px 0',
+                  transform: 'skewX(12deg)',
+                }}>
+                  {val}
+                </div>
+                <div style={{
+                  background: 'rgba(28,8,8,0.95)',
+                  borderTop: '1px solid rgba(200,20,20,0.3)',
+                  borderBottom: '1px solid rgba(200,20,20,0.3)',
+                  borderRight: '1px solid rgba(200,20,20,0.3)',
+                  color: i === 0 ? '#fff' : '#aaa',
+                  fontSize: i === 0 ? 10 : 9,
+                  fontWeight: 700,
+                  textTransform: 'uppercase', letterSpacing: 2,
+                  padding: '6px 10px',
+                  transform: 'skewX(12deg)',
+                  flex: 1,
+                }}>
+                  {lbl}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom left quote */}
+          <div style={{ position: 'absolute', bottom: 22, left: 28, maxWidth: 200, zIndex: 20 }}>
+            <div style={{ color: '#CC1A1A', fontSize: 12, fontWeight: 900, marginBottom: 4 }}>✖</div>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 8, fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+              "Mystery is our game. Elite is our name."
+            </p>
+          </div>
+
+          {/* Bottom right player name */}
+          <div style={{ position: 'absolute', bottom: 22, right: 28, textAlign: 'right', zIndex: 20 }}>
+            {firstName && (
+              <div style={{
+                fontSize: 28, fontWeight: 900,
+                fontFamily: "'Impact', 'Arial Black', sans-serif",
+                color: '#fff', textTransform: 'uppercase',
+                letterSpacing: -1, lineHeight: 1,
+              }}>
+                {firstName}
+              </div>
+            )}
+            <div style={{
+              fontSize: 30, fontWeight: 700,
+              fontFamily: 'Georgia, serif',
+              fontStyle: 'italic',
+              color: '#CC1A1A', lineHeight: 1, marginTop: 2,
+              textShadow: '0 2px 16px rgba(200,20,20,0.6)',
+            }}>
+              {lastName}
             </div>
-            <div>
-              <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MOTM</p>
-              <p className="text-lg font-black text-amber-300">{data.motm}</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MATCHES</p>
-              <p className="text-lg font-black text-amber-300">{data.appearances}</p>
-            </div>
-            <div>
-              <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">POINTS</p>
-              <p className="text-lg font-black text-amber-300">{data.points}</p>
+            <div style={{
+              fontSize: 9, color: 'rgba(255,255,255,0.35)',
+              fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: 2, marginTop: 6,
+            }}>
+              ★ TOP SCORER
             </div>
           </div>
         </>
       ) : (
-        <div className="relative z-10 my-auto text-center text-slate-400 py-12">
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'rgba(255,255,255,0.3)', fontSize: 14, zIndex: 20,
+        }}>
           No stats recorded for this period yet.
         </div>
       )}
-    </CardFrame>
+    </div>
   );
 }
