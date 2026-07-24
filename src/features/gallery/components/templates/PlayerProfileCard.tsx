@@ -13,7 +13,6 @@ interface PlayerProfileCardProps {
 export function PlayerProfileCard({
   player,
   seasonStats = [],
-  title = 'MVP',
   subtitle = 'Player of the Week',
   cardRef,
 }: PlayerProfileCardProps) {
