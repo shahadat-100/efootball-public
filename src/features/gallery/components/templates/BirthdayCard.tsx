@@ -210,7 +210,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         {firstName && (
           <div style={{
             fontSize: 34, fontWeight: 900,
-            fontFamily: "'Hoshiko Satsuki', 'Impact', sans-serif",
+            fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
             color: '#fff', textTransform: 'uppercase',
             letterSpacing: 0.5, lineHeight: 0.95,
           }}>

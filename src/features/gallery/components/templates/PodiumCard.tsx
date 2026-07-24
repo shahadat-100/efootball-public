@@ -126,7 +126,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
           {topPlayers.slice(0, 3).map((r, idx) => {
             const rr = RANK_RING[idx] || RANK_RING[2];
             // Center (1st place) column is taller
-            const colHeight = idx === 0 ? '100%' : idx === 1 ? '88%' : '78%';
+            const colHeight = '92%';
             return (
               <div key={r.player.id || idx} style={{
                 flex: 1,
@@ -148,12 +148,12 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
 
                 {/* Avatar Ring */}
                 <div style={{
-                  width: idx === 0 ? 100 : 80,
-                  height: idx === 0 ? 100 : 80,
+                  width: 90,
+                  height: 90,
                   borderRadius: '50%',
                   background: rr.ring,
                   padding: 3,
-                  boxShadow: `0 0 30px ${rr.glow}, 0 0 60px ${rr.glow}`,
+                  boxShadow: `0 0 25px ${rr.glow}, 0 0 50px ${rr.glow}`,
                 }}>
                   <div style={{
                     width: '100%', height: '100%',
@@ -161,7 +161,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                     overflow: 'hidden',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Avatar name={r.player.name} src={r.player.profileImageUrl} size={idx === 0 ? 94 : 74} />
+                    <Avatar name={r.player.name} src={r.player.profileImageUrl} size={84} />
                   </div>
                 </div>
 

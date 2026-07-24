@@ -301,11 +301,12 @@ export function PlayerProfileCard({
           </div>
         )}
         <div style={{
-          fontSize: 30, fontWeight: 700,
-          fontFamily: "'Golden Varsity Script', Georgia, serif",
+          fontSize: 30, fontWeight: 900,
+          fontFamily: "'Action Comics', 'Impact', sans-serif",
           color: '#CC1A1A',
           lineHeight: 1,
-          marginTop: 2,
+          marginTop: 4,
+          letterSpacing: 1,
           textShadow: '0 2px 16px rgba(200,20,20,0.6)',
         }}>
           {lastName}

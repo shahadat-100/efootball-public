@@ -99,10 +99,10 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
 
         {/* Main title */}
         <div style={{
-          fontSize: 36, fontWeight: 900, lineHeight: 1,
-          fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+          fontSize: 34, fontWeight: 900, lineHeight: 1.1,
+          fontFamily: "'Supersonic Rocketship', 'Impact', sans-serif",
           color: '#fff', textTransform: 'uppercase',
-          letterSpacing: 1, marginBottom: 16,
+          letterSpacing: 2, marginBottom: 16,
         }}>
           {title}
         </div>
@@ -119,34 +119,34 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
       {/* ── Right panel: Two columns of players ─────────────────────── */}
       <div style={{
         position: 'absolute', top: 0, left: 356, right: 0, height: '100%',
-        display: 'flex', gap: 6,
-        padding: '16px 20px',
+        display: 'flex', gap: 10,
+        padding: '24px 20px',
         zIndex: 20,
       }}>
         {[firstCol, secondCol].map((col, cIdx) => (
-          <div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
             {col.map((r, rowIdx) => {
               const absIdx = cIdx * 5 + rowIdx;
               const rankColor = RANK_COLOR[absIdx] || 'rgba(255,255,255,0.6)';
               const isTop3 = absIdx < 3;
               return (
                 <div key={r.player.id || absIdx} style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
+                  display: 'flex', alignItems: 'center', gap: 10,
                   background: isTop3
                     ? `linear-gradient(90deg, rgba(204,26,26,0.18), rgba(204,26,26,0.06), transparent)`
                     : 'rgba(255,255,255,0.03)',
-                  borderLeft: `2.5px solid ${rankColor}`,
+                  borderLeft: `3px solid ${rankColor}`,
                   borderRadius: '0 8px 8px 0',
-                  padding: '5px 8px 5px 10px',
+                  padding: '8px 10px 8px 12px',
                   transition: 'all 0.2s',
                 }}>
                   {/* Rank number */}
                   <div style={{
-                    fontSize: isTop3 ? 18 : 13,
+                    fontSize: isTop3 ? 20 : 15,
                     fontWeight: 900,
                     fontFamily: "'Impact', 'Arial Black', sans-serif",
                     color: rankColor,
-                    minWidth: isTop3 ? 22 : 16,
+                    minWidth: isTop3 ? 24 : 18,
                     lineHeight: 1,
                     textAlign: 'center',
                   }}>
@@ -155,38 +155,38 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
 
                   {/* Avatar */}
                   <div style={{
-                    width: isTop3 ? 34 : 28, height: isTop3 ? 34 : 28,
+                    width: isTop3 ? 38 : 32, height: isTop3 ? 38 : 32,
                     borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
                     border: `1.5px solid ${isTop3 ? rankColor : 'rgba(255,255,255,0.1)'}`,
                     boxShadow: isTop3 ? `0 0 8px ${rankColor}60` : 'none',
                   }}>
-                    <Avatar name={r.player.name} src={r.player.profileImageUrl} size={isTop3 ? 34 : 28} />
+                    <Avatar name={r.player.name} src={r.player.profileImageUrl} size={isTop3 ? 38 : 32} />
                   </div>
 
                   {/* Name */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
-                      fontSize: isTop3 ? 10 : 9, fontWeight: 900,
+                      fontSize: isTop3 ? 12 : 10, fontWeight: 900,
                       fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
                       color: '#fff', textTransform: 'uppercase',
-                      lineHeight: 1, letterSpacing: 0.5,
+                      lineHeight: 1.1, letterSpacing: 0.5,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
                       {r.player.name}
                     </div>
-                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginTop: 1 }}>
+                    <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginTop: 2 }}>
                       {r.goals}G · {r.appearances}A · {r.motm}M
                     </div>
                   </div>
 
                   {/* Points */}
                   <div style={{
-                    fontSize: isTop3 ? 16 : 12, fontWeight: 900,
+                    fontSize: isTop3 ? 18 : 14, fontWeight: 900,
                     fontFamily: "'Impact', 'Arial Black', sans-serif",
                     color: rankColor, lineHeight: 1, flexShrink: 0,
                   }}>
                     {r.points}
-                    <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', display: 'block', textAlign: 'right' }}>PTS</span>
+                    <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', display: 'block', textAlign: 'right' }}>PTS</span>
                   </div>
                 </div>
               );
