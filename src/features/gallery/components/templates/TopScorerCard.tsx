@@ -68,18 +68,17 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
       {/* Giant watermark */}
       <div style={{
         position: 'absolute',
-        bottom: 60, left: 0, right: 0,
+        bottom: 50, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 150,
+        fontSize: 120,
         fontWeight: 900,
-        fontFamily: "'Neon Sans', 'Impact', sans-serif",
-        color: 'rgba(255,255,255,0.09)',
-        letterSpacing: 2,
+        fontFamily: "'Impact', 'Arial Black', sans-serif",
+        color: 'rgba(255,255,255,0.08)',
+        letterSpacing: -2,
         lineHeight: 1,
         userSelect: 'none',
         pointerEvents: 'none',
         zIndex: 3,
-        textShadow: '0 0 15px rgba(255,255,255,0.1)',
       }}>
         SCORER
       </div>
@@ -124,11 +123,10 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
       <div style={{
         position: 'absolute', top: 74, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 22,
-        fontFamily: "'Golden Varsity Script', Georgia, serif",
-        fontWeight: 700,
+        fontSize: 26,
+        fontFamily: "'Elegant Bloom', Georgia, serif",
         color: '#FFD700',
-        letterSpacing: 1.5,
+        letterSpacing: 2,
         zIndex: 20,
         textShadow: '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)',
       }}>

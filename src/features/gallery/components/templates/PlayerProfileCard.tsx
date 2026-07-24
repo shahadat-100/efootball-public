@@ -151,11 +151,10 @@ export function PlayerProfileCard({
       <div style={{
         position: 'absolute', top: 74, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 22,
-        fontFamily: "'Golden Varsity Script', Georgia, serif",
-        fontWeight: 700,
+        fontSize: 26,
+        fontFamily: "'Elegant Bloom', Georgia, serif",
         color: '#FFD700',
-        letterSpacing: 1.5,
+        letterSpacing: 2,
         zIndex: 20,
         textShadow: '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)',
       }}>
@@ -200,6 +199,24 @@ export function PlayerProfileCard({
         display: 'flex', flexDirection: 'column', gap: 8,
         zIndex: 20,
       }}>
+        {/* Period label badge — only shown when data is period-specific */}
+        {periodData && (
+          <div style={{
+            fontSize: 8,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+            color: isMonthly ? '#FFD700' : '#FF6B6B',
+            background: isMonthly ? 'rgba(212,175,55,0.12)' : 'rgba(200,20,20,0.15)',
+            border: `1px solid ${isMonthly ? 'rgba(212,175,55,0.3)' : 'rgba(200,20,20,0.35)'}`,
+            borderRadius: 4,
+            padding: '3px 8px',
+            width: 'fit-content',
+            marginBottom: 2,
+          }}>
+            {isMonthly ? '📅 This Month\'s Stats' : '📅 This Week\'s Stats'}
+          </div>
+        )}
         {[
           { val: totalApps,  lbl: 'Apps'  },
           { val: totalGoals, lbl: 'Goals' },
@@ -231,8 +248,10 @@ export function PlayerProfileCard({
               borderTop: '1px solid rgba(200,20,20,0.3)',
               borderBottom: '1px solid rgba(200,20,20,0.3)',
               borderRight: '1px solid rgba(200,20,20,0.3)',
-              color: '#aaa',
-              fontSize: 9, fontWeight: 700,
+              color: 'rgba(255,255,255,0.85)',
+              fontSize: 9,
+              fontFamily: "'Neon Sans', 'Impact', sans-serif",
+              fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: 2,
               padding: '6px 10px',
               transform: 'skewX(12deg)',
@@ -271,10 +290,10 @@ export function PlayerProfileCard({
         {firstName && (
           <div style={{
             fontSize: 28, fontWeight: 900,
-            fontFamily: "'Impact', 'Arial Black', sans-serif",
+            fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
             color: '#fff',
             textTransform: 'uppercase',
-            letterSpacing: -1,
+            letterSpacing: 1,
             lineHeight: 1,
           }}>
             {firstName}
@@ -282,8 +301,7 @@ export function PlayerProfileCard({
         )}
         <div style={{
           fontSize: 30, fontWeight: 700,
-          fontFamily: 'Georgia, serif',
-          fontStyle: 'italic',
+          fontFamily: "'Golden Varsity Script', Georgia, serif",
           color: '#CC1A1A',
           lineHeight: 1,
           marginTop: 2,

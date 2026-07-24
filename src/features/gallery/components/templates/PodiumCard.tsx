@@ -35,7 +35,7 @@ export function PodiumCard({ topPlayers, title, subtitle, aspect = '16:9', cardR
       {/* Header Overlay */}
       <div className="flex items-center justify-between border-b border-red-900/30 pb-3 -mx-6 -mt-6 p-5 bg-slate-950/70 backdrop-blur-md relative z-20">
         <div>
-          <span className="text-[12px] font-bold text-[#FFD700] uppercase tracking-widest block mb-0.5" style={{ fontFamily: "'Golden Varsity Script', Georgia, serif", textShadow: '0 2px 10px rgba(255,215,0,0.4)' }}>{subtitle}</span>
+          <span className="text-[14px] font-bold text-[#FFD700] block mb-0.5" style={{ fontFamily: "'Elegant Bloom', Georgia, serif", textShadow: '0 2px 10px rgba(255,215,0,0.4)', letterSpacing: '0.05em' }}>{subtitle}</span>
           <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2" style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}>
             <Trophy className="w-5 h-5 text-red-500" /> {title}
           </h3>
