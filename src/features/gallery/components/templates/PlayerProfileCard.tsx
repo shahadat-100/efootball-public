@@ -151,8 +151,8 @@ export function PlayerProfileCard({
       <div style={{
         position: 'absolute', top: 74, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 26,
-        fontFamily: "'Elegant Bloom', Georgia, serif",
+        fontSize: 28,
+        fontFamily: "'The Wildeast', Georgia, serif",
         color: '#FFD700',
         letterSpacing: 2,
         zIndex: 20,
