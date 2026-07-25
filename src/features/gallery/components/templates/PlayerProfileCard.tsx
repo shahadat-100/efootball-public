@@ -2,6 +2,7 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { RankedPlayer } from '@/features/gallery/utils/galleryStats';
 import { Avatar } from '@/shared/components';
+import { calcTotalRawPoints } from '@/utils/playerStats';
 
 interface PlayerProfileCardProps {
   player: Player;
@@ -16,6 +17,7 @@ export function PlayerProfileCard({
   player,
   seasonStats = [],
   periodData,
+  title,
   subtitle = 'Player of the Week',
   cardRef,
 }: PlayerProfileCardProps) {
@@ -26,12 +28,14 @@ export function PlayerProfileCard({
   const totalWins   = periodData ? periodData.wins        : seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
   const totalDraws  = periodData ? periodData.draws       : seasonStats.reduce((a, s) => a + (s.draws || 0), 0);
   const totalLosses = periodData ? periodData.losses      : seasonStats.reduce((a, s) => a + (s.losses || 0), 0);
+  const totalPoints = periodData ? periodData.points      : calcTotalRawPoints(seasonStats);
 
   const nameParts = player.name.trim().split(' ');
   const lastName  = nameParts.pop() || '';
   const firstName = nameParts.join(' ');
 
   const isMonthly = subtitle.toLowerCase().includes('month');
+  const cornerColor = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(200,20,20,0.5)';
 
   // Background and Accent colors based on type
   const bgGradient = isMonthly
@@ -147,16 +151,41 @@ export function PlayerProfileCard({
         )}
       </div>
 
+      {/* ── Big Bold Title ("MVP" or "PLAYER PROFILE") ── */}
+      {title && (
+        <div style={{
+          position: 'absolute', top: 58, left: 0, right: 0,
+          textAlign: 'center',
+          fontSize: 38,
+          fontWeight: 900,
+          fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
+          color: isMonthly ? '#FFD700' : '#fff',
+          letterSpacing: 6,
+          zIndex: 20,
+          textShadow: isMonthly
+            ? '0 0 20px rgba(212,175,55,0.4)'
+            : '0 0 20px rgba(200,20,20,0.4)',
+          textTransform: 'uppercase',
+        }}>
+          {title}
+        </div>
+      )}
+
       {/* ── Cursive subtitle ("Player of the Week · Week 4, July") ── */}
       <div style={{
-        position: 'absolute', top: 74, left: 0, right: 0,
+        position: 'absolute',
+        top: title ? 104 : 74,
+        left: 0,
+        right: 0,
         textAlign: 'center',
-        fontSize: 28,
+        fontSize: title ? 22 : 28,
         fontFamily: "'The Wildeast', Georgia, serif",
-        color: '#FFD700',
+        color: isMonthly ? '#FFD700' : '#FF6B6B',
         letterSpacing: 2,
         zIndex: 20,
-        textShadow: '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)',
+        textShadow: isMonthly
+          ? '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)'
+          : '0 2px 20px rgba(200,20,20,0.65), 0 0 40px rgba(200,20,20,0.4)',
       }}>
         {subtitle}
       </div>
@@ -218,49 +247,66 @@ export function PlayerProfileCard({
           </div>
         )}
         {[
+          { val: totalPoints, lbl: 'Points' },
           { val: totalApps,  lbl: 'Apps'  },
           { val: totalGoals, lbl: 'Goals' },
           { val: totalMotm,  lbl: 'MOTM'  },
-        ].map(({ val, lbl }) => (
-          <div key={lbl} style={{
-            display: 'flex', alignItems: 'center', gap: 0,
-            transform: 'skewX(-12deg)',
-            overflow: 'hidden',
-            borderRadius: 4,
-            boxShadow: '0 4px 20px rgba(200,20,20,0.4)',
-            width: 130,
-          }}>
-            {/* Red number block */}
-            <div style={{
-              background: 'linear-gradient(135deg, #CC1A1A, #8b0000)',
-              color: '#fff',
-              fontSize: 20, fontWeight: 900,
-              fontFamily: "'Impact', 'Arial Black', sans-serif",
-              minWidth: 52, textAlign: 'center',
-              padding: '6px 0',
-              transform: 'skewX(12deg)',
+        ].map(({ val, lbl }) => {
+          const isPoints = lbl === 'Points';
+          const numBg = isPoints
+            ? (isMonthly ? 'linear-gradient(135deg, #FFD700, #b8860b)' : 'linear-gradient(135deg, #FF8C00, #CC1A1A)')
+            : 'linear-gradient(135deg, #CC1A1A, #8b0000)';
+          const labelBg = isPoints
+            ? (isMonthly ? 'rgba(35,25,5,0.95)' : 'rgba(30,10,10,0.95)')
+            : 'rgba(28,8,8,0.95)';
+          const labelBorderColor = isPoints
+            ? (isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(255,140,0,0.45)')
+            : 'rgba(200,20,20,0.3)';
+          const numColor = isPoints && isMonthly ? '#131318' : '#fff';
+
+          return (
+            <div key={lbl} style={{
+              display: 'flex', alignItems: 'center', gap: 0,
+              transform: 'skewX(-12deg)',
+              overflow: 'hidden',
+              borderRadius: 4,
+              boxShadow: isPoints
+                ? (isMonthly ? '0 4px 20px rgba(212,175,55,0.35)' : '0 4px 20px rgba(255,140,0,0.35)')
+                : '0 4px 20px rgba(200,20,20,0.4)',
+              width: 130,
             }}>
-              {val}
+              {/* Number block */}
+              <div style={{
+                background: numBg,
+                color: numColor,
+                fontSize: 20, fontWeight: 900,
+                fontFamily: "'Impact', 'Arial Black', sans-serif",
+                minWidth: 52, textAlign: 'center',
+                padding: '6px 0',
+                transform: 'skewX(12deg)',
+              }}>
+                {val}
+              </div>
+              {/* Dark label block */}
+              <div style={{
+                background: labelBg,
+                borderTop: `1px solid ${labelBorderColor}`,
+                borderBottom: `1px solid ${labelBorderColor}`,
+                borderRight: `1px solid ${labelBorderColor}`,
+                color: isPoints ? (isMonthly ? '#FFD700' : '#FF8C00') : 'rgba(255,255,255,0.85)',
+                fontSize: 9,
+                fontFamily: "'Neon Sans', 'Impact', sans-serif",
+                fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: 2,
+                padding: '6px 10px',
+                transform: 'skewX(12deg)',
+                flex: 1,
+              }}>
+                {lbl}
+              </div>
             </div>
-            {/* Dark label block */}
-            <div style={{
-              background: 'rgba(28,8,8,0.95)',
-              borderTop: '1px solid rgba(200,20,20,0.3)',
-              borderBottom: '1px solid rgba(200,20,20,0.3)',
-              borderRight: '1px solid rgba(200,20,20,0.3)',
-              color: 'rgba(255,255,255,0.85)',
-              fontSize: 9,
-              fontFamily: "'Neon Sans', 'Impact', sans-serif",
-              fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: 2,
-              padding: '6px 10px',
-              transform: 'skewX(12deg)',
-              flex: 1,
-            }}>
-              {lbl}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Bottom left: quote ────────────────────────────────────── */}
@@ -320,6 +366,30 @@ export function PlayerProfileCard({
         </div>
       </div>
 
+      {/* ── Futuristic Corner Accents ───────────────────────────────── */}
+      <div style={{ position: 'absolute', top: 12, left: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
+      <div style={{ position: 'absolute', top: 12, right: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
+      <div style={{ position: 'absolute', bottom: 12, left: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
+      <div style={{ position: 'absolute', bottom: 12, right: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
+
+      {/* Decorative footer details */}
+      <div style={{
+        position: 'absolute', bottom: 10, left: 28, right: 28, height: 1,
+        background: `linear-gradient(90deg, ${isMonthly ? 'rgba(212,175,55,0.3)' : 'rgba(204,26,26,0.3)'}, transparent)`,
+        zIndex: 20,
+      }} />
+      <div style={{
+        position: 'absolute', bottom: 12, left: 0, right: 0,
+        textAlign: 'center',
+        fontSize: 7,
+        fontWeight: 700,
+        color: 'rgba(255,255,255,0.15)',
+        textTransform: 'uppercase',
+        letterSpacing: 3,
+        zIndex: 20,
+      }}>
+        TEE CLUB MEMBER • OFFICIAL CARD
+      </div>
     </div>
   );
 }

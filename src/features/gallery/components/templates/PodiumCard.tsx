@@ -18,6 +18,24 @@ const RANK_RING = [
 ];
 
 export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardProps) {
+  const isMonthly = title.toLowerCase().includes('monthly') || subtitle.toLowerCase().includes('month');
+
+  const bgGradient = isMonthly
+    ? 'radial-gradient(ellipse 80% 100% at 50% 110%, rgba(212,175,55,0.15) 0%, transparent 60%), radial-gradient(ellipse 120% 60% at 50% -10%, rgba(25,20,10,0.9) 0%, transparent 70%)'
+    : 'radial-gradient(ellipse 80% 100% at 50% 110%, rgba(204,26,26,0.22) 0%, transparent 60%), radial-gradient(ellipse 120% 60% at 50% -10%, rgba(30,10,10,0.9) 0%, transparent 70%)';
+
+  const floorGradient = isMonthly
+    ? 'linear-gradient(to top, rgba(212,175,55,0.12) 0%, transparent 100%)'
+    : 'linear-gradient(to top, rgba(204,26,26,0.18) 0%, transparent 100%)';
+
+  const accentLineGradient = isMonthly
+    ? 'linear-gradient(90deg, #D4AF37, rgba(212,175,55,0.2), transparent)'
+    : 'linear-gradient(90deg, #CC1A1A, rgba(204,26,26,0.2), transparent)';
+
+  const statBg = isMonthly ? 'rgba(212,175,55,0.15)' : 'rgba(204,26,26,0.2)';
+  const statBorder = isMonthly ? '1px solid rgba(212,175,55,0.25)' : '1px solid rgba(204,26,26,0.3)';
+  const cornerColor = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(200,20,20,0.5)';
+
   return (
     <div
       ref={cardRef}
@@ -35,14 +53,14 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       {/* ── Deep dark atmospheric background ───────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 80% 100% at 50% 110%, rgba(204,26,26,0.22) 0%, transparent 60%), radial-gradient(ellipse 120% 60% at 50% -10%, rgba(30,10,10,0.9) 0%, transparent 70%)',
+        background: bgGradient,
         zIndex: 1,
       }} />
 
       {/* ── Stage floor light sweep ─────────────────────────────────── */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: 180,
-        background: 'linear-gradient(to top, rgba(204,26,26,0.18) 0%, transparent 100%)',
+        background: floorGradient,
         zIndex: 2,
       }} />
 
@@ -104,7 +122,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       {/* ── Red horizontal accent line ──────────────────────────────── */}
       <div style={{
         position: 'absolute', top: 80, left: 28, right: 28, height: 1.5,
-        background: 'linear-gradient(90deg, #CC1A1A, rgba(204,26,26,0.2), transparent)',
+        background: accentLineGradient,
         zIndex: 30,
       }} />
 
@@ -127,16 +145,17 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
             const rr = RANK_RING[idx] || RANK_RING[2];
             // Center (1st place) column is taller
             const colHeight = '92%';
+
             return (
               <div key={r.player.id || idx} style={{
                 flex: 1,
                 height: colHeight,
                 position: 'relative',
                 background: idx === 0
-                  ? 'linear-gradient(180deg, rgba(204,26,26,0.15) 0%, rgba(204,26,26,0.05) 100%)'
+                  ? (isMonthly ? 'linear-gradient(180deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 100%)' : 'linear-gradient(180deg, rgba(204,26,26,0.15) 0%, rgba(204,26,26,0.05) 100%)')
                   : 'rgba(255,255,255,0.03)',
                 border: idx === 0
-                  ? '1px solid rgba(204,26,26,0.4)'
+                  ? (isMonthly ? '1px solid rgba(212,175,55,0.35)' : '1px solid rgba(204,26,26,0.4)')
                   : '1px solid rgba(255,255,255,0.07)',
                 borderRadius: 16,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -154,6 +173,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                   background: rr.ring,
                   padding: 3,
                   boxShadow: `0 0 25px ${rr.glow}, 0 0 50px ${rr.glow}`,
+                  position: 'relative',
                 }}>
                   <div style={{
                     width: '100%', height: '100%',
@@ -163,6 +183,30 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                   }}>
                     <Avatar name={r.player.name} src={r.player.profileImageUrl} size={84} />
                   </div>
+
+                  {/* Jersey absolute badge */}
+                  {r.player.jerseyNumber && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      background: isMonthly ? '#D4AF37' : '#CC1A1A',
+                      color: isMonthly ? '#131318' : '#fff',
+                      fontSize: 11,
+                      fontWeight: 900,
+                      fontFamily: "'Impact', sans-serif",
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1.5px solid #131318',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                    }}>
+                      {r.player.jerseyNumber}
+                    </div>
+                  )}
                 </div>
 
                 {/* Name */}
@@ -193,8 +237,8 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                     { v: r.motm, l: 'M' },
                   ].map(({ v, l }) => (
                     <div key={l} style={{
-                      background: 'rgba(204,26,26,0.2)',
-                      border: '1px solid rgba(204,26,26,0.3)',
+                      background: statBg,
+                      border: statBorder,
                       borderRadius: 5,
                       padding: '2px 6px',
                       fontSize: 10, fontWeight: 900,
@@ -206,11 +250,58 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                     </div>
                   ))}
                 </div>
+
+                {/* W-D-L Record */}
+                <div style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: 'rgba(255,255,255,0.45)',
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 3,
+                  marginTop: 2,
+                }}>
+                  <span>{r.wins}W</span>
+                  <span style={{ color: 'rgba(255,255,255,0.15)' }}>•</span>
+                  <span>{r.draws}D</span>
+                  <span style={{ color: 'rgba(255,255,255,0.15)' }}>•</span>
+                  <span>{r.losses}L</span>
+                  {r.appearances > 0 && (
+                    <>
+                      <span style={{ color: 'rgba(255,255,255,0.15)' }}>•</span>
+                      <span style={{ color: isMonthly ? '#FFD700' : '#FF6B6B', fontWeight: 800 }}>
+                        {Math.round((r.wins / r.appearances) * 100)}%
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* ── Futuristic Corner Accents ───────────────────────────────── */}
+      <div style={{ position: 'absolute', top: 12, left: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
+      <div style={{ position: 'absolute', top: 12, right: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
+      <div style={{ position: 'absolute', bottom: 12, left: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
+      <div style={{ position: 'absolute', bottom: 12, right: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
+
+      {/* ── Bottom: Card footer info ─────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', bottom: 12, left: 0, right: 0,
+        textAlign: 'center',
+        fontSize: 8,
+        fontWeight: 700,
+        color: 'rgba(255,255,255,0.2)',
+        textTransform: 'uppercase',
+        letterSpacing: 3,
+        zIndex: 30,
+      }}>
+        OFFICIAL LEADERBOARD RESULTS • THE ENIGMATIC ELITE
+      </div>
     </div>
   );
 }
