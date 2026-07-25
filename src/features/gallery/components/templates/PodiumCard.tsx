@@ -34,7 +34,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
 
   const statBg = isMonthly ? 'rgba(212,175,55,0.15)' : 'rgba(204,26,26,0.2)';
   const statBorder = isMonthly ? '1px solid rgba(212,175,55,0.25)' : '1px solid rgba(204,26,26,0.3)';
-  const cornerColor = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(200,20,20,0.5)';
 
   return (
     <div
@@ -101,16 +100,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
 
       {/* ── Top-right: Title block ──────────────────────────────────── */}
       <div style={{ position: 'absolute', top: 18, right: 28, textAlign: 'right', zIndex: 30 }}>
-        <div style={{
-          fontSize: 13, color: '#FFD700',
-          fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-          fontWeight: 800,
-          textTransform: 'uppercase',
-          letterSpacing: 2, lineHeight: 1, marginBottom: 5,
-          textShadow: '0 0 12px rgba(255,215,0,0.4)',
-        }}>
-          {subtitle}
-        </div>
         <div style={{
           fontSize: 28, fontWeight: 900, lineHeight: 1,
           fontFamily: "'Action Comics Black', 'Impact', sans-serif",
@@ -285,12 +274,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         </div>
       )}
 
-      {/* ── Futuristic Corner Accents ───────────────────────────────── */}
-      <div style={{ position: 'absolute', top: 12, left: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
-      <div style={{ position: 'absolute', top: 12, right: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
-      <div style={{ position: 'absolute', bottom: 12, left: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
-      <div style={{ position: 'absolute', bottom: 12, right: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
-
       {/* ── Bottom: Card footer info ─────────────────────────────────── */}
       <div style={{
         position: 'absolute', bottom: 12, left: 0, right: 0,
@@ -303,6 +286,24 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         zIndex: 30,
       }}>
         OFFICIAL LEADERBOARD RESULTS • THE ENIGMATIC ELITE
+      </div>
+
+      {/* ── Bottom-right: Date / Period tag ─────────────────────────── */}
+      <div style={{
+        position: 'absolute', bottom: 10, right: 28,
+        fontSize: 10, color: '#FFD700',
+        fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+        fontWeight: 800,
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+        zIndex: 30,
+        background: 'rgba(255,215,0,0.08)',
+        border: '1px solid rgba(255,215,0,0.18)',
+        padding: '3px 10px',
+        borderRadius: 6,
+        textShadow: '0 0 8px rgba(255,215,0,0.3)',
+      }}>
+        {subtitle}
       </div>
     </div>
   );

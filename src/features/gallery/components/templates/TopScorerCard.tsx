@@ -10,10 +10,6 @@ interface TopScorerCardProps {
 }
 
 export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCardProps) {
-  const subtitle = type === 'weekly'
-    ? `Top Scorer of the Week · ${periodLabel}`
-    : `Top Scorer of the Month · ${periodLabel}`;
-
 
 
   const nameParts = (data?.player.name ?? '').trim().split(' ');
@@ -118,18 +114,32 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
         )}
       </div>
 
-      {/* Cursive subtitle */}
+      {/* Two-line title with different fonts */}
       <div style={{
-        position: 'absolute', top: 74, left: 0, right: 0,
+        position: 'absolute', top: 58, left: 0, right: 0,
         textAlign: 'center',
-        fontSize: 28,
+        fontSize: 34,
+        fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
+        fontWeight: 900,
+        color: '#fff',
+        textTransform: 'uppercase',
+        letterSpacing: 4,
+        zIndex: 20,
+        textShadow: '0 0 20px rgba(255,255,255,0.2)',
+      }}>
+        Top Scorer
+      </div>
+      <div style={{
+        position: 'absolute', top: 96, left: 0, right: 0,
+        textAlign: 'center',
+        fontSize: 24,
         fontFamily: "'The Wildeast', Georgia, serif",
         color: '#FFD700',
         letterSpacing: 2,
         zIndex: 20,
         textShadow: '0 2px 20px rgba(255,215,0,0.65), 0 0 40px rgba(184,134,11,0.5)',
       }}>
-        {subtitle}
+        {type === 'weekly' ? 'of the Week' : 'of the Month'} · {periodLabel}
       </div>
 
       {data ? (

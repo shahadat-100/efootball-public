@@ -35,7 +35,6 @@ export function PlayerProfileCard({
   const firstName = nameParts.join(' ');
 
   const isMonthly = subtitle.toLowerCase().includes('month');
-  const cornerColor = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(200,20,20,0.5)';
 
   // Background and Accent colors based on type
   const bgGradient = isMonthly
@@ -365,12 +364,6 @@ export function PlayerProfileCard({
           {totalWins}W · {totalDraws}D · {totalLosses}L
         </div>
       </div>
-
-      {/* ── Futuristic Corner Accents ───────────────────────────────── */}
-      <div style={{ position: 'absolute', top: 12, left: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
-      <div style={{ position: 'absolute', top: 12, right: 12, width: 10, height: 10, borderTop: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
-      <div style={{ position: 'absolute', bottom: 12, left: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderLeft: `2px solid ${cornerColor}`, zIndex: 30 }} />
-      <div style={{ position: 'absolute', bottom: 12, right: 12, width: 10, height: 10, borderBottom: `2px solid ${cornerColor}`, borderRight: `2px solid ${cornerColor}`, zIndex: 30 }} />
 
       {/* Decorative footer details */}
       <div style={{

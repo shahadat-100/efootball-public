@@ -242,7 +242,6 @@ export function Gallery() {
                 cardRef={cardRef}
                 player={selectedPlayer}
                 seasonStats={selectedStats}
-                title="PROFILE"
                 subtitle="Player Profile"
               />
             )}
