@@ -102,10 +102,12 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       {/* ── Top-right: Title block ──────────────────────────────────── */}
       <div style={{ position: 'absolute', top: 18, right: 28, textAlign: 'right', zIndex: 30 }}>
         <div style={{
-          fontSize: 11, color: '#FFD700',
-          fontFamily: "'Elegant Bloom', Georgia, serif",
-          letterSpacing: 1.5, lineHeight: 1, marginBottom: 3,
-          textShadow: '0 0 12px rgba(255,215,0,0.5)',
+          fontSize: 13, color: '#FFD700',
+          fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+          fontWeight: 800,
+          textTransform: 'uppercase',
+          letterSpacing: 2, lineHeight: 1, marginBottom: 5,
+          textShadow: '0 0 12px rgba(255,215,0,0.4)',
         }}>
           {subtitle}
         </div>
