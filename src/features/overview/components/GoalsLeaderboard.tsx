@@ -46,6 +46,14 @@ interface ReplayPeriod {
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TAUNTS = [
+  "Beat me if you can! ⚔️",
+  "Catch me at the top! ⚡",
+  "Top Goalscorer! ⚽👑",
+  "Can anyone dethrone me? 🏆",
+  "Sitting at #1! 🔥"
+];
+
 const today = new Date();
 const currentMonthIndex = today.getMonth();
 const currentYear = today.getFullYear();
@@ -446,7 +454,7 @@ export function GoalsLeaderboard({
           className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"/>
       </div>
 
-      {/* ── METICULOUS MOBILE CARDS (< md) ────────────────────────────────── */}
+      {/* ── MOBILE CARDS VIEW (< md) WITH SPEECH BUBBLE FOR #1 ───────────────── */}
       <div className="flex flex-col gap-3 md:hidden">
         {isEmpty ? (
           <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground shadow-sm">
@@ -457,97 +465,109 @@ export function GoalsLeaderboard({
           pageList.map(r => {
             const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
             const isTop3 = activeRank >= 0 && activeRank < 3;
+            const isRank1 = activeRank === 0;
 
             return (
-              <div
-                key={r.player.id}
-                onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
-                className={cn(
-                  "relative rounded-2xl border p-4 transition-all duration-200 active:scale-[0.98]",
-                  activeRank === 0 ? "bg-gradient-to-r from-red-500/10 via-card to-card border-red-500/40 shadow-md" :
-                  activeRank === 1 ? "bg-gradient-to-r from-slate-400/10 via-card to-card border-slate-400/40 shadow-sm" :
-                  activeRank === 2 ? "bg-gradient-to-r from-amber-700/10 via-card to-card border-amber-700/40 shadow-sm" :
-                  "bg-card/90 border-border/80 shadow-xs",
-                  r.isInactive && "opacity-40 bg-muted/10 border-border/30",
-                  !r.isInactive && onPlayerClick && "cursor-pointer"
+              <div key={r.player.id} className="relative pt-2">
+                {/* 💬 Challenge Speech Bubble for #1 Top Scorer */}
+                {isRank1 && (
+                  <div className="absolute -top-3 left-10 z-20 animate-bounce">
+                    <div className="relative border-2 border-red-500/60 bg-gradient-to-r from-red-950 via-zinc-900 to-red-950 px-3 py-1 text-red-300 shadow-md rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1 border-red-500/80">
+                      <span>💬 {TAUNTS[Math.abs(r.player.name.length) % TAUNTS.length]}</span>
+                      <div className="absolute -bottom-1.5 left-5 w-2 h-2 bg-zinc-900 border-r-2 border-b-2 border-red-500/80 rotate-45" />
+                    </div>
+                  </div>
                 )}
-              >
-                {/* Main Card Header */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Rank Badge */}
-                    <div className="flex flex-col items-center justify-center shrink-0 w-9 h-9 rounded-xl bg-background/80 border border-border/60 shadow-xs">
-                      <span className={cn(
-                        "font-black text-xs leading-none",
-                        activeRank === 0 ? "text-red-500 text-sm" :
-                        activeRank === 1 ? "text-slate-400 text-sm" :
-                        activeRank === 2 ? "text-amber-700 text-sm" : "text-muted-foreground"
-                      )}>
-                        #{activeRank >= 0 ? activeRank + 1 : '—'}
-                      </span>
-                      {r.rankShift !== null && (
-                        <span className={cn("flex items-center text-[8px] font-bold mt-0.5",
-                          r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
-                          {r.rankShift > 0 ? <ArrowUp className="w-2 h-2" /> : r.rankShift < 0 ? <ArrowDown className="w-2 h-2" /> : <Minus className="w-2 h-2" />}
-                          {r.rankShift !== 0 && Math.abs(r.rankShift)}
+
+                <div
+                  onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
+                  className={cn(
+                    "relative rounded-2xl border p-4 transition-all duration-200 active:scale-[0.98]",
+                    activeRank === 0 ? "bg-gradient-to-r from-red-500/10 via-card to-card border-red-500/40 shadow-md" :
+                    activeRank === 1 ? "bg-gradient-to-r from-slate-400/10 via-card to-card border-slate-400/40 shadow-sm" :
+                    activeRank === 2 ? "bg-gradient-to-r from-amber-700/10 via-card to-card border-amber-700/40 shadow-sm" :
+                    "bg-card/90 border-border/80 shadow-xs",
+                    r.isInactive && "opacity-40 bg-muted/10 border-border/30",
+                    !r.isInactive && onPlayerClick && "cursor-pointer"
+                  )}
+                >
+                  {/* Card Main Content */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Rank Badge */}
+                      <div className="flex flex-col items-center justify-center shrink-0 w-9 h-9 rounded-xl bg-background/80 border border-border/60 shadow-xs">
+                        <span className={cn(
+                          "font-black text-xs leading-none",
+                          activeRank === 0 ? "text-red-500 text-sm" :
+                          activeRank === 1 ? "text-slate-400 text-sm" :
+                          activeRank === 2 ? "text-amber-700 text-sm" : "text-muted-foreground"
+                        )}>
+                          #{activeRank >= 0 ? activeRank + 1 : '—'}
                         </span>
-                      )}
+                        {r.rankShift !== null && (
+                          <span className={cn("flex items-center text-[8px] font-bold mt-0.5",
+                            r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
+                            {r.rankShift > 0 ? <ArrowUp className="w-2 h-2" /> : r.rankShift < 0 ? <ArrowDown className="w-2 h-2" /> : <Minus className="w-2 h-2" />}
+                            {r.rankShift!==0&&Math.abs(r.rankShift)}
+                          </span>
+                        )}
+                      </div>
+
+                      <Avatar name={r.player.name} size={40} src={(r.player as any).profileImageUrl} />
+
+                      <div className="min-w-0">
+                        <h4 className={cn("font-bold text-foreground truncate text-sm leading-tight flex items-center gap-1.5", isTop3 && "text-red-500 font-extrabold")}>
+                          {r.player.name}
+                          {activeRank === 0 && <Crown className="w-3.5 h-3.5 text-red-500 inline shrink-0" />}
+                        </h4>
+
+                        {/* Recent Form Dots */}
+                        {!r.isInactive && (
+                          <div className="flex items-center gap-1 mt-1">
+                            {r.form.map((res, fi) => (
+                              <span key={fi} className={cn("w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-black shadow-xs",
+                                res === 'win' ? "bg-emerald-500/25 text-emerald-500 ring-1 ring-emerald-500/30" :
+                                res === 'draw' ? "bg-amber-500/25 text-amber-500 ring-1 ring-amber-500/30" :
+                                "bg-red-500/25 text-red-500 ring-1 ring-red-500/30")}>
+                                {res.charAt(0).toUpperCase()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <Avatar name={r.player.name} size={40} src={(r.player as any).profileImageUrl} />
-
-                    <div className="min-w-0">
-                      <h4 className={cn("font-bold text-foreground truncate text-sm leading-tight flex items-center gap-1.5", isTop3 && "text-red-500 font-extrabold")}>
-                        {r.player.name}
-                        {activeRank === 0 && <Crown className="w-3.5 h-3.5 text-red-500 inline shrink-0" />}
-                      </h4>
-
-                      {/* Recent Form Dots */}
-                      {!r.isInactive && (
-                        <div className="flex items-center gap-1 mt-1">
-                          {r.form.map((res, fi) => (
-                            <span key={fi} className={cn("w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-black shadow-xs",
-                              res === 'win' ? "bg-emerald-500/25 text-emerald-500 ring-1 ring-emerald-500/30" :
-                              res === 'draw' ? "bg-amber-500/25 text-amber-500 ring-1 ring-amber-500/30" :
-                              "bg-red-500/25 text-red-500 ring-1 ring-red-500/30")}>
-                              {res.charAt(0).toUpperCase()}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                    {/* Goals Pill */}
+                    <div className="shrink-0 text-right">
+                      <span className={cn(
+                        "font-black text-sm px-3 py-1.5 rounded-xl border shadow-xs inline-block",
+                        r.goals > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-muted text-muted-foreground border-border"
+                      )}>
+                        ⚽ {r.goals} <span className="text-[10px] font-semibold opacity-70">GOALS</span>
+                      </span>
                     </div>
                   </div>
 
-                  {/* Goals Pill */}
-                  <div className="shrink-0 text-right">
-                    <span className={cn(
-                      "font-black text-sm px-3 py-1.5 rounded-xl border shadow-xs inline-block",
-                      r.goals > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-muted text-muted-foreground border-border"
-                    )}>
-                      ⚽ {r.goals} <span className="text-[10px] font-semibold opacity-70">GOALS</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Sub Stats Row */}
-                <div className="grid grid-cols-4 gap-1.5 pt-3 mt-3 border-t border-border/40 text-center text-xs">
-                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
-                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">W-D-L</span>
-                    <span className="font-bold text-foreground text-xs">{r.wins}-{r.draws}-{r.losses}</span>
-                  </div>
-                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
-                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">WIN %</span>
-                    <span className={cn("font-bold text-xs", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
-                      {r.matches > 0 ? `${r.winRate}%` : '—'}
-                    </span>
-                  </div>
-                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
-                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">HAT-TRICKS</span>
-                    <span className="font-bold text-violet-400 text-xs">⚽ {r.ht}</span>
-                  </div>
-                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
-                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">MOTM/CS</span>
-                    <span className="font-bold text-amber-500 text-xs">👑{r.motm} <span className="text-cyan-500 font-semibold">🛡️{r.cs}</span></span>
+                  {/* Sub Stats Row */}
+                  <div className="grid grid-cols-4 gap-1.5 pt-3 mt-3 border-t border-border/40 text-center text-xs">
+                    <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                      <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">W-D-L</span>
+                      <span className="font-bold text-foreground text-xs">{r.wins}-{r.draws}-{r.losses}</span>
+                    </div>
+                    <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                      <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">WIN %</span>
+                      <span className={cn("font-bold text-xs", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
+                        {r.matches > 0 ? `${r.winRate}%` : '—'}
+                      </span>
+                    </div>
+                    <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                      <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">HAT-TRICKS</span>
+                      <span className="font-bold text-violet-400 text-xs">⚽ {r.ht}</span>
+                    </div>
+                    <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                      <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">MOTM/CS</span>
+                      <span className="font-bold text-amber-500 text-xs">👑{r.motm} <span className="text-cyan-500 font-semibold">🛡️{r.cs}</span></span>
+                    </div>
                   </div>
                 </div>
               </div>
