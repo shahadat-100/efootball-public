@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Avatar } from '@/shared/components';
-import { Award, ChevronLeft, ChevronRight, Crown, Sparkles, Star, Trophy } from 'lucide-react';
+import { Award, ChevronLeft, ChevronRight, Crown, Sparkles, Trophy } from 'lucide-react';
 
-// ── Per-legend accent palette ───────────────────────────────────────────────
 const HOF_PALETTE: string[] = [
-  '#b8860b', // Dark Gold
-  '#c8102e', // Crimson
-  '#1e40af', // Deep Blue
-  '#047857', // Deep Emerald
-  '#6d28d9', // Deep Violet
-  '#be123c', // Deep Rose
-  '#0e7490', // Deep Cyan
-  '#0f766e', // Deep Teal
+  '#f59e0b', // Gold
+  '#ef4444', // Red
+  '#3b82f6', // Blue
+  '#10b981', // Emerald
+  '#8b5cf6', // Violet
+  '#f43f5e', // Rose
+  '#06b6d4', // Cyan
+  '#14b8a6', // Teal
 ];
 
 export function HallOfFameCarousel() {
@@ -39,13 +38,14 @@ export function HallOfFameCarousel() {
   // ── Empty State ──────────────────────────────────────────────────────────────
   if (hallOfFame.length === 0) {
     return (
-      <div className="rounded-2xl h-full flex flex-col items-center justify-center text-center gap-3 border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/50 shadow-sm">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center border-2 border-amber-300/50 bg-gradient-to-br from-amber-100 to-amber-50">
-          <Crown className="w-6 h-6 text-amber-600" />
+      <div className="rounded-3xl h-full flex flex-col items-center justify-center text-center p-6 border border-amber-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-amber-950/40 shadow-xl relative overflow-hidden">
+        <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center border border-amber-500/30 bg-amber-500/10 shadow-inner mb-3">
+          <Crown className="w-8 h-8 text-amber-400 animate-pulse" />
         </div>
         <div>
-          <p className="text-sm font-black text-amber-800 uppercase tracking-[0.2em]">Hall of Fame</p>
-          <p className="text-xs text-amber-600/60 mt-1">Legends will be inducted here</p>
+          <p className="text-sm font-black text-amber-400 uppercase tracking-[0.25em]">Hall of Fame</p>
+          <p className="text-xs text-muted-foreground mt-1 font-medium">Legendary achievements will be enshrined here</p>
         </div>
       </div>
     );
@@ -56,154 +56,139 @@ export function HallOfFameCarousel() {
   const accent = HOF_PALETTE[currentIndex % HOF_PALETTE.length];
 
   return (
-    <div className="relative rounded-2xl overflow-hidden h-full border border-amber-200/50 shadow-md transition-all duration-500 bg-gradient-to-br from-amber-50/60 via-white to-orange-50/40">
+    <div className="relative rounded-3xl overflow-hidden h-full border border-amber-500/30 shadow-2xl transition-all duration-500 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black group">
 
-      {/* ── Decorative golden texture elements ──────────────────────────── */}
-      {/* Top-left ornamental glow */}
-      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl pointer-events-none opacity-[0.12]"
-        style={{ background: 'radial-gradient(circle, #f59e0b, #d97706, transparent)' }}
-      />
-      {/* Bottom-right ornamental glow */}
-      <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-[0.10]"
+      {/* ── Ambient Background Glows ───────────────────────────────────── */}
+      <div
+        className="absolute -top-24 -left-24 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-25 transition-all duration-700"
         style={{ background: `radial-gradient(circle, ${accent}, transparent)` }}
       />
-      {/* Top gold filigree line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px]"
-        style={{ background: 'linear-gradient(90deg, transparent 5%, #d4a84420, #f59e0b60, #d4a84420, transparent 95%)' }}
+      <div className="absolute -bottom-20 -right-20 w-60 h-60 rounded-full blur-3xl pointer-events-none opacity-15"
+        style={{ background: 'radial-gradient(circle, #f59e0b, transparent)' }}
       />
 
-      {/* ── Content ──────────────────────────────────────────────────────── */}
-      <div className="relative z-10 h-full flex flex-col px-5 pt-4 pb-4 gap-3">
+      {/* Subtle Grid / Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
-        {/* ── Header: "Hall of Fame" crest + navigation ───────────────── */}
+      {/* Top Gold Border Highlight */}
+      <div className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: 'linear-gradient(90deg, transparent 5%, #f59e0b40, #f59e0b, #f59e0b40, transparent 95%)' }}
+      />
+
+      {/* ── Content Wrapper ─────────────────────────────────────────────── */}
+      <div className="relative z-10 h-full flex flex-col p-5 justify-between gap-4">
+
+        {/* ── Top Bar: Title + Nav ─────────────────────────────────────── */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            {/* Crest icon */}
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-100 to-amber-50 border border-amber-300/50 shadow-sm">
-              <Crown className="w-4.5 h-4.5 text-amber-700" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-br from-amber-400/20 to-amber-600/10 border border-amber-500/40 shadow-lg shadow-amber-500/5">
+              <Crown className="w-5 h-5 text-amber-400" />
             </div>
             <div>
-              <span className="text-[11px] font-black text-amber-900/80 uppercase tracking-[0.18em] block leading-tight">
-                Hall of Fame
+              <span className="text-[12px] font-black text-amber-400 uppercase tracking-[0.2em] block leading-tight flex items-center gap-1.5">
+                Hall of Fame <Sparkles className="w-3 h-3 text-amber-400/80" />
               </span>
-              <span className="text-[10px] font-semibold text-amber-600/50 tracking-wide">
-                {currentIndex + 1} / {hallOfFame.length} Legends
+              <span className="text-[11px] font-semibold text-zinc-400">
+                Legend {currentIndex + 1} of {hallOfFame.length}
               </span>
             </div>
           </div>
 
-          {/* Nav */}
+          {/* Navigation controls */}
           {hallOfFame.length > 1 && (
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => navigate(-1)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-amber-500 hover:text-amber-800 transition-all border border-amber-200/60 bg-white/70 hover:bg-amber-50 hover:shadow-sm"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:text-amber-400 transition-all border border-zinc-800 bg-zinc-900/80 hover:bg-amber-500/10 hover:border-amber-500/40 active:scale-95 shadow-sm"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => navigate(1)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-amber-500 hover:text-amber-800 transition-all border border-amber-200/60 bg-white/70 hover:bg-amber-50 hover:shadow-sm"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:text-amber-400 transition-all border border-zinc-800 bg-zinc-900/80 hover:bg-amber-500/10 hover:border-amber-500/40 active:scale-95 shadow-sm"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}
         </div>
 
-        {/* ── Divider with golden ornament ─────────────────────────────── */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
-          <Star className="w-3 h-3 text-amber-400/60 fill-amber-300/40" />
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
-        </div>
-
-        {/* ── Main Content: Horizontal Player Legacy Card ─────────────── */}
+        {/* ── Main Card Content ────────────────────────────────────────── */}
         <div
           className={`flex-1 flex items-center gap-5 transition-all duration-300 ${
-            animating ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'
+            animating ? 'opacity-0 translate-y-1 scale-95' : 'opacity-100 translate-y-0 scale-100'
           }`}
         >
-          {/* Left: Grand Avatar with legacy frame */}
+          {/* Avatar with Golden Trophy Badge Frame */}
           <div className="relative shrink-0">
-            {/* Outer golden frame */}
             <div
-              className="rounded-xl p-[3px] shadow-lg"
+              className="rounded-2xl p-[3px] shadow-2xl relative"
               style={{
-                background: 'linear-gradient(145deg, #f59e0b, #d97706, #b8860b, #d4a844)',
+                background: 'linear-gradient(135deg, #f59e0b, #b8860b, #78350f, #f59e0b)',
               }}
             >
-              <div className="rounded-xl overflow-hidden bg-amber-50" style={{ width: 96, height: 96 }}>
-                <Avatar name={player?.name ?? 'Legend'} src={player?.profileImageUrl} size={96} />
+              <div className="rounded-2xl overflow-hidden bg-zinc-950" style={{ width: 92, height: 92 }}>
+                <Avatar name={player?.name ?? 'Legend'} src={player?.profileImageUrl} size={92} />
               </div>
             </div>
 
-            {/* Crown badge — top center */}
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-b from-amber-400 to-amber-600 border-2 border-white shadow-lg">
-              <Crown className="w-4 h-4 text-white" />
+            {/* Top Crown Ribbon */}
+            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 border border-amber-200 shadow-md">
+              <Crown className="w-3.5 h-3.5 text-zinc-950" />
             </div>
 
-            {/* "LEGEND" ribbon — bottom */}
-            <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <div
-                className="px-3 py-[3px] rounded-full text-[8px] font-black uppercase tracking-[0.25em] text-white shadow-md border border-amber-500/50"
-                style={{
-                  background: 'linear-gradient(90deg, #d97706, #f59e0b, #d97706)',
-                }}
-              >
-                ★ Legend ★
-              </div>
+            {/* Bottom Ribbon */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap">
+              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-amber-950 bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 shadow-md border border-amber-200">
+                Legend
+              </span>
             </div>
           </div>
 
-          {/* Right: Player Legacy Info */}
-          <div className="flex-1 min-w-0 flex flex-col gap-2">
-            {/* Player Name — large, commanding */}
+          {/* Details */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
             <div>
-              <h4 className="font-black text-[19px] text-slate-900 tracking-tight leading-tight truncate">
-                {player?.name ?? 'Unknown'}
+              <h4 className="font-black text-xl text-zinc-100 tracking-tight leading-none truncate flex items-center gap-2">
+                {player?.name ?? 'Unknown Legend'}
               </h4>
               {player?.jerseyNumber && (
-                <span className="text-[11px] font-black text-amber-700/70 mt-0.5 block tracking-wider">
+                <span className="text-[11px] font-black text-amber-400/90 tracking-wider mt-1 block">
                   #{player.jerseyNumber}
                 </span>
               )}
             </div>
 
-            {/* Achievement badges */}
+            {/* Tags / Badges */}
             <div className="flex items-center gap-2 flex-wrap">
               <span
-                className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg shadow-xs"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-xl shadow-sm border"
                 style={{
                   color: accent,
-                  background: `${accent}12`,
-                  border: `1px solid ${accent}25`,
+                  backgroundColor: `${accent}15`,
+                  borderColor: `${accent}35`,
                 }}
               >
-                <Award className="w-3 h-3" />
+                <Award className="w-3.5 h-3.5" />
                 {entry.category}
               </span>
-              <span className="text-[10px] font-bold text-amber-800/70 bg-amber-100/80 border border-amber-200/60 px-2 py-1 rounded-lg flex items-center gap-1 shadow-xs">
-                <Trophy className="w-3 h-3 text-amber-500" />
+              <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-xl flex items-center gap-1.5 shadow-sm">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
                 {entry.seasonText}
               </span>
             </div>
 
-            {/* Subtitle / Achievement Quote */}
+            {/* Quote / Subtitle */}
             {entry.subTitle && (
-              <div className="flex items-start gap-1.5 mt-0.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-[12px] font-semibold text-amber-800/80 leading-snug line-clamp-2 italic">
-                  "{entry.subTitle}"
-                </p>
-              </div>
+              <p className="text-[12px] font-medium text-zinc-300 italic line-clamp-2 leading-relaxed bg-zinc-900/60 p-2 rounded-xl border border-zinc-800/60">
+                "{entry.subTitle}"
+              </p>
             )}
           </div>
         </div>
 
-        {/* ── Bottom: Dot indicators ──────────────────────────────────── */}
+        {/* ── Bottom Carousel Dots ─────────────────────────────────────── */}
         {hallOfFame.length > 1 && (
-          <div className="flex justify-center gap-1.5 pt-0.5">
+          <div className="flex justify-center gap-1.5">
             {hallOfFame.map((_, idx) => (
               <button
                 key={idx}
@@ -213,11 +198,11 @@ export function HallOfFameCarousel() {
                 }}
                 className="rounded-full transition-all duration-300"
                 style={{
-                  width: idx === currentIndex ? 20 : 6,
+                  width: idx === currentIndex ? 24 : 6,
                   height: 6,
                   background: idx === currentIndex
-                    ? 'linear-gradient(90deg, #d97706, #f59e0b)'
-                    : '#e5d9c3',
+                    ? 'linear-gradient(90deg, #f59e0b, #d97706)'
+                    : '#27272a',
                 }}
               />
             ))}
@@ -225,9 +210,9 @@ export function HallOfFameCarousel() {
         )}
       </div>
 
-      {/* Bottom golden filigree line */}
+      {/* Bottom Gold Line */}
       <div className="absolute bottom-0 left-0 right-0 h-[2px]"
-        style={{ background: 'linear-gradient(90deg, transparent 5%, #d4a84420, #f59e0b50, #d4a84420, transparent 95%)' }}
+        style={{ background: 'linear-gradient(90deg, transparent 5%, #f59e0b30, #f59e0b, #f59e0b30, transparent 95%)' }}
       />
     </div>
   );
