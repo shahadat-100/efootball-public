@@ -4,6 +4,7 @@ import { MatchEntry } from '@/features/match-entries/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
+import { ArrowUp, ArrowDown, Minus, ChevronUp, ChevronDown, Search } from 'lucide-react';
 
 interface GoalsLeaderboardProps {
   players: Player[];
@@ -13,6 +14,7 @@ interface GoalsLeaderboardProps {
   playerMonthlyStats?: PlayerMonthlyStat[];
   playerWeeklyStats?: PlayerWeeklyStat[];
   limit?: number;
+  onPlayerClick?: (playerId: string) => void;
 }
 
 interface RankedPlayer {
@@ -27,6 +29,8 @@ interface RankedPlayer {
   cs: number;
   ht: number;
   motm: number;
+  form: Array<'win' | 'draw' | 'loss'>;
+  rankShift: number | null;
 }
 
 const MONTHS = [
@@ -40,15 +44,20 @@ const currentYear = today.getFullYear();
 const currentDay = today.getDate();
 
 type ViewMode = 'weekly' | 'monthly' | 'overall';
+type SortField = 'default' | 'matches' | 'wins' | 'draws' | 'losses' | 'winRate' | 'gc' | 'cs' | 'ht' | 'motm' | 'goals';
+type SortDir = 'asc' | 'desc';
 
 const PAGE_SIZE = 20;
 
-export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats = [], playerWeeklyStats = [] }: GoalsLeaderboardProps) {
+export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats = [], playerWeeklyStats = [], onPlayerClick }: GoalsLeaderboardProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<SortField>('default');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const [selectedWeeklySeasonId, setSelectedWeeklySeasonId] = useState<number | null>(null);
   const [selectedWeeklyMonth, setSelectedWeeklyMonth] = useState<number>(currentMonthIndex);
@@ -59,9 +68,45 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
     return 1;
   });
 
-  const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDir === 'desc') setSortDir('asc');
+      else { setSortField('default'); setSortDir('desc'); }
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+    setPage(1);
+  };
 
-    // Weekly from playerWeeklyStats
+  const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
+    // ── Get last 5 match results for form ────────────────────────────────
+    const getForm = (playerId: string): Array<'win' | 'draw' | 'loss'> => {
+      return matchEntries
+        .filter(e => e.playerId === playerId && e.date)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5)
+        .map(e => e.result as 'win' | 'draw' | 'loss');
+    };
+
+    // ── Weekly ──────────────────────────────────────────────────────────
+    const prevWeek = selectedWeeklyWeek > 1 ? selectedWeeklyWeek - 1 : null;
+    const prevWeeklyGoals = new Map<string, number>();
+    if (prevWeek !== null) {
+      players.forEach(p => {
+        const stats = playerWeeklyStats.filter(s =>
+          s.playerId === p.id &&
+          s.monthIndex === selectedWeeklyMonth &&
+          s.week === prevWeek &&
+          (selectedWeeklySeasonId !== null ? s.seasonId === selectedWeeklySeasonId : s.year === currentYear)
+        );
+        prevWeeklyGoals.set(p.id, stats.reduce((t, s) => t + s.goals, 0));
+      });
+    }
+    const prevWeeklyRanked = Array.from(prevWeeklyGoals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([id], i) => ({ id, rank: i + 1 }));
+
     const weeklyList: RankedPlayer[] = players.map(p => {
       const stats = playerWeeklyStats.filter(s =>
         s.playerId === p.id &&
@@ -79,10 +124,30 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
       const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm };
-    }).filter(r => r.matches > 0).sort((a, b) => b.goals - a.goals);
+      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
+    }).filter(r => r.matches > 0).sort((a, b) => b.goals - a.goals)
+      .map((r, i) => {
+        const prev = prevWeeklyRanked.find(x => x.id === r.player.id);
+        return { ...r, rankShift: prev ? prev.rank - (i + 1) : null };
+      });
 
-    // Monthly from playerMonthlyStats
+    // ── Monthly ───────────────────────────────────────────────────────────
+    const prevMonth = selectedMonthlyMonth > 0 ? selectedMonthlyMonth - 1 : null;
+    const prevMonthlyGoals = new Map<string, number>();
+    if (prevMonth !== null) {
+      players.forEach(p => {
+        const stats = playerMonthlyStats.filter(s =>
+          s.playerId === p.id &&
+          s.monthIndex === prevMonth &&
+          (selectedMonthlySeasonId !== null ? s.seasonId === selectedMonthlySeasonId : s.year === currentYear)
+        );
+        prevMonthlyGoals.set(p.id, stats.reduce((t, s) => t + s.goals, 0));
+      });
+    }
+    const prevMonthlyRanked = Array.from(prevMonthlyGoals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([id], i) => ({ id, rank: i + 1 }));
+
     const monthlyList: RankedPlayer[] = players.map(p => {
       const stats = playerMonthlyStats.filter(s =>
         s.playerId === p.id &&
@@ -99,10 +164,31 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
       const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm };
-    }).filter(r => r.matches > 0).sort((a, b) => b.goals - a.goals);
+      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
+    }).filter(r => r.matches > 0).sort((a, b) => b.goals - a.goals)
+      .map((r, i) => {
+        const prev = prevMonthlyRanked.find(x => x.id === r.player.id);
+        return { ...r, rankShift: prev ? prev.rank - (i + 1) : null };
+      });
 
-    // Overall from playerSeasonStats
+    // ── Overall ───────────────────────────────────────────────────────────
+    const seasonIds = seasons.map(s => s.id);
+    let prevSeasonId: number | null = null;
+    if (selectedOverallSeasonId !== null) {
+      const idx = seasonIds.indexOf(selectedOverallSeasonId);
+      prevSeasonId = idx > 0 ? seasonIds[idx - 1] : null;
+    }
+    const prevOverallGoals = new Map<string, number>();
+    if (prevSeasonId !== null) {
+      players.forEach(p => {
+        const stats = playerSeasonStats.filter(s => s.playerId === p.id && s.seasonId === prevSeasonId);
+        prevOverallGoals.set(p.id, stats.reduce((t, s) => t + (s.goals || 0), 0));
+      });
+    }
+    const prevOverallRanked = Array.from(prevOverallGoals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([id], i) => ({ id, rank: i + 1 }));
+
     const overallList: RankedPlayer[] = players.map(p => {
       const stats = playerSeasonStats.filter(s =>
         s.playerId === p.id &&
@@ -118,8 +204,12 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
       const motm   = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm };
-    }).sort((a, b) => b.goals - a.goals);
+      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
+    }).sort((a, b) => b.goals - a.goals)
+      .map((r, i) => {
+        const prev = prevOverallRanked.find(x => x.id === r.player.id);
+        return { ...r, rankShift: prevSeasonId !== null && prev ? prev.rank - (i + 1) : null };
+      });
 
     const monthlySeasonLabel = selectedMonthlySeasonId
       ? seasons.find(s => s.id === selectedMonthlySeasonId)?.name ?? ''
@@ -146,18 +236,72 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
     viewMode === 'monthly' ? monthlyRanking :
     overallRanking;
 
-  const totalEntries = activeRanking.list.length;
+  // Search filter
+  const searchFiltered = useMemo(() => {
+    if (!searchQuery.trim()) return activeRanking.list;
+    const q = searchQuery.toLowerCase();
+    return activeRanking.list.filter(r => r.player.name.toLowerCase().includes(q));
+  }, [activeRanking.list, searchQuery]);
+
+  // Custom sorting
+  const sortedList = useMemo(() => {
+    if (sortField === 'default') return searchFiltered;
+    return [...searchFiltered].sort((a, b) => {
+      const val = (r: RankedPlayer): number => {
+        switch (sortField) {
+          case 'matches': return r.matches;
+          case 'wins': return r.wins;
+          case 'draws': return r.draws;
+          case 'losses': return r.losses;
+          case 'winRate': return r.winRate;
+          case 'gc': return r.gc;
+          case 'cs': return r.cs;
+          case 'ht': return r.ht;
+          case 'motm': return r.motm;
+          case 'goals': return r.goals;
+          default: return 0;
+        }
+      };
+      return sortDir === 'desc' ? val(b) - val(a) : val(a) - val(b);
+    });
+  }, [searchFiltered, sortField, sortDir]);
+
+  const totalEntries = sortedList.length;
   const totalPages   = Math.max(1, Math.ceil(totalEntries / PAGE_SIZE));
   const safePage     = Math.min(page, totalPages);
   const pageStart    = (safePage - 1) * PAGE_SIZE;
   const pageEnd      = Math.min(pageStart + PAGE_SIZE, totalEntries);
-  const pageList     = activeRanking.list.slice(pageStart, pageEnd);
+  const pageList     = sortedList.slice(pageStart, pageEnd);
 
   const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
 
   const handleViewMode = (mode: ViewMode) => { setViewMode(mode); setPage(1); };
 
-  const isEmpty = activeRanking.list.length === 0 || activeRanking.list.every(r => r.goals === 0 && r.matches === 0);
+  const isEmpty = sortedList.length === 0 || sortedList.every(r => r.goals === 0 && r.matches === 0);
+
+  // Sortable column header helper
+  const SortTh = ({ field, label, title, left = false }: { field: SortField; label: string; title: string; left?: boolean }) => {
+    const active = sortField === field;
+    return (
+      <th
+        title={title}
+        onClick={() => handleSort(field)}
+        className={cn(
+          "py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none cursor-pointer hover:text-foreground transition-colors group",
+          left ? 'text-left px-3' : 'text-center px-1'
+        )}
+      >
+        <span className="inline-flex items-center gap-0.5">
+          {label}
+          {active ? (
+            sortDir === 'desc' ? <ChevronDown className="w-3 h-3 text-primary" /> : <ChevronUp className="w-3 h-3 text-primary" />
+          ) : (
+            <ChevronDown className="w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity" />
+          )}
+        </span>
+      </th>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -248,13 +392,26 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
         </span>
       </div>
 
+      {/* Search bar */}
+      <div className="relative w-full max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Search player..."
+          value={searchQuery}
+          onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
+          className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"
+        />
+      </div>
+
       {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: '44px' }} />   {/* # */}
-              <col style={{ width: '160px' }} />  {/* Player */}
+              <col style={{ width: '140px' }} />  {/* Player */}
+              <col style={{ width: '90px' }} />   {/* Form */}
               <col style={{ width: '48px' }} />   {/* M */}
               <col style={{ width: '48px' }} />   {/* W */}
               <col style={{ width: '48px' }} />   {/* D */}
@@ -268,39 +425,25 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
             </colgroup>
             <thead className="sticky top-0 z-20">
               <tr className="bg-muted/60 backdrop-blur border-b border-border">
-                {[
-                  { label: '#',        title: 'Rank' },
-                  { label: 'Player',   title: 'Player' },
-                  { label: 'M',        title: 'Matches' },
-                  { label: 'W',        title: 'Wins' },
-                  { label: 'D',        title: 'Draws' },
-                  { label: 'L',        title: 'Losses' },
-                  { label: 'Win%',     title: 'Win Rate' },
-                  { label: 'GC',       title: 'Goals Conceded' },
-                  { label: 'CS',       title: 'Clean Sheets' },
-                  { label: 'HT',       title: 'Hat-tricks' },
-                  { label: 'MOTM',     title: 'Man of the Match' },
-                  { label: '⚽ Goals', title: 'Goals' },
-                ].map((c, idx) => (
-                  <th
-                    key={idx}
-                    title={c.title}
-                    className={cn(
-                      "py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none",
-                      idx === 0 ? 'text-center px-2' :
-                      idx === 1 ? 'text-left px-3' :
-                      'text-center px-1'
-                    )}
-                  >
-                    {c.label}
-                  </th>
-                ))}
+                <th title="Rank" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-2">#</th>
+                <th title="Player" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-left px-3">Player</th>
+                <th title="Recent Form (last 5)" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-1">Form</th>
+                <SortTh field="matches" label="M" title="Matches" />
+                <SortTh field="wins" label="W" title="Wins" />
+                <SortTh field="draws" label="D" title="Draws" />
+                <SortTh field="losses" label="L" title="Losses" />
+                <SortTh field="winRate" label="Win%" title="Win Rate" />
+                <SortTh field="gc" label="GC" title="Goals Conceded" />
+                <SortTh field="cs" label="CS" title="Clean Sheets" />
+                <SortTh field="ht" label="HT" title="Hat-tricks" />
+                <SortTh field="motm" label="MOTM" title="Man of the Match" />
+                <SortTh field="goals" label="⚽ Goals" title="Goals" />
               </tr>
             </thead>
             <tbody>
               {isEmpty ? (
                 <tr>
-                  <td colSpan={12} className="py-20 text-center text-muted-foreground">
+                  <td colSpan={13} className="py-20 text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2">
                       <span className="text-4xl">⚽</span>
                       <p className="font-medium text-sm">No data for this period</p>
@@ -325,12 +468,32 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
                   return (
                     <tr
                       key={r.player.id}
-                      className={cn("border-b border-border/50 transition-colors group", rowCls)}
+                      onClick={() => onPlayerClick?.(r.player.id)}
+                      className={cn(
+                        "border-b border-border/50 transition-colors group",
+                        rowCls,
+                        onPlayerClick && "cursor-pointer"
+                      )}
                     >
-                      {/* Rank */}
+                      {/* Rank + shift */}
                       <td className="py-2.5 px-2 text-center">
-                        <div className={cn('w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm', medalCls)}>
-                          {globalIdx + 1}
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div className={cn('w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm', medalCls)}>
+                            {globalIdx + 1}
+                          </div>
+                          {r.rankShift !== null && (
+                            <span className={cn(
+                              "flex items-center text-[9px] font-bold leading-none",
+                              r.rankShift > 0 ? "text-emerald-500" :
+                              r.rankShift < 0 ? "text-red-500" :
+                              "text-muted-foreground/50"
+                            )}>
+                              {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> :
+                               r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> :
+                               <Minus className="w-2.5 h-2.5" />}
+                              {r.rankShift !== 0 && Math.abs(r.rankShift)}
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -341,6 +504,29 @@ export function GoalsLeaderboard({ players, matchEntries, seasons, playerSeasonS
                           <span className={cn("font-semibold text-foreground truncate text-[13px]", isTop3 && "font-bold")}>
                             {r.player.name}
                           </span>
+                        </div>
+                      </td>
+
+                      {/* Form */}
+                      <td className="py-2.5 px-1 text-center">
+                        <div className="flex items-center justify-center gap-0.5">
+                          {r.form.length === 0 ? (
+                            <span className="text-muted-foreground/40 text-[11px]">—</span>
+                          ) : (
+                            r.form.map((result, fi) => (
+                              <span
+                                key={fi}
+                                className={cn(
+                                  "w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black shadow-sm",
+                                  result === 'win' ? "bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30" :
+                                  result === 'draw' ? "bg-amber-500/20 text-amber-500 ring-1 ring-amber-500/30" :
+                                  "bg-red-500/20 text-red-500 ring-1 ring-red-500/30"
+                                )}
+                              >
+                                {result.charAt(0).toUpperCase()}
+                              </span>
+                            ))
+                          )}
                         </div>
                       </td>
 

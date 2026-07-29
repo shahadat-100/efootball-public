@@ -3,6 +3,8 @@ import { useFootballStore } from '@/store/footballStore';
 import { PointsLeaderboard } from '@/features/overview/components/PointsLeaderboard';
 import { GoalsLeaderboard } from '@/features/overview/components/GoalsLeaderboard';
 import { cn } from '@/shared/lib/cn';
+import { PlayerDetail } from '@/features/players';
+import { X } from 'lucide-react';
 
 export function Leaderboard() {
   const {
@@ -11,6 +13,7 @@ export function Leaderboard() {
     fetchPlayerMonthlyStats, fetchPlayerWeeklyStats,
   } = useFootballStore();
   const [activeTab, setActiveTab] = useState<'points' | 'goals'>('points');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch everything needed — store guards (length > 0) prevent duplicate network calls
@@ -62,7 +65,6 @@ export function Leaderboard() {
         </div>
       </div>
 
-
       {/* Points / Goals switcher */}
       <div className="flex items-center gap-2 mb-8 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
         <button
@@ -97,6 +99,7 @@ export function Leaderboard() {
           playerSeasonStats={playerSeasonStats}
           playerMonthlyStats={playerMonthlyStats}
           playerWeeklyStats={playerWeeklyStats}
+          onPlayerClick={setSelectedPlayerId}
         />
       ) : (
         <GoalsLeaderboard
@@ -106,7 +109,28 @@ export function Leaderboard() {
           playerSeasonStats={playerSeasonStats}
           playerMonthlyStats={playerMonthlyStats}
           playerWeeklyStats={playerWeeklyStats}
+          onPlayerClick={setSelectedPlayerId}
         />
+      )}
+
+      {/* Player Detail Overlay Modal */}
+      {selectedPlayerId && (
+        <div
+          className="fixed inset-0 bg-background/80 backdrop-blur-md z-50 overflow-y-auto flex justify-center items-start animate-in fade-in duration-200"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedPlayerId(null); }}
+        >
+          <div className="w-full max-w-6xl bg-card border border-border rounded-3xl shadow-2xl relative overflow-hidden my-6 mx-4">
+            <button
+              onClick={() => setSelectedPlayerId(null)}
+              className="absolute top-4 right-4 z-[60] p-2 rounded-full bg-background/80 hover:bg-muted border border-border text-foreground hover:scale-105 transition-all shadow-md"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="p-6 md:p-8">
+              <PlayerDetail playerId={selectedPlayerId} onBack={() => setSelectedPlayerId(null)} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

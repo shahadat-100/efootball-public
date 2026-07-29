@@ -4,6 +4,7 @@ import { MatchEntry } from '@/features/match-entries/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
+import { ArrowUp, ArrowDown, Minus, ChevronUp, ChevronDown, Search } from 'lucide-react';
 
 interface PointsLeaderboardProps {
   players: Player[];
@@ -16,6 +17,7 @@ interface PointsLeaderboardProps {
   /** compact=true → show top N rows, hide pagination (for Overview widget) */
   compact?: boolean;
   compactLimit?: number;
+  onPlayerClick?: (playerId: string) => void;
 }
 
 interface RankedPlayer {
@@ -31,6 +33,8 @@ interface RankedPlayer {
   cs: number;
   ht: number;
   motm: number;
+  form: Array<'win' | 'draw' | 'loss'>;
+  rankShift: number | null; // positive = moved up, negative = moved down, null = new
 }
 
 const MONTHS = [
@@ -44,15 +48,20 @@ const currentYear = today.getFullYear();
 const currentDay = today.getDate();
 
 type ViewMode = 'weekly' | 'monthly' | 'overall';
+type SortField = 'default' | 'matches' | 'wins' | 'draws' | 'losses' | 'winRate' | 'gf' | 'gc' | 'cs' | 'ht' | 'motm' | 'points';
+type SortDir = 'asc' | 'desc';
 
 const PAGE_SIZE = 20;
 
-export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats = [], playerWeeklyStats = [], compact = false, compactLimit = 8 }: PointsLeaderboardProps) {
+export function PointsLeaderboard({ players, matchEntries, seasons, playerSeasonStats, playerMonthlyStats = [], playerWeeklyStats = [], compact = false, compactLimit = 8, onPlayerClick }: PointsLeaderboardProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<SortField>('default');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const [selectedWeeklySeasonId, setSelectedWeeklySeasonId] = useState<number | null>(null);
   const [selectedWeeklyMonth, setSelectedWeeklyMonth] = useState<number>(currentMonthIndex);
@@ -62,6 +71,17 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
     if (currentDay >= 22) return 4;
     return 1;
   });
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDir === 'desc') setSortDir('asc');
+      else { setSortField('default'); setSortDir('desc'); }
+    } else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+    setPage(1);
+  };
 
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
     const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
@@ -76,12 +96,44 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       return 1;
     };
 
-    // ── Weekly — HYBRID: matchEntries (accurate) + playerWeeklyStats (historical fallback) ──
-    // Problem 1: playerWeeklyStats table may be incomplete for recent data (missing players)
-    // Problem 2: matchEntries only has 500 most-recent rows (old weeks have no entries in memory)
-    // Solution: use matchEntries if available for the period; otherwise fall back to playerWeeklyStats
+    // ── Get last 5 match results for form ────────────────────────────────
+    const getForm = (playerId: string): Array<'win' | 'draw' | 'loss'> => {
+      const entries = matchEntries
+        .filter(e => e.playerId === playerId && e.date)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5);
+      return entries.map(e => e.result as 'win' | 'draw' | 'loss');
+    };
+
+    // ── Weekly — HYBRID ──────────────────────────────────────────────────
+    // Compute prev week for rank shift
+    const prevWeek = selectedWeeklyWeek > 1 ? selectedWeeklyWeek - 1 : null;
+    const prevWeeklyPoints = new Map<string, number>();
+    if (prevWeek !== null) {
+      players.forEach(p => {
+        const stats = playerWeeklyStats.filter(s =>
+          s.playerId === p.id &&
+          s.monthIndex === selectedWeeklyMonth &&
+          s.week === prevWeek &&
+          (selectedWeeklySeasonId !== null ? s.seasonId === selectedWeeklySeasonId : s.year === currentYear)
+        );
+        const pts = calcPoints({
+          wins: stats.reduce((t, s) => t + s.wins, 0),
+          draws: stats.reduce((t, s) => t + s.draws, 0),
+          losses: stats.reduce((t, s) => t + s.losses, 0),
+          goals: stats.reduce((t, s) => t + s.goals, 0),
+          goalsConceded: stats.reduce((t, s) => t + (s.goalsConceded || 0), 0),
+          hattricks: stats.reduce((t, s) => t + (s.hattricks || 0), 0),
+          motmCount: stats.reduce((t, s) => t + (s.motmCount || 0), 0),
+        });
+        prevWeeklyPoints.set(p.id, pts);
+      });
+    }
+    const prevWeeklyRanked = Array.from(prevWeeklyPoints.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([id], i) => ({ id, rank: i + 1 }));
+
     const weeklyList: RankedPlayer[] = players.map(p => {
-      // Step 1: check matchEntries for this period (covers recent weeks accurately)
       const entries = matchEntries.filter(e => {
         if (e.playerId !== p.id) return false;
         if (!e.date) return false;
@@ -96,7 +148,6 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       });
 
       if (entries.length > 0) {
-        // Use live entry data — most accurate source
         const wins   = entries.filter(e => e.result === 'win').length;
         const draws  = entries.filter(e => e.result === 'draw').length;
         const losses = entries.filter(e => e.result === 'loss').length;
@@ -108,10 +159,9 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
         const matches = wins + draws + losses;
         const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
         const points  = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
-        return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
+        return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
       }
 
-      // Step 2: fallback to pre-computed playerWeeklyStats (covers older weeks)
       const stats = playerWeeklyStats.filter(s =>
         s.playerId === p.id &&
         s.monthIndex === selectedWeeklyMonth &&
@@ -129,11 +179,40 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
       const points  = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points);
+      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
+    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points)
+      .map((r, i) => {
+        const prev = prevWeeklyRanked.find(x => x.id === r.player.id);
+        const rankShift = prev ? prev.rank - (i + 1) : null;
+        return { ...r, rankShift };
+      });
 
+    // ── Monthly ───────────────────────────────────────────────────────────
+    const prevMonth = selectedMonthlyMonth > 0 ? selectedMonthlyMonth - 1 : null;
+    const prevMonthlyPoints = new Map<string, number>();
+    if (prevMonth !== null) {
+      players.forEach(p => {
+        const stats = playerMonthlyStats.filter(s =>
+          s.playerId === p.id &&
+          s.monthIndex === prevMonth &&
+          (selectedMonthlySeasonId !== null ? s.seasonId === selectedMonthlySeasonId : s.year === currentYear)
+        );
+        const pts = calcPoints({
+          wins: stats.reduce((t, s) => t + s.wins, 0),
+          draws: stats.reduce((t, s) => t + s.draws, 0),
+          losses: stats.reduce((t, s) => t + s.losses, 0),
+          goals: stats.reduce((t, s) => t + s.goals, 0),
+          goalsConceded: stats.reduce((t, s) => t + (s.goalsConceded || 0), 0),
+          hattricks: stats.reduce((t, s) => t + (s.hattricks || 0), 0),
+          motmCount: stats.reduce((t, s) => t + (s.motmCount || 0), 0),
+        });
+        prevMonthlyPoints.set(p.id, pts);
+      });
+    }
+    const prevMonthlyRanked = Array.from(prevMonthlyPoints.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([id], i) => ({ id, rank: i + 1 }));
 
-    // Monthly from playerMonthlyStats
     const monthlyList: RankedPlayer[] = players.map(p => {
       const stats = playerMonthlyStats.filter(s =>
         s.playerId === p.id &&
@@ -151,10 +230,34 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
       const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points);
+      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
+    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points)
+      .map((r, i) => {
+        const prev = prevMonthlyRanked.find(x => x.id === r.player.id);
+        const rankShift = prev ? prev.rank - (i + 1) : null;
+        return { ...r, rankShift };
+      });
 
-    // Overall from playerSeasonStats
+    // ── Overall ───────────────────────────────────────────────────────────
+    const seasonIds = seasons.map(s => s.id);
+    // Previous season for rank shift
+    let prevSeasonId: number | null = null;
+    if (selectedOverallSeasonId !== null) {
+      const idx = seasonIds.indexOf(selectedOverallSeasonId);
+      prevSeasonId = idx > 0 ? seasonIds[idx - 1] : null;
+    }
+    const prevOverallPoints = new Map<string, number>();
+    if (prevSeasonId !== null) {
+      players.forEach(p => {
+        const stats = playerSeasonStats.filter(s => s.playerId === p.id && s.seasonId === prevSeasonId);
+        const pts = stats.reduce((t, s) => t + s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks, 0);
+        prevOverallPoints.set(p.id, pts);
+      });
+    }
+    const prevOverallRanked = Array.from(prevOverallPoints.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([id], i) => ({ id, rank: i + 1 }));
+
     const overallList: RankedPlayer[] = players.map(p => {
       const stats = playerSeasonStats.filter(s =>
         s.playerId === p.id &&
@@ -171,8 +274,13 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
       const matches = wins + draws + losses;
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
       const points = wins * 10 + draws * 5 - losses * 3 + gf - gc + motm * 4 + ht;
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    }).sort((a, b) => b.points - a.points);
+      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm, form: getForm(p.id), rankShift: null };
+    }).sort((a, b) => b.points - a.points)
+      .map((r, i) => {
+        const prev = prevOverallRanked.find(x => x.id === r.player.id);
+        const rankShift = prevSeasonId !== null && prev ? prev.rank - (i + 1) : null;
+        return { ...r, rankShift };
+      });
 
     const monthlySeasonLabel = selectedMonthlySeasonId
       ? seasons.find(s => s.id === selectedMonthlySeasonId)?.name ?? ''
@@ -199,16 +307,46 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
     viewMode === 'monthly' ? monthlyRanking :
     overallRanking;
 
+  // Apply search filter
+  const searchFiltered = useMemo(() => {
+    if (!searchQuery.trim()) return activeRanking.list;
+    const q = searchQuery.toLowerCase();
+    return activeRanking.list.filter(r => r.player.name.toLowerCase().includes(q));
+  }, [activeRanking.list, searchQuery]);
+
+  // Apply custom sorting (default = points ranking from above)
+  const sortedList = useMemo(() => {
+    if (sortField === 'default') return searchFiltered;
+    return [...searchFiltered].sort((a, b) => {
+      const val = (r: RankedPlayer): number => {
+        switch (sortField) {
+          case 'matches': return r.matches;
+          case 'wins': return r.wins;
+          case 'draws': return r.draws;
+          case 'losses': return r.losses;
+          case 'winRate': return r.winRate;
+          case 'gf': return r.gf;
+          case 'gc': return r.gc;
+          case 'cs': return r.cs;
+          case 'ht': return r.ht;
+          case 'motm': return r.motm;
+          case 'points': return r.points;
+          default: return 0;
+        }
+      };
+      return sortDir === 'desc' ? val(b) - val(a) : val(a) - val(b);
+    });
+  }, [searchFiltered, sortField, sortDir]);
+
   // Reset to page 1 whenever filter changes
-  const totalEntries = activeRanking.list.length;
+  const totalEntries = sortedList.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * PAGE_SIZE;
   const pageEnd   = Math.min(pageStart + PAGE_SIZE, totalEntries);
-  // In compact mode show only the top N rows; otherwise show the current page slice
   const pageList  = compact
-    ? activeRanking.list.slice(0, compactLimit)
-    : activeRanking.list.slice(pageStart, pageEnd);
+    ? sortedList.slice(0, compactLimit)
+    : sortedList.slice(pageStart, pageEnd);
 
   const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
 
@@ -217,7 +355,31 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
     setPage(1);
   };
 
-  const isEmpty = activeRanking.list.length === 0 || activeRanking.list.every(r => r.points === 0 && r.matches === 0);
+  const isEmpty = sortedList.length === 0 || sortedList.every(r => r.points === 0 && r.matches === 0);
+
+  // Sortable column header helper
+  const SortTh = ({ field, label, title, left = false }: { field: SortField; label: string; title: string; left?: boolean }) => {
+    const active = sortField === field;
+    return (
+      <th
+        title={title}
+        onClick={() => handleSort(field)}
+        className={cn(
+          "py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none cursor-pointer hover:text-foreground transition-colors group",
+          left ? 'text-left px-3' : 'text-center px-1'
+        )}
+      >
+        <span className="inline-flex items-center gap-0.5">
+          {label}
+          {active ? (
+            sortDir === 'desc' ? <ChevronDown className="w-3 h-3 text-primary" /> : <ChevronUp className="w-3 h-3 text-primary" />
+          ) : (
+            <ChevronDown className="w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity" />
+          )}
+        </span>
+      </th>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -308,13 +470,26 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
         </span>
       </div>
 
+      {/* Search bar */}
+      <div className="relative w-full max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Search player..."
+          value={searchQuery}
+          onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
+          className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"
+        />
+      </div>
+
       {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: '44px' }} />   {/* # */}
-              <col style={{ width: '160px' }} />  {/* Player */}
+              <col style={{ width: '140px' }} />  {/* Player */}
+              <col style={{ width: '90px' }} />   {/* Form */}
               <col style={{ width: '48px' }} />   {/* M */}
               <col style={{ width: '48px' }} />   {/* W */}
               <col style={{ width: '48px' }} />   {/* D */}
@@ -329,40 +504,26 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
             </colgroup>
             <thead className="sticky top-0 z-20">
               <tr className="bg-muted/60 backdrop-blur border-b border-border">
-                {[
-                  { label: '#',    title: 'Rank' },
-                  { label: 'Player', title: 'Player' },
-                  { label: 'M',    title: 'Matches' },
-                  { label: 'W',    title: 'Wins' },
-                  { label: 'D',    title: 'Draws' },
-                  { label: 'L',    title: 'Losses' },
-                  { label: 'Win%', title: 'Win Rate' },
-                  { label: 'GF',   title: 'Goals For' },
-                  { label: 'GC',   title: 'Goals Conceded' },
-                  { label: 'CS',   title: 'Clean Sheets' },
-                  { label: 'HT',   title: 'Hat-tricks' },
-                  { label: 'MOTM', title: 'Man of the Match' },
-                  { label: 'Pts',  title: 'Points' },
-                ].map((c, idx) => (
-                  <th
-                    key={idx}
-                    title={c.title}
-                    className={cn(
-                      "py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none",
-                      idx === 0 ? 'text-center px-2' :
-                      idx === 1 ? 'text-left px-3' :
-                      'text-center px-1'
-                    )}
-                  >
-                    {c.label}
-                  </th>
-                ))}
+                <th title="Rank" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-2">#</th>
+                <th title="Player" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-left px-3">Player</th>
+                <th title="Recent Form (last 5)" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-1">Form</th>
+                <SortTh field="matches" label="M" title="Matches" />
+                <SortTh field="wins" label="W" title="Wins" />
+                <SortTh field="draws" label="D" title="Draws" />
+                <SortTh field="losses" label="L" title="Losses" />
+                <SortTh field="winRate" label="Win%" title="Win Rate" />
+                <SortTh field="gf" label="GF" title="Goals For" />
+                <SortTh field="gc" label="GC" title="Goals Conceded" />
+                <SortTh field="cs" label="CS" title="Clean Sheets" />
+                <SortTh field="ht" label="HT" title="Hat-tricks" />
+                <SortTh field="motm" label="MOTM" title="Man of the Match" />
+                <SortTh field="points" label="Pts" title="Points" />
               </tr>
             </thead>
             <tbody>
               {isEmpty ? (
                 <tr>
-                  <td colSpan={13} className="py-20 text-center text-muted-foreground">
+                  <td colSpan={14} className="py-20 text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2">
                       <span className="text-4xl">📊</span>
                       <p className="font-medium text-sm">No data for this period</p>
@@ -389,18 +550,35 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
                   return (
                     <tr
                       key={r.player.id}
+                      onClick={() => onPlayerClick?.(r.player.id)}
                       className={cn(
                         "border-b border-border/50 transition-colors group",
-                        rowCls
+                        rowCls,
+                        onPlayerClick && "cursor-pointer"
                       )}
                     >
-                      {/* Rank */}
+                      {/* Rank + shift */}
                       <td className="py-2.5 px-2 text-center">
-                        <div className={cn(
-                          'w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm',
-                          medalCls
-                        )}>
-                          {globalIdx + 1}
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div className={cn(
+                            'w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm',
+                            medalCls
+                          )}>
+                            {globalIdx + 1}
+                          </div>
+                          {r.rankShift !== null && (
+                            <span className={cn(
+                              "flex items-center text-[9px] font-bold leading-none",
+                              r.rankShift > 0 ? "text-emerald-500" :
+                              r.rankShift < 0 ? "text-red-500" :
+                              "text-muted-foreground/50"
+                            )}>
+                              {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> :
+                               r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> :
+                               <Minus className="w-2.5 h-2.5" />}
+                              {r.rankShift !== 0 && Math.abs(r.rankShift)}
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -414,6 +592,29 @@ export function PointsLeaderboard({ players, matchEntries, seasons, playerSeason
                           )}>
                             {r.player.name}
                           </span>
+                        </div>
+                      </td>
+
+                      {/* Form */}
+                      <td className="py-2.5 px-1 text-center">
+                        <div className="flex items-center justify-center gap-0.5">
+                          {r.form.length === 0 ? (
+                            <span className="text-muted-foreground/40 text-[11px]">—</span>
+                          ) : (
+                            r.form.map((result, fi) => (
+                              <span
+                                key={fi}
+                                className={cn(
+                                  "w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black shadow-sm",
+                                  result === 'win' ? "bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30" :
+                                  result === 'draw' ? "bg-amber-500/20 text-amber-500 ring-1 ring-amber-500/30" :
+                                  "bg-red-500/20 text-red-500 ring-1 ring-red-500/30"
+                                )}
+                              >
+                                {result.charAt(0).toUpperCase()}
+                              </span>
+                            ))
+                          )}
                         </div>
                       </td>
 
