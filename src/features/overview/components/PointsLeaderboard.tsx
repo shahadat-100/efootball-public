@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn';
 import {
   ArrowUp, ArrowDown, Minus, ChevronUp, ChevronDown,
   Search, Play, ChevronLeft, ChevronRight,
-  Calculator, RotateCcw, TrendingUp, Eye, EyeOff, Radio,
+  TrendingUp, Eye, EyeOff, Radio,
 } from 'lucide-react';
 
 interface PointsLeaderboardProps {
@@ -68,7 +68,6 @@ export function PointsLeaderboard({
   compact = false, compactLimit = 8, onPlayerClick,
 }: PointsLeaderboardProps) {
 
-  // ── Existing state ────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
@@ -86,25 +85,12 @@ export function PointsLeaderboard({
     return 1;
   });
 
-  // ── Idea 18: inactive toggle ──────────────────────────────────────
+  // Idea 18: inactive toggle
   const [showInactive, setShowInactive] = useState(true);
 
-  // ── Idea 16: replay timeline ──────────────────────────────────────
+  // Idea 16: replay timeline
   const [replayMode, setReplayMode] = useState(false);
   const [replayPeriodIndex, setReplayPeriodIndex] = useState(0);
-
-  // ── Idea 20: what-if simulator ────────────────────────────────────
-  const [simulateMode, setSimulateMode] = useState(false);
-  const [adjustments, setAdjustments] = useState<Map<string, { wins: number; draws: number; losses: number; goals: number }>>(new Map());
-
-  const adjust = (playerId: string, field: 'wins' | 'draws' | 'losses' | 'goals', delta: number) => {
-    setAdjustments(prev => {
-      const next = new Map(prev);
-      const cur = next.get(playerId) ?? { wins: 0, draws: 0, losses: 0, goals: 0 };
-      next.set(playerId, { ...cur, [field]: Math.max(0, cur[field] + delta) });
-      return next;
-    });
-  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -116,7 +102,6 @@ export function PointsLeaderboard({
     setPage(1);
   };
 
-  // ── Core rankings computation ─────────────────────────────────────
   const { weeklyRanking, monthlyRanking, overallRanking, availablePeriods } = useMemo(() => {
     const getWeek = (dateStr: string) => {
       const d = new Date(dateStr).getDate();
@@ -130,7 +115,6 @@ export function PointsLeaderboard({
         .slice(0, 5)
         .map(e => e.result as 'win' | 'draw' | 'loss');
 
-    // Available periods for replay (idea 16)
     const periodSet = new Set(playerMonthlyStats.map(s => `${s.year}-${s.monthIndex}`));
     const availablePeriods: ReplayPeriod[] = [...periodSet]
       .map(key => {
@@ -139,17 +123,12 @@ export function PointsLeaderboard({
       })
       .sort((a, b) => a.year !== b.year ? a.year - b.year : a.monthIndex - b.monthIndex);
 
-    // Recent activity set for overall "inactive" (idea 18)
     const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentIds = new Set(matchEntries.filter(e => e.date && new Date(e.date) >= thirtyDaysAgo).map(e => e.playerId));
 
-    // ── Helper: build ranked list with inactive players at bottom ──
-    const buildRanked = (
-      rawList: (RankedPlayer)[],
-      prevRanked: { id: string; rank: number }[]
-    ): RankedPlayer[] => {
-      const active = rawList.filter(r => !r.isInactive).sort((a, b) => b.points - a.points);
-      const inactive = rawList.filter(r => r.isInactive);
+    const buildRanked = (raw: RankedPlayer[], prevRanked: { id: string; rank: number }[]): RankedPlayer[] => {
+      const active = raw.filter(r => !r.isInactive).sort((a, b) => b.points - a.points);
+      const inactive = raw.filter(r => r.isInactive);
       return [
         ...active.map((r, i) => {
           const prev = prevRanked.find(x => x.id === r.player.id);
@@ -159,7 +138,7 @@ export function PointsLeaderboard({
       ];
     };
 
-    // ── Weekly ────────────────────────────────────────────────────
+    // ── Weekly ──────────────────────────────────────────────────────
     const prevWeek = selectedWeeklyWeek > 1 ? selectedWeeklyWeek - 1 : null;
     const prevWeeklyMap = new Map<string, number>();
     if (prevWeek !== null) {
@@ -171,7 +150,7 @@ export function PointsLeaderboard({
         prevWeeklyMap.set(p.id, calcPts({ wins: s.reduce((t,x)=>t+x.wins,0), draws: s.reduce((t,x)=>t+x.draws,0), losses: s.reduce((t,x)=>t+x.losses,0), goals: s.reduce((t,x)=>t+x.goals,0), goalsConceded: s.reduce((t,x)=>t+(x.goalsConceded||0),0), hattricks: s.reduce((t,x)=>t+(x.hattricks||0),0), motmCount: s.reduce((t,x)=>t+(x.motmCount||0),0) }));
       });
     }
-    const prevWeeklyRanked = [...prevWeeklyMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id, rank:i+1}));
+    const prevWeeklyRanked = [...prevWeeklyMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id,rank:i+1}));
 
     const weeklyRaw: RankedPlayer[] = players.map(p => {
       const entries = matchEntries.filter(e => {
@@ -193,11 +172,10 @@ export function PointsLeaderboard({
         ht=s.reduce((t,x)=>t+(x.hattricks||0),0); motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
       }
       const matches=wins+draws+losses, winRate=matches>0?Math.round((wins/matches)*100):0;
-      const points=calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm});
-      return {player:p,points,matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
+      return {player:p, points:calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm}), matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm, form:getForm(p.id), rankShift:null, isInactive:matches===0};
     });
 
-    // ── Monthly ───────────────────────────────────────────────────
+    // ── Monthly ─────────────────────────────────────────────────────
     const prevMonth = selectedMonthlyMonth > 0 ? selectedMonthlyMonth - 1 : null;
     const prevMonthlyMap = new Map<string, number>();
     if (prevMonth !== null) {
@@ -217,7 +195,7 @@ export function PointsLeaderboard({
       return {player:p,points:calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm}),matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
 
-    // ── Overall ───────────────────────────────────────────────────
+    // ── Overall ─────────────────────────────────────────────────────
     const seasonIds = seasons.map(s => s.id);
     let prevSeasonId: number | null = null;
     if (selectedOverallSeasonId !== null) {
@@ -254,17 +232,15 @@ export function PointsLeaderboard({
     };
   }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedWeeklySeasonId, selectedWeeklyMonth, selectedWeeklyWeek, selectedOverallSeasonId]);
 
-  // ── Idea 16: Replay ranking ───────────────────────────────────────
+  // Idea 16: Replay ranking
   const replayRanking = useMemo(() => {
     if (!replayMode || availablePeriods.length === 0) return null;
     const period = availablePeriods[Math.min(replayPeriodIndex, availablePeriods.length - 1)];
     if (!period) return null;
-
     const getForm = (pid: string): Array<'win' | 'draw' | 'loss'> =>
       [...matchEntries].filter(e=>e.playerId===pid&&e.date)
         .sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime())
         .slice(0,5).map(e=>e.result as 'win'|'draw'|'loss');
-
     const list: RankedPlayer[] = players.map(p => {
       const s = playerMonthlyStats.filter(x => x.playerId===p.id && x.year===period.year && x.monthIndex===period.monthIndex);
       const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
@@ -274,42 +250,26 @@ export function PointsLeaderboard({
       return {player:p,points:calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm}),matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
     const active = list.filter(r=>!r.isInactive).sort((a,b)=>b.points-a.points);
-    const inactive = list.filter(r=>r.isInactive);
     const isLive = period.year === currentYear && period.monthIndex === currentMonthIndex;
-    return { label: `${period.label}${isLive?' · 🔴 LIVE':' · Replay'}`, list: [...active,...inactive], isLive };
+    return { label: `${period.label}${isLive?' · 🔴 LIVE':' · Replay'}`, list: [...active,...list.filter(r=>r.isInactive)], isLive };
   }, [replayMode, replayPeriodIndex, availablePeriods, players, playerMonthlyStats, matchEntries]);
 
-  // ── Active ranking (with replay override) ─────────────────────────
-  const baseRanking = (replayMode && replayRanking)
-    ? replayRanking
+  const baseRanking = (replayMode && replayRanking) ? replayRanking
     : viewMode === 'weekly' ? weeklyRanking
     : viewMode === 'monthly' ? monthlyRanking
     : overallRanking;
 
-  // ── Idea 20: Apply what-if adjustments ───────────────────────────
-  const adjustedList = useMemo(() => {
-    if (!simulateMode || adjustments.size === 0) return baseRanking.list;
-    const mapped = baseRanking.list.map(r => {
-      const adj = adjustments.get(r.player.id);
-      if (!adj || (!adj.wins && !adj.draws && !adj.losses && !adj.goals)) return r;
-      const extraPts = adj.wins*10 + adj.draws*5 - adj.losses*3 + adj.goals;
-      return { ...r, points: r.points+extraPts, wins: r.wins+adj.wins, draws: r.draws+adj.draws, losses: r.losses+adj.losses, gf: r.gf+adj.goals, matches: r.matches+adj.wins+adj.draws+adj.losses };
-    });
-    const active = mapped.filter(r=>!r.isInactive).sort((a,b)=>b.points-a.points);
-    return [...active, ...mapped.filter(r=>r.isInactive)];
-  }, [baseRanking.list, adjustments, simulateMode]);
+  // Idea 18: Filter inactive
+  const visibleList = showInactive ? baseRanking.list : baseRanking.list.filter(r => !r.isInactive);
 
-  // ── Idea 18: Filter inactive ──────────────────────────────────────
-  const visibleList = showInactive ? adjustedList : adjustedList.filter(r => !r.isInactive);
-
-  // ── Idea 17: Most Improved ────────────────────────────────────────
+  // Idea 17: Most Improved
   const mostImproved = useMemo(() => {
     const candidates = baseRanking.list.filter(r => !r.isInactive && r.rankShift !== null && r.rankShift >= 2);
     if (!candidates.length) return null;
     return candidates.reduce((best, r) => r.rankShift! > best.rankShift! ? r : best);
   }, [baseRanking.list]);
 
-  // ── Search & sort ─────────────────────────────────────────────────
+  // Search & sort
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return visibleList;
     const q = searchQuery.toLowerCase();
@@ -331,7 +291,6 @@ export function PointsLeaderboard({
     return [...active.sort((a,b)=>sortDir==='desc'?valOf(b)-valOf(a):valOf(a)-valOf(b)), ...inactive];
   }, [searchFiltered, sortField, sortDir]);
 
-  // ── Pagination ────────────────────────────────────────────────────
   const totalEntries = sortedList.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -339,12 +298,11 @@ export function PointsLeaderboard({
   const pageEnd = Math.min(pageStart + PAGE_SIZE, totalEntries);
   const pageList = compact ? sortedList.slice(0, compactLimit) : sortedList.slice(pageStart, pageEnd);
   const activeListForRank = sortedList.filter(r => !r.isInactive);
+  const allInactiveCount = baseRanking.list.filter(r => r.isInactive).length;
   const inactiveCount = sortedList.filter(r => r.isInactive).length;
-  const allInactiveCount = adjustedList.filter(r => r.isInactive).length;
   const isEmpty = activeListForRank.length === 0;
 
   const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
-
   const handleViewMode = (mode: ViewMode) => { setViewMode(mode); setPage(1); setReplayMode(false); };
 
   const SortTh = ({ field, label, title }: { field: SortField; label: string; title: string }) => {
@@ -361,12 +319,10 @@ export function PointsLeaderboard({
     );
   };
 
-  const totalCols = simulateMode ? 15 : 14;
-
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── Controls Row ── */}
+      {/* Controls Row */}
       <div className="flex flex-wrap items-center gap-3">
         {!replayMode && (
           <div className="flex items-center gap-1 bg-muted/40 border border-border p-1 rounded-xl">
@@ -435,23 +391,13 @@ export function PointsLeaderboard({
             </button>
           )}
 
-          {/* Idea 20: simulate button */}
-          {!compact && (
-            <button onClick={() => setSimulateMode(v=>!v)}
-              className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all",
-                simulateMode?"bg-amber-500/20 border-amber-500/40 text-amber-500":"bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60")}>
-              <Calculator className="w-3.5 h-3.5"/>
-              {simulateMode?'Exit Simulate':'🧮 Simulate'}
-            </button>
-          )}
-
           <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
             {baseRanking.label}
           </span>
         </div>
       </div>
 
-      {/* ── Idea 16: Replay Timeline Slider ── */}
+      {/* Idea 16: Replay Timeline Slider */}
       {replayMode && availablePeriods.length > 0 && (
         <div className="bg-violet-500/5 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -490,26 +436,7 @@ export function PointsLeaderboard({
         </div>
       )}
 
-      {/* ── Idea 20: Simulate Banner ── */}
-      {simulateMode && (
-        <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <Calculator className="w-4 h-4 text-amber-500 shrink-0"/>
-            <div>
-              <p className="text-xs font-black text-amber-500 uppercase tracking-wider">What-If Simulator Active</p>
-              <p className="text-[11px] text-muted-foreground">Click +W / +D / +L / +G on any player. Rankings update live.</p>
-            </div>
-          </div>
-          {adjustments.size > 0 && (
-            <button onClick={() => setAdjustments(new Map())}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-all">
-              <RotateCcw className="w-3.5 h-3.5"/> Reset All
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── Idea 17: Most Improved Banner ── */}
+      {/* Idea 17: Most Improved Banner */}
       {mostImproved && !replayMode && !compact && (
         <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-4 flex-wrap">
           <div className="absolute top-0 right-0 w-40 h-full bg-emerald-500/5 blur-2xl pointer-events-none"/>
@@ -535,7 +462,7 @@ export function PointsLeaderboard({
         </div>
       )}
 
-      {/* ── Search Bar ── */}
+      {/* Search Bar */}
       <div className="relative w-full max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"/>
         <input type="text" placeholder="Search player..." value={searchQuery}
@@ -543,7 +470,7 @@ export function PointsLeaderboard({
           className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"/>
       </div>
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
@@ -551,7 +478,6 @@ export function PointsLeaderboard({
               <col style={{ width: '44px' }}/>
               <col style={{ width: '140px' }}/>
               <col style={{ width: '90px' }}/>
-              {simulateMode && <col style={{ width: '150px' }}/>}
               <col style={{ width: '48px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/>
               <col style={{ width: '60px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/>
               <col style={{ width: '64px' }}/><col style={{ width: '64px' }}/><col style={{ width: '64px' }}/>
@@ -561,7 +487,6 @@ export function PointsLeaderboard({
                 <th title="Rank" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-2">#</th>
                 <th title="Player" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-left px-3">Player</th>
                 <th title="Recent Form" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-1">Form</th>
-                {simulateMode && <th className="py-3 text-[11px] font-bold uppercase tracking-wider text-amber-500 whitespace-nowrap select-none text-center px-1">Simulate</th>}
                 <SortTh field="matches" label="M" title="Matches"/>
                 <SortTh field="wins" label="W" title="Wins"/>
                 <SortTh field="draws" label="D" title="Draws"/>
@@ -577,23 +502,16 @@ export function PointsLeaderboard({
             </thead>
             <tbody>
               {isEmpty ? (
-                <tr>
-                  <td colSpan={totalCols} className="py-20 text-center text-muted-foreground">
-                    <div className="flex flex-col items-center gap-2"><span className="text-4xl">📊</span><p className="font-medium text-sm">No data for this period</p></div>
-                  </td>
-                </tr>
+                <tr><td colSpan={14} className="py-20 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2"><span className="text-4xl">📊</span><p className="font-medium text-sm">No data for this period</p></div>
+                </td></tr>
               ) : pageList.map(r => {
                 const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
                 const isTop3 = activeRank >= 0 && activeRank < 3;
-                const adj = adjustments.get(r.player.id) ?? { wins:0, draws:0, losses:0, goals:0 };
-                const hasAdj = simulateMode && (adj.wins>0||adj.draws>0||adj.losses>0||adj.goals>0);
-
                 const medalCls = r.isInactive ? 'bg-muted/30 text-muted-foreground/30 text-[10px]'
                   : activeRank===0 ? 'medal-gold' : activeRank===1 ? 'medal-silver' : activeRank===2 ? 'medal-bronze'
                   : 'bg-muted/60 text-muted-foreground/70 text-[10px]';
-
                 const rowCls = r.isInactive ? 'opacity-40 bg-muted/10'
-                  : hasAdj ? 'bg-amber-500/5 ring-1 ring-inset ring-amber-500/20'
                   : activeRank===0 ? 'bg-amber-500/5 hover:bg-amber-500/10'
                   : activeRank===1 ? 'bg-slate-400/5 hover:bg-slate-400/10'
                   : activeRank===2 ? 'bg-orange-700/5 hover:bg-orange-700/10'
@@ -601,16 +519,13 @@ export function PointsLeaderboard({
 
                 return (
                   <tr key={r.player.id}
-                    onClick={() => !simulateMode && !r.isInactive && onPlayerClick?.(r.player.id)}
-                    className={cn("border-b border-border/50 transition-colors group", rowCls, !simulateMode && !r.isInactive && onPlayerClick && "cursor-pointer")}>
+                    onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
+                    className={cn("border-b border-border/50 transition-colors group", rowCls, !r.isInactive && onPlayerClick && "cursor-pointer")}>
 
-                    {/* Rank + shift */}
                     <td className="py-2.5 px-2 text-center">
                       {r.isInactive ? <span className="text-[10px] text-muted-foreground/30 font-bold">—</span> : (
                         <div className="flex flex-col items-center gap-0.5">
-                          <div className={cn('w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm', medalCls)}>
-                            {activeRank+1}
-                          </div>
+                          <div className={cn('w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm', medalCls)}>{activeRank+1}</div>
                           {r.rankShift !== null && (
                             <span className={cn("flex items-center text-[9px] font-bold leading-none",
                               r.rankShift>0?"text-emerald-500":r.rankShift<0?"text-red-500":"text-muted-foreground/50")}>
@@ -622,23 +537,19 @@ export function PointsLeaderboard({
                       )}
                     </td>
 
-                    {/* Player */}
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <Avatar name={r.player.name} size={28} src={(r.player as any).profileImageUrl}/>
                         <div className="min-w-0">
                           <span className={cn("font-semibold text-foreground truncate text-[13px] block", isTop3&&"font-bold")}>{r.player.name}</span>
                           {r.isInactive && <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/40 bg-muted/30 px-1.5 py-0.5 rounded">Inactive</span>}
-                          {hasAdj && <span className="text-[9px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded">✏️ Simulated</span>}
                         </div>
                       </div>
                     </td>
 
-                    {/* Form */}
                     <td className="py-2.5 px-1 text-center">
                       <div className="flex items-center justify-center gap-0.5">
-                        {r.form.length===0
-                          ? <span className="text-muted-foreground/40 text-[11px]">—</span>
+                        {r.form.length===0 ? <span className="text-muted-foreground/40 text-[11px]">—</span>
                           : r.form.map((res,fi)=>(
                             <span key={fi} className={cn("w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black shadow-sm",
                               res==='win'?"bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30":
@@ -650,34 +561,6 @@ export function PointsLeaderboard({
                       </div>
                     </td>
 
-                    {/* Idea 20: Simulate Controls */}
-                    {simulateMode && (
-                      <td className="py-1.5 px-1 text-center" onClick={e=>e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-1 flex-wrap">
-                          {([
-                            {label:'+W',field:'wins' as const,cls:'text-emerald-600 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20'},
-                            {label:'+D',field:'draws' as const,cls:'text-amber-600 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20'},
-                            {label:'+L',field:'losses' as const,cls:'text-red-600 border-red-500/30 bg-red-500/10 hover:bg-red-500/20'},
-                            {label:'+G',field:'goals' as const,cls:'text-violet-600 border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20'},
-                          ]).map(({label,field,cls})=>(
-                            <div key={field} className="flex flex-col items-center gap-0.5">
-                              <button onClick={()=>adjust(r.player.id,field,1)}
-                                className={cn("text-[9px] font-black px-1.5 py-0.5 rounded border transition-all active:scale-95",cls)}>
-                                {label}
-                              </button>
-                              {adj[field]>0&&(
-                                <span onClick={()=>adjust(r.player.id,field,-1)}
-                                  className="text-[8px] text-muted-foreground/60 cursor-pointer hover:text-red-500 transition-colors leading-none">
-                                  {adj[field]}✕
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                    )}
-
-                    {/* Stats cells */}
                     <td className="py-2.5 px-1 text-center text-muted-foreground font-medium text-[13px]">{r.matches}</td>
                     <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]",r.wins>0?"text-emerald-500":"text-muted-foreground/50")}>{r.wins}</span></td>
                     <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]",r.draws>0?"text-amber-500":"text-muted-foreground/50")}>{r.draws}</span></td>
@@ -716,7 +599,7 @@ export function PointsLeaderboard({
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {!isEmpty && !compact && (
         <div className="flex items-center justify-between px-1 flex-wrap gap-2">
           <p className="text-xs text-muted-foreground">
@@ -730,9 +613,7 @@ export function PointsLeaderboard({
                 safePage<=1?"border-border/50 text-muted-foreground/40 cursor-not-allowed":"border-border bg-card hover:bg-muted/50 text-foreground active:scale-95")}>
               ← Previous
             </button>
-            <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 min-w-[80px] text-center">
-              Page {safePage}/{totalPages}
-            </span>
+            <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 min-w-[80px] text-center">Page {safePage}/{totalPages}</span>
             <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={safePage>=totalPages}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all",
                 safePage>=totalPages?"border-border/50 text-muted-foreground/40 cursor-not-allowed":"border-border bg-card hover:bg-muted/50 text-foreground active:scale-95")}>
