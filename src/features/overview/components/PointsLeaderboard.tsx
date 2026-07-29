@@ -240,8 +240,8 @@ export function PointsLeaderboard({
     const list: RankedPlayer[] = players.map(p => {
       const s = playerMonthlyStats.filter(x => x.playerId===p.id && x.year===period.year && x.monthIndex===period.monthIndex);
       const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
-      const gf=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0),cs=s.reduce((t,x)=>t+(x.cleansheets||0),0);
-      const ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
+      const gf=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
+      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
       const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
       return {player:p,points:calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm}),matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
@@ -461,10 +461,10 @@ export function PointsLeaderboard({
           className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"/>
       </div>
 
-      {/* ── MOBILE CARDS VIEW (< md) ────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 md:hidden">
+      {/* ── PREMIUM MOBILE CARDS VIEW (< md) ────────────────────────────────── */}
+      <div className="flex flex-col gap-3.5 md:hidden">
         {isEmpty ? (
-          <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground">
+          <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground shadow-sm">
             <span className="text-4xl block mb-2">📊</span>
             <p className="font-medium text-sm">No data for this period</p>
           </div>
@@ -472,90 +472,131 @@ export function PointsLeaderboard({
           pageList.map(r => {
             const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
             const isTop3 = activeRank >= 0 && activeRank < 3;
-            const medalCls = r.isInactive ? 'bg-muted/30 text-muted-foreground/40'
-              : activeRank === 0 ? 'medal-gold' : activeRank === 1 ? 'medal-silver' : activeRank === 2 ? 'medal-bronze'
-              : 'bg-muted/70 text-muted-foreground';
+
+            // Medal / Rank styling
+            const medalBadge = activeRank === 0 ? { bg: 'from-amber-400 to-amber-600 text-zinc-950 shadow-amber-500/30', border: 'border-amber-400/50', ring: 'ring-amber-500/30', glow: 'shadow-amber-500/10' }
+              : activeRank === 1 ? { bg: 'from-slate-300 to-slate-500 text-zinc-950 shadow-slate-400/30', border: 'border-slate-300/50', ring: 'ring-slate-400/30', glow: '' }
+              : activeRank === 2 ? { bg: 'from-amber-600 to-amber-800 text-amber-100 shadow-amber-700/30', border: 'border-amber-600/50', ring: 'ring-amber-700/30', glow: '' }
+              : { bg: 'bg-muted/80 text-muted-foreground', border: 'border-border/60', ring: '', glow: '' };
 
             return (
               <div
                 key={r.player.id}
                 onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
                 className={cn(
-                  "bg-card border border-border/70 rounded-2xl p-4 flex flex-col gap-3 shadow-xs transition-all active:scale-[0.99]",
-                  r.isInactive && "opacity-50 bg-muted/10",
+                  "relative overflow-hidden rounded-2xl border transition-all duration-300 active:scale-[0.98]",
+                  isTop3
+                    ? "bg-gradient-to-r from-card via-card to-card/90 border-amber-500/30 shadow-lg"
+                    : "bg-card/90 border-border/80 shadow-sm hover:border-border",
+                  r.isInactive && "opacity-45 bg-muted/10 border-border/40",
                   !r.isInactive && onPlayerClick && "cursor-pointer"
                 )}
               >
-                {/* Header: Rank + Avatar + Name + Points */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex flex-col items-center gap-0.5 shrink-0">
-                      <div className={cn("w-7 h-7 flex items-center justify-center rounded-full text-xs font-black shadow-xs", medalCls)}>
-                        {activeRank >= 0 ? activeRank + 1 : '—'}
-                      </div>
-                      {r.rankShift !== null && (
-                        <span className={cn("flex items-center text-[9px] font-bold",
-                          r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
-                          {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> : <Minus className="w-2.5 h-2.5" />}
-                          {r.rankShift !== 0 && Math.abs(r.rankShift)}
-                        </span>
-                      )}
-                    </div>
+                {/* Subtle top rank accent border */}
+                {isTop3 && (
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                )}
 
-                    <Avatar name={r.player.name} size={36} src={(r.player as any).profileImageUrl} />
-                    <div className="min-w-0">
-                      <h4 className={cn("font-bold text-foreground truncate text-sm", isTop3 && "text-amber-500")}>
-                        {r.player.name}
-                      </h4>
-                      {r.isInactive ? (
-                        <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/50 bg-muted/40 px-1.5 py-0.5 rounded">Inactive</span>
-                      ) : (
-                        <div className="flex items-center gap-1 mt-0.5">
-                          {r.form.map((res, fi) => (
-                            <span key={fi} className={cn("w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-black",
-                              res === 'win' ? "bg-emerald-500/20 text-emerald-500" :
-                              res === 'draw' ? "bg-amber-500/20 text-amber-500" :
-                              "bg-red-500/20 text-red-500")}>
-                              {res.charAt(0).toUpperCase()}
-                            </span>
-                          ))}
+                <div className="p-4 flex flex-col gap-3">
+                  {/* Row 1: Rank + Avatar + Player Name + Points Pill */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Rank Badge */}
+                      <div className="flex flex-col items-center gap-0.5 shrink-0">
+                        <div className={cn(
+                          "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-md border bg-gradient-to-br",
+                          medalBadge.bg, medalBadge.border
+                        )}>
+                          {activeRank >= 0 ? `#${activeRank + 1}` : '—'}
                         </div>
-                      )}
+                        {r.rankShift !== null && (
+                          <span className={cn("flex items-center text-[9px] font-bold mt-0.5",
+                            r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
+                            {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> : <Minus className="w-2.5 h-2.5" />}
+                            {r.rankShift !== 0 && Math.abs(r.rankShift)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Avatar */}
+                      <div className={cn("rounded-full p-0.5 border shrink-0", isTop3 ? "border-amber-500/40 shadow-sm" : "border-border/60")}>
+                        <Avatar name={r.player.name} size={38} src={(r.player as any).profileImageUrl} />
+                      </div>
+
+                      {/* Player Name + Form */}
+                      <div className="min-w-0">
+                        <h4 className={cn("font-extrabold text-foreground truncate text-[15px] leading-snug", isTop3 && "text-amber-400 font-black")}>
+                          {r.player.name}
+                        </h4>
+                        {r.isInactive ? (
+                          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/50 bg-muted/40 px-1.5 py-0.5 rounded-md inline-block mt-0.5">
+                            Inactive
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-1 mt-1">
+                            {r.form.length === 0 ? (
+                              <span className="text-[10px] text-muted-foreground/40 font-medium">No recent form</span>
+                            ) : (
+                              r.form.map((res, fi) => (
+                                <span
+                                  key={fi}
+                                  className={cn(
+                                    "w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7.5px] font-black shadow-2xs border",
+                                    res === 'win' ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                                    res === 'draw' ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
+                                    "bg-red-500/20 text-red-400 border-red-500/30"
+                                  )}
+                                >
+                                  {res.charAt(0).toUpperCase()}
+                                </span>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Points Pill (Hero Score) */}
+                    <div className="shrink-0 text-right">
+                      <div className={cn(
+                        "px-3 py-1.5 rounded-xl border shadow-sm flex flex-col items-center justify-center min-w-[64px]",
+                        r.points > 0 ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" :
+                        r.points < 0 ? "bg-red-500/15 text-red-500 border-red-500/30" :
+                        "bg-muted/50 text-muted-foreground border-border"
+                      )}>
+                        <span className="font-black text-base leading-none">
+                          {r.points > 0 ? `+${r.points}` : r.points}
+                        </span>
+                        <span className="text-[9px] font-extrabold uppercase tracking-widest opacity-80 mt-0.5">PTS</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Points Pill */}
-                  <div className="shrink-0 text-right">
-                    <span className={cn(
-                      "font-black text-sm px-2.5 py-1 rounded-xl border shadow-xs inline-block",
-                      r.points > 0 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
-                      r.points < 0 ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                      "bg-muted text-muted-foreground border-border"
-                    )}>
-                      {r.points > 0 ? `+${r.points}` : r.points} <span className="text-[10px] font-medium opacity-70">pts</span>
-                    </span>
-                  </div>
-                </div>
+                  {/* Row 2: Sleek Metric Chips Grid */}
+                  <div className="grid grid-cols-4 gap-1.5 pt-2.5 border-t border-border/50">
+                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
+                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">W-D-L</span>
+                      <span className="font-bold text-foreground text-[11px] mt-0.5">{r.wins}-{r.draws}-{r.losses}</span>
+                    </div>
 
-                {/* Sub Stats Grid */}
-                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border/40 text-center text-xs">
-                  <div className="bg-muted/30 p-1.5 rounded-lg">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">W-D-L</span>
-                    <span className="font-bold text-foreground text-xs">{r.wins}-{r.draws}-{r.losses}</span>
-                  </div>
-                  <div className="bg-muted/30 p-1.5 rounded-lg">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">Win %</span>
-                    <span className={cn("font-bold text-xs", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
-                      {r.matches > 0 ? `${r.winRate}%` : '—'}
-                    </span>
-                  </div>
-                  <div className="bg-muted/30 p-1.5 rounded-lg">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">GF / GC</span>
-                    <span className="font-bold text-foreground text-xs">{r.gf} / {r.gc}</span>
-                  </div>
-                  <div className="bg-muted/30 p-1.5 rounded-lg">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">MOTM / CS</span>
-                    <span className="font-bold text-amber-500 text-xs">👑{r.motm} <span className="text-cyan-500 font-normal">🛡️{r.cs}</span></span>
+                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
+                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">WIN %</span>
+                      <span className={cn("font-bold text-[11px] mt-0.5", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
+                        {r.matches > 0 ? `${r.winRate}%` : '—'}
+                      </span>
+                    </div>
+
+                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
+                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">GF/GC</span>
+                      <span className="font-bold text-foreground text-[11px] mt-0.5">{r.gf}/{r.gc}</span>
+                    </div>
+
+                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
+                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">MOTM/CS</span>
+                      <span className="font-bold text-[11px] mt-0.5 text-amber-500 flex items-center justify-center gap-1">
+                        👑{r.motm} <span className="text-cyan-500 font-semibold">🛡️{r.cs}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
