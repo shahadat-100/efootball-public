@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn';
 import {
   ArrowUp, ArrowDown, Minus, ChevronUp, ChevronDown,
   Search, Play, ChevronLeft, ChevronRight,
-  TrendingUp, Eye, EyeOff, Radio, Trophy, Award, Shield, Crown
+  TrendingUp, Eye, EyeOff, Radio, Crown
 } from 'lucide-react';
 
 interface PointsLeaderboardProps {

@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn';
 import {
   ArrowUp, ArrowDown, Minus, ChevronUp, ChevronDown,
   Search, Play, ChevronLeft, ChevronRight,
-  TrendingUp, Eye, EyeOff, Radio,
+  TrendingUp, Eye, EyeOff, Radio, Crown
 } from 'lucide-react';
 
 interface GoalsLeaderboardProps {
@@ -446,8 +446,8 @@ export function GoalsLeaderboard({
           className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"/>
       </div>
 
-      {/* ── PREMIUM MOBILE CARDS VIEW (< md) ────────────────────────────────── */}
-      <div className="flex flex-col gap-3.5 md:hidden">
+      {/* ── METICULOUS MOBILE CARDS (< md) ────────────────────────────────── */}
+      <div className="flex flex-col gap-3 md:hidden">
         {isEmpty ? (
           <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground shadow-sm">
             <span className="text-4xl block mb-2">⚽</span>
@@ -458,128 +458,96 @@ export function GoalsLeaderboard({
             const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
             const isTop3 = activeRank >= 0 && activeRank < 3;
 
-            // Medal / Rank styling
-            const medalBadge = activeRank === 0 ? { bg: 'from-amber-400 to-amber-600 text-zinc-950 shadow-amber-500/30', border: 'border-amber-400/50' }
-              : activeRank === 1 ? { bg: 'from-slate-300 to-slate-500 text-zinc-950 shadow-slate-400/30', border: 'border-slate-300/50' }
-              : activeRank === 2 ? { bg: 'from-amber-600 to-amber-800 text-amber-100 shadow-amber-700/30', border: 'border-amber-600/50' }
-              : { bg: 'bg-muted/80 text-muted-foreground', border: 'border-border/60' };
-
             return (
               <div
                 key={r.player.id}
                 onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
                 className={cn(
-                  "relative overflow-hidden rounded-2xl border transition-all duration-300 active:scale-[0.98]",
-                  isTop3
-                    ? "bg-gradient-to-r from-card via-card to-card/90 border-red-500/30 shadow-lg"
-                    : "bg-card/90 border-border/80 shadow-sm hover:border-border",
-                  r.isInactive && "opacity-45 bg-muted/10 border-border/40",
+                  "relative rounded-2xl border p-4 transition-all duration-200 active:scale-[0.98]",
+                  activeRank === 0 ? "bg-gradient-to-r from-red-500/10 via-card to-card border-red-500/40 shadow-md" :
+                  activeRank === 1 ? "bg-gradient-to-r from-slate-400/10 via-card to-card border-slate-400/40 shadow-sm" :
+                  activeRank === 2 ? "bg-gradient-to-r from-amber-700/10 via-card to-card border-amber-700/40 shadow-sm" :
+                  "bg-card/90 border-border/80 shadow-xs",
+                  r.isInactive && "opacity-40 bg-muted/10 border-border/30",
                   !r.isInactive && onPlayerClick && "cursor-pointer"
                 )}
               >
-                {/* Subtle top accent border for top 3 */}
-                {isTop3 && (
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent" />
-                )}
-
-                <div className="p-4 flex flex-col gap-3">
-                  {/* Row 1: Rank + Avatar + Player Name + Goals Pill */}
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* Rank Badge */}
-                      <div className="flex flex-col items-center gap-0.5 shrink-0">
-                        <div className={cn(
-                          "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-md border bg-gradient-to-br",
-                          medalBadge.bg, medalBadge.border
-                        )}>
-                          {activeRank >= 0 ? `#${activeRank + 1}` : '—'}
-                        </div>
-                        {r.rankShift !== null && (
-                          <span className={cn("flex items-center text-[9px] font-bold mt-0.5",
-                            r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
-                            {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> : <Minus className="w-2.5 h-2.5" />}
-                            {r.rankShift !== 0 && Math.abs(r.rankShift)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Avatar */}
-                      <div className={cn("rounded-full p-0.5 border shrink-0", isTop3 ? "border-red-500/40 shadow-sm" : "border-border/60")}>
-                        <Avatar name={r.player.name} size={38} src={(r.player as any).profileImageUrl} />
-                      </div>
-
-                      {/* Player Name + Form */}
-                      <div className="min-w-0">
-                        <h4 className={cn("font-extrabold text-foreground truncate text-[15px] leading-snug", isTop3 && "text-red-400 font-black")}>
-                          {r.player.name}
-                        </h4>
-                        {r.isInactive ? (
-                          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/50 bg-muted/40 px-1.5 py-0.5 rounded-md inline-block mt-0.5">
-                            Inactive
-                          </span>
-                        ) : (
-                          <div className="flex items-center gap-1 mt-1">
-                            {r.form.length === 0 ? (
-                              <span className="text-[10px] text-muted-foreground/40 font-medium">No recent form</span>
-                            ) : (
-                              r.form.map((res, fi) => (
-                                <span
-                                  key={fi}
-                                  className={cn(
-                                    "w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7.5px] font-black shadow-2xs border",
-                                    res === 'win' ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                                    res === 'draw' ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                                    "bg-red-500/20 text-red-400 border-red-500/30"
-                                  )}
-                                >
-                                  {res.charAt(0).toUpperCase()}
-                                </span>
-                              ))
-                            )}
-                          </div>
-                        )}
-                      </div>
+                {/* Main Card Header */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {/* Rank Badge */}
+                    <div className="flex flex-col items-center justify-center shrink-0 w-9 h-9 rounded-xl bg-background/80 border border-border/60 shadow-xs">
+                      <span className={cn(
+                        "font-black text-xs leading-none",
+                        activeRank === 0 ? "text-red-500 text-sm" :
+                        activeRank === 1 ? "text-slate-400 text-sm" :
+                        activeRank === 2 ? "text-amber-700 text-sm" : "text-muted-foreground"
+                      )}>
+                        #{activeRank >= 0 ? activeRank + 1 : '—'}
+                      </span>
+                      {r.rankShift !== null && (
+                        <span className={cn("flex items-center text-[8px] font-bold mt-0.5",
+                          r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
+                          {r.rankShift > 0 ? <ArrowUp className="w-2 h-2" /> : r.rankShift < 0 ? <ArrowDown className="w-2 h-2" /> : <Minus className="w-2 h-2" />}
+                          {r.rankShift !== 0 && Math.abs(r.rankShift)}
+                        </span>
+                      )}
                     </div>
 
-                    {/* Goals Pill (Hero Score) */}
-                    <div className="shrink-0 text-right">
-                      <div className={cn(
-                        "px-3 py-1.5 rounded-xl border shadow-sm flex flex-col items-center justify-center min-w-[64px]",
-                        r.goals > 0 ? "bg-red-500/15 text-red-500 border-red-500/30" : "bg-muted/50 text-muted-foreground border-border"
-                      )}>
-                        <span className="font-black text-base leading-none">
-                          ⚽ {r.goals}
-                        </span>
-                        <span className="text-[9px] font-extrabold uppercase tracking-widest opacity-80 mt-0.5">GOALS</span>
-                      </div>
+                    <Avatar name={r.player.name} size={40} src={(r.player as any).profileImageUrl} />
+
+                    <div className="min-w-0">
+                      <h4 className={cn("font-bold text-foreground truncate text-sm leading-tight flex items-center gap-1.5", isTop3 && "text-red-500 font-extrabold")}>
+                        {r.player.name}
+                        {activeRank === 0 && <Crown className="w-3.5 h-3.5 text-red-500 inline shrink-0" />}
+                      </h4>
+
+                      {/* Recent Form Dots */}
+                      {!r.isInactive && (
+                        <div className="flex items-center gap-1 mt-1">
+                          {r.form.map((res, fi) => (
+                            <span key={fi} className={cn("w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-black shadow-xs",
+                              res === 'win' ? "bg-emerald-500/25 text-emerald-500 ring-1 ring-emerald-500/30" :
+                              res === 'draw' ? "bg-amber-500/25 text-amber-500 ring-1 ring-amber-500/30" :
+                              "bg-red-500/25 text-red-500 ring-1 ring-red-500/30")}>
+                              {res.charAt(0).toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Row 2: Metric Chips Grid */}
-                  <div className="grid grid-cols-4 gap-1.5 pt-2.5 border-t border-border/50">
-                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
-                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">W-D-L</span>
-                      <span className="font-bold text-foreground text-[11px] mt-0.5">{r.wins}-{r.draws}-{r.losses}</span>
-                    </div>
+                  {/* Goals Pill */}
+                  <div className="shrink-0 text-right">
+                    <span className={cn(
+                      "font-black text-sm px-3 py-1.5 rounded-xl border shadow-xs inline-block",
+                      r.goals > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-muted text-muted-foreground border-border"
+                    )}>
+                      ⚽ {r.goals} <span className="text-[10px] font-semibold opacity-70">GOALS</span>
+                    </span>
+                  </div>
+                </div>
 
-                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
-                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">WIN %</span>
-                      <span className={cn("font-bold text-[11px] mt-0.5", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
-                        {r.matches > 0 ? `${r.winRate}%` : '—'}
-                      </span>
-                    </div>
-
-                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
-                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">HAT-TRICKS</span>
-                      <span className="font-bold text-[11px] mt-0.5 text-violet-400">⚽ {r.ht}</span>
-                    </div>
-
-                    <div className="bg-muted/40 border border-border/40 rounded-xl p-1.5 text-center flex flex-col items-center justify-center">
-                      <span className="text-[9px] font-extrabold text-muted-foreground/70 uppercase tracking-wider block">MOTM/CS</span>
-                      <span className="font-bold text-[11px] mt-0.5 text-amber-500 flex items-center justify-center gap-1">
-                        👑{r.motm} <span className="text-cyan-500 font-semibold">🛡️{r.cs}</span>
-                      </span>
-                    </div>
+                {/* Sub Stats Row */}
+                <div className="grid grid-cols-4 gap-1.5 pt-3 mt-3 border-t border-border/40 text-center text-xs">
+                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">W-D-L</span>
+                    <span className="font-bold text-foreground text-xs">{r.wins}-{r.draws}-{r.losses}</span>
+                  </div>
+                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">WIN %</span>
+                    <span className={cn("font-bold text-xs", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
+                      {r.matches > 0 ? `${r.winRate}%` : '—'}
+                    </span>
+                  </div>
+                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">HAT-TRICKS</span>
+                    <span className="font-bold text-violet-400 text-xs">⚽ {r.ht}</span>
+                  </div>
+                  <div className="bg-muted/20 border border-border/30 px-1 py-1 rounded-lg">
+                    <span className="text-[8.5px] font-bold text-muted-foreground uppercase block tracking-wider">MOTM/CS</span>
+                    <span className="font-bold text-amber-500 text-xs">👑{r.motm} <span className="text-cyan-500 font-semibold">🛡️{r.cs}</span></span>
                   </div>
                 </div>
               </div>
