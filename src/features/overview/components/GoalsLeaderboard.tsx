@@ -473,7 +473,7 @@ export function GoalsLeaderboard({
                 {isRank1 && (
                   <div className="absolute -top-3 left-10 z-20 animate-bounce">
                     <div className="relative border-2 border-red-500/60 bg-gradient-to-r from-red-950 via-zinc-900 to-red-950 px-3 py-1 text-red-300 shadow-md rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1 border-red-500/80">
-                      <span>💬 {TAUNTS[Math.abs(r.player.name.length) % TAUNTS.length]}</span>
+                      <span>{TAUNTS[Math.abs(r.player.name.length) % TAUNTS.length]}</span>
                       <div className="absolute -bottom-1.5 left-5 w-2 h-2 bg-zinc-900 border-r-2 border-b-2 border-red-500/80 rotate-45" />
                     </div>
                   </div>

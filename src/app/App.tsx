@@ -92,6 +92,7 @@ export function AppShell() {
             <div className="flex flex-col">
               <span className="font-heading font-bold text-[16px] tracking-tight text-foreground leading-none">THE ENIGMATIC ELITE</span>
               <span className="text-[9px] text-muted-foreground font-medium tracking-widest uppercase leading-none mt-0.5">In Mystery We Reign</span>
+              <span className="text-[8px] text-primary/60 font-semibold leading-none mt-0.5 tracking-wide">crafted by Aryan Bhuiyan</span>
             </div>
           </div>
 
