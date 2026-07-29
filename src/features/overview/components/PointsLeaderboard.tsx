@@ -85,10 +85,7 @@ export function PointsLeaderboard({
     return 1;
   });
 
-  // Idea 18: inactive toggle
   const [showInactive, setShowInactive] = useState(true);
-
-  // Idea 16: replay timeline
   const [replayMode, setReplayMode] = useState(false);
   const [replayPeriodIndex, setReplayPeriodIndex] = useState(0);
 
@@ -138,7 +135,7 @@ export function PointsLeaderboard({
       ];
     };
 
-    // ── Weekly ──────────────────────────────────────────────────────
+    // Weekly
     const prevWeek = selectedWeeklyWeek > 1 ? selectedWeeklyWeek - 1 : null;
     const prevWeeklyMap = new Map<string, number>();
     if (prevWeek !== null) {
@@ -175,7 +172,7 @@ export function PointsLeaderboard({
       return {player:p, points:calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm}), matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm, form:getForm(p.id), rankShift:null, isInactive:matches===0};
     });
 
-    // ── Monthly ─────────────────────────────────────────────────────
+    // Monthly
     const prevMonth = selectedMonthlyMonth > 0 ? selectedMonthlyMonth - 1 : null;
     const prevMonthlyMap = new Map<string, number>();
     if (prevMonth !== null) {
@@ -195,7 +192,7 @@ export function PointsLeaderboard({
       return {player:p,points:calcPts({wins,draws,losses,goals:gf,goalsConceded:gc,hattricks:ht,motmCount:motm}),matches,wins,draws,losses,winRate,gf,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
 
-    // ── Overall ─────────────────────────────────────────────────────
+    // Overall
     const seasonIds = seasons.map(s => s.id);
     let prevSeasonId: number | null = null;
     if (selectedOverallSeasonId !== null) {
@@ -232,7 +229,6 @@ export function PointsLeaderboard({
     };
   }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedWeeklySeasonId, selectedWeeklyMonth, selectedWeeklyWeek, selectedOverallSeasonId]);
 
-  // Idea 16: Replay ranking
   const replayRanking = useMemo(() => {
     if (!replayMode || availablePeriods.length === 0) return null;
     const period = availablePeriods[Math.min(replayPeriodIndex, availablePeriods.length - 1)];
@@ -259,17 +255,14 @@ export function PointsLeaderboard({
     : viewMode === 'monthly' ? monthlyRanking
     : overallRanking;
 
-  // Idea 18: Filter inactive
   const visibleList = showInactive ? baseRanking.list : baseRanking.list.filter(r => !r.isInactive);
 
-  // Idea 17: Most Improved
   const mostImproved = useMemo(() => {
     const candidates = baseRanking.list.filter(r => !r.isInactive && r.rankShift !== null && r.rankShift >= 2);
     if (!candidates.length) return null;
     return candidates.reduce((best, r) => r.rankShift! > best.rankShift! ? r : best);
   }, [baseRanking.list]);
 
-  // Search & sort
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return visibleList;
     const q = searchQuery.toLowerCase();
@@ -297,7 +290,6 @@ export function PointsLeaderboard({
   const pageStart = (safePage - 1) * PAGE_SIZE;
   const pageEnd = Math.min(pageStart + PAGE_SIZE, totalEntries);
   const pageList = compact ? sortedList.slice(0, compactLimit) : sortedList.slice(pageStart, pageEnd);
-  // Always use the FULL unfiltered list for rank numbers so search doesn't re-rank players
   const activeListForRank = baseRanking.list.filter(r => !r.isInactive);
   const allInactiveCount = baseRanking.list.filter(r => r.isInactive).length;
   const inactiveCount = sortedList.filter(r => r.isInactive).length;
@@ -372,7 +364,6 @@ export function PointsLeaderboard({
         )}
 
         <div className="flex items-center gap-2 ml-auto flex-wrap">
-          {/* Idea 18: inactive toggle */}
           {allInactiveCount > 0 && (
             <button onClick={() => setShowInactive(v=>!v)}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all",
@@ -382,7 +373,6 @@ export function PointsLeaderboard({
             </button>
           )}
 
-          {/* Idea 16: replay button */}
           {!compact && availablePeriods.length > 0 && (
             <button onClick={() => { if(!replayMode){setReplayMode(true);setReplayPeriodIndex(availablePeriods.length-1);}else setReplayMode(false); }}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all",
@@ -398,7 +388,7 @@ export function PointsLeaderboard({
         </div>
       </div>
 
-      {/* Idea 16: Replay Timeline Slider */}
+      {/* Replay Timeline */}
       {replayMode && availablePeriods.length > 0 && (
         <div className="bg-violet-500/5 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -437,7 +427,7 @@ export function PointsLeaderboard({
         </div>
       )}
 
-      {/* Idea 17: Most Improved Banner */}
+      {/* Most Improved Banner */}
       {mostImproved && !replayMode && !compact && (
         <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-4 flex-wrap">
           <div className="absolute top-0 right-0 w-40 h-full bg-emerald-500/5 blur-2xl pointer-events-none"/>
@@ -471,8 +461,111 @@ export function PointsLeaderboard({
           className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"/>
       </div>
 
-      {/* Table */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+      {/* ── MOBILE CARDS VIEW (< md) ────────────────────────────────────────── */}
+      <div className="flex flex-col gap-3 md:hidden">
+        {isEmpty ? (
+          <div className="bg-card border border-border rounded-2xl p-10 text-center text-muted-foreground">
+            <span className="text-4xl block mb-2">📊</span>
+            <p className="font-medium text-sm">No data for this period</p>
+          </div>
+        ) : (
+          pageList.map(r => {
+            const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
+            const isTop3 = activeRank >= 0 && activeRank < 3;
+            const medalCls = r.isInactive ? 'bg-muted/30 text-muted-foreground/40'
+              : activeRank === 0 ? 'medal-gold' : activeRank === 1 ? 'medal-silver' : activeRank === 2 ? 'medal-bronze'
+              : 'bg-muted/70 text-muted-foreground';
+
+            return (
+              <div
+                key={r.player.id}
+                onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
+                className={cn(
+                  "bg-card border border-border/70 rounded-2xl p-4 flex flex-col gap-3 shadow-xs transition-all active:scale-[0.99]",
+                  r.isInactive && "opacity-50 bg-muted/10",
+                  !r.isInactive && onPlayerClick && "cursor-pointer"
+                )}
+              >
+                {/* Header: Rank + Avatar + Name + Points */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex flex-col items-center gap-0.5 shrink-0">
+                      <div className={cn("w-7 h-7 flex items-center justify-center rounded-full text-xs font-black shadow-xs", medalCls)}>
+                        {activeRank >= 0 ? activeRank + 1 : '—'}
+                      </div>
+                      {r.rankShift !== null && (
+                        <span className={cn("flex items-center text-[9px] font-bold",
+                          r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/40")}>
+                          {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> : <Minus className="w-2.5 h-2.5" />}
+                          {r.rankShift !== 0 && Math.abs(r.rankShift)}
+                        </span>
+                      )}
+                    </div>
+
+                    <Avatar name={r.player.name} size={36} src={(r.player as any).profileImageUrl} />
+                    <div className="min-w-0">
+                      <h4 className={cn("font-bold text-foreground truncate text-sm", isTop3 && "text-amber-500")}>
+                        {r.player.name}
+                      </h4>
+                      {r.isInactive ? (
+                        <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/50 bg-muted/40 px-1.5 py-0.5 rounded">Inactive</span>
+                      ) : (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {r.form.map((res, fi) => (
+                            <span key={fi} className={cn("w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-black",
+                              res === 'win' ? "bg-emerald-500/20 text-emerald-500" :
+                              res === 'draw' ? "bg-amber-500/20 text-amber-500" :
+                              "bg-red-500/20 text-red-500")}>
+                              {res.charAt(0).toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Points Pill */}
+                  <div className="shrink-0 text-right">
+                    <span className={cn(
+                      "font-black text-sm px-2.5 py-1 rounded-xl border shadow-xs inline-block",
+                      r.points > 0 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+                      r.points < 0 ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                      "bg-muted text-muted-foreground border-border"
+                    )}>
+                      {r.points > 0 ? `+${r.points}` : r.points} <span className="text-[10px] font-medium opacity-70">pts</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sub Stats Grid */}
+                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border/40 text-center text-xs">
+                  <div className="bg-muted/30 p-1.5 rounded-lg">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">W-D-L</span>
+                    <span className="font-bold text-foreground text-xs">{r.wins}-{r.draws}-{r.losses}</span>
+                  </div>
+                  <div className="bg-muted/30 p-1.5 rounded-lg">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">Win %</span>
+                    <span className={cn("font-bold text-xs", r.winRate >= 60 ? "text-emerald-500" : r.winRate >= 40 ? "text-amber-500" : "text-muted-foreground")}>
+                      {r.matches > 0 ? `${r.winRate}%` : '—'}
+                    </span>
+                  </div>
+                  <div className="bg-muted/30 p-1.5 rounded-lg">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">GF / GC</span>
+                    <span className="font-bold text-foreground text-xs">{r.gf} / {r.gc}</span>
+                  </div>
+                  <div className="bg-muted/30 p-1.5 rounded-lg">
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase block">MOTM / CS</span>
+                    <span className="font-bold text-amber-500 text-xs">👑{r.motm} <span className="text-cyan-500 font-normal">🛡️{r.cs}</span></span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── DESKTOP TABLE VIEW (>= md) ────────────────────────────────────────── */}
+      <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
             <colgroup>
