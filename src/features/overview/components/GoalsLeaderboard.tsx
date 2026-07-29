@@ -53,6 +53,13 @@ const TAUNTS = [
   "Can anyone dethrone me? 🏆",
   "Sitting at #1! 🔥"
 ];
+const CHASER_TAUNTS = [
+  "I'm right behind you! 🎯",
+  "Coming for that top spot! 🔥",
+  "Almost there... ⚡",
+  "Watch your back! 👀",
+  "The gap is closing! 🏃"
+];
 
 const today = new Date();
 const currentMonthIndex = today.getMonth();
@@ -466,6 +473,10 @@ export function GoalsLeaderboard({
             const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
             const isTop3 = activeRank >= 0 && activeRank < 3;
             const isRank1 = activeRank === 0;
+            const isRank2 = activeRank === 1;
+            const rank1Goals = activeListForRank[0]?.goals ?? 0;
+            const rank2Goals = activeListForRank[1]?.goals ?? 0;
+            const isCloseChaser = isRank2 && (rank1Goals - rank2Goals) <= 3;
 
             return (
               <div key={r.player.id} className="relative pt-2">
@@ -475,6 +486,15 @@ export function GoalsLeaderboard({
                     <div className="relative border-2 border-red-500/60 bg-gradient-to-r from-red-950 via-zinc-900 to-red-950 px-3 py-1 text-red-300 shadow-md rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1 border-red-500/80">
                       <span>{TAUNTS[Math.abs(r.player.name.length) % TAUNTS.length]}</span>
                       <div className="absolute -bottom-1.5 left-5 w-2 h-2 bg-zinc-900 border-r-2 border-b-2 border-red-500/80 rotate-45" />
+                    </div>
+                  </div>
+                )}
+                {/* 💬 Chaser Speech Bubble for #2 when gap ≤ 3 goals */}
+                {isCloseChaser && (
+                  <div className="absolute -top-3 left-10 z-20 animate-bounce">
+                    <div className="relative border-2 border-cyan-500/60 bg-gradient-to-r from-cyan-950 via-zinc-900 to-cyan-950 px-3 py-1 text-cyan-300 shadow-md rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1 border-cyan-500/80">
+                      <span>{CHASER_TAUNTS[Math.abs(r.player.name.length) % CHASER_TAUNTS.length]}</span>
+                      <div className="absolute -bottom-1.5 left-5 w-2 h-2 bg-zinc-900 border-r-2 border-b-2 border-cyan-500/80 rotate-45" />
                     </div>
                   </div>
                 )}
