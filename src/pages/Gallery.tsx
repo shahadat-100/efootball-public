@@ -14,7 +14,7 @@ import {
   getCurrentWeekLabel,
   getCurrentMonthLabel,
 } from '@/features/gallery/utils/galleryStats';
-import { Download, Image as ImageIcon, Sparkles, User, Award, Search, Maximize2 } from 'lucide-react';
+import { Download, Image as ImageIcon, Sparkles, User, Award, Search } from 'lucide-react';
 
 type TemplateType =
   | 'player-profile'
@@ -51,7 +51,7 @@ export function Gallery() {
   const [activeTemplate, setActiveTemplate] = useState<TemplateType>('player-profile');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>(players[0]?.id || '');
   const [playerSearchQuery, setPlayerSearchQuery] = useState('');
-  const [aspectRatio, setAspectRatio] = useState<AspectRatioType>('4:5');
+  const aspectRatio = (TEMPLATES.find(t => t.id === activeTemplate)?.defaultAspect ?? '4:5') as AspectRatioType;
   const [isDownloading, setIsDownloading] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -79,8 +79,6 @@ export function Gallery() {
 
   const handleTemplateChange = (tmplId: TemplateType) => {
     setActiveTemplate(tmplId);
-    const tmpl = TEMPLATES.find(t => t.id === tmplId);
-    if (tmpl) setAspectRatio(tmpl.defaultAspect);
   };
 
   const handleDownload = async (format: 'png' | 'jpg') => {
@@ -117,28 +115,7 @@ export function Gallery() {
         {/* Left Column: Template & Player Selection Controls */}
         <div className="lg:col-span-5 space-y-6">
 
-          {/* Aspect Ratio Selector */}
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-3 shadow-sm">
-            <h3 className="font-bold text-sm flex items-center gap-2">
-              <Maximize2 className="w-4 h-4 text-amber-500" />
-              Aspect Ratio / Dimensions
-            </h3>
-            <div className="grid grid-cols-4 gap-2">
-              {(['4:5', '1:1', '16:9', '9:16'] as AspectRatioType[]).map(ratio => (
-                <button
-                  key={ratio}
-                  onClick={() => setAspectRatio(ratio)}
-                  className={`py-2 text-xs font-black rounded-xl border transition-all ${
-                    aspectRatio === ratio
-                      ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-md'
-                      : 'bg-background border-border text-foreground hover:border-amber-500/40'
-                  }`}
-                >
-                  {ratio}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           {/* Template Picker */}
           <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm">
