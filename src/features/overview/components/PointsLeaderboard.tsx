@@ -297,7 +297,8 @@ export function PointsLeaderboard({
   const pageStart = (safePage - 1) * PAGE_SIZE;
   const pageEnd = Math.min(pageStart + PAGE_SIZE, totalEntries);
   const pageList = compact ? sortedList.slice(0, compactLimit) : sortedList.slice(pageStart, pageEnd);
-  const activeListForRank = sortedList.filter(r => !r.isInactive);
+  // Always use the FULL unfiltered list for rank numbers so search doesn't re-rank players
+  const activeListForRank = baseRanking.list.filter(r => !r.isInactive);
   const allInactiveCount = baseRanking.list.filter(r => r.isInactive).length;
   const inactiveCount = sortedList.filter(r => r.isInactive).length;
   const isEmpty = activeListForRank.length === 0;

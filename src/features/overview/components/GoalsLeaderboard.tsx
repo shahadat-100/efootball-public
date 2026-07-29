@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn';
 import {
   ArrowUp, ArrowDown, Minus, ChevronUp, ChevronDown,
   Search, Play, ChevronLeft, ChevronRight,
-  Calculator, RotateCcw, TrendingUp, Eye, EyeOff, Radio,
+  TrendingUp, Eye, EyeOff, Radio,
 } from 'lucide-react';
 
 interface GoalsLeaderboardProps {
@@ -61,7 +61,6 @@ export function GoalsLeaderboard({
   playerMonthlyStats = [], playerWeeklyStats = [], onPlayerClick,
 }: GoalsLeaderboardProps) {
 
-  // ── Existing state ────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
   const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
@@ -79,25 +78,12 @@ export function GoalsLeaderboard({
     return 1;
   });
 
-  // ── Idea 18: inactive toggle ──────────────────────────────────────
+  // Idea 18: inactive toggle
   const [showInactive, setShowInactive] = useState(true);
 
-  // ── Idea 16: replay timeline ──────────────────────────────────────
+  // Idea 16: replay timeline
   const [replayMode, setReplayMode] = useState(false);
   const [replayPeriodIndex, setReplayPeriodIndex] = useState(0);
-
-  // ── Idea 20: what-if simulator ────────────────────────────────────
-  const [simulateMode, setSimulateMode] = useState(false);
-  const [adjustments, setAdjustments] = useState<Map<string, { goals: number }>>(new Map());
-
-  const adjustGoals = (playerId: string, delta: number) => {
-    setAdjustments(prev => {
-      const next = new Map(prev);
-      const cur = next.get(playerId) ?? { goals: 0 };
-      next.set(playerId, { goals: Math.max(0, cur.goals + delta) });
-      return next;
-    });
-  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -109,7 +95,6 @@ export function GoalsLeaderboard({
     setPage(1);
   };
 
-  // ── Core rankings computation ─────────────────────────────────────
   const { weeklyRanking, monthlyRanking, overallRanking, availablePeriods } = useMemo(() => {
     const getForm = (playerId: string): Array<'win' | 'draw' | 'loss'> =>
       [...matchEntries]
@@ -118,7 +103,6 @@ export function GoalsLeaderboard({
         .slice(0, 5)
         .map(e => e.result as 'win' | 'draw' | 'loss');
 
-    // Available periods for replay (idea 16)
     const periodSet = new Set(playerMonthlyStats.map(s => `${s.year}-${s.monthIndex}`));
     const availablePeriods: ReplayPeriod[] = [...periodSet]
       .map(key => {
@@ -127,11 +111,9 @@ export function GoalsLeaderboard({
       })
       .sort((a, b) => a.year !== b.year ? a.year - b.year : a.monthIndex - b.monthIndex);
 
-    // Recent activity for overall "inactive" check (idea 18)
     const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recentIds = new Set(matchEntries.filter(e => e.date && new Date(e.date) >= thirtyDaysAgo).map(e => e.playerId));
 
-    // Helper: build ranked list with active first, inactive at bottom
     const buildRanked = (raw: RankedPlayer[], prevRanked: { id: string; rank: number }[]): RankedPlayer[] => {
       const active = raw.filter(r => !r.isInactive).sort((a, b) => b.goals - a.goals);
       const inactive = raw.filter(r => r.isInactive);
@@ -144,7 +126,7 @@ export function GoalsLeaderboard({
       ];
     };
 
-    // ── Weekly ────────────────────────────────────────────────────
+    // ── Weekly ──────────────────────────────────────────────────────
     const prevWeek = selectedWeeklyWeek > 1 ? selectedWeeklyWeek - 1 : null;
     const prevWeeklyMap = new Map<string, number>();
     if (prevWeek !== null) {
@@ -156,22 +138,21 @@ export function GoalsLeaderboard({
         prevWeeklyMap.set(p.id, s.reduce((t, x) => t + x.goals, 0));
       });
     }
-    const prevWeeklyRanked = [...prevWeeklyMap.entries()].sort((a, b) => b[1] - a[1]).map(([id], i) => ({ id, rank: i + 1 }));
+    const prevWeeklyRanked = [...prevWeeklyMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id,rank:i+1}));
 
     const weeklyRaw: RankedPlayer[] = players.map(p => {
       const s = playerWeeklyStats.filter(x =>
         x.playerId === p.id && x.monthIndex === selectedWeeklyMonth && x.week === selectedWeeklyWeek &&
         (selectedWeeklySeasonId !== null ? x.seasonId === selectedWeeklySeasonId : x.year === currentYear)
       );
-      const wins = s.reduce((t, x) => t + x.wins, 0), draws = s.reduce((t, x) => t + x.draws, 0), losses = s.reduce((t, x) => t + x.losses, 0);
-      const goals = s.reduce((t, x) => t + x.goals, 0), gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
-      const cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0), ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
-      const motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
-      const matches = wins + draws + losses, winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null, isInactive: matches === 0 };
+      const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
+      const goals=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
+      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
+      const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
+      return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
 
-    // ── Monthly ───────────────────────────────────────────────────
+    // ── Monthly ─────────────────────────────────────────────────────
     const prevMonth = selectedMonthlyMonth > 0 ? selectedMonthlyMonth - 1 : null;
     const prevMonthlyMap = new Map<string, number>();
     if (prevMonth !== null) {
@@ -183,22 +164,21 @@ export function GoalsLeaderboard({
         prevMonthlyMap.set(p.id, s.reduce((t, x) => t + x.goals, 0));
       });
     }
-    const prevMonthlyRanked = [...prevMonthlyMap.entries()].sort((a, b) => b[1] - a[1]).map(([id], i) => ({ id, rank: i + 1 }));
+    const prevMonthlyRanked = [...prevMonthlyMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id,rank:i+1}));
 
     const monthlyRaw: RankedPlayer[] = players.map(p => {
       const s = playerMonthlyStats.filter(x =>
         x.playerId === p.id && x.monthIndex === selectedMonthlyMonth &&
         (selectedMonthlySeasonId !== null ? x.seasonId === selectedMonthlySeasonId : x.year === currentYear)
       );
-      const wins = s.reduce((t, x) => t + x.wins, 0), draws = s.reduce((t, x) => t + x.draws, 0), losses = s.reduce((t, x) => t + x.losses, 0);
-      const goals = s.reduce((t, x) => t + x.goals, 0), gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
-      const cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0), ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
-      const motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
-      const matches = wins + draws + losses, winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null, isInactive: matches === 0 };
+      const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
+      const goals=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
+      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
+      const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
+      return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
 
-    // ── Overall ───────────────────────────────────────────────────
+    // ── Overall ─────────────────────────────────────────────────────
     const seasonIds = seasons.map(s => s.id);
     let prevSeasonId: number | null = null;
     if (selectedOverallSeasonId !== null) {
@@ -212,88 +192,69 @@ export function GoalsLeaderboard({
         prevOverallMap.set(p.id, s.reduce((t, x) => t + (x.goals || 0), 0));
       });
     }
-    const prevOverallRanked = [...prevOverallMap.entries()].sort((a, b) => b[1] - a[1]).map(([id], i) => ({ id, rank: i + 1 }));
+    const prevOverallRanked = [...prevOverallMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id,rank:i+1}));
 
     const overallRaw: RankedPlayer[] = players.map(p => {
       const s = playerSeasonStats.filter(x =>
         x.playerId === p.id && (selectedOverallSeasonId === null || x.seasonId === selectedOverallSeasonId)
       );
-      const wins = s.reduce((t, x) => t + x.wins, 0), draws = s.reduce((t, x) => t + x.draws, 0), losses = s.reduce((t, x) => t + x.losses, 0);
-      const goals = s.reduce((t, x) => t + (x.goals || 0), 0), gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
-      const cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0), ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
-      const motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
-      const matches = wins + draws + losses, winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null, isInactive: !recentIds.has(p.id) };
+      const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
+      const goals=s.reduce((t,x)=>t+(x.goals||0),0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
+      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
+      const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
+      return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:!recentIds.has(p.id)};
     });
 
-    const mlabel = `${MONTHS[selectedMonthlyMonth]} · ${selectedMonthlySeasonId ? seasons.find(s => s.id === selectedMonthlySeasonId)?.name ?? '' : currentYear}`;
-    const wlabel = `Week ${selectedWeeklyWeek} · ${MONTHS[selectedWeeklyMonth]} · ${selectedWeeklySeasonId ? seasons.find(s => s.id === selectedWeeklySeasonId)?.name ?? '' : currentYear}`;
-    const olabel = selectedOverallSeasonId ? (seasons.find(s => s.id === selectedOverallSeasonId)?.name ?? 'Overall') : 'All Time';
+    const mlabel = `${MONTHS[selectedMonthlyMonth]} · ${selectedMonthlySeasonId?seasons.find(s=>s.id===selectedMonthlySeasonId)?.name??'':currentYear}`;
+    const wlabel = `Week ${selectedWeeklyWeek} · ${MONTHS[selectedWeeklyMonth]} · ${selectedWeeklySeasonId?seasons.find(s=>s.id===selectedWeeklySeasonId)?.name??'':currentYear}`;
+    const olabel = selectedOverallSeasonId?(seasons.find(s=>s.id===selectedOverallSeasonId)?.name??'Overall'):'All Time';
 
     return {
-      weeklyRanking: { label: wlabel, list: buildRanked(weeklyRaw, prevWeeklyRanked) },
+      weeklyRanking:  { label: wlabel, list: buildRanked(weeklyRaw, prevWeeklyRanked) },
       monthlyRanking: { label: mlabel, list: buildRanked(monthlyRaw, prevMonthlyRanked) },
-      overallRanking: { label: olabel, list: buildRanked(overallRaw, prevSeasonId !== null ? prevOverallRanked : []) },
+      overallRanking: { label: olabel, list: buildRanked(overallRaw, prevSeasonId!==null?prevOverallRanked:[]) },
       availablePeriods,
     };
   }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedWeeklySeasonId, selectedWeeklyMonth, selectedWeeklyWeek, selectedOverallSeasonId]);
 
-  // ── Idea 16: Replay ranking ───────────────────────────────────────
+  // Idea 16: Replay ranking
   const replayRanking = useMemo(() => {
     if (!replayMode || availablePeriods.length === 0) return null;
     const period = availablePeriods[Math.min(replayPeriodIndex, availablePeriods.length - 1)];
     if (!period) return null;
-
     const getForm = (pid: string): Array<'win' | 'draw' | 'loss'> =>
-      [...matchEntries].filter(e => e.playerId === pid && e.date)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5).map(e => e.result as 'win' | 'draw' | 'loss');
-
+      [...matchEntries].filter(e=>e.playerId===pid&&e.date)
+        .sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime())
+        .slice(0,5).map(e=>e.result as 'win'|'draw'|'loss');
     const list: RankedPlayer[] = players.map(p => {
-      const s = playerMonthlyStats.filter(x => x.playerId === p.id && x.year === period.year && x.monthIndex === period.monthIndex);
-      const wins = s.reduce((t, x) => t + x.wins, 0), draws = s.reduce((t, x) => t + x.draws, 0), losses = s.reduce((t, x) => t + x.losses, 0);
-      const goals = s.reduce((t, x) => t + x.goals, 0), gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
-      const cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0), ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
-      const motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
-      const matches = wins + draws + losses, winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      return { player: p, goals, matches, wins, draws, losses, winRate, gc, cs, ht, motm, form: getForm(p.id), rankShift: null, isInactive: matches === 0 };
+      const s = playerMonthlyStats.filter(x=>x.playerId===p.id&&x.year===period.year&&x.monthIndex===period.monthIndex);
+      const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
+      const goals=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
+      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
+      const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
+      return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
-    const active = list.filter(r => !r.isInactive).sort((a, b) => b.goals - a.goals);
-    const inactive = list.filter(r => r.isInactive);
+    const active = list.filter(r=>!r.isInactive).sort((a,b)=>b.goals-a.goals);
     const isLive = period.year === currentYear && period.monthIndex === currentMonthIndex;
-    return { label: `${period.label}${isLive ? ' · 🔴 LIVE' : ' · Replay'}`, list: [...active, ...inactive], isLive };
+    return { label: `${period.label}${isLive?' · 🔴 LIVE':' · Replay'}`, list: [...active,...list.filter(r=>r.isInactive)], isLive };
   }, [replayMode, replayPeriodIndex, availablePeriods, players, playerMonthlyStats, matchEntries]);
 
-  // ── Active ranking (with replay override) ─────────────────────────
-  const baseRanking = (replayMode && replayRanking)
-    ? replayRanking
+  const baseRanking = (replayMode && replayRanking) ? replayRanking
     : viewMode === 'weekly' ? weeklyRanking
     : viewMode === 'monthly' ? monthlyRanking
     : overallRanking;
 
-  // ── Idea 20: Apply what-if adjustments (goals only) ───────────────
-  const adjustedList = useMemo(() => {
-    if (!simulateMode || adjustments.size === 0) return baseRanking.list;
-    const mapped = baseRanking.list.map(r => {
-      const adj = adjustments.get(r.player.id);
-      if (!adj || !adj.goals) return r;
-      return { ...r, goals: r.goals + adj.goals };
-    });
-    const active = mapped.filter(r => !r.isInactive).sort((a, b) => b.goals - a.goals);
-    return [...active, ...mapped.filter(r => r.isInactive)];
-  }, [baseRanking.list, adjustments, simulateMode]);
+  // Idea 18: Filter inactive
+  const visibleList = showInactive ? baseRanking.list : baseRanking.list.filter(r => !r.isInactive);
 
-  // ── Idea 18: Filter inactive ──────────────────────────────────────
-  const visibleList = showInactive ? adjustedList : adjustedList.filter(r => !r.isInactive);
-
-  // ── Idea 17: Most Improved ────────────────────────────────────────
+  // Idea 17: Most Improved
   const mostImproved = useMemo(() => {
     const candidates = baseRanking.list.filter(r => !r.isInactive && r.rankShift !== null && r.rankShift >= 2);
     if (!candidates.length) return null;
     return candidates.reduce((best, r) => r.rankShift! > best.rankShift! ? r : best);
   }, [baseRanking.list]);
 
-  // ── Search & sort ─────────────────────────────────────────────────
+  // Search & sort
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return visibleList;
     const q = searchQuery.toLowerCase();
@@ -302,29 +263,29 @@ export function GoalsLeaderboard({
 
   const sortedList = useMemo(() => {
     if (sortField === 'default') return searchFiltered;
-    const active = searchFiltered.filter(r => !r.isInactive);
-    const inactive = searchFiltered.filter(r => r.isInactive);
+    const active = searchFiltered.filter(r=>!r.isInactive);
+    const inactive = searchFiltered.filter(r=>r.isInactive);
     const valOf = (r: RankedPlayer) => {
-      switch (sortField) {
+      switch(sortField) {
         case 'matches': return r.matches; case 'wins': return r.wins; case 'draws': return r.draws;
         case 'losses': return r.losses; case 'winRate': return r.winRate; case 'gc': return r.gc;
         case 'cs': return r.cs; case 'ht': return r.ht; case 'motm': return r.motm;
         case 'goals': return r.goals; default: return 0;
       }
     };
-    return [...active.sort((a, b) => sortDir === 'desc' ? valOf(b) - valOf(a) : valOf(a) - valOf(b)), ...inactive];
+    return [...active.sort((a,b)=>sortDir==='desc'?valOf(b)-valOf(a):valOf(a)-valOf(b)), ...inactive];
   }, [searchFiltered, sortField, sortDir]);
 
-  // ── Pagination ────────────────────────────────────────────────────
   const totalEntries = sortedList.length;
   const totalPages = Math.max(1, Math.ceil(totalEntries / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * PAGE_SIZE;
   const pageEnd = Math.min(pageStart + PAGE_SIZE, totalEntries);
   const pageList = sortedList.slice(pageStart, pageEnd);
-  const activeListForRank = sortedList.filter(r => !r.isInactive);
+  // Always use the FULL unfiltered list for rank numbers so search doesn't re-rank players
+  const activeListForRank = baseRanking.list.filter(r => !r.isInactive);
+  const allInactiveCount = baseRanking.list.filter(r => r.isInactive).length;
   const inactiveCount = sortedList.filter(r => r.isInactive).length;
-  const allInactiveCount = adjustedList.filter(r => r.isInactive).length;
   const isEmpty = activeListForRank.length === 0;
 
   const selectCls = "text-xs bg-background border border-border rounded-lg px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer shadow-sm transition-all";
@@ -337,94 +298,84 @@ export function GoalsLeaderboard({
         className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none cursor-pointer hover:text-foreground transition-colors text-center px-1 group">
         <span className="inline-flex items-center gap-0.5">
           {label}
-          {active ? (sortDir === 'desc' ? <ChevronDown className="w-3 h-3 text-primary" /> : <ChevronUp className="w-3 h-3 text-primary" />)
-            : <ChevronDown className="w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity" />}
+          {active ? (sortDir==='desc'?<ChevronDown className="w-3 h-3 text-primary"/>:<ChevronUp className="w-3 h-3 text-primary"/>)
+          :<ChevronDown className="w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity"/>}
         </span>
       </th>
     );
   };
 
-  const totalCols = simulateMode ? 14 : 13;
-
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── Controls Row ── */}
+      {/* Controls Row */}
       <div className="flex flex-wrap items-center gap-3">
         {!replayMode && (
           <div className="flex items-center gap-1 bg-muted/40 border border-border p-1 rounded-xl">
-            {(['weekly', 'monthly', 'overall'] as ViewMode[]).map(mode => (
+            {(['weekly','monthly','overall'] as ViewMode[]).map(mode => (
               <button key={mode} onClick={() => handleViewMode(mode)}
                 className={cn("px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all",
-                  viewMode === mode ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground hover:bg-background/60")}>
+                  viewMode===mode?"bg-primary text-primary-foreground shadow-md":"text-muted-foreground hover:text-foreground hover:bg-background/60")}>
                 {mode}
               </button>
             ))}
           </div>
         )}
 
-        {!replayMode && viewMode === 'weekly' && (
+        {!replayMode && viewMode==='weekly' && (
           <div className="flex items-center gap-2">
-            <select value={selectedWeeklySeasonId ?? ''} onChange={e => { setSelectedWeeklySeasonId(e.target.value === '' ? null : Number(e.target.value)); setPage(1); }} className={selectCls}>
+            <select value={selectedWeeklySeasonId??''} onChange={e=>{setSelectedWeeklySeasonId(e.target.value===''?null:Number(e.target.value));setPage(1);}} className={selectCls}>
               <option value="">{currentYear} (Current)</option>
-              {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {seasons.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
-            <select value={selectedWeeklyMonth} onChange={e => { setSelectedWeeklyMonth(Number(e.target.value)); setPage(1); }} className={selectCls}>
-              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+            <select value={selectedWeeklyMonth} onChange={e=>{setSelectedWeeklyMonth(Number(e.target.value));setPage(1);}} className={selectCls}>
+              {MONTHS.map((m,i)=><option key={i} value={i}>{m}</option>)}
             </select>
-            <select value={selectedWeeklyWeek} onChange={e => { setSelectedWeeklyWeek(Number(e.target.value)); setPage(1); }} className={selectCls}>
-              {[1, 2, 3, 4].map(w => <option key={w} value={w}>Week {w}</option>)}
+            <select value={selectedWeeklyWeek} onChange={e=>{setSelectedWeeklyWeek(Number(e.target.value));setPage(1);}} className={selectCls}>
+              {[1,2,3,4].map(w=><option key={w} value={w}>Week {w}</option>)}
             </select>
           </div>
         )}
 
-        {!replayMode && viewMode === 'monthly' && (
+        {!replayMode && viewMode==='monthly' && (
           <div className="flex items-center gap-2">
-            <select value={selectedMonthlySeasonId ?? ''} onChange={e => { setSelectedMonthlySeasonId(e.target.value === '' ? null : Number(e.target.value)); setPage(1); }} className={selectCls}>
+            <select value={selectedMonthlySeasonId??''} onChange={e=>{setSelectedMonthlySeasonId(e.target.value===''?null:Number(e.target.value));setPage(1);}} className={selectCls}>
               <option value="">{currentYear} (Current)</option>
-              {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {seasons.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
-            <select value={selectedMonthlyMonth} onChange={e => { setSelectedMonthlyMonth(Number(e.target.value)); setPage(1); }} className={selectCls}>
-              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+            <select value={selectedMonthlyMonth} onChange={e=>{setSelectedMonthlyMonth(Number(e.target.value));setPage(1);}} className={selectCls}>
+              {MONTHS.map((m,i)=><option key={i} value={i}>{m}</option>)}
             </select>
           </div>
         )}
 
-        {!replayMode && viewMode === 'overall' && (
-          <select value={selectedOverallSeasonId ?? ''} onChange={e => { setSelectedOverallSeasonId(e.target.value === '' ? null : Number(e.target.value)); setPage(1); }} className={selectCls}>
+        {!replayMode && viewMode==='overall' && (
+          <select value={selectedOverallSeasonId??''} onChange={e=>{setSelectedOverallSeasonId(e.target.value===''?null:Number(e.target.value));setPage(1);}} className={selectCls}>
             <option value="">All Time</option>
-            {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            {seasons.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         )}
 
         <div className="flex items-center gap-2 ml-auto flex-wrap">
           {/* Idea 18: inactive toggle */}
           {allInactiveCount > 0 && (
-            <button onClick={() => setShowInactive(v => !v)}
+            <button onClick={() => setShowInactive(v=>!v)}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all",
-                showInactive ? "bg-muted/40 border-border text-muted-foreground hover:bg-muted/60" : "bg-muted/20 border-border/50 text-muted-foreground/50")}>
-              {showInactive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              {showInactive ? `Hide inactive (${allInactiveCount})` : `Show inactive (${allInactiveCount})`}
+                showInactive?"bg-muted/40 border-border text-muted-foreground hover:bg-muted/60":"bg-muted/20 border-border/50 text-muted-foreground/50")}>
+              {showInactive?<Eye className="w-3.5 h-3.5"/>:<EyeOff className="w-3.5 h-3.5"/>}
+              {showInactive?`Hide inactive (${allInactiveCount})`:`Show inactive (${allInactiveCount})`}
             </button>
           )}
 
           {/* Idea 16: replay button */}
           {availablePeriods.length > 0 && (
-            <button onClick={() => { if (!replayMode) { setReplayMode(true); setReplayPeriodIndex(availablePeriods.length - 1); } else setReplayMode(false); }}
+            <button onClick={() => { if(!replayMode){setReplayMode(true);setReplayPeriodIndex(availablePeriods.length-1);}else setReplayMode(false); }}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all",
-                replayMode ? "bg-violet-500/20 border-violet-500/40 text-violet-500" : "bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60")}>
-              <Play className="w-3.5 h-3.5" />
-              {replayMode ? 'Exit Replay' : '📅 Replay'}
+                replayMode?"bg-violet-500/20 border-violet-500/40 text-violet-500":"bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60")}>
+              <Play className="w-3.5 h-3.5"/>
+              {replayMode?'Exit Replay':'📅 Replay'}
             </button>
           )}
-
-          {/* Idea 20: simulate button */}
-          <button onClick={() => setSimulateMode(v => !v)}
-            className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all",
-              simulateMode ? "bg-amber-500/20 border-amber-500/40 text-amber-500" : "bg-muted/40 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60")}>
-            <Calculator className="w-3.5 h-3.5" />
-            {simulateMode ? 'Exit Simulate' : '🧮 Simulate'}
-          </button>
 
           <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 border border-red-500/20 whitespace-nowrap">
             {baseRanking.label}
@@ -432,7 +383,7 @@ export function GoalsLeaderboard({
         </div>
       </div>
 
-      {/* ── Idea 16: Replay Timeline Slider ── */}
+      {/* Idea 16: Replay Timeline Slider */}
       {replayMode && availablePeriods.length > 0 && (
         <div className="bg-violet-500/5 border border-violet-500/20 rounded-2xl p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -440,65 +391,46 @@ export function GoalsLeaderboard({
               <span className="text-xs font-black uppercase tracking-widest text-violet-500/80">📅 Timeline Replay</span>
               {replayRanking?.isLive && (
                 <span className="flex items-center gap-1 text-[10px] font-black text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-                  <Radio className="w-2.5 h-2.5 animate-pulse" /> LIVE
+                  <Radio className="w-2.5 h-2.5 animate-pulse"/> LIVE
                 </span>
               )}
             </div>
             <span className="text-xs font-bold text-foreground bg-background/80 border border-border px-3 py-1 rounded-lg shadow-sm">
-              {availablePeriods[Math.min(replayPeriodIndex, availablePeriods.length - 1)]?.label ?? '—'}
+              {availablePeriods[Math.min(replayPeriodIndex, availablePeriods.length-1)]?.label ?? '—'}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setReplayPeriodIndex(i => Math.max(0, i - 1))} disabled={replayPeriodIndex === 0}
+            <button onClick={() => setReplayPeriodIndex(i=>Math.max(0,i-1))} disabled={replayPeriodIndex===0}
               className="p-1.5 rounded-lg border border-border bg-background hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4"/>
             </button>
             <div className="flex-1">
-              <input type="range" min={0} max={availablePeriods.length - 1} value={replayPeriodIndex}
+              <input type="range" min={0} max={availablePeriods.length-1} value={replayPeriodIndex}
                 onChange={e => setReplayPeriodIndex(Number(e.target.value))}
-                className="w-full accent-violet-500 cursor-pointer" />
+                className="w-full accent-violet-500 cursor-pointer"/>
               <div className="flex justify-between mt-0.5">
                 <span className="text-[10px] text-muted-foreground/50">{availablePeriods[0]?.label}</span>
-                <span className="text-[10px] text-muted-foreground/50">{availablePeriods[availablePeriods.length - 1]?.label}</span>
+                <span className="text-[10px] text-muted-foreground/50">{availablePeriods[availablePeriods.length-1]?.label}</span>
               </div>
             </div>
-            <button onClick={() => setReplayPeriodIndex(i => Math.min(availablePeriods.length - 1, i + 1))} disabled={replayPeriodIndex === availablePeriods.length - 1}
+            <button onClick={() => setReplayPeriodIndex(i=>Math.min(availablePeriods.length-1,i+1))} disabled={replayPeriodIndex===availablePeriods.length-1}
               className="p-1.5 rounded-lg border border-border bg-background hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4"/>
             </button>
           </div>
           <p className="text-[10px] text-muted-foreground/50 text-center">{availablePeriods.length} monthly periods available · drag to navigate</p>
         </div>
       )}
 
-      {/* ── Idea 20: Simulate Banner ── */}
-      {simulateMode && (
-        <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <Calculator className="w-4 h-4 text-amber-500 shrink-0" />
-            <div>
-              <p className="text-xs font-black text-amber-500 uppercase tracking-wider">What-If Simulator Active</p>
-              <p className="text-[11px] text-muted-foreground">Click +G on any player to add hypothetical goals. Rankings update live.</p>
-            </div>
-          </div>
-          {adjustments.size > 0 && (
-            <button onClick={() => setAdjustments(new Map())}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-all">
-              <RotateCcw className="w-3.5 h-3.5" /> Reset All
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── Idea 17: Most Improved Banner ── */}
+      {/* Idea 17: Most Improved Banner */}
       {mostImproved && !replayMode && (
         <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-4 flex-wrap">
-          <div className="absolute top-0 right-0 w-40 h-full bg-emerald-500/5 blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-40 h-full bg-emerald-500/5 blur-2xl pointer-events-none"/>
           <div className="flex items-center gap-3 relative z-10">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              <TrendingUp className="w-5 h-5 text-emerald-500"/>
             </div>
-            <Avatar name={mostImproved.player.name} size={36} src={(mostImproved.player as any).profileImageUrl} className="ring-2 ring-emerald-500/30 shrink-0" />
+            <Avatar name={mostImproved.player.name} size={36} src={(mostImproved.player as any).profileImageUrl} className="ring-2 ring-emerald-500/30 shrink-0"/>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500/70">🚀 Most Improved</p>
               <p className="text-sm font-bold text-foreground">{mostImproved.player.name}</p>
@@ -506,123 +438,107 @@ export function GoalsLeaderboard({
           </div>
           <div className="relative z-10 flex items-center gap-3 ml-auto flex-wrap">
             <span className="flex items-center gap-1 text-xs font-black text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg">
-              <ArrowUp className="w-3.5 h-3.5" /> ▲{mostImproved.rankShift} rank{mostImproved.rankShift !== 1 ? 's' : ''} up
+              <ArrowUp className="w-3.5 h-3.5"/> ▲{mostImproved.rankShift} rank{mostImproved.rankShift !== 1 ? 's' : ''} up
             </span>
             <span className="text-xs text-muted-foreground">
-              Now <span className="font-bold text-foreground">#{activeListForRank.findIndex(r => r.player.id === mostImproved.player.id) + 1}</span>
+              Now <span className="font-bold text-foreground">#{activeListForRank.findIndex(r=>r.player.id===mostImproved.player.id)+1}</span>
               {' · '}{mostImproved.goals} goals
             </span>
           </div>
         </div>
       )}
 
-      {/* ── Search Bar ── */}
+      {/* Search Bar */}
       <div className="relative w-full max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"/>
         <input type="text" placeholder="Search player..." value={searchQuery}
           onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all" />
+          className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm transition-all"/>
       </div>
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '44px' }} />
-              <col style={{ width: '140px' }} />
-              <col style={{ width: '90px' }} />
-              {simulateMode && <col style={{ width: '100px' }} />}
-              <col style={{ width: '48px' }} /><col style={{ width: '48px' }} /><col style={{ width: '48px' }} /><col style={{ width: '48px' }} />
-              <col style={{ width: '60px' }} /><col style={{ width: '48px' }} /><col style={{ width: '48px' }} />
-              <col style={{ width: '64px' }} /><col style={{ width: '64px' }} /><col style={{ width: '72px' }} />
+              <col style={{ width: '44px' }}/>
+              <col style={{ width: '140px' }}/>
+              <col style={{ width: '90px' }}/>
+              <col style={{ width: '48px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/>
+              <col style={{ width: '60px' }}/><col style={{ width: '48px' }}/><col style={{ width: '48px' }}/>
+              <col style={{ width: '64px' }}/><col style={{ width: '64px' }}/><col style={{ width: '72px' }}/>
             </colgroup>
             <thead className="sticky top-0 z-20">
               <tr className="bg-muted/60 backdrop-blur border-b border-border">
                 <th title="Rank" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-2">#</th>
                 <th title="Player" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-left px-3">Player</th>
                 <th title="Recent Form" className="py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap select-none text-center px-1">Form</th>
-                {simulateMode && <th className="py-3 text-[11px] font-bold uppercase tracking-wider text-amber-500 whitespace-nowrap select-none text-center px-1">Simulate</th>}
-                <SortTh field="matches" label="M" title="Matches" />
-                <SortTh field="wins" label="W" title="Wins" />
-                <SortTh field="draws" label="D" title="Draws" />
-                <SortTh field="losses" label="L" title="Losses" />
-                <SortTh field="winRate" label="Win%" title="Win Rate" />
-                <SortTh field="gc" label="GC" title="Goals Conceded" />
-                <SortTh field="cs" label="CS" title="Clean Sheets" />
-                <SortTh field="ht" label="HT" title="Hat-tricks" />
-                <SortTh field="motm" label="MOTM" title="Man of the Match" />
-                <SortTh field="goals" label="⚽ Goals" title="Goals" />
+                <SortTh field="matches" label="M" title="Matches"/>
+                <SortTh field="wins" label="W" title="Wins"/>
+                <SortTh field="draws" label="D" title="Draws"/>
+                <SortTh field="losses" label="L" title="Losses"/>
+                <SortTh field="winRate" label="Win%" title="Win Rate"/>
+                <SortTh field="gc" label="GC" title="Goals Conceded"/>
+                <SortTh field="cs" label="CS" title="Clean Sheets"/>
+                <SortTh field="ht" label="HT" title="Hat-tricks"/>
+                <SortTh field="motm" label="MOTM" title="Man of the Match"/>
+                <SortTh field="goals" label="⚽ Goals" title="Goals"/>
               </tr>
             </thead>
             <tbody>
               {isEmpty ? (
-                <tr>
-                  <td colSpan={totalCols} className="py-20 text-center text-muted-foreground">
-                    <div className="flex flex-col items-center gap-2"><span className="text-4xl">⚽</span><p className="font-medium text-sm">No data for this period</p></div>
-                  </td>
-                </tr>
+                <tr><td colSpan={13} className="py-20 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2"><span className="text-4xl">⚽</span><p className="font-medium text-sm">No data for this period</p></div>
+                </td></tr>
               ) : pageList.map(r => {
                 const activeRank = !r.isInactive ? activeListForRank.findIndex(x => x.player.id === r.player.id) : -1;
                 const isTop3 = activeRank >= 0 && activeRank < 3;
-                const adj = adjustments.get(r.player.id) ?? { goals: 0 };
-                const hasAdj = simulateMode && adj.goals > 0;
-
                 const medalCls = r.isInactive ? 'bg-muted/30 text-muted-foreground/30 text-[10px]'
-                  : activeRank === 0 ? 'medal-gold' : activeRank === 1 ? 'medal-silver' : activeRank === 2 ? 'medal-bronze'
+                  : activeRank===0 ? 'medal-gold' : activeRank===1 ? 'medal-silver' : activeRank===2 ? 'medal-bronze'
                   : 'bg-muted/60 text-muted-foreground/70 text-[10px]';
-
                 const rowCls = r.isInactive ? 'opacity-40 bg-muted/10'
-                  : hasAdj ? 'bg-amber-500/5 ring-1 ring-inset ring-amber-500/20'
-                  : activeRank === 0 ? 'bg-amber-500/5 hover:bg-amber-500/10'
-                  : activeRank === 1 ? 'bg-slate-400/5 hover:bg-slate-400/10'
-                  : activeRank === 2 ? 'bg-orange-700/5 hover:bg-orange-700/10'
+                  : activeRank===0 ? 'bg-amber-500/5 hover:bg-amber-500/10'
+                  : activeRank===1 ? 'bg-slate-400/5 hover:bg-slate-400/10'
+                  : activeRank===2 ? 'bg-orange-700/5 hover:bg-orange-700/10'
                   : 'hover:bg-muted/40';
 
                 return (
                   <tr key={r.player.id}
-                    onClick={() => !simulateMode && !r.isInactive && onPlayerClick?.(r.player.id)}
-                    className={cn("border-b border-border/50 transition-colors group", rowCls, !simulateMode && !r.isInactive && onPlayerClick && "cursor-pointer")}>
+                    onClick={() => !r.isInactive && onPlayerClick?.(r.player.id)}
+                    className={cn("border-b border-border/50 transition-colors group", rowCls, !r.isInactive && onPlayerClick && "cursor-pointer")}>
 
-                    {/* Rank + shift */}
                     <td className="py-2.5 px-2 text-center">
                       {r.isInactive ? <span className="text-[10px] text-muted-foreground/30 font-bold">—</span> : (
                         <div className="flex flex-col items-center gap-0.5">
-                          <div className={cn('w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm', medalCls)}>
-                            {activeRank + 1}
-                          </div>
+                          <div className={cn('w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black mx-auto shrink-0 shadow-sm', medalCls)}>{activeRank+1}</div>
                           {r.rankShift !== null && (
                             <span className={cn("flex items-center text-[9px] font-bold leading-none",
-                              r.rankShift > 0 ? "text-emerald-500" : r.rankShift < 0 ? "text-red-500" : "text-muted-foreground/50")}>
-                              {r.rankShift > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : r.rankShift < 0 ? <ArrowDown className="w-2.5 h-2.5" /> : <Minus className="w-2.5 h-2.5" />}
-                              {r.rankShift !== 0 && Math.abs(r.rankShift)}
+                              r.rankShift>0?"text-emerald-500":r.rankShift<0?"text-red-500":"text-muted-foreground/50")}>
+                              {r.rankShift>0?<ArrowUp className="w-2.5 h-2.5"/>:r.rankShift<0?<ArrowDown className="w-2.5 h-2.5"/>:<Minus className="w-2.5 h-2.5"/>}
+                              {r.rankShift!==0&&Math.abs(r.rankShift)}
                             </span>
                           )}
                         </div>
                       )}
                     </td>
 
-                    {/* Player */}
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-2 min-w-0">
-                        <Avatar name={r.player.name} size={28} src={(r.player as any).profileImageUrl} />
+                        <Avatar name={r.player.name} size={28} src={(r.player as any).profileImageUrl}/>
                         <div className="min-w-0">
-                          <span className={cn("font-semibold text-foreground truncate text-[13px] block", isTop3 && "font-bold")}>{r.player.name}</span>
+                          <span className={cn("font-semibold text-foreground truncate text-[13px] block", isTop3&&"font-bold")}>{r.player.name}</span>
                           {r.isInactive && <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/40 bg-muted/30 px-1.5 py-0.5 rounded">Inactive</span>}
-                          {hasAdj && <span className="text-[9px] font-black uppercase tracking-wider text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded">✏️ Simulated</span>}
                         </div>
                       </div>
                     </td>
 
-                    {/* Form */}
                     <td className="py-2.5 px-1 text-center">
                       <div className="flex items-center justify-center gap-0.5">
-                        {r.form.length === 0
-                          ? <span className="text-muted-foreground/40 text-[11px]">—</span>
-                          : r.form.map((res, fi) => (
+                        {r.form.length===0?<span className="text-muted-foreground/40 text-[11px]">—</span>
+                          :r.form.map((res,fi)=>(
                             <span key={fi} className={cn("w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black shadow-sm",
-                              res === 'win' ? "bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30" :
-                              res === 'draw' ? "bg-amber-500/20 text-amber-500 ring-1 ring-amber-500/30" :
+                              res==='win'?"bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30":
+                              res==='draw'?"bg-amber-500/20 text-amber-500 ring-1 ring-amber-500/30":
                               "bg-red-500/20 text-red-500 ring-1 ring-red-500/30")}>
                               {res.charAt(0).toUpperCase()}
                             </span>
@@ -630,49 +546,30 @@ export function GoalsLeaderboard({
                       </div>
                     </td>
 
-                    {/* Idea 20: Simulate Controls (Goals only) */}
-                    {simulateMode && (
-                      <td className="py-1.5 px-1 text-center" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => adjustGoals(r.player.id, 1)}
-                            className="text-[9px] font-black px-1.5 py-0.5 rounded border text-violet-600 border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 transition-all active:scale-95">
-                            +G
-                          </button>
-                          {adj.goals > 0 && (
-                            <span onClick={() => adjustGoals(r.player.id, -1)}
-                              className="text-[8px] text-muted-foreground/60 cursor-pointer hover:text-red-500 transition-colors leading-none">
-                              {adj.goals}✕
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    )}
-
-                    {/* Stats */}
                     <td className="py-2.5 px-1 text-center text-muted-foreground font-medium text-[13px]">{r.matches}</td>
-                    <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]", r.wins > 0 ? "text-emerald-500" : "text-muted-foreground/50")}>{r.wins}</span></td>
-                    <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]", r.draws > 0 ? "text-amber-500" : "text-muted-foreground/50")}>{r.draws}</span></td>
-                    <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]", r.losses > 0 ? "text-red-500" : "text-muted-foreground/50")}>{r.losses}</span></td>
+                    <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]",r.wins>0?"text-emerald-500":"text-muted-foreground/50")}>{r.wins}</span></td>
+                    <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]",r.draws>0?"text-amber-500":"text-muted-foreground/50")}>{r.draws}</span></td>
+                    <td className="py-2.5 px-1 text-center"><span className={cn("font-semibold text-[13px]",r.losses>0?"text-red-500":"text-muted-foreground/50")}>{r.losses}</span></td>
                     <td className="py-2.5 px-1 text-center">
                       <span className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded-md",
-                        r.winRate >= 60 ? "bg-emerald-500/15 text-emerald-600" : r.winRate >= 40 ? "bg-amber-500/15 text-amber-600" :
-                        r.matches > 0 ? "bg-red-500/10 text-red-500" : "text-muted-foreground/40")}>
-                        {r.matches > 0 ? `${r.winRate}%` : '—'}
+                        r.winRate>=60?"bg-emerald-500/15 text-emerald-600":r.winRate>=40?"bg-amber-500/15 text-amber-600":
+                        r.matches>0?"bg-red-500/10 text-red-500":"text-muted-foreground/40")}>
+                        {r.matches>0?`${r.winRate}%`:'—'}
                       </span>
                     </td>
                     <td className="py-2.5 px-1 text-center font-medium text-foreground/80 text-[13px]">{r.gc}</td>
                     <td className="py-2.5 px-1 text-center">
-                      {r.cs > 0 ? <span className="text-[11px] font-bold text-cyan-600 bg-cyan-500/10 px-1.5 py-0.5 rounded-md">{r.cs}</span> : <span className="text-muted-foreground/40 text-[12px]">—</span>}
+                      {r.cs>0?<span className="text-[11px] font-bold text-cyan-600 bg-cyan-500/10 px-1.5 py-0.5 rounded-md">{r.cs}</span>:<span className="text-muted-foreground/40 text-[12px]">—</span>}
                     </td>
                     <td className="py-2.5 px-1 text-center">
-                      {r.ht > 0 ? <span className="text-[11px] font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">⚽ {r.ht}</span> : <span className="text-muted-foreground/40 text-[12px]">—</span>}
+                      {r.ht>0?<span className="text-[11px] font-bold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">⚽ {r.ht}</span>:<span className="text-muted-foreground/40 text-[12px]">—</span>}
                     </td>
                     <td className="py-2.5 px-1 text-center">
-                      {r.motm > 0 ? <span className="text-[11px] font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">👑 {r.motm}</span> : <span className="text-muted-foreground/40 text-[12px]">—</span>}
+                      {r.motm>0?<span className="text-[11px] font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-md">👑 {r.motm}</span>:<span className="text-muted-foreground/40 text-[12px]">—</span>}
                     </td>
                     <td className="py-2.5 px-1 text-center">
                       <span className={cn("font-black text-[13px] px-2 py-0.5 rounded-lg border shadow-sm",
-                        r.goals > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-muted text-muted-foreground border-border")}>
+                        r.goals>0?"bg-red-500/10 text-red-600 border-red-500/20":"bg-muted text-muted-foreground border-border")}>
                         {r.goals}
                       </span>
                     </td>
@@ -684,26 +581,24 @@ export function GoalsLeaderboard({
         </div>
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {!isEmpty && (
         <div className="flex items-center justify-between px-1 flex-wrap gap-2">
           <p className="text-xs text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{pageStart + 1}–{pageEnd}</span> of{' '}
+            Showing <span className="font-semibold text-foreground">{pageStart+1}–{pageEnd}</span> of{' '}
             <span className="font-semibold text-foreground">{totalEntries}</span> players
-            {inactiveCount > 0 && showInactive && <span className="text-muted-foreground/50 ml-1">({inactiveCount} inactive)</span>}
+            {inactiveCount>0&&showInactive&&<span className="text-muted-foreground/50 ml-1">({inactiveCount} inactive)</span>}
           </p>
           <div className="flex items-center gap-2">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage <= 1}
+            <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={safePage<=1}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all",
-                safePage <= 1 ? "border-border/50 text-muted-foreground/40 cursor-not-allowed" : "border-border bg-card hover:bg-muted/50 text-foreground active:scale-95")}>
+                safePage<=1?"border-border/50 text-muted-foreground/40 cursor-not-allowed":"border-border bg-card hover:bg-muted/50 text-foreground active:scale-95")}>
               ← Previous
             </button>
-            <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 min-w-[80px] text-center">
-              Page {safePage}/{totalPages}
-            </span>
-            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+            <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 min-w-[80px] text-center">Page {safePage}/{totalPages}</span>
+            <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={safePage>=totalPages}
               className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all",
-                safePage >= totalPages ? "border-border/50 text-muted-foreground/40 cursor-not-allowed" : "border-border bg-card hover:bg-muted/50 text-foreground active:scale-95")}>
+                safePage>=totalPages?"border-border/50 text-muted-foreground/40 cursor-not-allowed":"border-border bg-card hover:bg-muted/50 text-foreground active:scale-95")}>
               Next →
             </button>
           </div>
