@@ -61,7 +61,7 @@ const CHASER_TAUNTS = [
   "Coming for that #1 spot! 🔥",
   "I'm on my way! ⚡",
   "Watch your back! 👀",
-  "Your throne is mine! 👑"
+  "Don't get too comfortable! 😤"
 ];
 
 const today = new Date();
