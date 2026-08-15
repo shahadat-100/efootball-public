@@ -20,5 +20,6 @@ export interface FriendlyPlayerStat {
   losses: number;
   goalsScored: number;
   goalsConceded: number;
+  cleanSheets: number;
   winRate: number;
 }

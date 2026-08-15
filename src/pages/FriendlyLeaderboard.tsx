@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useFootballStore } from '@/store/footballStore';
-import { Swords, Trophy, Search, Zap, Calendar } from 'lucide-react';
+import { Swords, Trophy, Search, Zap, Calendar, Flame, Shield, Target } from 'lucide-react';
 import { Avatar } from '@/shared/components';
 import { FriendlyPlayerStat } from '@/features/friendly-matches/types';
 import { cn } from '@/shared/lib/cn';
@@ -91,14 +91,15 @@ export function FriendlyLeaderboard() {
       losses: number;
       goalsScored: number;
       goalsConceded: number;
+      cleanSheets: number;
     }>();
 
     filteredMatches.forEach(m => {
       const p1 = m.player1Id;
       const p2 = m.player2Id;
 
-      if (!map.has(p1)) map.set(p1, { matches: 0, wins: 0, draws: 0, losses: 0, goalsScored: 0, goalsConceded: 0 });
-      if (!map.has(p2)) map.set(p2, { matches: 0, wins: 0, draws: 0, losses: 0, goalsScored: 0, goalsConceded: 0 });
+      if (!map.has(p1)) map.set(p1, { matches: 0, wins: 0, draws: 0, losses: 0, goalsScored: 0, goalsConceded: 0, cleanSheets: 0 });
+      if (!map.has(p2)) map.set(p2, { matches: 0, wins: 0, draws: 0, losses: 0, goalsScored: 0, goalsConceded: 0, cleanSheets: 0 });
 
       const s1 = map.get(p1)!;
       const s2 = map.get(p2)!;
@@ -109,6 +110,9 @@ export function FriendlyLeaderboard() {
       s1.goalsConceded += m.player2Goals;
       s2.goalsScored += m.player2Goals;
       s2.goalsConceded += m.player1Goals;
+
+      if (m.player2Goals === 0) s1.cleanSheets += 1;
+      if (m.player1Goals === 0) s2.cleanSheets += 1;
 
       if (m.player1Goals > m.player2Goals) {
         s1.wins += 1;
@@ -143,6 +147,21 @@ export function FriendlyLeaderboard() {
       return b.winRate - a.winRate;
     });
   }, [filteredMatches, playerMap]);
+
+  // Featured Highlight Cards (Most Goals, Most Wins, Most Clean Sheets)
+  const highlights = useMemo(() => {
+    if (statsList.length === 0) return null;
+
+    const mostGoalsPlayer = [...statsList].sort((a, b) => b.goalsScored - a.goalsScored || b.wins - a.wins)[0];
+    const mostWinsPlayer = [...statsList].sort((a, b) => b.wins - a.wins || b.goalsScored - a.goalsScored)[0];
+    const mostCleanSheetsPlayer = [...statsList].sort((a, b) => b.cleanSheets - a.cleanSheets || b.wins - a.wins)[0];
+
+    return {
+      mostGoals: mostGoalsPlayer && mostGoalsPlayer.goalsScored > 0 ? mostGoalsPlayer : null,
+      mostWins: mostWinsPlayer && mostWinsPlayer.wins > 0 ? mostWinsPlayer : null,
+      mostCleanSheets: mostCleanSheetsPlayer && mostCleanSheetsPlayer.cleanSheets > 0 ? mostCleanSheetsPlayer : null,
+    };
+  }, [statsList]);
 
   // Head-to-Head breakdown matrix for selected player (filtered by selected period)
   const headToHeadMatrix = useMemo(() => {
@@ -211,10 +230,12 @@ export function FriendlyLeaderboard() {
     );
   }
 
+  const periodLabel = viewMode === 'weekly' ? 'This Week' : viewMode === 'monthly' ? 'This Month' : 'All-Time';
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-primary/15 via-card to-card border border-primary/25 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+      <div className="bg-gradient-to-r from-primary/15 via-card to-card border border-primary/25 rounded-3xl p-5 sm:p-8 relative overflow-hidden shadow-xl">
         <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
@@ -230,7 +251,7 @@ export function FriendlyLeaderboard() {
           </div>
 
           <div className="flex gap-4 items-center">
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
@@ -247,11 +268,11 @@ export function FriendlyLeaderboard() {
       {/* Period Filter Tabs (Weekly / Monthly / Overall + Dropdowns) */}
       <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Toggle Mode */}
-        <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-xl shrink-0">
+        <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-xl shrink-0 overflow-x-auto">
           <button
             onClick={() => setViewMode('weekly')}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               viewMode === 'weekly' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -260,7 +281,7 @@ export function FriendlyLeaderboard() {
           <button
             onClick={() => setViewMode('monthly')}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               viewMode === 'monthly' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -269,7 +290,7 @@ export function FriendlyLeaderboard() {
           <button
             onClick={() => setViewMode('overall')}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               viewMode === 'overall' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -279,10 +300,10 @@ export function FriendlyLeaderboard() {
 
         {/* Dropdowns for Year/Month/Week */}
         {viewMode !== 'overall' && (
-          <div className="flex flex-wrap items-center gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
             {/* Year Selector */}
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <Calendar className="w-4 h-4 text-muted-foreground hidden sm:inline-block" />
               <select
                 value={selectedYear}
                 onChange={e => setSelectedYear(Number(e.target.value))}
@@ -322,37 +343,106 @@ export function FriendlyLeaderboard() {
         )}
       </div>
 
+      {/* Feature Highlights Section: Most Goals, Most Wins, Most Clean Sheets */}
+      {highlights && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* Most Goals */}
+          <div className="bg-gradient-to-br from-amber-500/10 via-card to-card border border-amber-500/30 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
+            <div className="p-3 bg-amber-500/20 text-amber-500 rounded-xl shrink-0">
+              <Target className="w-6 h-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">Most Goals ({periodLabel})</span>
+              {highlights.mostGoals ? (
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <div className="flex items-center gap-2 truncate">
+                    <Avatar src={highlights.mostGoals.profileImageUrl} name={highlights.mostGoals.playerName} className="w-6 h-6 rounded-full shrink-0" />
+                    <span className="font-bold text-sm text-foreground truncate">{highlights.mostGoals.playerName}</span>
+                  </div>
+                  <span className="font-mono font-black text-amber-500 text-base shrink-0">{highlights.mostGoals.goalsScored} ⚽</span>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-0.5">No goals recorded</p>
+              )}
+            </div>
+          </div>
+
+          {/* Most Wins */}
+          <div className="bg-gradient-to-br from-emerald-500/10 via-card to-card border border-emerald-500/30 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
+            <div className="p-3 bg-emerald-500/20 text-emerald-500 rounded-xl shrink-0">
+              <Flame className="w-6 h-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500">Most Wins ({periodLabel})</span>
+              {highlights.mostWins ? (
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <div className="flex items-center gap-2 truncate">
+                    <Avatar src={highlights.mostWins.profileImageUrl} name={highlights.mostWins.playerName} className="w-6 h-6 rounded-full shrink-0" />
+                    <span className="font-bold text-sm text-foreground truncate">{highlights.mostWins.playerName}</span>
+                  </div>
+                  <span className="font-mono font-black text-emerald-500 text-base shrink-0">{highlights.mostWins.wins} W</span>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-0.5">No wins recorded</p>
+              )}
+            </div>
+          </div>
+
+          {/* Most Clean Sheets */}
+          <div className="bg-gradient-to-br from-cyan-500/10 via-card to-card border border-cyan-500/30 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
+            <div className="p-3 bg-cyan-500/20 text-cyan-500 rounded-xl shrink-0">
+              <Shield className="w-6 h-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-500">Clean Sheets ({periodLabel})</span>
+              {highlights.mostCleanSheets ? (
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <div className="flex items-center gap-2 truncate">
+                    <Avatar src={highlights.mostCleanSheets.profileImageUrl} name={highlights.mostCleanSheets.playerName} className="w-6 h-6 rounded-full shrink-0" />
+                    <span className="font-bold text-sm text-foreground truncate">{highlights.mostCleanSheets.playerName}</span>
+                  </div>
+                  <span className="font-mono font-black text-cyan-500 text-base shrink-0">{highlights.mostCleanSheets.cleanSheets} 🧤</span>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-0.5">No clean sheets</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Leaderboard Table & Matches Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Table - 2 Cols */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-border/60 flex items-center justify-between">
+            <div className="p-4 sm:p-5 border-b border-border/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-500" />
-                <h2 className="font-heading font-bold text-lg text-foreground">
+                <h2 className="font-heading font-bold text-base sm:text-lg text-foreground">
                   {viewMode === 'weekly' ? `${MONTHS[selectedMonth]} (Week ${selectedWeek}) Standings` :
                    viewMode === 'monthly' ? `${MONTHS[selectedMonth]} ${selectedYear} Standings` :
                    'All-Time Standings'}
                 </h2>
               </div>
-              <span className="text-xs text-muted-foreground font-medium">{filteredStats.length} Active Players</span>
+              <span className="text-xs text-muted-foreground font-medium">{filteredStats.length} Players</span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[620px] sm:min-w-0">
                 <thead className="bg-muted/40 text-muted-foreground text-[11px] font-semibold uppercase tracking-wider border-b border-border/50">
                   <tr>
-                    <th className="py-3 px-4 w-12 text-center">Rank</th>
-                    <th className="py-3 px-4">Player</th>
-                    <th className="py-3 px-3 text-center">M</th>
-                    <th className="py-3 px-3 text-center">W</th>
-                    <th className="py-3 px-3 text-center">D</th>
-                    <th className="py-3 px-3 text-center">L</th>
-                    <th className="py-3 px-3 text-center">GF</th>
-                    <th className="py-3 px-3 text-center">GA</th>
-                    <th className="py-3 px-4 text-center">Win %</th>
-                    <th className="py-3 px-3 text-right">H2H</th>
+                    <th className="py-3 px-3 sm:px-4 w-10 text-center">#</th>
+                    <th className="py-3 px-3 sm:px-4">Player</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">M</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">W</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">D</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">L</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">GF</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">GA</th>
+                    <th className="py-3 px-2 sm:px-3 text-center">CS</th>
+                    <th className="py-3 px-3 sm:px-4 text-center">Win %</th>
+                    <th className="py-3 px-2 sm:px-3 text-right">H2H</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
@@ -370,28 +460,29 @@ export function FriendlyLeaderboard() {
                         }`}
                         onClick={() => setSelectedPlayerHeadToHead(isSelected ? null : stat.playerId)}
                       >
-                        <td className="py-3.5 px-4 text-center font-bold text-xs">
+                        <td className="py-3 px-3 sm:px-4 text-center font-bold text-xs">
                           {isTop1 && <span className="inline-flex w-6 h-6 rounded-full bg-amber-500/15 text-amber-500 items-center justify-center font-black">1</span>}
                           {isTop2 && <span className="inline-flex w-6 h-6 rounded-full bg-slate-300/20 text-slate-300 items-center justify-center font-black">2</span>}
                           {isTop3 && <span className="inline-flex w-6 h-6 rounded-full bg-amber-700/20 text-amber-600 items-center justify-center font-black">3</span>}
                           {!isTop1 && !isTop2 && !isTop3 && <span className="text-muted-foreground">{idx + 1}</span>}
                         </td>
 
-                        <td className="py-3.5 px-4 font-semibold text-foreground">
-                          <div className="flex items-center gap-3">
-                            <Avatar src={stat.profileImageUrl} name={stat.playerName} className="w-8 h-8 rounded-full border border-border" />
-                            <span>{stat.playerName}</span>
+                        <td className="py-3 px-3 sm:px-4 font-semibold text-foreground">
+                          <div className="flex items-center gap-2.5 sm:gap-3 max-w-[130px] sm:max-w-none truncate">
+                            <Avatar src={stat.profileImageUrl} name={stat.playerName} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-border shrink-0" />
+                            <span className="truncate">{stat.playerName}</span>
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-3 text-center text-muted-foreground font-mono">{stat.matches}</td>
-                        <td className="py-3.5 px-3 text-center font-bold text-emerald-500 font-mono">{stat.wins}</td>
-                        <td className="py-3.5 px-3 text-center text-amber-500 font-mono">{stat.draws}</td>
-                        <td className="py-3.5 px-3 text-center text-red-400 font-mono">{stat.losses}</td>
-                        <td className="py-3.5 px-3 text-center font-bold text-foreground font-mono">{stat.goalsScored}</td>
-                        <td className="py-3.5 px-3 text-center text-muted-foreground font-mono">{stat.goalsConceded}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-muted-foreground font-mono">{stat.matches}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center font-bold text-emerald-500 font-mono">{stat.wins}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-amber-500 font-mono">{stat.draws}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-red-400 font-mono">{stat.losses}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center font-bold text-foreground font-mono">{stat.goalsScored}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-muted-foreground font-mono">{stat.goalsConceded}</td>
+                        <td className="py-3 px-2 sm:px-3 text-center font-semibold text-cyan-500 font-mono">{stat.cleanSheets}</td>
 
-                        <td className="py-3.5 px-4 text-center font-black font-mono">
+                        <td className="py-3 px-3 sm:px-4 text-center font-black font-mono">
                           <span className={`px-2 py-0.5 rounded-full text-xs ${
                             stat.winRate >= 60 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
                             stat.winRate >= 40 ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
@@ -401,7 +492,7 @@ export function FriendlyLeaderboard() {
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-3 text-right">
+                        <td className="py-3 px-2 sm:px-3 text-right">
                           <button 
                             className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                               isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted/80 hover:bg-muted text-foreground'
@@ -416,7 +507,7 @@ export function FriendlyLeaderboard() {
 
                   {filteredStats.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-muted-foreground text-sm">
+                      <td colSpan={11} className="py-12 text-center text-muted-foreground text-sm">
                         No friendly matches played in this selected period.
                       </td>
                     </tr>
@@ -474,7 +565,7 @@ export function FriendlyLeaderboard() {
 
         {/* Recent Matches Feed - 1 Col */}
         <div className="space-y-4">
-          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 max-h-[750px] overflow-y-auto">
+          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-4 sm:p-5 max-h-[750px] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border/60 pb-3">
               <h2 className="font-heading font-bold text-base text-foreground">Duels Feed</h2>
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{filteredMatches.length} Matches</span>
