@@ -9,6 +9,7 @@ import { NewsDetail } from '@/pages/NewsDetail';
 import { HallOfFame } from '@/pages/HallOfFame';
 import { Compare } from '@/pages/Compare';
 import { Leaderboard } from '@/pages/Leaderboard';
+import { FriendlyLeaderboard } from '@/pages/FriendlyLeaderboard';
 import { ClubInfo } from '@/pages/ClubInfo';
 import { Gallery } from '@/pages/Gallery';
 
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: "matches", element: <Matches /> },
       { path: "compare", element: <Compare /> },
       { path: "leaderboard", element: <Leaderboard /> },
+      { path: "friendly", element: <FriendlyLeaderboard /> },
       { path: "news", element: <News /> },
       { path: "news/:id", element: <NewsDetail /> },
       { path: "hall-of-fame", element: <HallOfFame /> },

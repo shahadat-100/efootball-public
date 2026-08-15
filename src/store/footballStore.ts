@@ -4,6 +4,7 @@ import { Player, SeasonDb, PlayerSeasonStat } from '@/features/players/types';
 import { Match } from '@/features/matches/types';
 import { MatchEntry } from '@/features/match-entries/types';
 import { NewsArticle } from '@/features/news/types';
+import { FriendlyMatch } from '@/features/friendly-matches/types';
 import { supabase } from '@/lib/supabase';
 
 export interface PlayerMonthlyStat {
@@ -57,6 +58,18 @@ export interface CustomTag {
   status: boolean;
   createdAt: string;
 }
+
+export const mapFriendlyMatchFromDb = (m: any): FriendlyMatch => ({
+  id: m.id,
+  player1Id: m.player1_id,
+  player2Id: m.player2_id,
+  player1Goals: m.player1_goals ?? 0,
+  player2Goals: m.player2_goals ?? 0,
+  date: m.date,
+  time: m.time ?? null,
+  notes: m.notes ?? null,
+  createdAt: m.created_at ?? null,
+});
 
 // ── Database Mapping Helpers ─────────────────────────────────────────
 
@@ -211,6 +224,8 @@ interface FootballStore {
   fetchAvailableTags: () => Promise<void>;
 
   fetchHallOfFame: () => Promise<void>;
+  friendlyMatches: FriendlyMatch[];
+  fetchFriendlyMatches: () => Promise<void>;
   isInitialized: boolean;
   initializeData: () => Promise<void>;
 }
@@ -230,6 +245,7 @@ export const useFootballStore = create<FootballStore>()(
       hallOfFame: [],
       availableRoles: [],
       availableTags: [],
+      friendlyMatches: [],
       matchEntriesLoaded: false,
       matchEntriesHasMore: true,
       isInitialized: false,
@@ -654,7 +670,14 @@ export const useFootballStore = create<FootballStore>()(
         }
         if (error) console.error('Error fetching Hall of Fame:', error);
       },
-
+      fetchFriendlyMatches: async () => {
+        const { data, error } = await supabase
+          .from('friendly_matches')
+          .select('*')
+          .order('date', { ascending: false });
+        if (data) set({ friendlyMatches: data.map(mapFriendlyMatchFromDb) });
+        if (error) console.error('Error fetching friendly matches:', error);
+      },
     }),
     { enabled: import.meta.env.MODE !== 'production' }
   )
