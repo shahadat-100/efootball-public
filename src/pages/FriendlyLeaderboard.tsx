@@ -1,14 +1,31 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useFootballStore } from '@/store/footballStore';
-import { Swords, Trophy, Search, Target, Flame, Crown, Zap } from 'lucide-react';
+import { Swords, Trophy, Search, Zap, Calendar } from 'lucide-react';
 import { Avatar } from '@/shared/components';
 import { FriendlyPlayerStat } from '@/features/friendly-matches/types';
+import { cn } from '@/shared/lib/cn';
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+type ViewMode = 'weekly' | 'monthly' | 'overall';
 
 export function FriendlyLeaderboard() {
   const { friendlyMatches, fetchFriendlyMatches, players, fetchPlayers } = useFootballStore();
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedPlayerHeadToHead, setSelectedPlayerHeadToHead] = useState<string | null>(null);
+
+  // Time-period Filter States
+  const [viewMode, setViewMode] = useState<ViewMode>('monthly');
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [selectedWeek, setSelectedWeek] = useState<number>(() => {
+    const d = new Date().getDate();
+    return d >= 22 ? 4 : d >= 15 ? 3 : d >= 8 ? 2 : 1;
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -25,7 +42,47 @@ export function FriendlyLeaderboard() {
     return map;
   }, [players]);
 
-  // Aggregate stats per player from friendly matches
+  // Extract available years from match dates
+  const availableYears = useMemo(() => {
+    const set = new Set<number>();
+    set.add(new Date().getFullYear());
+    friendlyMatches.forEach(m => {
+      if (m.date) {
+        const y = new Date(m.date).getFullYear();
+        if (!isNaN(y)) set.add(y);
+      }
+    });
+    return Array.from(set).sort((a, b) => b - a);
+  }, [friendlyMatches]);
+
+  // Filter matches based on Weekly / Monthly / Overall selection
+  const filteredMatches = useMemo(() => {
+    return friendlyMatches.filter(m => {
+      if (!m.date) return false;
+      const d = new Date(m.date);
+      const matchYear = d.getFullYear();
+      const matchMonth = d.getMonth();
+      const matchDay = d.getDate();
+
+      if (viewMode === 'overall') return true;
+
+      if (matchYear !== selectedYear) return false;
+
+      if (viewMode === 'monthly') {
+        return matchMonth === selectedMonth;
+      }
+
+      if (viewMode === 'weekly') {
+        if (matchMonth !== selectedMonth) return false;
+        const matchWeek = matchDay >= 22 ? 4 : matchDay >= 15 ? 3 : matchDay >= 8 ? 2 : 1;
+        return matchWeek === selectedWeek;
+      }
+
+      return true;
+    });
+  }, [friendlyMatches, viewMode, selectedYear, selectedMonth, selectedWeek]);
+
+  // Aggregate stats per player for the filtered time period
   const statsList = useMemo<FriendlyPlayerStat[]>(() => {
     const map = new Map<string, {
       matches: number;
@@ -36,7 +93,7 @@ export function FriendlyLeaderboard() {
       goalsConceded: number;
     }>();
 
-    friendlyMatches.forEach(m => {
+    filteredMatches.forEach(m => {
       const p1 = m.player1Id;
       const p2 = m.player2Id;
 
@@ -85,34 +142,16 @@ export function FriendlyLeaderboard() {
       if (b.goalsScored !== a.goalsScored) return b.goalsScored - a.goalsScored;
       return b.winRate - a.winRate;
     });
-  }, [friendlyMatches, playerMap]);
+  }, [filteredMatches, playerMap]);
 
-  // Highlight / Summary Stats Cards
-  const summaryStats = useMemo(() => {
-    const totalFriendlyMatches = friendlyMatches.length;
-    const totalGoals = friendlyMatches.reduce((acc, m) => acc + m.player1Goals + m.player2Goals, 0);
-    const avgGoalsPerMatch = totalFriendlyMatches > 0 ? (totalGoals / totalFriendlyMatches).toFixed(1) : '0';
-
-    const topWinner = statsList.length > 0 ? statsList[0] : null;
-    const topScorer = [...statsList].sort((a, b) => b.goalsScored - a.goalsScored)[0] || null;
-
-    return {
-      totalFriendlyMatches,
-      totalGoals,
-      avgGoalsPerMatch,
-      topWinner,
-      topScorer,
-    };
-  }, [friendlyMatches, statsList]);
-
-  // Head-to-Head breakdown matrix for selected player
+  // Head-to-Head breakdown matrix for selected player (filtered by selected period)
   const headToHeadMatrix = useMemo(() => {
     if (!selectedPlayerHeadToHead) return [];
 
     const pId = selectedPlayerHeadToHead;
     const oppMap = new Map<string, { oppId: string; oppName: string; oppAvatar: string; matches: number; wins: number; draws: number; losses: number; gf: number; ga: number }>();
 
-    friendlyMatches.forEach(m => {
+    filteredMatches.forEach(m => {
       if (m.player1Id !== pId && m.player2Id !== pId) return;
 
       const isP1 = m.player1Id === pId;
@@ -146,7 +185,7 @@ export function FriendlyLeaderboard() {
     });
 
     return Array.from(oppMap.values()).sort((a, b) => b.matches - a.matches);
-  }, [selectedPlayerHeadToHead, friendlyMatches, playerMap]);
+  }, [selectedPlayerHeadToHead, filteredMatches, playerMap]);
 
   const filteredStats = useMemo(() => {
     if (!search.trim()) return statsList;
@@ -154,25 +193,20 @@ export function FriendlyLeaderboard() {
   }, [statsList, search]);
 
   const enrichedMatches = useMemo(() => {
-    return friendlyMatches.map(m => ({
+    return filteredMatches.map(m => ({
       ...m,
       p1Name: playerMap.get(m.player1Id)?.name || 'Unknown',
       p1Avatar: playerMap.get(m.player1Id)?.avatar || '',
       p2Name: playerMap.get(m.player2Id)?.name || 'Unknown',
       p2Avatar: playerMap.get(m.player2Id)?.avatar || '',
     }));
-  }, [friendlyMatches, playerMap]);
+  }, [filteredMatches, playerMap]);
 
   if (isLoading) {
     return (
       <div className="space-y-6 animate-pulse p-4">
         <div className="h-8 w-64 bg-muted rounded-md" />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="h-28 bg-card rounded-2xl border border-border" />
-          <div className="h-28 bg-card rounded-2xl border border-border" />
-          <div className="h-28 bg-card rounded-2xl border border-border" />
-          <div className="h-28 bg-card rounded-2xl border border-border" />
-        </div>
+        <div className="h-32 bg-card rounded-2xl border border-border" />
       </div>
     );
   }
@@ -185,13 +219,13 @@ export function FriendlyLeaderboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3 shadow-sm">
-              <Swords className="w-4 h-4" /> Training & Friendly Arena
+              <Swords className="w-4 h-4" /> Friendly & Training Arena
             </div>
             <h1 className="font-heading font-black text-2xl sm:text-4xl text-foreground tracking-tight">
-              Friendly Arena & Leaderboard
+              Friendly Leaderboard
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base mt-1.5 max-w-xl">
-              Complete club training analytics — internal 1v1 duels, head-to-head records, and goal charts.
+              Periodic internal club standings — reset weekly & monthly to crown training champions.
             </p>
           </div>
 
@@ -210,81 +244,82 @@ export function FriendlyLeaderboard() {
         </div>
       </div>
 
-      {/* Overview Stat Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Total Matches */}
-        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Duels</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-              <Swords className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="font-mono font-black text-2xl sm:text-3xl text-foreground">{summaryStats.totalFriendlyMatches}</span>
-            <span className="text-[11px] text-muted-foreground ml-2">matches played</span>
-          </div>
+      {/* Period Filter Tabs (Weekly / Monthly / Overall + Dropdowns) */}
+      <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        {/* Toggle Mode */}
+        <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-xl shrink-0">
+          <button
+            onClick={() => setViewMode('weekly')}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-xs font-bold transition-all",
+              viewMode === 'weekly' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Weekly
+          </button>
+          <button
+            onClick={() => setViewMode('monthly')}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-xs font-bold transition-all",
+              viewMode === 'monthly' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setViewMode('overall')}
+            className={cn(
+              "px-3.5 py-2 rounded-lg text-xs font-bold transition-all",
+              viewMode === 'overall' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            All Time
+          </button>
         </div>
 
-        {/* Total Goals */}
-        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Goals</span>
-            <div className="w-8 h-8 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
-              <Target className="w-4 h-4" />
+        {/* Dropdowns for Year/Month/Week */}
+        {viewMode !== 'overall' && (
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            {/* Year Selector */}
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-foreground font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                {availableYears.map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
             </div>
-          </div>
-          <div className="mt-3">
-            <span className="font-mono font-black text-2xl sm:text-3xl text-foreground">{summaryStats.totalGoals}</span>
-            <span className="text-[11px] text-muted-foreground ml-2">({summaryStats.avgGoalsPerMatch} / match)</span>
-          </div>
-        </div>
 
-        {/* Top King (Most Wins) */}
-        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Most Wins</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-              <Crown className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            {summaryStats.topWinner ? (
-              <>
-                <Avatar src={summaryStats.topWinner.profileImageUrl} name={summaryStats.topWinner.playerName} className="w-7 h-7 rounded-full" />
-                <div className="truncate">
-                  <p className="font-bold text-xs sm:text-sm text-foreground truncate">{summaryStats.topWinner.playerName}</p>
-                  <p className="text-[11px] font-mono text-emerald-500 font-semibold">{summaryStats.topWinner.wins} Wins ({summaryStats.topWinner.winRate}%)</p>
-                </div>
-              </>
-            ) : (
-              <span className="text-xs text-muted-foreground">N/A</span>
+            {/* Month Selector */}
+            <select
+              value={selectedMonth}
+              onChange={e => setSelectedMonth(Number(e.target.value))}
+              className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-foreground font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              {MONTHS.map((m, idx) => (
+                <option key={idx} value={idx}>{m}</option>
+              ))}
+            </select>
+
+            {/* Week Selector */}
+            {viewMode === 'weekly' && (
+              <select
+                value={selectedWeek}
+                onChange={e => setSelectedWeek(Number(e.target.value))}
+                className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-foreground font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value={1}>Week 1 (1-7)</option>
+                <option value={2}>Week 2 (8-14)</option>
+                <option value={3}>Week 3 (15-21)</option>
+                <option value={4}>Week 4 (22+)</option>
+              </select>
             )}
           </div>
-        </div>
-
-        {/* Top Scorer */}
-        <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Scorer</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <Flame className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            {summaryStats.topScorer ? (
-              <>
-                <Avatar src={summaryStats.topScorer.profileImageUrl} name={summaryStats.topScorer.playerName} className="w-7 h-7 rounded-full" />
-                <div className="truncate">
-                  <p className="font-bold text-xs sm:text-sm text-foreground truncate">{summaryStats.topScorer.playerName}</p>
-                  <p className="text-[11px] font-mono text-foreground font-semibold">{summaryStats.topScorer.goalsScored} Goals</p>
-                </div>
-              </>
-            ) : (
-              <span className="text-xs text-muted-foreground">N/A</span>
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Leaderboard Table & Matches Grid */}
@@ -295,9 +330,13 @@ export function FriendlyLeaderboard() {
             <div className="p-5 border-b border-border/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-500" />
-                <h2 className="font-heading font-bold text-lg text-foreground">Player Standings</h2>
+                <h2 className="font-heading font-bold text-lg text-foreground">
+                  {viewMode === 'weekly' ? `${MONTHS[selectedMonth]} (Week ${selectedWeek}) Standings` :
+                   viewMode === 'monthly' ? `${MONTHS[selectedMonth]} ${selectedYear} Standings` :
+                   'All-Time Standings'}
+                </h2>
               </div>
-              <span className="text-xs text-muted-foreground font-medium">{filteredStats.length} Players</span>
+              <span className="text-xs text-muted-foreground font-medium">{filteredStats.length} Active Players</span>
             </div>
 
             <div className="overflow-x-auto">
@@ -378,7 +417,7 @@ export function FriendlyLeaderboard() {
                   {filteredStats.length === 0 && (
                     <tr>
                       <td colSpan={10} className="py-12 text-center text-muted-foreground text-sm">
-                        No friendly match records found.
+                        No friendly matches played in this selected period.
                       </td>
                     </tr>
                   )}
@@ -394,7 +433,7 @@ export function FriendlyLeaderboard() {
                 <div className="flex items-center gap-2">
                   <Zap className="w-5 h-5 text-primary" />
                   <h3 className="font-heading font-bold text-base text-foreground">
-                    Head-to-Head Record: <span className="text-primary">{playerMap.get(selectedPlayerHeadToHead)?.name}</span>
+                    Head-to-Head ({viewMode}): <span className="text-primary">{playerMap.get(selectedPlayerHeadToHead)?.name}</span>
                   </h3>
                 </div>
                 <button 
@@ -406,7 +445,7 @@ export function FriendlyLeaderboard() {
               </div>
 
               {headToHeadMatrix.length === 0 ? (
-                <p className="text-muted-foreground text-xs">No head-to-head matches found for this player.</p>
+                <p className="text-muted-foreground text-xs">No head-to-head matches found for this player in selected period.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto">
                   {headToHeadMatrix.map((item) => (
@@ -437,8 +476,8 @@ export function FriendlyLeaderboard() {
         <div className="space-y-4">
           <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 max-h-[750px] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border/60 pb-3">
-              <h2 className="font-heading font-bold text-base text-foreground">Recent Duels</h2>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Live Feed</span>
+              <h2 className="font-heading font-bold text-base text-foreground">Duels Feed</h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{filteredMatches.length} Matches</span>
             </div>
 
             <div className="space-y-3">
@@ -472,7 +511,7 @@ export function FriendlyLeaderboard() {
               ))}
 
               {enrichedMatches.length === 0 && (
-                <p className="text-muted-foreground text-xs text-center py-8">No recent duels recorded.</p>
+                <p className="text-muted-foreground text-xs text-center py-8">No friendly duels found in this period.</p>
               )}
             </div>
           </div>
