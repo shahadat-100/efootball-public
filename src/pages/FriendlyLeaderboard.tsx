@@ -330,7 +330,7 @@ export function FriendlyLeaderboard() {
   }
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div>
 
       {/* ── Header ── */}
       <div className="mb-6 md:mb-8 flex flex-col gap-2">
@@ -358,12 +358,12 @@ export function FriendlyLeaderboard() {
 
       {/* ── Period Filter ── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
+        <div className="flex items-center gap-1.5 bg-muted/30 p-1.5 rounded-xl border border-border w-max">
           {(['weekly', 'monthly', 'overall'] as ViewMode[]).map(mode => (
             <button key={mode} onClick={() => setViewMode(mode)}
               className={cn(
-                "px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-lg transition-all",
-                viewMode === mode ? "bg-primary text-primary-foreground shadow-md scale-105" : "text-muted-foreground hover:text-foreground hover:bg-background/80"
+                "px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-lg transition-colors",
+                viewMode === mode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-background/80"
               )}>
               {mode === 'weekly' ? '📅 Weekly' : mode === 'monthly' ? '🗓️ Monthly' : '🏆 All Time'}
             </button>
@@ -386,10 +386,10 @@ export function FriendlyLeaderboard() {
             {viewMode === 'weekly' && (
               <select value={selectedWeek} onChange={e => setSelectedWeek(Number(e.target.value))}
                 className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-foreground font-semibold focus:outline-none focus:ring-1 focus:ring-primary text-xs">
-                <option value={1}>Week 1 (1-7)</option>
-                <option value={2}>Week 2 (8-14)</option>
-                <option value={3}>Week 3 (15-21)</option>
-                <option value={4}>Week 4 (22+)</option>
+                <option value={1}>Week 1</option>
+                <option value={2}>Week 2</option>
+                <option value={3}>Week 3</option>
+                <option value={4}>Week 4</option>
               </select>
             )}
           </div>
