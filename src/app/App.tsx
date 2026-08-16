@@ -24,8 +24,8 @@ const BOTTOM_NAV = [
   { id: 'overview', label: 'Overview', icon: Hexagon },
   { id: 'players', label: 'Players', icon: Users },
   { id: 'matches', label: 'Matches', icon: Trophy },
-  { id: 'gallery', label: 'Gallery', icon: ImageIcon },
   { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
+  { id: 'friendly', label: 'Friendly', icon: Swords },
 ];
 
 // Page title map
