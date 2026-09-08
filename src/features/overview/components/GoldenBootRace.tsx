@@ -57,7 +57,7 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
   // Empty state for seasons with no goal data yet
   if (scorers.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden h-full">
         <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
         <div className="relative z-10 flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
   const chasers = scorers.slice(1);
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group h-full">
       {/* Gold glow behind leader */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-amber-500/10 to-transparent pointer-events-none" />
       <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />

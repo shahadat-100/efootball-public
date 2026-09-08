@@ -49,7 +49,7 @@ export function ActivityTimeline({ dates }: ActivityTimelineProps) {
   const peakMonth = chartData.reduce((best, d) => d.count > best.count ? d : best, chartData[0]);
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col relative overflow-hidden group">
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col relative overflow-hidden group h-full">
       {/* Ambient glow */}
       <div className="absolute -top-12 -right-12 w-40 h-40 bg-primary/8 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 group-hover:opacity-150" />
       <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
