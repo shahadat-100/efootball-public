@@ -10,6 +10,9 @@ const calcPoints = (s: {
   (s.wins * 10) + (s.draws * 5) - (s.losses * 3) +
   s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
 
+// ── Month Names ────────────────────────────────────────────────────────────
+export const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
 // ── Current time helpers ───────────────────────────────────────────────────
 function getCurrentPeriod() {
   const today = new Date();
@@ -21,6 +24,71 @@ function getCurrentPeriod() {
   else if (day >= 15 && day <= 21) week = 3;
   else if (day >= 22) week = 4;
   return { year, monthIndex, week };
+}
+
+export interface WeekOption {
+  year: number;
+  monthIndex: number;
+  week: number;
+  label: string;
+  isOver: boolean;
+}
+
+export interface MonthOption {
+  year: number;
+  monthIndex: number;
+  label: string;
+  isOver: boolean;
+}
+
+export function getLast4Weeks(baseDate = new Date()): WeekOption[] {
+  let year = baseDate.getFullYear();
+  let monthIndex = baseDate.getMonth();
+  const day = baseDate.getDate();
+  let week = 1;
+  if (day >= 8 && day <= 14) week = 2;
+  else if (day >= 15 && day <= 21) week = 3;
+  else if (day >= 22) week = 4;
+
+  const result: WeekOption[] = [];
+  for (let i = 0; i < 4; i++) {
+    result.push({
+      year,
+      monthIndex,
+      week,
+      label: `Week ${week} · ${MONTHS[monthIndex]} ${year}`,
+      isOver: i > 0, // only the first (current) week is ongoing / not over
+    });
+
+    // Step backwards one week
+    if (week > 1) {
+      week -= 1;
+    } else {
+      week = 4;
+      monthIndex -= 1;
+      if (monthIndex < 0) {
+        monthIndex = 11;
+        year -= 1;
+      }
+    }
+  }
+  return result;
+}
+
+export function getLast3Months(baseDate = new Date()): MonthOption[] {
+  const result: MonthOption[] = [];
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(baseDate.getFullYear(), baseDate.getMonth() - i, 1);
+    const year = d.getFullYear();
+    const monthIndex = d.getMonth();
+    result.push({
+      year,
+      monthIndex,
+      label: `${MONTHS[monthIndex]} ${year}`,
+      isOver: i > 0, // only past months are over
+    });
+  }
+  return result;
 }
 
 export interface RankedPlayer {
@@ -38,9 +106,10 @@ export interface RankedPlayer {
 export function getTopPlayersWeekly(
   players: Player[],
   weeklyStats: PlayerWeeklyStat[],
-  count = 10
+  count = 10,
+  period?: { year: number; monthIndex: number; week: number }
 ): RankedPlayer[] {
-  const { year, monthIndex, week } = getCurrentPeriod();
+  const { year, monthIndex, week } = period ?? getCurrentPeriod();
   const map = new Map<string, { pts: number; goals: number; motm: number; apps: number; wins: number; draws: number; losses: number }>();
 
   players.forEach(p => map.set(p.id, { pts: 0, goals: 0, motm: 0, apps: 0, wins: 0, draws: 0, losses: 0 }));
@@ -81,9 +150,10 @@ export function getTopPlayersWeekly(
 export function getTopPlayersMonthly(
   players: Player[],
   monthlyStats: PlayerMonthlyStat[],
-  count = 10
+  count = 10,
+  period?: { year: number; monthIndex: number }
 ): RankedPlayer[] {
-  const { year, monthIndex } = getCurrentPeriod();
+  const { year, monthIndex } = period ?? getCurrentPeriod();
   const map = new Map<string, { pts: number; goals: number; motm: number; apps: number; wins: number; draws: number; losses: number }>();
 
   players.forEach(p => map.set(p.id, { pts: 0, goals: 0, motm: 0, apps: 0, wins: 0, draws: 0, losses: 0 }));
@@ -123,9 +193,10 @@ export function getTopPlayersMonthly(
 // ── Top scorer (by goals) — weekly ─────────────────────────────────────────
 export function getTopScorerWeekly(
   players: Player[],
-  weeklyStats: PlayerWeeklyStat[]
+  weeklyStats: PlayerWeeklyStat[],
+  period?: { year: number; monthIndex: number; week: number }
 ): RankedPlayer | null {
-  const ranked = getTopPlayersWeekly(players, weeklyStats, 10);
+  const ranked = getTopPlayersWeekly(players, weeklyStats, 10, period);
   const sorted = [...ranked].sort((a, b) => b.goals - a.goals);
   return sorted[0] ?? null;
 }
@@ -133,9 +204,10 @@ export function getTopScorerWeekly(
 // ── Top scorer (by goals) — monthly ────────────────────────────────────────
 export function getTopScorerMonthly(
   players: Player[],
-  monthlyStats: PlayerMonthlyStat[]
+  monthlyStats: PlayerMonthlyStat[],
+  period?: { year: number; monthIndex: number }
 ): RankedPlayer | null {
-  const ranked = getTopPlayersMonthly(players, monthlyStats, 10);
+  const ranked = getTopPlayersMonthly(players, monthlyStats, 10, period);
   const sorted = [...ranked].sort((a, b) => b.goals - a.goals);
   return sorted[0] ?? null;
 }
@@ -216,8 +288,6 @@ export function getSeasonLeaders(
 }
 
 // ── Period labels ──────────────────────────────────────────────────────────
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 export function getCurrentWeekLabel(): string {
   const { week, monthIndex } = getCurrentPeriod();
   return `Week ${week}, ${MONTHS[monthIndex]}`;
