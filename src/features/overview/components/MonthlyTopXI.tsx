@@ -81,7 +81,7 @@ export function MonthlyTopXI({ players, matchEntries, playerMonthlyStats = [] }:
   const isEmpty = topXI.length === 0;
 
   return (
-    <div className="bg-card border border-border rounded-[24px] shadow-sm overflow-hidden flex flex-col w-full">
+    <div className="bg-card border border-border rounded-[24px] shadow-sm overflow-hidden flex flex-col w-full h-full">
       {/* Header */}
       <div className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-border bg-card">
         <div>

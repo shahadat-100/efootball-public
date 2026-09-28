@@ -58,7 +58,7 @@ export function PlayerProfileCard({
         height: 750,
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 28,
+        borderRadius: 0,
         background: '#0C0C10',
         fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
         boxShadow: '0 30px 80px rgba(0,0,0,0.8)',

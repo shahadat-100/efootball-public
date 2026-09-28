@@ -24,7 +24,7 @@ export function AwardsLeaderboard({ data }: AwardsLeaderboardProps) {
         <span className="text-xl">{icon}</span>
         <span className="font-bold text-sm tracking-tight">{title}</span>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex-1 flex flex-col gap-3 justify-center">
         {items.length === 0 ? (
           <p className="text-xs text-muted-foreground italic px-2">No awards yet</p>
         ) : (

@@ -43,7 +43,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         height: 540,
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 24,
+        borderRadius: 0,
         background: '#08080C',
         fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
         boxShadow: '0 30px 80px rgba(0,0,0,0.9)',

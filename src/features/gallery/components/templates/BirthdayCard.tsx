@@ -21,7 +21,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         height: 750,
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 28,
+        borderRadius: 0,
         background: '#0B0B0F',
         fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
         boxShadow: '0 35px 90px rgba(0,0,0,0.85)',
