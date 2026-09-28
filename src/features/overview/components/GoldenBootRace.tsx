@@ -57,9 +57,9 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
   // Empty state for seasons with no goal data yet
   if (scorers.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden h-full">
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden h-full flex flex-col">
         <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
-        <div className="relative z-10 flex items-center justify-between mb-6">
+        <div className="relative z-10 flex items-center justify-between mb-6 shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-500 flex items-center justify-center">
               <Target className="w-4 h-4" />
@@ -81,7 +81,7 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
             ))}
           </select>
         </div>
-        <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
           <span className="text-4xl mb-3">🥾</span>
           <p className="text-sm font-bold text-foreground mb-1">No goals scored yet</p>
           <p className="text-[11px] text-muted-foreground">in {selectedSeason?.name ?? 'this season'}</p>
@@ -94,13 +94,13 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
   const chasers = scorers.slice(1);
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group h-full">
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden group h-full flex flex-col">
       {/* Gold glow behind leader */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-amber-500/10 to-transparent pointer-events-none" />
       <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between mb-6">
+      <div className="relative z-10 flex items-center justify-between mb-6 shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-500 flex items-center justify-center">
             <Target className="w-4 h-4" />
@@ -124,8 +124,10 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
         </select>
       </div>
 
+      {/* ─── Leader + Chasers group — centers as a whole when the row is taller than this card's own content ─── */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center gap-5">
       {/* ─── LEADER (the King) ─── */}
-      <div className="relative z-10 flex items-center gap-4 p-4 rounded-2xl mb-5 border"
+      <div className="relative flex items-center gap-4 p-4 rounded-2xl border"
         style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04))', borderColor: 'rgba(245,158,11,0.3)' }}>
         {/* Crown badge */}
         <div className="absolute -top-3 left-6 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-lg">
@@ -153,7 +155,7 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
       </div>
 
       {/* ─── CHASERS ─── */}
-      <div className="relative z-10 space-y-3">
+      <div className="relative space-y-3">
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-4">
           <Flame className="w-3 h-3 text-orange-400" /> Chasers
         </p>
@@ -215,6 +217,7 @@ export function GoldenBootRace({ players, playerSeasonStats, seasons }: GoldenBo
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );

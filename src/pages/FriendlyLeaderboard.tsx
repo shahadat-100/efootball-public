@@ -32,6 +32,8 @@ export function FriendlyLeaderboard() {
     const d = new Date().getDate();
     return d >= 22 ? 4 : d >= 15 ? 3 : d >= 8 ? 2 : 1;
   });
+  const DUELS_PAGE_SIZE = 20;
+  const [duelsVisibleCount, setDuelsVisibleCount] = useState(DUELS_PAGE_SIZE);
 
   useEffect(() => {
     const load = async () => {
@@ -47,6 +49,11 @@ export function FriendlyLeaderboard() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
+
+  // Reset the Duels Feed pagination whenever the selected period changes
+  useEffect(() => {
+    setDuelsVisibleCount(DUELS_PAGE_SIZE);
+  }, [viewMode, selectedYear, selectedMonth, selectedWeek]);
 
   const playerMap = useMemo(() => {
     const map = new Map<string, { name: string; avatar: string }>();
@@ -772,7 +779,7 @@ export function FriendlyLeaderboard() {
 
         {/* ── Duels Feed ── */}
         <div>
-          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-4 sm:p-5 max-h-[600px] lg:max-h-[900px] overflow-y-auto">
+          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4 border-b border-border/60 pb-3">
               <h2 className="font-heading font-bold text-base text-foreground">Duels Feed</h2>
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
@@ -780,7 +787,7 @@ export function FriendlyLeaderboard() {
               </span>
             </div>
             <div className="space-y-3">
-              {enrichedMatches.map((m) => (
+              {enrichedMatches.slice(0, duelsVisibleCount).map((m) => (
                 <div key={m.id} className="p-3.5 bg-muted/30 border border-border/40 rounded-xl space-y-2 hover:border-primary/30 transition-colors">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 max-w-[40%] truncate">
@@ -803,6 +810,16 @@ export function FriendlyLeaderboard() {
                 <p className="text-muted-foreground text-xs text-center py-8">No friendly duels found in this period.</p>
               )}
             </div>
+
+            {enrichedMatches.length > duelsVisibleCount && (
+              <button
+                onClick={() => setDuelsVisibleCount(c => c + DUELS_PAGE_SIZE)}
+                className="w-full mt-4 py-2.5 flex items-center justify-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-xl transition-colors"
+              >
+                <ArrowDown className="w-3.5 h-3.5" />
+                Show 20 More ({enrichedMatches.length - duelsVisibleCount} remaining)
+              </button>
+            )}
           </div>
         </div>
       </div>

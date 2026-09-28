@@ -98,6 +98,12 @@ export function HallOfFame() {
                 (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
               }}
             >
+              {/* Top foil accent line — matches the gallery card templates' colored divider */}
+              <div
+                className="absolute top-0 left-0 right-0 h-[3px] rounded-t-3xl"
+                style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}30, ${accent}, ${accent}30, transparent 95%)` }}
+              />
+
               {/* Subtle top subtle gradient ring blur effect */}
               <div
                 className="absolute top-0 right-0 w-36 h-36 rounded-full blur-2xl pointer-events-none opacity-10 transition-opacity duration-300 group-hover:opacity-25"
@@ -213,6 +219,11 @@ export function HallOfFame() {
                 className="h-1 w-full rounded-full mt-5 transition-all duration-300 opacity-40 group-hover:opacity-100"
                 style={{ background: `linear-gradient(90deg, ${accent}, ${accent}30)` }}
               />
+
+              {/* Footer micro-tag — same "official card" copy convention as the exported gallery cards */}
+              <p className="text-center text-[8px] font-bold uppercase tracking-[0.25em] text-slate-300 mt-3">
+                Official Hall of Fame
+              </p>
             </div>
           );
         })}

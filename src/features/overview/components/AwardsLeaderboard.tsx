@@ -14,9 +14,9 @@ interface AwardsLeaderboardProps {
 }
 
 export function AwardsLeaderboard({ data }: AwardsLeaderboardProps) {
-  const topMotm = [...data].sort((a, b) => b.motm - a.motm).slice(0, 3).filter(d => d.motm > 0);
-  const topCleanSheets = [...data].sort((a, b) => b.cleanSheets - a.cleanSheets).slice(0, 3).filter(d => d.cleanSheets > 0);
-  const topHattricks = [...data].sort((a, b) => b.hattricks - a.hattricks).slice(0, 3).filter(d => d.hattricks > 0);
+  const topMotm = [...data].sort((a, b) => b.motm - a.motm).slice(0, 10).filter(d => d.motm > 0);
+  const topCleanSheets = [...data].sort((a, b) => b.cleanSheets - a.cleanSheets).slice(0, 10).filter(d => d.cleanSheets > 0);
+  const topHattricks = [...data].sort((a, b) => b.hattricks - a.hattricks).slice(0, 10).filter(d => d.hattricks > 0);
 
   const Column = ({ title, icon, items, valueKey, accentColor }: { title: string, icon: string, items: AwardData[], valueKey: keyof AwardData, accentColor: string }) => (
     <div className="flex-1 flex flex-col">
@@ -32,10 +32,11 @@ export function AwardsLeaderboard({ data }: AwardsLeaderboardProps) {
             <div key={item.player.id} className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-muted/40 transition-all group">
               <div className="flex items-center gap-3 min-w-0">
                 <span className={cn(
-                  "text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-sm",
+                  "text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-sm shrink-0",
                   i === 0 ? "medal-gold" :
                   i === 1 ? "medal-silver" :
-                  "medal-bronze"
+                  i === 2 ? "medal-bronze" :
+                  "bg-muted text-muted-foreground"
                 )}>{i + 1}</span>
                 <Avatar name={item.player.name} size={28} src={(item.player as any).profileImageUrl} />
                 <span className="text-sm font-semibold truncate">{item.player.name.split(' ')[0]}</span>
