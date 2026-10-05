@@ -12,781 +12,18 @@ interface PlayerCardProps {
   index?: number;
 }
 
-interface CommonVariantProps {
-  player: Player;
-  stats: ReturnType<typeof usePlayerStats>;
-  totalPoints: number;
-  rank: number | null;
-  winRate: number;
-  displayImage: string | null;
-  isCutout: boolean;
-  bgLoading: boolean;
-  hovered: boolean;
-  firstName: string;
-  lastName: string;
-}
+const RANK_CONFIG: Record<number, { accent: string; glow: string; label: string }> = {
+  1: { accent: '#FFD700', glow: 'rgba(212,175,55,0.55)', label: 'TOP PLAYER' },
+  2: { accent: '#C0C0C0', glow: 'rgba(192,192,192,0.4)', label: 'ELITE' },
+  3: { accent: '#CD7F32', glow: 'rgba(205,127,50,0.4)',  label: 'BRONZE' },
+};
 
-// ═════════════════════════════════════════════════════════════════════════════
-// VARIANT 0: RED/CHARCOAL MVP (Reference 5 — Man of the Match, stat pills left, player right)
-// ═════════════════════════════════════════════════════════════════════════════
-function VariantRedMVP({
-  player, stats, totalPoints, displayImage, isCutout, bgLoading, hovered, firstName, lastName,
-}: CommonVariantProps) {
-  const accent = '#EF4444';
-  const glow = 'rgba(239, 68, 68, 0.45)';
-
-  return (
-    <div style={{
-      position: 'relative', width: '100%', height: '100%',
-      background: '#0B0B0E', overflow: 'hidden',
-    }}>
-      {/* Dark grunge background + red scratches */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 1,
-        background: 'radial-gradient(ellipse at 75% 30%, rgba(225,29,72,0.22) 0%, rgba(15,15,20,0.95) 75%)',
-      }} />
-
-      {/* Red diagonal slash graphic */}
-      <div style={{
-        position: 'absolute', width: '160%', height: 60,
-        background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.18), transparent)',
-        transform: 'rotate(-28deg)', top: '50%', left: '-30%',
-        zIndex: 2, pointerEvents: 'none',
-      }} />
-      <div style={{
-        position: 'absolute', width: '140%', height: 2,
-        background: 'rgba(239,68,68,0.3)',
-        transform: 'rotate(-28deg)', top: '48%', left: '-20%',
-        zIndex: 2, pointerEvents: 'none',
-      }} />
-
-      {/* Top Header: Club info */}
-      <div style={{
-        position: 'absolute', top: 12, left: 14, right: 14,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        zIndex: 20,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <img
-            src="/images/club-logo.jpg"
-            alt=""
-            style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(239,68,68,0.6)' }}
-          />
-          <span style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 9, fontWeight: 800,
-            letterSpacing: '0.16em', textTransform: 'uppercase', color: '#fff',
-          }}>
-            THE ENIGMATIC ELITE
-          </span>
-        </div>
-        {player.jerseyNumber && (
-          <span style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 13, fontWeight: 900,
-            color: accent, letterSpacing: '0.05em',
-          }}>
-            #{player.jerseyNumber}
-          </span>
-        )}
-      </div>
-
-      {/* Title: Red script "Man of The Match" + Big distressed MVP */}
-      <div style={{
-        position: 'absolute', top: '10%', left: 14, right: 14,
-        zIndex: 4, pointerEvents: 'none', userSelect: 'none',
-      }}>
-        <div style={{
-          fontFamily: "'Caveat', cursive",
-          fontSize: 'clamp(20px, 5.5vw, 28px)',
-          fontWeight: 700,
-          color: '#EF4444',
-          transform: 'rotate(-3deg)',
-          marginLeft: 4,
-          marginBottom: -8,
-          textShadow: '0 2px 10px rgba(0,0,0,0.9)',
-        }}>
-          Man of The Match
-        </div>
-        <div style={{
-          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          fontSize: 'clamp(60px, 17vw, 88px)',
-          fontWeight: 400,
-          color: '#ffffff',
-          letterSpacing: '0.04em',
-          lineHeight: 0.85,
-          textTransform: 'uppercase',
-          textShadow: '0 0 25px rgba(239,68,68,0.5), 0 4px 15px rgba(0,0,0,0.9)',
-        }}>
-          MVP
-        </div>
-      </div>
-
-      {/* Left Stat Bars (Skewed Red Gradients like Ref 5) */}
-      <div style={{
-        position: 'absolute', left: 12, bottom: '22%',
-        display: 'flex', flexDirection: 'column', gap: 7,
-        zIndex: 18,
-      }}>
-        {[
-          { val: stats.totalGoals, label: 'Pts', bg: 'linear-gradient(90deg, #DC2626 0%, #991B1B 100%)' },
-          { val: stats.totalMOTM, label: 'Ast', bg: 'linear-gradient(90deg, #B91C1C 0%, #7F1D1D 100%)' },
-          { val: stats.totalMatches, label: 'Reb', bg: 'linear-gradient(90deg, #991B1B 0%, #450A0A 100%)' },
-        ].map((item, i) => (
-          <div
-            key={i}
-            style={{
-              background: item.bg,
-              border: '1.5px solid rgba(254,202,202,0.3)',
-              borderRadius: 6,
-              padding: '3px 12px 3px 10px',
-              display: 'flex', alignItems: 'baseline', gap: 6,
-              transform: 'skewX(-12deg)',
-              boxShadow: '0 4px 14px rgba(185,28,28,0.45)',
-            }}
-          >
-            <span style={{
-              fontFamily: "'Oswald', sans-serif", fontSize: 22, fontWeight: 800,
-              color: '#fff', lineHeight: 1,
-            }}>
-              {item.val}
-            </span>
-            <span style={{
-              fontFamily: "'Caveat', cursive", fontSize: 13, fontWeight: 700,
-              color: '#FCA5A5', fontStyle: 'italic',
-            }}>
-              {item.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom Left Quote */}
-      <div style={{
-        position: 'absolute', left: 12, bottom: '7%', width: '42%',
-        zIndex: 18, pointerEvents: 'none',
-      }}>
-        <div style={{ color: accent, fontSize: 14, fontWeight: 900, marginBottom: 2 }}>✱</div>
-        <div style={{
-          fontFamily: "'Inter', sans-serif", fontSize: 7.5, color: 'rgba(255,255,255,0.7)',
-          fontStyle: 'italic', lineHeight: 1.3,
-        }}>
-          &ldquo;Consistency turned discipline into greatness.&rdquo;
-        </div>
-      </div>
-
-      {/* Player Cutout — RIGHT SHIFTED (like Ref 5) */}
-      {displayImage ? (
-        <motion.img
-          src={displayImage}
-          alt={player.name}
-          animate={{ scale: hovered ? 1.04 : 1 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            position: 'absolute',
-            bottom: '4%', right: '-4%',
-            zIndex: 10,
-            width: '74%', height: '72%',
-            objectFit: isCutout ? 'contain' : 'cover',
-            objectPosition: 'bottom right',
-            filter: isCutout
-              ? 'drop-shadow(0 0 20px rgba(239,68,68,0.4)) drop-shadow(0 10px 25px rgba(0,0,0,0.9))'
-              : 'none',
-            opacity: bgLoading ? 0 : 1,
-          }}
-        />
-      ) : (
-        <div style={{
-          position: 'absolute', bottom: '10%', right: '8%',
-          zIndex: 10, width: 85, height: 85, borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, color: accent,
-          background: 'rgba(239,68,68,0.15)', border: `2px solid ${accent}`,
-        }}>
-          {player.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-
-      {/* Player Name at Bottom Right (White Sans + Red Script like Ref 5) */}
-      <div style={{
-        position: 'absolute', bottom: '6%', right: 14,
-        zIndex: 22, textAlign: 'right', pointerEvents: 'none',
-      }}>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 16, fontWeight: 900,
-          color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.08em',
-          lineHeight: 1, textShadow: '0 2px 8px rgba(0,0,0,0.95)',
-        }}>
-          {firstName}
-        </div>
-        <div style={{
-          fontFamily: "'Caveat', cursive", fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 700,
-          color: '#EF4444', lineHeight: 0.9, marginTop: 1,
-          transform: 'rotate(-4deg)', textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(239,68,68,0.6)',
-        }}>
-          {lastName || firstName}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// VARIANT 1: AARON LOEB / NEW SIGNING (Reference 4 — White/Blue diagonal split, player right)
-// ═════════════════════════════════════════════════════════════════════════════
-function VariantNewSigning({
-  player, stats, winRate, displayImage, isCutout, bgLoading, hovered, firstName, lastName,
-}: CommonVariantProps) {
-  const accent = '#2563EB';
-
-  return (
-    <div style={{
-      position: 'relative', width: '100%', height: '100%',
-      background: '#F1F5F9', overflow: 'hidden',
-    }}>
-      {/* Light subtle repeating watermark texture */}
-      <div style={{
-        position: 'absolute', top: -20, left: -20, right: -20, height: '60%',
-        zIndex: 1, opacity: 0.06, pointerEvents: 'none',
-        display: 'flex', flexDirection: 'column', gap: 6,
-        transform: 'rotate(-8deg)',
-      }}>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} style={{
-            fontFamily: "'Bebas Neue', sans-serif", fontSize: 42,
-            whiteSpace: 'nowrap', color: '#0F172A', letterSpacing: '0.1em',
-          }}>
-            WELCOME WELCOME WELCOME WELCOME
-          </div>
-        ))}
-      </div>
-
-      {/* Royal Blue Diagonal Banner (like Ref 4) */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 3,
-        clipPath: 'polygon(0 42%, 100% 65%, 100% 100%, 0 100%)',
-        background: 'linear-gradient(135deg, #1D4ED8 0%, #1E40AF 60%, #172554 100%)',
-      }} />
-
-      {/* Top Left: New Signing & Club Shield */}
-      <div style={{
-        position: 'absolute', top: 14, left: 14,
-        zIndex: 20, display: 'flex', flexDirection: 'column', gap: 6,
-      }}>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 8.5, fontWeight: 900,
-          letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1E3A8A',
-          lineHeight: 1.2,
-        }}>
-          OFFICIAL SQUAD<br />CONFIRMED
-        </div>
-        <img
-          src="/images/club-logo.jpg"
-          alt=""
-          style={{
-            width: 28, height: 28, borderRadius: 6,
-            objectFit: 'cover', border: '1.5px solid #1E40AF',
-            boxShadow: '0 2px 8px rgba(30,64,175,0.3)',
-          }}
-        />
-      </div>
-
-      {/* Inside Blue Banner (Left side): Giant White Name (Ref 4) */}
-      <div style={{
-        position: 'absolute', bottom: '12%', left: 14, width: '56%',
-        zIndex: 15, transform: 'rotate(-5deg)',
-      }}>
-        <div style={{
-          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          fontSize: 'clamp(32px, 8.5vw, 46px)',
-          fontWeight: 400,
-          color: '#ffffff',
-          lineHeight: 0.88,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em',
-          textShadow: '0 3px 12px rgba(0,0,0,0.4)',
-        }}>
-          {firstName}<br />{lastName || 'ELITE'}
-        </div>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 8.5, fontWeight: 700,
-          color: '#93C5FD', letterSpacing: '0.15em', textTransform: 'uppercase',
-          marginTop: 6,
-        }}>
-          {player.playerRoles?.[0] || 'FORWARD'} · #{player.jerseyNumber || '10'}
-        </div>
-        <div style={{
-          marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)',
-          padding: '2px 8px', borderRadius: 4,
-          fontFamily: "'Oswald', sans-serif", fontSize: 8, fontWeight: 800,
-          color: '#ffffff', letterSpacing: '0.08em',
-        }}>
-          <span>{stats.totalGoals} GOALS</span>
-          <span>•</span>
-          <span>{winRate}% WIN RATE</span>
-        </div>
-      </div>
-
-      {/* Player Cutout — RIGHT ALIGNED (overlapping the blue diagonal) */}
-      {displayImage ? (
-        <motion.img
-          src={displayImage}
-          alt={player.name}
-          animate={{ scale: hovered ? 1.04 : 1 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            position: 'absolute',
-            bottom: 0, right: 0,
-            zIndex: 10,
-            width: '68%', height: '76%',
-            objectFit: isCutout ? 'contain' : 'cover',
-            objectPosition: 'bottom center',
-            filter: isCutout
-              ? 'drop-shadow(-4px 0 16px rgba(0,0,0,0.35)) drop-shadow(0 10px 20px rgba(0,0,0,0.4))'
-              : 'none',
-            opacity: bgLoading ? 0 : 1,
-          }}
-        />
-      ) : (
-        <div style={{
-          position: 'absolute', bottom: '12%', right: '10%',
-          zIndex: 10, width: 85, height: 85, borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, color: accent,
-          background: 'rgba(37,99,235,0.15)', border: `2px solid ${accent}`,
-        }}>
-          {player.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// VARIANT 2: THE NEXT GAME / MATCHDAY (Reference 3 — Navy blue, player left, match details right)
-// ═════════════════════════════════════════════════════════════════════════════
-function VariantNextGame({
-  player, stats, totalPoints, winRate, displayImage, isCutout, bgLoading, hovered,
-}: CommonVariantProps) {
-  const accent = '#00F0FF';
-
-  return (
-    <div style={{
-      position: 'relative', width: '100%', height: '100%',
-      background: 'linear-gradient(180deg, #020917 0%, #071E48 55%, #030C1E 100%)',
-      overflow: 'hidden',
-    }}>
-      {/* Neon accent bars top-left & bottom-right (Ref 3) */}
-      <div style={{
-        position: 'absolute', top: 12, left: 14, width: 44, height: 4,
-        background: '#38BDF8', borderRadius: 2, zIndex: 10,
-      }} />
-      <div style={{
-        position: 'absolute', bottom: 12, right: 14, width: 44, height: 4,
-        background: '#38BDF8', borderRadius: 2, zIndex: 10,
-      }} />
-
-      {/* Top Header */}
-      <div style={{
-        position: 'absolute', top: 22, left: 0, right: 0,
-        textAlign: 'center', zIndex: 12,
-      }}>
-        <span style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 8.5, fontWeight: 800,
-          color: '#38BDF8', letterSpacing: '0.2em', textTransform: 'uppercase',
-        }}>
-          SUPER FOOTBALL LEAGUE
-        </span>
-      </div>
-
-      {/* Big Title: THE NEXT GAME (Ref 3) */}
-      <div style={{
-        position: 'absolute', top: '10%', left: 16,
-        zIndex: 4, pointerEvents: 'none', userSelect: 'none',
-      }}>
-        <div style={{
-          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          fontSize: 'clamp(44px, 12vw, 64px)',
-          fontWeight: 400,
-          color: '#ffffff',
-          lineHeight: 0.85,
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
-          textShadow: '0 0 25px rgba(56,189,248,0.5), 0 4px 15px rgba(0,0,0,0.9)',
-        }}>
-          THE NEXT<br />GAME
-        </div>
-      </div>
-
-      {/* Right Side: Player & Match Info Blocks (Ref 3) */}
-      <div style={{
-        position: 'absolute', top: '38%', right: 14, width: '48%',
-        zIndex: 18, textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 10,
-      }}>
-        <div>
-          <div style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 9, fontWeight: 900,
-            color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase',
-          }}>
-            KEY SQUAD STAR
-          </div>
-          <div style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 7.5, fontWeight: 600,
-            color: '#38BDF8', letterSpacing: '0.08em',
-          }}>
-            THE ENIGMATIC ELITE
-          </div>
-        </div>
-
-        <div style={{
-          background: 'rgba(7,30,72,0.65)', backdropFilter: 'blur(8px)',
-          borderRight: '2px solid #38BDF8', padding: '4px 8px', borderRadius: 4,
-        }}>
-          <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 13, fontWeight: 800, color: '#fff' }}>
-            {stats.totalGoals} GOALS
-          </div>
-          <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 7.5, color: '#93C5FD' }}>
-            {stats.totalMatches} MATCHES • {winRate}% WR
-          </div>
-        </div>
-
-        <div>
-          <div style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 800,
-            color: '#ffffff', textTransform: 'uppercase',
-          }}>
-            +{totalPoints} PTS
-          </div>
-          <div style={{
-            fontFamily: "'Inter', sans-serif", fontSize: 7, color: 'rgba(255,255,255,0.6)',
-          }}>
-            OFFICIAL FIXTURE SPOTLIGHT
-          </div>
-        </div>
-      </div>
-
-      {/* Player Cutout — LEFT SHIFTED (Ref 3) */}
-      {displayImage ? (
-        <motion.img
-          src={displayImage}
-          alt={player.name}
-          animate={{ scale: hovered ? 1.04 : 1 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            position: 'absolute',
-            bottom: 0, left: '-2%',
-            zIndex: 10,
-            width: '68%', height: '72%',
-            objectFit: isCutout ? 'contain' : 'cover',
-            objectPosition: 'bottom left',
-            filter: isCutout
-              ? 'drop-shadow(0 0 20px rgba(56,189,248,0.45)) drop-shadow(0 10px 25px rgba(0,0,0,0.9))'
-              : 'none',
-            opacity: bgLoading ? 0 : 1,
-          }}
-        />
-      ) : (
-        <div style={{
-          position: 'absolute', bottom: '12%', left: '8%',
-          zIndex: 10, width: 85, height: 85, borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, color: accent,
-          background: 'rgba(56,189,248,0.15)', border: `2px solid ${accent}`,
-        }}>
-          {player.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-
-      {/* Player name at bottom */}
-      <div style={{
-        position: 'absolute', bottom: 12, left: 16,
-        zIndex: 22, pointerEvents: 'none',
-      }}>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 12, fontWeight: 900,
-          color: '#fff', textTransform: 'uppercase', letterSpacing: '0.1em',
-          textShadow: '0 2px 8px rgba(0,0,0,0.95)',
-        }}>
-          {player.name}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// VARIANT 3: MVP OF THE GAME (Reference 2 — Distressed MVP, player center, frosted pills)
-// ═════════════════════════════════════════════════════════════════════════════
-function VariantMVPOftheGame({
-  player, stats, winRate, displayImage, isCutout, bgLoading, hovered,
-}: CommonVariantProps) {
-  const accent = '#38BDF8';
-
-  return (
-    <div style={{
-      position: 'relative', width: '100%', height: '100%',
-      background: '#040C1A', overflow: 'hidden',
-    }}>
-      {/* Stadium spotlight glow */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 1,
-        background: 'radial-gradient(circle at 50% 30%, rgba(56,189,248,0.22) 0%, rgba(4,12,26,0.9) 70%)',
-      }} />
-
-      {/* Big Title: MVP OF THE GAME! (Ref 2) */}
-      <div style={{
-        position: 'absolute', top: '10%', left: 0, right: 0,
-        textAlign: 'center', zIndex: 4, pointerEvents: 'none',
-      }}>
-        <div style={{
-          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          fontSize: 'clamp(62px, 17vw, 92px)',
-          fontWeight: 400,
-          color: '#ffffff',
-          letterSpacing: '0.06em',
-          lineHeight: 0.85,
-          textTransform: 'uppercase',
-          textShadow: '0 0 30px rgba(56,189,248,0.6), 0 4px 18px rgba(0,0,0,0.9)',
-        }}>
-          MVP
-        </div>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-          color: '#38BDF8', letterSpacing: '0.22em', textTransform: 'uppercase',
-          marginTop: 2, textShadow: '0 0 10px rgba(56,189,248,0.7)',
-        }}>
-          OF THE GAME!
-        </div>
-      </div>
-
-      {/* Player Cutout — CENTERED (Ref 2) */}
-      {displayImage ? (
-        <motion.img
-          src={displayImage}
-          alt={player.name}
-          animate={{ scale: hovered ? 1.04 : 1 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            position: 'absolute',
-            bottom: '4%', left: 0, right: 0,
-            zIndex: 10,
-            width: '100%', height: '74%',
-            objectFit: isCutout ? 'contain' : 'cover',
-            objectPosition: 'bottom center',
-            filter: isCutout
-              ? 'drop-shadow(0 -2px 14px rgba(255,255,255,0.4)) drop-shadow(0 10px 25px rgba(0,0,0,0.9))'
-              : 'none',
-            opacity: bgLoading ? 0 : 1,
-          }}
-        />
-      ) : (
-        <div style={{
-          position: 'absolute', bottom: '15%', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 10, width: 90, height: 90, borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, color: accent,
-          background: 'rgba(56,189,248,0.15)', border: `2px solid ${accent}`,
-        }}>
-          {player.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-
-      {/* Floating Stat Pills — LEFT & RIGHT (Ref 2) */}
-      <div style={{
-        position: 'absolute', left: 12, bottom: '26%',
-        display: 'flex', flexDirection: 'column', gap: 14,
-        zIndex: 18,
-      }}>
-        <div style={{
-          background: 'rgba(14,40,78,0.75)', backdropFilter: 'blur(8px)',
-          borderLeft: '2px solid #38BDF8', padding: '4px 10px', borderRadius: 4,
-          fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-          color: '#fff', fontStyle: 'italic',
-        }}>
-          {stats.totalGoals} GOAL
-        </div>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-          color: '#fff', fontStyle: 'italic', textShadow: '0 2px 6px rgba(0,0,0,0.9)',
-          paddingLeft: 4,
-        }}>
-          {stats.totalMOTM} MOTM
-        </div>
-      </div>
-
-      <div style={{
-        position: 'absolute', right: 12, bottom: '26%',
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 14,
-        zIndex: 18,
-      }}>
-        <div style={{
-          background: 'rgba(14,40,78,0.75)', backdropFilter: 'blur(8px)',
-          borderRight: '2px solid #38BDF8', padding: '4px 10px', borderRadius: 4,
-          fontFamily: "'Oswald', sans-serif", fontSize: 9, fontWeight: 800,
-          color: '#38BDF8', textTransform: 'uppercase',
-        }}>
-          DOMINATES THE FIELD
-        </div>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-          color: '#fff', fontStyle: 'italic', textShadow: '0 2px 6px rgba(0,0,0,0.9)',
-          paddingRight: 4,
-        }}>
-          {winRate}% PASS ACCURACY
-        </div>
-      </div>
-
-      {/* Player Signature Name at Bottom Right (Caveat cursive like Ref 2) */}
-      <div style={{
-        position: 'absolute', bottom: '8%', right: 16,
-        zIndex: 22, pointerEvents: 'none', transform: 'rotate(-4deg)',
-      }}>
-        <span style={{
-          fontFamily: "'Caveat', cursive",
-          fontSize: 'clamp(22px, 6vw, 30px)',
-          fontWeight: 700,
-          color: '#ffffff',
-          textShadow: '0 2px 10px rgba(0,0,0,0.95), 0 0 15px rgba(56,189,248,0.6)',
-        }}>
-          {player.name}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// VARIANT 4: NEXT MATCH (Reference 1 — Stadium floodlights, vertical NEXT, player center)
-// ═════════════════════════════════════════════════════
-function VariantNextMatch({
-  player, stats, displayImage, isCutout, bgLoading, hovered,
-}: CommonVariantProps) {
-  const accent = '#00F0FF';
-
-  return (
-    <div style={{
-      position: 'relative', width: '100%', height: '100%',
-      background: '#040810', overflow: 'hidden',
-    }}>
-      {/* Stadium floodlight beams */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 1,
-        background: 'radial-gradient(circle at 50% 25%, rgba(0,240,255,0.2) 0%, #040810 75%)',
-      }} />
-
-      {/* Title: Vertical NEXT + Big MATCH (Ref 1) */}
-      <div style={{
-        position: 'absolute', top: 12, left: 14, right: 14,
-        display: 'flex', alignItems: 'flex-start', gap: 6,
-        zIndex: 4, pointerEvents: 'none',
-      }}>
-        <div style={{
-          writingMode: 'vertical-rl', transform: 'rotate(180deg)',
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 26,
-          color: '#00F0FF', letterSpacing: '0.08em', lineHeight: 1,
-          marginTop: 2,
-        }}>
-          NEXT
-        </div>
-        <div style={{
-          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          fontSize: 'clamp(52px, 14.5vw, 76px)',
-          fontWeight: 400,
-          color: '#ffffff',
-          letterSpacing: '0.05em',
-          lineHeight: 0.85,
-          textShadow: '0 0 25px rgba(0,240,255,0.6), 0 4px 15px rgba(0,0,0,0.95)',
-        }}>
-          MATCH
-        </div>
-      </div>
-
-      {/* Left Badge: Crest + Info (Ref 1) */}
-      <div style={{
-        position: 'absolute', top: '38%', left: 14,
-        zIndex: 18, display: 'flex', flexDirection: 'column', gap: 4,
-      }}>
-        <img
-          src="/images/club-logo.jpg"
-          alt=""
-          style={{
-            width: 28, height: 28, borderRadius: 6,
-            objectFit: 'cover', border: '1.5px solid #00F0FF',
-            boxShadow: '0 0 10px rgba(0,240,255,0.4)',
-          }}
-        />
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 9, fontWeight: 900,
-          color: '#ffffff', letterSpacing: '0.05em',
-        }}>
-          #{player.jerseyNumber || '10'} {player.playerRoles?.[0] || 'STAR'}
-        </div>
-        <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 7.5, fontWeight: 600,
-          color: '#00F0FF',
-        }}>
-          {stats.totalGoals} GOALS SCORED
-        </div>
-      </div>
-
-      {/* Player Cutout — CENTERED (Ref 1) */}
-      {displayImage ? (
-        <motion.img
-          src={displayImage}
-          alt={player.name}
-          animate={{ scale: hovered ? 1.04 : 1 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            position: 'absolute',
-            bottom: '7%', left: 0, right: 0,
-            zIndex: 10,
-            width: '100%', height: '72%',
-            objectFit: isCutout ? 'contain' : 'cover',
-            objectPosition: 'bottom center',
-            filter: isCutout
-              ? 'drop-shadow(0 0 16px rgba(0,240,255,0.5)) drop-shadow(0 10px 25px rgba(0,0,0,0.95))'
-              : 'none',
-            opacity: bgLoading ? 0 : 1,
-          }}
-        />
-      ) : (
-        <div style={{
-          position: 'absolute', bottom: '15%', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 10, width: 90, height: 90, borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 44, color: accent,
-          background: 'rgba(0,240,255,0.15)', border: `2px solid ${accent}`,
-        }}>
-          {player.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-
-      {/* Bottom Bar: Clean white banner (Ref 1) */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: '7%', background: '#ffffff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 25,
-      }}>
-        <span style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 7.5, fontWeight: 900,
-          color: '#040810', letterSpacing: '0.18em', textTransform: 'uppercase',
-        }}>
-          THE ENIGMATIC ELITE FC · {player.name}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// MAIN PLAYER CARD WRAPPER
-// ═════════════════════════════════════════════════════════════════════════════
 export function PlayerCard({ player, onView, index = 0 }: PlayerCardProps) {
   const [hovered, setHovered] = useState(false);
   const stats = usePlayerStats(player.id);
-  const { players, playerSeasonStats } = useFootballStore();
+  const { players, playerSeasonStats, matchEntries } = useFootballStore();
 
-  // Rank calculation
+  // ── Rank ──
   const calcPts = (s: any) =>
     s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
@@ -797,52 +34,84 @@ export function PlayerCard({ player, onView, index = 0 }: PlayerCardProps) {
   const rankIdx     = ranked.findIndex(r => r.id === player.id);
   const rank        = rankIdx !== -1 ? rankIdx + 1 : null;
   const totalPoints = rankIdx !== -1 ? ranked[rankIdx].pts : 0;
-  const winRate     = stats.totalMatches > 0 ? Math.round((stats.totalWins / stats.totalMatches) * 100) : 0;
+  const rankCfg     = rank && rank <= 3 ? RANK_CONFIG[rank] : null;
 
-  // Split Name for two-tone headings
-  const nameParts = player.name.trim().split(' ');
-  const firstName = nameParts[0] || player.name;
-  const lastName  = nameParts.slice(1).join(' ');
+  // ── Last 5 form ──
+  const form = matchEntries
+    .filter(e => e.playerId === player.id && e.result)
+    .sort((a, b) => {
+      const ta = new Date(a.time ? `${a.date}T${a.time}` : `${a.date}T00:00:00`).getTime() || 0;
+      const tb = new Date(b.time ? `${b.date}T${b.time}` : `${b.date}T00:00:00`).getTime() || 0;
+      return tb !== ta ? tb - ta : String(b.id).localeCompare(String(a.id));
+    })
+    .slice(0, 5).map(e => e.result!).reverse();
 
-  // Auto bg removal hook
+  const winRate = stats.totalMatches > 0 ? Math.round((stats.totalWins / stats.totalMatches) * 100) : 0;
+
+  const accent = rankCfg ? rankCfg.accent : '#6366F1';
+  const glow   = rankCfg ? rankCfg.glow   : 'rgba(99,102,241,0.35)';
+
+  // Role label (top title)
+  const roleLabel = (player.playerRoles ?? [])[0]?.toUpperCase()
+    || (rankCfg ? rankCfg.label : 'PLAYER');
+
+  // ── Auto bg removal ──
   const { src: displayImage, isCutout, loading: bgLoading } = useBackgroundRemoval(
     player.coverImageUrl,
     player.profileImageUrl,
   );
 
-  // Cycle through the 5 distinct reference designs!
-  const variantIndex = index % 5;
-
-  // Glare color according to template
-  const glareColors = ['#EF4444', '#2563EB', '#00F0FF', '#38BDF8', '#00F0FF'];
-  const currentGlare = glareColors[variantIndex];
-
-  const commonProps: CommonVariantProps = {
-    player,
-    stats,
-    totalPoints,
-    rank,
-    winRate,
-    displayImage,
-    isCutout,
-    bgLoading,
-    hovered,
-    firstName,
-    lastName,
-  };
+  // skew pill helper
+  const Pill = ({
+    value, label, side, icon, big = false,
+  }: { value: string | number; label: string; side: 'left' | 'right'; icon?: string; big?: boolean }) => (
+    <div style={{
+      background: 'rgba(6,10,20,0.88)',
+      backdropFilter: 'blur(14px)',
+      WebkitBackdropFilter: 'blur(14px)',
+      border: `1.5px solid ${big ? accent : 'rgba(255,255,255,0.15)'}`,
+      boxShadow: big ? `0 6px 20px ${glow}, inset 0 0 10px ${accent}22` : '0 4px 14px rgba(0,0,0,0.6)',
+      padding: big ? '6px 14px' : '4px 11px',
+      borderRadius: 10,
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 5,
+      transform: side === 'left' ? 'skewX(-6deg)' : 'skewX(6deg)',
+    }}>
+      {icon && <span style={{ fontSize: big ? 14 : 11 }}>{icon}</span>}
+      <span style={{
+        fontFamily: "'Oswald', sans-serif",
+        fontWeight: 800, fontStyle: 'italic',
+        fontSize: big ? 26 : 18,
+        color: big ? accent : '#fff',
+        lineHeight: 1,
+      }}>
+        {value}
+      </span>
+      <span style={{
+        fontFamily: "'Oswald', sans-serif",
+        fontWeight: 700, fontSize: big ? 10 : 8,
+        textTransform: 'uppercase' as const,
+        letterSpacing: '0.12em',
+        color: big ? '#fff' : accent,
+      }}>
+        {label}
+      </span>
+    </div>
+  );
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 26, scale: 0.94 }}
+      initial={{ opacity: 0, y: 28, scale: 0.93 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.45, delay: index * 0.055, ease: [0.22, 1, 0.36, 1] }}
     >
       <Tilt
-        tiltMaxAngleX={8}
-        tiltMaxAngleY={8}
+        tiltMaxAngleX={9}
+        tiltMaxAngleY={9}
         glareEnable={true}
-        glareMaxOpacity={0.16}
-        glareColor={currentGlare}
+        glareMaxOpacity={rankCfg ? 0.2 : 0.08}
+        glareColor={accent}
         glarePosition="all"
         glareBorderRadius="16px"
         scale={1.025}
@@ -852,22 +121,296 @@ export function PlayerCard({ player, onView, index = 0 }: PlayerCardProps) {
         onLeave={() => setHovered(false)}
         onClick={onView}
       >
+        {/* ══ CARD ══ */}
         <div style={{
           position: 'relative',
           width: '100%',
           aspectRatio: '3/4',
           borderRadius: 16,
           overflow: 'hidden',
+          background: '#040711',
           boxShadow: hovered
-            ? `0 20px 45px rgba(0,0,0,0.8), 0 0 0 1.5px ${currentGlare}55`
-            : '0 6px 24px rgba(0,0,0,0.6)',
+            ? `0 20px 50px ${glow}, 0 0 0 1.5px ${accent}55`
+            : '0 6px 30px rgba(0,0,0,0.7)',
           transition: 'box-shadow 0.3s ease',
         }}>
-          {variantIndex === 0 && <VariantRedMVP {...commonProps} />}
-          {variantIndex === 1 && <VariantNewSigning {...commonProps} />}
-          {variantIndex === 2 && <VariantNextGame {...commonProps} />}
-          {variantIndex === 3 && <VariantMVPOftheGame {...commonProps} />}
-          {variantIndex === 4 && <VariantNextMatch {...commonProps} />}
+
+          {/* ── BG: radial spotlight ── */}
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 1,
+            background: `radial-gradient(circle at 50% 35%, ${accent}22 0%, ${accent}06 45%, #040711 85%)`,
+          }} />
+
+          {/* ── BG: gallery background image (faint) ── */}
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 1,
+            backgroundImage: `url('/images/gallery-bg/bg-golden-boot.jpg')`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            opacity: 0.08,
+          }} />
+
+          {/* ── Club crest watermark ── */}
+          <img
+            src="/images/club-logo.jpg"
+            alt=""
+            aria-hidden
+            style={{
+              position: 'absolute',
+              top: '28%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 2,
+              width: '65%', height: 'auto',
+              objectFit: 'contain',
+              opacity: hovered ? 0.08 : 0.05,
+              transition: 'opacity 0.4s ease',
+              filter: 'saturate(0) brightness(3)',
+              borderRadius: 8,
+            }}
+          />
+
+          {/* ── TOP HEADER ── */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0,
+            padding: '12px 14px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            zIndex: 20,
+          }}>
+            {/* Club logo + name */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <img
+                src="/images/club-logo.jpg"
+                alt="Club"
+                style={{
+                  width: 32, height: 32, borderRadius: 7,
+                  objectFit: 'cover',
+                  border: `1.5px solid ${accent}99`,
+                  boxShadow: `0 0 10px ${glow}`,
+                }}
+              />
+              <div>
+                <div style={{
+                  fontFamily: "'Oswald', sans-serif",
+                  fontSize: 9, fontWeight: 900,
+                  textTransform: 'uppercase', letterSpacing: '0.15em',
+                  color: '#fff', lineHeight: 1.2,
+                }}>The Enigmatic Elite</div>
+                <div style={{
+                  fontFamily: "'Oswald', sans-serif",
+                  fontSize: 7.5, fontWeight: 700, fontStyle: 'italic',
+                  textTransform: 'uppercase', letterSpacing: '0.12em',
+                  color: accent,
+                }}>In Mystery We Reign</div>
+              </div>
+            </div>
+
+            {/* Jersey badge */}
+            {player.jerseyNumber && (
+              <div style={{
+                background: 'rgba(4,7,17,0.85)',
+                backdropFilter: 'blur(8px)',
+                border: `1.5px solid ${accent}`,
+                boxShadow: `0 4px 14px rgba(0,0,0,0.6), 0 0 10px ${glow}`,
+                borderRadius: 8,
+                padding: '3px 10px',
+                display: 'flex', alignItems: 'baseline', gap: 1,
+              }}>
+                <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 700, color: accent }}>#</span>
+                <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                  {player.jerseyNumber}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* ── BIG TITLE TEXT (Bebas Neue like reference) ── */}
+          <div style={{
+            position: 'absolute',
+            top: '13%', left: 0, right: 0,
+            textAlign: 'center',
+            zIndex: 4, pointerEvents: 'none', userSelect: 'none',
+          }}>
+            <div style={{
+              fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
+              fontSize: 'clamp(52px, 14vw, 76px)',
+              fontWeight: 400,
+              color: '#ffffff',
+              letterSpacing: '0.04em',
+              lineHeight: 0.88,
+              textTransform: 'uppercase',
+              textShadow: `0 0 30px ${glow}, 0 6px 20px rgba(0,0,0,0.95)`,
+            }}>
+              {roleLabel}
+            </div>
+            {rankCfg && (
+              <div style={{
+                fontFamily: "'Oswald', sans-serif",
+                fontSize: 9, fontWeight: 700,
+                color: accent,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                marginTop: 4,
+                textShadow: `0 0 10px ${glow}`,
+              }}>
+                {rank === 1 ? 'GOLDEN BOOT' : rank === 2 ? 'SILVER' : 'BRONZE'} · RANK #{rank}
+              </div>
+            )}
+          </div>
+
+          {/* ── PLAYER IMAGE ── */}
+          {bgLoading && (
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 10,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                border: `3px solid ${accent}30`, borderTopColor: accent,
+                animation: 'spin 0.9s linear infinite',
+              }} />
+              <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 9, color: `${accent}88`, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                Processing…
+              </span>
+            </div>
+          )}
+
+          {displayImage ? (
+            <motion.img
+              src={displayImage}
+              alt={player.name}
+              animate={{ scale: hovered ? 1.04 : 1 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              style={{
+                position: 'absolute',
+                bottom: '8%', left: 0, right: 0,
+                zIndex: 9,
+                width: '100%', height: '72%',
+                objectFit: isCutout ? 'contain' : 'cover',
+                objectPosition: isCutout ? 'bottom center' : 'center 10%',
+                filter: isCutout
+                  ? `drop-shadow(0 -4px 24px ${accent}55) drop-shadow(0 12px 30px rgba(0,0,0,0.95))`
+                  : hovered ? 'brightness(1.05)' : 'brightness(0.9)',
+                opacity: bgLoading ? 0 : 1,
+                transition: 'filter 0.4s ease',
+              }}
+            />
+          ) : (
+            <div style={{
+              position: 'absolute',
+              bottom: '8%', left: 0, right: 0,
+              zIndex: 9,
+              height: '72%',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+              paddingBottom: 20,
+            }}>
+              <div style={{
+                width: 90, height: 90, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
+                fontSize: 44, color: accent,
+                background: `linear-gradient(135deg, ${accent}30, ${accent}08)`,
+                border: `3px solid ${accent}55`,
+                boxShadow: `0 0 40px ${glow}`,
+              }}>
+                {player.name.charAt(0).toUpperCase()}
+              </div>
+            </div>
+          )}
+
+          {/* ── STAT PILLS — LEFT ── */}
+          <div style={{
+            position: 'absolute', left: 12, bottom: '18%',
+            display: 'flex', flexDirection: 'column', gap: 8,
+            zIndex: 20,
+          }}>
+            <Pill value={stats.totalGoals} label="Goals" side="left" icon="⚽" big />
+            <Pill value={`+${totalPoints}`} label="Pts" side="left" />
+          </div>
+
+          {/* ── STAT PILLS — RIGHT ── */}
+          <div style={{
+            position: 'absolute', right: 12, bottom: '18%',
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8,
+            zIndex: 20,
+          }}>
+            <Pill value={stats.totalMOTM}    label="MOTM"    side="right" />
+            <Pill value={stats.totalMatches} label="Matches" side="right" />
+          </div>
+
+          {/* ── FORM DOTS row ── */}
+          {form.length > 0 && (
+            <div style={{
+              position: 'absolute', bottom: '13%', left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex', alignItems: 'center', gap: 4,
+              zIndex: 20,
+            }}>
+              {form.map((r, i) => {
+                const isWin = r === 'win', isDraw = r === 'draw';
+                return (
+                  <div key={`${r}-${i}`} style={{
+                    width: 22, height: 22, borderRadius: 5,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 700,
+                    background: isWin ? 'rgba(52,211,153,0.2)' : isDraw ? 'rgba(251,191,36,0.2)' : 'rgba(239,68,68,0.2)',
+                    border: `1.5px solid ${isWin ? 'rgba(52,211,153,0.6)' : isDraw ? 'rgba(251,191,36,0.6)' : 'rgba(239,68,68,0.6)'}`,
+                    color: isWin ? '#34D399' : isDraw ? '#FBBF24' : '#F87171',
+                  }}>
+                    {isWin ? 'W' : isDraw ? 'D' : 'L'}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── PLAYER NAME (Caveat script like reference) ── */}
+          <div style={{
+            position: 'absolute',
+            bottom: '7.5%', left: '50%',
+            transform: 'translateX(-50%) rotate(-2deg)',
+            zIndex: 22, pointerEvents: 'none', userSelect: 'none',
+            whiteSpace: 'nowrap',
+          }}>
+            <span style={{
+              fontFamily: "'Caveat', cursive",
+              fontSize: 'clamp(20px, 5vw, 28px)',
+              fontWeight: 700,
+              color: '#FFE57F',
+              textShadow: `0 2px 8px rgba(0,0,0,0.95), 0 0 20px ${glow}`,
+              letterSpacing: 0.5,
+            }}>
+              {player.name}
+            </span>
+          </div>
+
+          {/* ── BOTTOM BAR ── */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            height: '7%',
+            background: '#020408',
+            borderTop: `1px solid ${accent}40`,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0 12px',
+            zIndex: 30,
+          }}>
+            <span style={{
+              fontFamily: "'Oswald', sans-serif",
+              fontSize: 7, fontWeight: 800,
+              textTransform: 'uppercase', letterSpacing: '0.15em',
+              color: accent,
+            }}>
+              THE ENIGMATIC ELITE FC
+            </span>
+            <span style={{
+              fontFamily: "'Oswald', sans-serif",
+              fontSize: 7, fontWeight: 700,
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: '0.1em',
+            }}>
+              {winRate}% WIN RATE
+            </span>
+          </div>
+
         </div>
       </Tilt>
     </motion.div>
