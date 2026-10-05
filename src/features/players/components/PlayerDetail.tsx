@@ -21,7 +21,7 @@ interface PlayerDetailProps {
   onBack: () => void;
 }
 export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
-  const { players, matchEntries, playerSeasonStats, seasons, playerMonthlyStats, fetchPlayerMatchEntries, fetchPlayerMonthlyStats } = useFootballStore();
+  const { players, matchEntries, playerSeasonStats, playerMonthlyStats, seasons, fetchPlayerMatchEntries, fetchPlayerMonthlyStats } = useFootballStore();
 
   useEffect(() => {
     fetchPlayerMatchEntries(playerId);
@@ -226,8 +226,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   const weeklyMap = new Map<string, number>();
-  const monthlyMap = new Map<string, number>();
-  players.forEach(p => { weeklyMap.set(p.id, 0); monthlyMap.set(p.id, 0); });
+  players.forEach(p => { weeklyMap.set(p.id, 0); });
 
   matchEntries.forEach(entry => {
     if (!entry.date) return;
@@ -244,11 +243,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       weeklyMap.set(entry.playerId, weeklyMap.get(entry.playerId)! + pts);
     }
 
-    // Month
-    const isMonthMatch = d.getMonth() === currentMonthIndex && d.getFullYear() === currentYear;
-    if (isMonthMatch && monthlyMap.has(entry.playerId)) {
-      monthlyMap.set(entry.playerId, monthlyMap.get(entry.playerId)! + pts);
-    }
   });
 
   const getRankFromMap = (map: Map<string, number>, pId: string) => {
@@ -258,7 +252,6 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   };
 
   const recentWeekRank = getRankFromMap(weeklyMap, player.id);
-  const recentMonthRank = getRankFromMap(monthlyMap, player.id);
 
   // Dynamically calculate the maximum league stats to correctly scale the radar chart
   const maxLeagueStats = players.reduce((max, p) => {
@@ -323,60 +316,71 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     hattricks: stats.totalHattricks
   };
 
-  // ── Monthly & Weekly RANK calculation (Using pre-aggregated stats) ──────────────────────────────
-  const calcMonthlyPoints = (s: any) =>
-    (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
+  // ── Monthly rank calculation from DB stats ─────────────────────────
+  type PeriodStats = { wins: number; draws: number; losses: number; goals: number; matches: number; points: number };
+  const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
+    s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
-  const monthlyRankData: any[] = [];
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  // Find all unique (year, monthIndex) combinations where the current player has matches
-  const myMonthlyStats = playerMonthlyStats.filter(s => s.playerId === player.id && s.appearances > 0);
-
-  myMonthlyStats.forEach(myStat => {
-    const year = myStat.year;
-    const monthIndex = myStat.monthIndex; // 0-indexed (0 to 11)
-
-    // Get all players stats for this year & month
-    const playersInMonth = playerMonthlyStats.filter(
-      s => s.year === year && s.monthIndex === monthIndex && s.appearances > 0
-    );
-
-    // Calculate points and goals
-    const rankedPlayers = playersInMonth.map(ps => ({
-      playerId: ps.playerId,
-      points: calcMonthlyPoints(ps),
-      goals: ps.goals
-    }));
-
-    // Sort by points desc, goals desc
-    rankedPlayers.sort((a, b) => b.points - a.points || b.goals - a.goals);
-
-    const myRank = rankedPlayers.findIndex(p => p.playerId === player.id) + 1;
-
-    if (myRank > 0 && myRank <= 10) {
-      monthlyRankData.push({
-        label: `${monthNames[monthIndex]} ${year}`,
-        rank: myRank,
-        wins: myStat.wins,
-        draws: myStat.draws,
-        losses: myStat.losses,
-        goals: myStat.goals,
-        matches: myStat.appearances,
-        totalPlayers: rankedPlayers.length
+  const monthlyPeriodMap = new Map<string, { label: string; year: number; monthIndex: number; playerStats: Map<string, PeriodStats> }>();
+  playerMonthlyStats.forEach(stat => {
+    const key = `${stat.year}-${stat.monthIndex}`;
+    if (!monthlyPeriodMap.has(key)) {
+      monthlyPeriodMap.set(key, {
+        label: new Date(stat.year, stat.monthIndex, 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+        year: stat.year,
+        monthIndex: stat.monthIndex,
+        playerStats: new Map<string, PeriodStats>(),
       });
     }
+    const period = monthlyPeriodMap.get(key)!;
+    const previous = period.playerStats.get(stat.playerId);
+    const points = calcPoints(stat);
+    period.playerStats.set(stat.playerId, {
+      wins: (previous?.wins || 0) + (stat.wins || 0),
+      draws: (previous?.draws || 0) + (stat.draws || 0),
+      losses: (previous?.losses || 0) + (stat.losses || 0),
+      goals: (previous?.goals || 0) + (stat.goals || 0),
+      matches: (previous?.matches || 0) + (stat.wins || 0) + (stat.draws || 0) + (stat.losses || 0),
+      points: (previous?.points || 0) + points,
+    });
   });
 
-  // Sort by date descending
-  monthlyRankData.sort((a, b) => {
-    const dateA = new Date(`1 ${a.label}`);
-    const dateB = new Date(`1 ${b.label}`);
-    if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
-      return dateB.getTime() - dateA.getTime();
-    }
-    return a.rank - b.rank;
-  });
+  const monthlyRankData = Array.from(monthlyPeriodMap.values())
+    .map(period => {
+      const sorted = Array.from(period.playerStats.entries())
+        .filter(([, stat]) => stat.matches > 0)
+        .sort((a, b) => b[1].points - a[1].points);
+      const rankIdx = sorted.findIndex(([id]) => id === player.id);
+      const myStats = period.playerStats.get(player.id);
+      return rankIdx === -1 || !myStats
+        ? null
+        : {
+            label: period.label,
+            rank: rankIdx + 1,
+            wins: myStats.wins,
+            draws: myStats.draws,
+            losses: myStats.losses,
+            goals: myStats.goals,
+            matches: myStats.matches,
+            totalPlayers: sorted.length,
+            year: period.year,
+            monthIndex: period.monthIndex,
+          };
+    })
+    .filter((item): item is {
+      label: string;
+      rank: number;
+      wins: number;
+      draws: number;
+      losses: number;
+      goals: number;
+      matches: number;
+      totalPlayers: number;
+      year: number;
+      monthIndex: number;
+    } => item !== null)
+    .filter(item => item.rank <= 5)
+    .sort((a, b) => b.year - a.year || b.monthIndex - a.monthIndex || a.rank - b.rank);
 
   const renderTrophyCabinet = () => {
     const trophies = [];
@@ -521,7 +525,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
           <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px]" style={{ background: 'rgba(59,130,246,0.12)' }} />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start pt-24 sm:pt-28">
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
             <div className="relative shrink-0 pt-2">
@@ -653,7 +657,7 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
               {/* Ranks */}
               {[
                 { label: 'Overall Rank', value: currentRank, color: '#fbbf24', bgColor: 'rgba(251,191,36,0.15)' },
-                { label: 'Month Rank', value: recentMonthRank, color: '#34d399', bgColor: 'rgba(52,211,153,0.15)' },
+                { label: 'Month Top 5', value: monthlyRankData.length, color: '#34d399', bgColor: 'rgba(52,211,153,0.15)' },
                 { label: 'Week Rank', value: recentWeekRank, color: '#a78bfa', bgColor: 'rgba(167,139,250,0.15)' },
               ].map(r => (
                 <div key={r.label}>
@@ -929,8 +933,8 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
 
             <div className="my-4">
               <RankTrendCard
-                title="Monthly Rank 🏅"
-                subtitle="Months where player ranked in the Top 10"
+                title="Monthly Rank"
+                subtitle="Monthly performance and rank overview. Top 5 months only."
                 data={monthlyRankData}
               />
             </div>
@@ -1035,9 +1039,9 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 </div>
                 <div>
                   <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">
-                    {monthlyRankData.filter(d => d.rank <= Math.max(3, players.length * 0.1)).length}
+                    {monthlyRankData.length}
                   </p>
-                  <p className="text-[11px] font-bold text-muted-foreground">Month Top 10%</p>
+                  <p className="text-[11px] font-bold text-muted-foreground">Month Top 5</p>
                 </div>
                 <div>
                   <p className="text-[32px] font-heading font-black text-primary leading-none mb-1">

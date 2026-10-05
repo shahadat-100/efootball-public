@@ -67,13 +67,13 @@ export function PlayerOverviewDashboard({ entries, stats }: PlayerOverviewDashbo
       </div>
 
       {/* Middle Row: Form Area & Gauge */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm lg:col-span-2 min-h-[320px] flex flex-col">
           <div className="mb-6">
             <h3 className="font-heading font-bold text-[16px] tracking-tight">Recent Goal Scoring Trend</h3>
             <p className="text-[12px] text-muted-foreground">Goals scored over the last 15 matches</p>
           </div>
-          <div className="h-[220px] w-full">
+          <div className="h-[220px] w-full flex-1 min-h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={goalTrendData} margin={{ top: 10, right: 10, left: -30, bottom: 0 }}>
                 <defs>
@@ -93,20 +93,20 @@ export function PlayerOverviewDashboard({ entries, stats }: PlayerOverviewDashbo
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col min-h-[320px]">
           <div className="mb-2">
             <h3 className="font-heading font-bold text-[16px] tracking-tight">Performance Gauge</h3>
             <p className="text-[12px] text-muted-foreground">Core KPIs efficiency</p>
           </div>
-          <div className="flex-1 flex items-center justify-center -mt-6">
+          <div className="flex-1 flex items-center justify-center min-h-[240px] -mt-2">
             <PlayerGaugeChart stats={stats} />
           </div>
         </div>
       </div>
 
       {/* Bottom Row: Nightingale & Bar Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col min-h-[360px]">
           <div className="mb-2">
             <h3 className="font-heading font-bold text-[16px] tracking-tight">Match Outcomes</h3>
             <p className="text-[12px] text-muted-foreground">Nightingale Rose distribution</p>
@@ -116,12 +116,12 @@ export function PlayerOverviewDashboard({ entries, stats }: PlayerOverviewDashbo
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm lg:col-span-2">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm lg:col-span-2 min-h-[360px] flex flex-col">
           <div className="mb-6">
             <h3 className="font-heading font-bold text-[16px] tracking-tight">Form History (Goal Difference)</h3>
             <p className="text-[12px] text-muted-foreground">Goals scored vs conceded in recent matches</p>
           </div>
-          <div className="h-[250px]">
+          <div className="h-[250px] flex-1 min-h-[250px]">
             <PlayerFormChart entries={entries} />
           </div>
         </div>
