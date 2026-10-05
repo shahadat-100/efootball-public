@@ -101,16 +101,17 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
           zIndex: 25,
         }}>
           <div style={{
-            fontSize: 28, fontWeight: 900, lineHeight: 1,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 34, fontWeight: 900, lineHeight: 0.95,
+            fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
             color: '#fff', textTransform: 'uppercase',
-            letterSpacing: 2,
-            textShadow: `0 0 20px ${accentGlow}`,
+            letterSpacing: 3,
+            textShadow: `0 0 25px ${accentGlow}`,
           }}>
             {title}
           </div>
           <div style={{
             fontSize: 11, fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: accentColor, textTransform: 'uppercase',
             letterSpacing: 2.5, marginTop: 4,
           }}>
@@ -144,19 +145,20 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
             <div style={{
               position: 'absolute',
               bottom: 46, left: 14,
-              background: 'rgba(7, 12, 22, 0.88)',
-              backdropFilter: 'blur(8px)',
+              background: 'rgba(7, 12, 22, 0.92)',
+              backdropFilter: 'blur(10px)',
               border: `1.5px solid ${accentColor}`,
-              borderRadius: 12,
-              padding: '4px 10px',
-              display: 'flex', alignItems: 'center', gap: 6,
-              boxShadow: `0 4px 15px rgba(0,0,0,0.7), 0 0 12px ${accentGlow}`,
+              borderRadius: 10,
+              padding: '5px 12px',
+              display: 'flex', alignItems: 'center', gap: 7,
+              boxShadow: `0 4px 18px rgba(0,0,0,0.8), 0 0 14px ${accentGlow}`,
             }}>
-              <span style={{ fontSize: 14 }}>👑</span>
+              <span style={{ fontSize: 15 }}>👑</span>
               <span style={{
-                fontSize: 11, fontWeight: 900,
-                fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+                fontSize: 12, fontWeight: 900,
+                fontFamily: "'Oswald', sans-serif",
                 color: '#fff', textTransform: 'uppercase',
+                letterSpacing: 1.5,
               }}>
                 {topLeader?.player.name}
               </span>
@@ -206,13 +208,14 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                 >
                   {/* Rank number */}
                   <div style={{
-                    fontSize: isTop3 ? 20 : 16,
+                    fontSize: isTop3 ? 18 : 14,
                     fontWeight: 900,
-                    fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+                    fontFamily: "'Oswald', sans-serif",
                     color: rankColor,
                     minWidth: 20,
                     textAlign: 'center',
                     lineHeight: 1,
+                    fontStyle: 'italic',
                   }}>
                     {absIdx + 1}
                   </div>
@@ -220,9 +223,9 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                   {/* Cutout / Avatar Thumb */}
                   <div style={{
                     width: 36, height: 36,
-                    borderRadius: 10,
+                    borderRadius: 8,
                     background: '#111522',
-                    border: `1px solid ${isTop3 ? rankColor : 'rgba(255,255,255,0.15)'}`,
+                    border: `1.5px solid ${isTop3 ? rankColor : 'rgba(255,255,255,0.15)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     overflow: 'hidden',
                     flexShrink: 0,
@@ -243,25 +246,26 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontSize: isTop3 ? 13 : 11.5,
-                      fontWeight: 900,
-                      fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+                      fontWeight: 800,
+                      fontFamily: "'Oswald', sans-serif",
                       color: '#fff',
                       textTransform: 'uppercase',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      letterSpacing: 0.5,
+                      letterSpacing: 1,
                     }}>
                       {r.player.name}
                     </div>
                     <div style={{
                       fontSize: 8.5,
                       fontWeight: 700,
-                      color: 'rgba(255,255,255,0.5)',
+                      fontFamily: "'Oswald', sans-serif",
+                      color: 'rgba(255,255,255,0.55)',
                       letterSpacing: 1,
                       marginTop: 2,
                     }}>
-                      {r.goals}G · {r.appearances}A · {r.wins}W
+                      {r.goals}G · {r.appearances}APP · {r.motm}M
                     </div>
                   </div>
 
@@ -273,13 +277,14 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                     <div style={{
                       fontSize: isTop3 ? 18 : 15,
                       fontWeight: 900,
-                      fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+                      fontFamily: "'Oswald', sans-serif",
                       color: rankColor,
                       lineHeight: 1,
+                      fontStyle: 'italic',
                     }}>
                       +{r.points}
                     </div>
-                    <div style={{ fontSize: 7, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: 7.5, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontFamily: "'Oswald', sans-serif", letterSpacing: 0.5 }}>
                       PTS
                     </div>
                   </div>

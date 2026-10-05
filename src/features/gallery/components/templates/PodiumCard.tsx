@@ -13,33 +13,33 @@ const MEDAL = ['🥇', '🥈', '🥉'];
 const RANK_CONFIG = [
   {
     rank: 1,
-    label: '1ST PLACE',
+    label: 'CHAMPION',
     color: '#FFD700',
-    glow: 'rgba(255, 215, 0, 0.55)',
-    bg: 'linear-gradient(180deg, rgba(212,175,55,0.25) 0%, rgba(15,12,5,0.95) 100%)',
-    border: 'rgba(255, 215, 0, 0.6)',
-    pedestalHeight: 180,
-    cutoutHeight: 270,
+    glow: 'rgba(255, 215, 0, 0.5)',
+    bg: 'linear-gradient(180deg, rgba(212,175,55,0.28) 0%, rgba(20,16,8,0.96) 100%)',
+    border: 'rgba(255, 215, 0, 0.7)',
+    pedestalHeight: 185,
+    cutoutHeight: 285,
   },
   {
     rank: 2,
-    label: '2ND PLACE',
+    label: 'RUNNER UP',
     color: '#E2E8F0',
     glow: 'rgba(226, 232, 240, 0.45)',
-    bg: 'linear-gradient(180deg, rgba(148,163,184,0.2) 0%, rgba(15,18,25,0.95) 100%)',
-    border: 'rgba(226, 232, 240, 0.45)',
-    pedestalHeight: 150,
-    cutoutHeight: 240,
+    bg: 'linear-gradient(180deg, rgba(148,163,184,0.22) 0%, rgba(15,20,30,0.96) 100%)',
+    border: 'rgba(226, 232, 240, 0.5)',
+    pedestalHeight: 155,
+    cutoutHeight: 250,
   },
   {
     rank: 3,
     label: '3RD PLACE',
     color: '#F59E0B',
     glow: 'rgba(245, 158, 11, 0.45)',
-    bg: 'linear-gradient(180deg, rgba(217,119,6,0.2) 0%, rgba(20,14,8,0.95) 100%)',
-    border: 'rgba(245, 158, 11, 0.45)',
-    pedestalHeight: 130,
-    cutoutHeight: 220,
+    bg: 'linear-gradient(180deg, rgba(217,119,6,0.22) 0%, rgba(22,15,8,0.96) 100%)',
+    border: 'rgba(245, 158, 11, 0.5)',
+    pedestalHeight: 135,
+    cutoutHeight: 230,
   },
 ];
 
@@ -139,16 +139,17 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
 
         <div style={{ textAlign: 'right' }}>
           <div style={{
-            fontSize: 24, fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 28, fontWeight: 900,
+            fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
             color: '#fff', textTransform: 'uppercase',
-            letterSpacing: 2, lineHeight: 1,
-            textShadow: `0 0 20px ${accentGlow}`,
+            letterSpacing: 3, lineHeight: 1,
+            textShadow: `0 0 25px ${accentGlow}`,
           }}>
             {title}
           </div>
           <div style={{
             fontSize: 10, fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: accentColor, textTransform: 'uppercase',
             letterSpacing: 2, marginTop: 4,
           }}>
@@ -235,9 +236,9 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                   height: config.pedestalHeight,
                   background: config.bg,
                   border: `1.5px solid ${config.border}`,
-                  borderRadius: 16,
-                  boxShadow: `0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px ${config.glow}`,
-                  backdropFilter: 'blur(8px)',
+                  borderRadius: 14,
+                  boxShadow: `0 12px 35px rgba(0,0,0,0.85), inset 0 0 24px ${config.glow}`,
+                  backdropFilter: 'blur(10px)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -248,87 +249,93 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                 }}>
                   {/* Subtle top pedestal accent highlight */}
                   <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+                    position: 'absolute', top: 0, left: 0, right: 0, height: 2.5,
                     background: `linear-gradient(90deg, transparent, ${config.color}, transparent)`,
                   }} />
 
                   {/* Player Name */}
                   <div style={{
-                    fontSize: originalIdx === 0 ? 16 : 13,
+                    fontSize: originalIdx === 0 ? 17 : 14,
                     fontWeight: 900,
-                    fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+                    fontFamily: "'Oswald', sans-serif",
                     color: '#fff',
                     textTransform: 'uppercase',
                     textAlign: 'center',
                     lineHeight: 1.1,
-                    letterSpacing: 1,
+                    letterSpacing: 1.5,
+                    textShadow: '0 2px 10px rgba(0,0,0,0.8)',
                   }}>
                     {r.player.name}
                   </div>
 
                   {/* Points Badge */}
                   <div style={{
-                    background: 'rgba(0,0,0,0.6)',
+                    background: 'rgba(0,0,0,0.65)',
                     border: `1px solid ${config.border}`,
-                    borderRadius: 12,
-                    padding: '4px 12px',
+                    borderRadius: 10,
+                    padding: '3px 12px',
                     display: 'flex',
                     alignItems: 'baseline',
-                    gap: 4,
+                    gap: 5,
+                    boxShadow: `0 4px 12px rgba(0,0,0,0.6)`,
                   }}>
                     <span style={{
                       fontSize: originalIdx === 0 ? 24 : 20,
                       fontWeight: 900,
-                      fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+                      fontFamily: "'Oswald', sans-serif",
                       color: config.color,
                       lineHeight: 1,
+                      fontStyle: 'italic',
                     }}>
                       +{r.points}
                     </span>
-                    <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.6)' }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(255,255,255,0.7)', fontFamily: "'Oswald', sans-serif", letterSpacing: 1 }}>
                       PTS
                     </span>
                   </div>
 
                   {/* Mini Stats (Goals, Apps, MOTM) */}
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', gap: 5 }}>
                     <div style={{
-                      background: 'rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.08)',
                       borderRadius: 6,
-                      padding: '2px 8px',
+                      padding: '2px 7px',
                       fontSize: 10,
                       fontWeight: 800,
+                      fontFamily: "'Oswald', sans-serif",
                       color: '#fff',
                     }}>
-                      {r.goals} <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.5)' }}>GOALS</span>
+                      {r.goals} <span style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.5)' }}>GLS</span>
                     </div>
                     <div style={{
-                      background: 'rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.08)',
                       borderRadius: 6,
-                      padding: '2px 8px',
+                      padding: '2px 7px',
                       fontSize: 10,
                       fontWeight: 800,
+                      fontFamily: "'Oswald', sans-serif",
                       color: '#fff',
                     }}>
-                      {r.appearances} <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.5)' }}>APPS</span>
+                      {r.appearances} <span style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.5)' }}>APP</span>
                     </div>
                     <div style={{
-                      background: 'rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.08)',
                       borderRadius: 6,
-                      padding: '2px 8px',
+                      padding: '2px 7px',
                       fontSize: 10,
                       fontWeight: 800,
+                      fontFamily: "'Oswald', sans-serif",
                       color: '#fff',
                     }}>
-                      {r.motm} <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.5)' }}>MOTM</span>
+                      {r.motm} <span style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.5)' }}>MOTM</span>
                     </div>
                   </div>
 
                   {/* Rank Label Banner at Bottom of Pedestal */}
                   <div style={{
-                    fontSize: 10,
+                    fontSize: 9.5,
                     fontWeight: 900,
-                    fontFamily: "'Neon Sans', 'Impact', sans-serif",
+                    fontFamily: "'Oswald', sans-serif",
                     color: config.color,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
