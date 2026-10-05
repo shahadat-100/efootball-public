@@ -2,6 +2,7 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { RankedPlayer } from '@/features/gallery/utils/galleryStats';
 import { calcTotalRawPoints } from '@/utils/playerStats';
+import { useCutoutImage } from '../../utils/useCutoutImage';
 
 interface PlayerProfileCardProps {
   player: Player;
@@ -33,8 +34,8 @@ export function PlayerProfileCard({
   const isMonthly = subtitle.toLowerCase().includes('month');
   const isMVP = Boolean(title && title.toUpperCase().includes('MVP')) || subtitle.toLowerCase().includes('week') || subtitle.toLowerCase().includes('month');
 
-  // Use coverImageUrl directly — it's already a cutout PNG, no processing needed
-  const coverImage = player.coverImageUrl || player.profileImageUrl || '';
+  // Only use coverImageUrl (never profileImageUrl), and remove black background via canvas
+  const coverImage = useCutoutImage(player.coverImageUrl);
 
   // Split name for two-tone athletic typography
   const nameParts = player.name.trim().split(' ');
@@ -394,7 +395,6 @@ export function PlayerProfileCard({
   // ═══════════════════════════════════════════════════════════════════════════
   // DESIGN B: SQUAD PROFILE SHOWCASE (Reference 4 — Diagonal Blue Banner, Player Right)
   // ═══════════════════════════════════════════════════════════════════════════
-  const accentColor = '#2563EB';
   const role = (player.playerRoles ?? [])[0]?.toUpperCase() || 'OFFICIAL SQUAD';
 
   return (
