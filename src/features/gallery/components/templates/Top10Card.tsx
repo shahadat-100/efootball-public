@@ -24,7 +24,7 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
   const firstCol = topPlayers.slice(0, 5);
   const secondCol = topPlayers.slice(5, 10);
 
-  const leaderCutout = topLeader?.player.coverImageUrl || topLeader?.player.profileImageUrl;
+  const leaderCutout = topLeader?.player.coverImageUrl;
 
   return (
     <div
@@ -186,7 +186,7 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
               const absIdx = cIdx * 5 + rowIdx;
               const rankColor = RANK_COLOR[absIdx] || 'rgba(255,255,255,0.7)';
               const isTop3 = absIdx < 3;
-              const rowCutout = r.player.coverImageUrl || r.player.profileImageUrl;
+              const rowCutout = r.player.coverImageUrl;
 
               return (
                 <div

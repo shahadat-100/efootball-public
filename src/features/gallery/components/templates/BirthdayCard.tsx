@@ -1,5 +1,6 @@
 import React from 'react';
 import { Player } from '@/features/players/types';
+import { useCutoutImage } from '../../utils/useCutoutImage';
 
 interface BirthdayCardProps {
   player: Player;
@@ -8,8 +9,8 @@ interface BirthdayCardProps {
 }
 
 export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
-  // Use coverImageUrl directly — already a cutout PNG, no processing needed
-  const coverImage = player.coverImageUrl || player.profileImageUrl || '';
+  // Only use coverImageUrl and strip black background
+  const coverImage = useCutoutImage(player.coverImageUrl);
   const accentColor = '#FFD700';
   const accentGlow = 'rgba(212, 175, 55, 0.45)';
 

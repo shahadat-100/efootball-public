@@ -180,7 +180,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         }}>
           {orderedSlots.map(({ player: r, config, originalIdx }) => {
             if (!r) return null;
-            const cutoutImage = r.player.coverImageUrl || r.player.profileImageUrl;
+            const cutoutImage = r.player.coverImageUrl;
 
             return (
               <div
