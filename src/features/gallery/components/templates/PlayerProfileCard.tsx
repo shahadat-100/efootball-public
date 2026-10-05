@@ -2,7 +2,6 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { RankedPlayer } from '@/features/gallery/utils/galleryStats';
 import { calcTotalRawPoints } from '@/utils/playerStats';
-import { useCutoutImage } from '../../utils/useCutoutImage';
 
 interface PlayerProfileCardProps {
   player: Player;
@@ -31,9 +30,8 @@ export function PlayerProfileCard({
   const isMonthly = subtitle.toLowerCase().includes('month');
   const isMVP = Boolean(title && title.toUpperCase().includes('MVP')) || subtitle.toLowerCase().includes('week') || subtitle.toLowerCase().includes('month');
 
-  // Automatic transparency processing for black-background cutouts
-  const rawImage = player.coverImageUrl || player.profileImageUrl;
-  const cutoutImage = useCutoutImage(rawImage);
+  // Use coverImageUrl directly — it's already a cutout PNG, no processing needed
+  const coverImage = player.coverImageUrl || player.profileImageUrl || '';
 
   // Split name for two-tone athletic typography
   const nameParts = player.name.trim().split(' ');
@@ -288,9 +286,9 @@ export function PlayerProfileCard({
         <div style={{
           position: 'absolute',
           bottom: 38,
-          right: -10,
-          width: 450,
-          height: 570,
+          right: -18,
+          width: 490,
+          height: 630,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'flex-end',
@@ -298,11 +296,11 @@ export function PlayerProfileCard({
           pointerEvents: 'none',
         }}>
           <img
-            src={cutoutImage}
+            src={coverImage}
             alt={player.name}
             crossOrigin="anonymous"
             style={{
-              maxHeight: 560,
+              maxHeight: 620,
               maxWidth: '100%',
               objectFit: 'contain',
               objectPosition: 'bottom right',
@@ -491,9 +489,9 @@ export function PlayerProfileCard({
       <div style={{
         position: 'absolute',
         bottom: 38,
-        right: -10,
-        width: 440,
-        height: 580,
+        right: -18,
+        width: 490,
+        height: 640,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
@@ -501,11 +499,11 @@ export function PlayerProfileCard({
         pointerEvents: 'none',
       }}>
         <img
-          src={cutoutImage}
+          src={coverImage}
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 570,
+            maxHeight: 630,
             maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom right',

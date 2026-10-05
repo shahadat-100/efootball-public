@@ -19,7 +19,7 @@ const RANK_CONFIG = [
     bg: 'linear-gradient(180deg, rgba(212,175,55,0.25) 0%, rgba(15,12,5,0.95) 100%)',
     border: 'rgba(255, 215, 0, 0.6)',
     pedestalHeight: 180,
-    cutoutHeight: 220,
+    cutoutHeight: 270,
   },
   {
     rank: 2,
@@ -29,7 +29,7 @@ const RANK_CONFIG = [
     bg: 'linear-gradient(180deg, rgba(148,163,184,0.2) 0%, rgba(15,18,25,0.95) 100%)',
     border: 'rgba(226, 232, 240, 0.45)',
     pedestalHeight: 150,
-    cutoutHeight: 195,
+    cutoutHeight: 240,
   },
   {
     rank: 3,
@@ -39,7 +39,7 @@ const RANK_CONFIG = [
     bg: 'linear-gradient(180deg, rgba(217,119,6,0.2) 0%, rgba(20,14,8,0.95) 100%)',
     border: 'rgba(245, 158, 11, 0.45)',
     pedestalHeight: 130,
-    cutoutHeight: 180,
+    cutoutHeight: 220,
   },
 ];
 

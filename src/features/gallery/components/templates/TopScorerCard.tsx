@@ -1,6 +1,5 @@
 import React from 'react';
 import { RankedPlayer } from '../../utils/galleryStats';
-import { useCutoutImage } from '../../utils/useCutoutImage';
 
 interface TopScorerCardProps {
   data: RankedPlayer | null;
@@ -11,8 +10,8 @@ interface TopScorerCardProps {
 
 export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCardProps) {
   const isMonthly = type === 'monthly';
-  const rawImage = data?.player.coverImageUrl || data?.player.profileImageUrl;
-  const cutoutImage = useCutoutImage(rawImage);
+  // Use coverImageUrl directly — already a cutout PNG
+  const coverImage = data?.player.coverImageUrl || data?.player.profileImageUrl || '';
 
   const accentColor = '#FFD700'; // Gold theme for Top Scorer / Golden Boot
   const accentGlow = 'rgba(212, 175, 55, 0.45)';
@@ -163,7 +162,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
-            height: 560,
+            height: 610,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -171,11 +170,11 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             pointerEvents: 'none',
           }}>
             <img
-              src={cutoutImage}
+              src={coverImage}
               alt={data.player.name}
               crossOrigin="anonymous"
               style={{
-                maxHeight: 550,
+                maxHeight: 600,
                 maxWidth: '96%',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',

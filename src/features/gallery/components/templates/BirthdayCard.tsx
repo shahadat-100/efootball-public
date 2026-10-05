@@ -1,6 +1,5 @@
 import React from 'react';
 import { Player } from '@/features/players/types';
-import { useCutoutImage } from '../../utils/useCutoutImage';
 
 interface BirthdayCardProps {
   player: Player;
@@ -9,8 +8,8 @@ interface BirthdayCardProps {
 }
 
 export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
-  const rawImage = player.coverImageUrl || player.profileImageUrl;
-  const cutoutImage = useCutoutImage(rawImage);
+  // Use coverImageUrl directly — already a cutout PNG, no processing needed
+  const coverImage = player.coverImageUrl || player.profileImageUrl || '';
   const accentColor = '#FFD700';
   const accentGlow = 'rgba(212, 175, 55, 0.45)';
 
@@ -188,7 +187,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        height: 560,
+        height: 610,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
@@ -196,11 +195,11 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         pointerEvents: 'none',
       }}>
         <img
-          src={cutoutImage}
+          src={coverImage}
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 550,
+            maxHeight: 600,
             maxWidth: '96%',
             objectFit: 'contain',
             objectPosition: 'bottom center',
