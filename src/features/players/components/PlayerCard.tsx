@@ -1,40 +1,44 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import Tilt from 'react-parallax-tilt';
 import { Player } from '../types';
+import { Badge } from '@/shared/components';
+import { MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
-import { useBackgroundRemoval } from '../hooks/useBackgroundRemoval';
+import { cn } from '@/shared/lib/cn';
 
 interface PlayerCardProps {
   player: Player;
   onView: () => void;
-  index?: number;
 }
 
-const RANK_CONFIG: Record<number, { accent: string; glow: string; label: string }> = {
-  1: { accent: '#FFD700', glow: 'rgba(212,175,55,0.55)', label: 'TOP PLAYER' },
-  2: { accent: '#C0C0C0', glow: 'rgba(192,192,192,0.4)', label: 'ELITE' },
-  3: { accent: '#CD7F32', glow: 'rgba(205,127,50,0.4)',  label: 'BRONZE' },
-};
-
-export function PlayerCard({ player, onView, index = 0 }: PlayerCardProps) {
-  const [hovered, setHovered] = useState(false);
+export function PlayerCard({ player, onView }: PlayerCardProps) {
+  const [hover, setHover] = useState(false);
   const stats = usePlayerStats(player.id);
-  const { players, playerSeasonStats, matchEntries } = useFootballStore();
+  const { matchEntries, players, playerSeasonStats } = useFootballStore();
+
+  const formattedBirthDate = player.dateOfBirth
+    ? new Date(player.dateOfBirth).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      })
+    : null;
 
   // ── Rank ──
   const calcPts = (s: any) =>
     s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
 
-  const ranked = [...players]
-    .map(p => ({ id: p.id, pts: playerSeasonStats.filter(s => s.playerId === p.id).reduce((a, s) => a + calcPts(s), 0) }))
-    .sort((a, b) => b.pts - a.pts);
+  const playerRanks = players
+    .map(p => ({ id: p.id, points: playerSeasonStats.filter(s => s.playerId === p.id).reduce((a, s) => a + calcPts(s), 0) }))
+    .sort((a, b) => b.points - a.points);
 
-  const rankIdx     = ranked.findIndex(r => r.id === player.id);
-  const rank        = rankIdx !== -1 ? rankIdx + 1 : null;
-  const totalPoints = rankIdx !== -1 ? ranked[rankIdx].pts : 0;
-  const rankCfg     = rank && rank <= 3 ? RANK_CONFIG[rank] : null;
+  const rankIndex = playerRanks.findIndex(r => r.id === player.id);
+  const rank = rankIndex !== -1 ? rankIndex + 1 : undefined;
+
+  const rankLabel =
+    rank === 1 ? { text: '🥇 #1', cls: 'bg-amber-500/20 text-amber-400 border-amber-500/30' } :
+    rank === 2 ? { text: '🥈 #2', cls: 'bg-slate-400/20 text-slate-300 border-slate-400/30' } :
+    rank === 3 ? { text: '🥉 #3', cls: 'bg-amber-700/20 text-amber-600 border-amber-700/30' } :
+    rank    ? { text: `#${rank}`, cls: 'bg-muted text-muted-foreground border-border' } :
+    null;
 
   // ── Last 5 form ──
   const form = matchEntries
@@ -44,375 +48,167 @@ export function PlayerCard({ player, onView, index = 0 }: PlayerCardProps) {
       const tb = new Date(b.time ? `${b.date}T${b.time}` : `${b.date}T00:00:00`).getTime() || 0;
       return tb !== ta ? tb - ta : String(b.id).localeCompare(String(a.id));
     })
-    .slice(0, 5).map(e => e.result!).reverse();
+    .slice(0, 5)
+    .map(e => e.result!)
+    .reverse();
 
-  const winRate = stats.totalMatches > 0 ? Math.round((stats.totalWins / stats.totalMatches) * 100) : 0;
-
-  const accent = rankCfg ? rankCfg.accent : '#6366F1';
-  const glow   = rankCfg ? rankCfg.glow   : 'rgba(99,102,241,0.35)';
-
-  // Role label (top title)
-  const roleLabel = (player.playerRoles ?? [])[0]?.toUpperCase()
-    || (rankCfg ? rankCfg.label : 'PLAYER');
-
-  // ── Auto bg removal ──
-  const { src: displayImage, isCutout, loading: bgLoading } = useBackgroundRemoval(
-    player.coverImageUrl,
-    player.profileImageUrl,
-  );
-
-  // skew pill helper
-  const Pill = ({
-    value, label, side, icon, big = false,
-  }: { value: string | number; label: string; side: 'left' | 'right'; icon?: string; big?: boolean }) => (
-    <div style={{
-      background: 'rgba(6,10,20,0.88)',
-      backdropFilter: 'blur(14px)',
-      WebkitBackdropFilter: 'blur(14px)',
-      border: `1.5px solid ${big ? accent : 'rgba(255,255,255,0.15)'}`,
-      boxShadow: big ? `0 6px 20px ${glow}, inset 0 0 10px ${accent}22` : '0 4px 14px rgba(0,0,0,0.6)',
-      padding: big ? '6px 14px' : '4px 11px',
-      borderRadius: 10,
-      display: 'flex',
-      alignItems: 'baseline',
-      gap: 5,
-      transform: side === 'left' ? 'skewX(-6deg)' : 'skewX(6deg)',
-    }}>
-      {icon && <span style={{ fontSize: big ? 14 : 11 }}>{icon}</span>}
-      <span style={{
-        fontFamily: "'Oswald', sans-serif",
-        fontWeight: 800, fontStyle: 'italic',
-        fontSize: big ? 26 : 18,
-        color: big ? accent : '#fff',
-        lineHeight: 1,
-      }}>
-        {value}
-      </span>
-      <span style={{
-        fontFamily: "'Oswald', sans-serif",
-        fontWeight: 700, fontSize: big ? 10 : 8,
-        textTransform: 'uppercase' as const,
-        letterSpacing: '0.12em',
-        color: big ? '#fff' : accent,
-      }}>
-        {label}
-      </span>
-    </div>
-  );
+  const winRate = stats.totalMatches > 0
+    ? Math.round((stats.totalWins / stats.totalMatches) * 100)
+    : 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 28, scale: 0.93 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, delay: index * 0.055, ease: [0.22, 1, 0.36, 1] }}
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={onView}
+      className={cn(
+        'relative bg-card border rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer group',
+        hover ? 'border-primary/40 shadow-xl -translate-y-1' : 'border-border shadow-sm'
+      )}
     >
-      <Tilt
-        tiltMaxAngleX={9}
-        tiltMaxAngleY={9}
-        glareEnable={true}
-        glareMaxOpacity={rankCfg ? 0.2 : 0.08}
-        glareColor={accent}
-        glarePosition="all"
-        glareBorderRadius="16px"
-        scale={1.025}
-        transitionSpeed={700}
-        style={{ borderRadius: 16, cursor: 'pointer', display: 'block' }}
-        onEnter={() => setHovered(true)}
-        onLeave={() => setHovered(false)}
-        onClick={onView}
-      >
-        {/* ══ CARD ══ */}
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '3/4',
-          borderRadius: 16,
-          overflow: 'hidden',
-          background: '#040711',
-          boxShadow: hovered
-            ? `0 20px 50px ${glow}, 0 0 0 1.5px ${accent}55`
-            : '0 6px 30px rgba(0,0,0,0.7)',
-          transition: 'box-shadow 0.3s ease',
-        }}>
+      {/* ── HEADER ── */}
+      <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-5 pb-4">
+        {/* Subtle dot texture */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+        />
+        {/* Glow on hover */}
+        <div className={cn(
+          'absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent transition-opacity duration-300',
+          hover ? 'opacity-100' : 'opacity-0'
+        )} />
 
-          {/* ── BG: radial spotlight ── */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1,
-            background: `radial-gradient(circle at 50% 35%, ${accent}22 0%, ${accent}06 45%, #040711 85%)`,
-          }} />
-
-          {/* ── BG: gallery background image (faint) ── */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1,
-            backgroundImage: `url('/images/gallery-bg/bg-golden-boot.jpg')`,
-            backgroundSize: 'cover', backgroundPosition: 'center',
-            opacity: 0.08,
-          }} />
-
-          {/* ── Club crest watermark ── */}
-          <img
-            src="/images/club-logo.jpg"
-            alt=""
-            aria-hidden
-            style={{
-              position: 'absolute',
-              top: '28%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 2,
-              width: '65%', height: 'auto',
-              objectFit: 'contain',
-              opacity: hovered ? 0.08 : 0.05,
-              transition: 'opacity 0.4s ease',
-              filter: 'saturate(0) brightness(3)',
-              borderRadius: 8,
-            }}
-          />
-
-          {/* ── TOP HEADER ── */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0,
-            padding: '12px 14px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            zIndex: 20,
-          }}>
-            {/* Club logo + name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <img
-                src="/images/club-logo.jpg"
-                alt="Club"
-                style={{
-                  width: 32, height: 32, borderRadius: 7,
-                  objectFit: 'cover',
-                  border: `1.5px solid ${accent}99`,
-                  boxShadow: `0 0 10px ${glow}`,
-                }}
-              />
-              <div>
-                <div style={{
-                  fontFamily: "'Oswald', sans-serif",
-                  fontSize: 9, fontWeight: 900,
-                  textTransform: 'uppercase', letterSpacing: '0.15em',
-                  color: '#fff', lineHeight: 1.2,
-                }}>The Enigmatic Elite</div>
-                <div style={{
-                  fontFamily: "'Oswald', sans-serif",
-                  fontSize: 7.5, fontWeight: 700, fontStyle: 'italic',
-                  textTransform: 'uppercase', letterSpacing: '0.12em',
-                  color: accent,
-                }}>In Mystery We Reign</div>
-              </div>
+        <div className="relative z-10 flex items-center gap-4">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className={cn(
+              'w-[68px] h-[68px] rounded-2xl overflow-hidden border-2 transition-all duration-300 shadow-lg',
+              hover ? 'border-primary/60 scale-105' : 'border-white/10'
+            )}>
+              {player.profileImageUrl ? (
+                <img src={player.profileImageUrl} alt={player.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-zinc-600 to-zinc-800 flex items-center justify-center">
+                  <span className="text-white font-black text-2xl">{player.name.charAt(0)}</span>
+                </div>
+              )}
             </div>
-
             {/* Jersey badge */}
             {player.jerseyNumber && (
-              <div style={{
-                background: 'rgba(4,7,17,0.85)',
-                backdropFilter: 'blur(8px)',
-                border: `1.5px solid ${accent}`,
-                boxShadow: `0 4px 14px rgba(0,0,0,0.6), 0 0 10px ${glow}`,
-                borderRadius: 8,
-                padding: '3px 10px',
-                display: 'flex', alignItems: 'baseline', gap: 1,
-              }}>
-                <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 700, color: accent }}>#</span>
-                <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1 }}>
-                  {player.jerseyNumber}
+              <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-primary rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-md">
+                {player.jerseyNumber}
+              </div>
+            )}
+          </div>
+
+          {/* Name + rank + form */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="font-heading font-black text-[17px] text-white leading-tight truncate">
+                {player.name}
+              </h3>
+              {rankLabel && (
+                <span className={cn('shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full border', rankLabel.cls)}>
+                  {rankLabel.text}
                 </span>
-              </div>
-            )}
-          </div>
-
-          {/* ── BIG TITLE TEXT (Bebas Neue like reference) ── */}
-          <div style={{
-            position: 'absolute',
-            top: '13%', left: 0, right: 0,
-            textAlign: 'center',
-            zIndex: 4, pointerEvents: 'none', userSelect: 'none',
-          }}>
-            <div style={{
-              fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-              fontSize: 'clamp(52px, 14vw, 76px)',
-              fontWeight: 400,
-              color: '#ffffff',
-              letterSpacing: '0.04em',
-              lineHeight: 0.88,
-              textTransform: 'uppercase',
-              textShadow: `0 0 30px ${glow}, 0 6px 20px rgba(0,0,0,0.95)`,
-            }}>
-              {roleLabel}
+              )}
             </div>
-            {rankCfg && (
-              <div style={{
-                fontFamily: "'Oswald', sans-serif",
-                fontSize: 9, fontWeight: 700,
-                color: accent,
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                marginTop: 4,
-                textShadow: `0 0 10px ${glow}`,
-              }}>
-                {rank === 1 ? 'GOLDEN BOOT' : rank === 2 ? 'SILVER' : 'BRONZE'} · RANK #{rank}
-              </div>
-            )}
-          </div>
 
-          {/* ── PLAYER IMAGE ── */}
-          {bgLoading && (
-            <div style={{
-              position: 'absolute', inset: 0, zIndex: 10,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 8,
-            }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%',
-                border: `3px solid ${accent}30`, borderTopColor: accent,
-                animation: 'spin 0.9s linear infinite',
-              }} />
-              <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 9, color: `${accent}88`, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                Processing…
-              </span>
-            </div>
-          )}
-
-          {displayImage ? (
-            <motion.img
-              src={displayImage}
-              alt={player.name}
-              animate={{ scale: hovered ? 1.04 : 1 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              style={{
-                position: 'absolute',
-                bottom: '8%', left: 0, right: 0,
-                zIndex: 9,
-                width: '100%', height: '72%',
-                objectFit: isCutout ? 'contain' : 'cover',
-                objectPosition: isCutout ? 'bottom center' : 'center 10%',
-                filter: isCutout
-                  ? `drop-shadow(0 -4px 24px ${accent}55) drop-shadow(0 12px 30px rgba(0,0,0,0.95))`
-                  : hovered ? 'brightness(1.05)' : 'brightness(0.9)',
-                opacity: bgLoading ? 0 : 1,
-                transition: 'filter 0.4s ease',
-              }}
-            />
-          ) : (
-            <div style={{
-              position: 'absolute',
-              bottom: '8%', left: 0, right: 0,
-              zIndex: 9,
-              height: '72%',
-              display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-              paddingBottom: 20,
-            }}>
-              <div style={{
-                width: 90, height: 90, borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-                fontSize: 44, color: accent,
-                background: `linear-gradient(135deg, ${accent}30, ${accent}08)`,
-                border: `3px solid ${accent}55`,
-                boxShadow: `0 0 40px ${glow}`,
-              }}>
-                {player.name.charAt(0).toUpperCase()}
-              </div>
-            </div>
-          )}
-
-          {/* ── STAT PILLS — LEFT ── */}
-          <div style={{
-            position: 'absolute', left: 12, bottom: '18%',
-            display: 'flex', flexDirection: 'column', gap: 8,
-            zIndex: 20,
-          }}>
-            <Pill value={stats.totalGoals} label="Goals" side="left" icon="⚽" big />
-            <Pill value={`+${totalPoints}`} label="Pts" side="left" />
-          </div>
-
-          {/* ── STAT PILLS — RIGHT ── */}
-          <div style={{
-            position: 'absolute', right: 12, bottom: '18%',
-            display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8,
-            zIndex: 20,
-          }}>
-            <Pill value={stats.totalMOTM}    label="MOTM"    side="right" />
-            <Pill value={stats.totalMatches} label="Matches" side="right" />
-          </div>
-
-          {/* ── FORM DOTS row ── */}
-          {form.length > 0 && (
-            <div style={{
-              position: 'absolute', bottom: '13%', left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex', alignItems: 'center', gap: 4,
-              zIndex: 20,
-            }}>
-              {form.map((r, i) => {
-                const isWin = r === 'win', isDraw = r === 'draw';
-                return (
-                  <div key={`${r}-${i}`} style={{
-                    width: 22, height: 22, borderRadius: 5,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 700,
-                    background: isWin ? 'rgba(52,211,153,0.2)' : isDraw ? 'rgba(251,191,36,0.2)' : 'rgba(239,68,68,0.2)',
-                    border: `1.5px solid ${isWin ? 'rgba(52,211,153,0.6)' : isDraw ? 'rgba(251,191,36,0.6)' : 'rgba(239,68,68,0.6)'}`,
-                    color: isWin ? '#34D399' : isDraw ? '#FBBF24' : '#F87171',
-                  }}>
-                    {isWin ? 'W' : isDraw ? 'D' : 'L'}
+            {/* Form dots */}
+            {form.length > 0 && (
+              <div className="flex items-center gap-1 mt-2">
+                {form.map((r, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'w-[20px] h-[20px] rounded flex items-center justify-center text-[8px] font-black',
+                      r === 'win'  ? 'bg-emerald-500/30 text-emerald-400' :
+                      r === 'draw' ? 'bg-amber-500/30  text-amber-400' :
+                                     'bg-red-500/30    text-red-400'
+                    )}
+                  >
+                    {r[0].toUpperCase()}
                   </div>
-                );
-              })}
+                ))}
+                <span className="text-[10px] text-white/30 font-medium ml-1">Last 5</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── STATS STRIP ── */}
+      <div className="grid grid-cols-4 border-b border-border">
+        {[
+          { label: 'MP',    value: stats.totalMatches,     color: '#818cf8' },
+          { label: 'Goals', value: stats.totalGoals,       color: '#34d399' },
+          { label: 'MOTM',  value: stats.totalMOTM,        color: '#fbbf24' },
+          { label: 'Win%',  value: `${winRate}%`,          color: '#38bdf8' },
+        ].map(s => (
+          <div key={s.label} className="flex flex-col items-center py-3 hover:bg-muted/30 transition-colors">
+            <span className="font-heading font-black text-lg leading-none" style={{ color: s.color }}>
+              {s.value}
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
+              {s.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── BODY ── */}
+      <div className="p-4 flex-1 flex flex-col gap-3">
+
+        {/* Roles / Tags */}
+        {((player.playerRoles?.length ?? 0) > 0 || (player.customTags?.length ?? 0) > 0 || (player.customStringTags?.length ?? 0) > 0) && (
+          <div className="flex flex-wrap gap-1.5">
+            {(player.playerRoles ?? []).slice(0, 2).map(t => (
+              <Badge key={t} bg="#1e1b4b" c="#a5b4fc">{t}</Badge>
+            ))}
+            {(player.customTags ?? []).slice(0, 2).map(t => (
+              <Badge key={t} bg="#1a1a1a" c="#9ca3af">{t}</Badge>
+            ))}
+            {(player.customStringTags ?? []).slice(0, 1).map(t => (
+              <Badge key={`str-${t}`} bg="#0c1a2e" c="#60a5fa">{t}</Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Info */}
+        <div className="space-y-1.5 text-[11px]">
+          {formattedBirthDate && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <CalendarDays className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span className="text-foreground font-medium truncate">{formattedBirthDate}</span>
             </div>
           )}
-
-          {/* ── PLAYER NAME (Caveat script like reference) ── */}
-          <div style={{
-            position: 'absolute',
-            bottom: '7.5%', left: '50%',
-            transform: 'translateX(-50%) rotate(-2deg)',
-            zIndex: 22, pointerEvents: 'none', userSelect: 'none',
-            whiteSpace: 'nowrap',
-          }}>
-            <span style={{
-              fontFamily: "'Caveat', cursive",
-              fontSize: 'clamp(20px, 5vw, 28px)',
-              fontWeight: 700,
-              color: '#FFE57F',
-              textShadow: `0 2px 8px rgba(0,0,0,0.95), 0 0 20px ${glow}`,
-              letterSpacing: 0.5,
-            }}>
-              {player.name}
-            </span>
-          </div>
-
-          {/* ── BOTTOM BAR ── */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            height: '7%',
-            background: '#020408',
-            borderTop: `1px solid ${accent}40`,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 12px',
-            zIndex: 30,
-          }}>
-            <span style={{
-              fontFamily: "'Oswald', sans-serif",
-              fontSize: 7, fontWeight: 800,
-              textTransform: 'uppercase', letterSpacing: '0.15em',
-              color: accent,
-            }}>
-              THE ENIGMATIC ELITE FC
-            </span>
-            <span style={{
-              fontFamily: "'Oswald', sans-serif",
-              fontSize: 7, fontWeight: 700,
-              color: 'rgba(255,255,255,0.4)',
-              letterSpacing: '0.1em',
-            }}>
-              {winRate}% WIN RATE
-            </span>
-          </div>
-
+          {player.education && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <GraduationCap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="text-foreground font-medium truncate">{player.education}</span>
+            </div>
+          )}
+          {player.location && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="text-foreground font-medium truncate">{player.location}</span>
+            </div>
+          )}
         </div>
-      </Tilt>
-    </motion.div>
+
+        {/* CTA */}
+        <button
+          onClick={e => { e.stopPropagation(); onView(); }}
+          className={cn(
+            'mt-auto w-full py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest border transition-all duration-300',
+            hover
+              ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
+              : 'bg-transparent text-primary border-primary/30 hover:bg-primary/10'
+          )}
+        >
+          View Profile →
+        </button>
+      </div>
+    </div>
   );
 }
