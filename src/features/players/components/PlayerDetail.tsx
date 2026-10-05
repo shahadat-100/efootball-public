@@ -515,17 +515,14 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
       {/* ═══════════════════════════════════════════
           HERO ZONE — Player Header
           ═══════════════════════════════════════════ */}
-      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 lg:p-12 min-h-[380px] md:min-h-[450px] lg:min-h-[550px] flex flex-col justify-center mb-6 shadow-xl overflow-visible" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
+      <div ref={captureRef} className="relative rounded-2xl p-6 md:p-8 lg:p-10 flex flex-col justify-center mb-6 shadow-xl overflow-visible" style={{ background: 'linear-gradient(to bottom right, #111827, #1f2937, #111827)' }}>
         <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-          {player.coverImageUrl && (
-            <img src={player.coverImageUrl} alt={`${player.name} cover`} className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-overlay" />
-          )}
           <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMS41IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')]" />
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px]" style={{ background: 'rgba(99,102,241,0.15)' }} />
           <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-[60px]" style={{ background: 'rgba(59,130,246,0.12)' }} />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start pt-24 sm:pt-28">
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start pt-4 sm:pt-6">
           {/* Left side: Avatar + Info */}
           <div className="flex gap-6 items-center flex-wrap flex-1">
             <div className="relative shrink-0 pt-2">
