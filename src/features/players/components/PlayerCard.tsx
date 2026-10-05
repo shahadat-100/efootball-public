@@ -118,16 +118,18 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
         <div className="relative flex-1" style={{ minHeight: 200 }}>
           {/* Bottom gradient sweep */}
           <div
-            className="absolute bottom-0 left-0 right-0 z-10"
+            className="absolute bottom-0 left-0 right-0"
             style={{
-              height: '55%',
-              background: `linear-gradient(to top, #0a0a14 0%, #0a0a1490 40%, transparent 100%)`,
+              zIndex: 1,
+              height: '65%',
+              background: `linear-gradient(to top, #0a0a14 0%, #0a0a14cc 30%, #0a0a1466 60%, transparent 100%)`,
             }}
           />
           {/* Accent sweep stripe */}
           <div
-            className="absolute bottom-0 left-0 right-0 z-10"
+            className="absolute bottom-0 left-0 right-0"
             style={{
+              zIndex: 2,
               height: '3px',
               background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
             }}
@@ -138,7 +140,7 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
               src={player.profileImageUrl}
               alt={player.name}
               className="absolute inset-0 w-full h-full object-cover object-top"
-              style={{ filter: hovered ? 'brightness(1.05)' : 'brightness(0.92)' }}
+              style={{ zIndex: 0, filter: hovered ? 'brightness(1.05)' : 'brightness(0.92)' }}
             />
           ) : (
             /* Fallback avatar */
@@ -168,8 +170,9 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
           {/* Jersey number pill (top-left, inside image area) */}
           {player.jerseyNumber && (
             <div
-              className="absolute top-3 left-3 z-20 font-black text-[12px] px-2.5 py-1 rounded-lg"
+              className="absolute top-3 left-3 font-black text-[12px] px-2.5 py-1 rounded-lg"
               style={{
+                zIndex: 3,
                 background: `${accentColor}25`,
                 border: `1px solid ${accentColor}60`,
                 color: accentColor,
@@ -181,7 +184,7 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
           )}
 
           {/* Player name overlay at bottom of image */}
-          <div className="absolute bottom-4 left-0 right-0 z-20 px-4">
+          <div className="absolute bottom-4 left-0 right-0 px-4" style={{ zIndex: 3 }}>
             <h3
               className="font-black text-white text-[18px] leading-tight truncate"
               style={{ textShadow: '0 2px 12px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,1)' }}
