@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Player } from '../types';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
+import { useBackgroundRemoval } from '../hooks/useBackgroundRemoval';
 
 interface PlayerCardProps {
   player: Player;
@@ -85,9 +86,11 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
   const glow        = rankCfg ? rankCfg.glow   : 'rgba(99,102,241,0.28)';
   const rankEmoji   = rank ? (rank <= 3 ? ['🥇','🥈','🥉'][rank - 1] : null) : null;
 
-  // ── Image selection: prefer coverImageUrl (cutout), fallback profileImageUrl ──
-  const displayImage  = player.coverImageUrl || player.profileImageUrl;
-  const isCutout      = !!player.coverImageUrl; // cutout = no bg, show differently
+  // ── Auto background removal: coverImageUrl → use directly; profileImageUrl → strip bg ──
+  const { src: displayImage, isCutout, loading: bgLoading } = useBackgroundRemoval(
+    player.coverImageUrl,
+    player.profileImageUrl,
+  );
 
   return (
     <div
@@ -137,10 +140,31 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
             filter: 'blur(30px)', pointerEvents: 'none',
           }} />
 
+          {/* Layer 1 — BG removal loading shimmer */}
+          {bgLoading && (
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 1,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
+              background: `linear-gradient(160deg, ${accent}08 0%, transparent 100%)`,
+            }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%',
+                border: `3px solid ${accent}25`,
+                borderTopColor: accent,
+                animation: 'spin 0.9s linear infinite',
+              }} />
+              <span style={{
+                fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 500,
+                textTransform: 'uppercase', letterSpacing: '0.12em',
+                color: `${accent}99`,
+              }}>Removing BG…</span>
+            </div>
+          )}
+
           {/* Layer 1 — Player image */}
           {displayImage ? (
             isCutout ? (
-              /* Cutout: fills full width, feet at bottom, no float */
+              /* Cutout (coverImageUrl or bg-removed): full width, feet at bottom */
               <img
                 src={displayImage}
                 alt={player.name}
@@ -148,27 +172,26 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
                   position: 'absolute',
                   bottom: 0, left: 0, right: 0,
                   zIndex: 1,
-                  width: '100%',
-                  height: '100%',
+                  width: '100%', height: '100%',
                   objectFit: 'contain',
                   objectPosition: 'bottom center',
                   filter: hovered
-                    ? `drop-shadow(0 -2px 20px ${accent}60) brightness(1.05)`
-                    : `drop-shadow(0 4px 16px rgba(0,0,0,0.85))`,
-                  transition: 'filter 0.35s ease',
+                    ? `drop-shadow(0 -2px 22px ${accent}65) brightness(1.05)`
+                    : `drop-shadow(0 4px 18px rgba(0,0,0,0.88))`,
+                  transition: 'filter 0.35s ease, opacity 0.4s ease',
+                  opacity: bgLoading ? 0 : 1,
                 }}
               />
             ) : (
-              /* Profile photo: cover, face properly framed */
+              /* Profile photo (bg removal in progress or unavailable) */
               <img
                 src={displayImage}
                 alt={player.name}
                 style={{
                   position: 'absolute', inset: 0, zIndex: 1,
                   width: '100%', height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center 15%',
-                  filter: hovered ? 'brightness(1.06) contrast(1.02)' : 'brightness(0.92)',
+                  objectFit: 'cover', objectPosition: 'center 15%',
+                  filter: hovered ? 'brightness(1.06) contrast(1.02)' : 'brightness(0.9)',
                   transition: 'filter 0.35s ease',
                 }}
               />
