@@ -20,12 +20,15 @@ export function PlayerProfileCard({
   subtitle = 'Player of the Week',
   cardRef,
 }: PlayerProfileCardProps) {
-  const totalApps   = periodData ? periodData.appearances : seasonStats.reduce((a, s) => a + (s.appearances || 0), 0);
-  const totalGoals  = periodData ? periodData.goals       : seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
-  const totalMotm   = periodData ? periodData.motm        : seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
-  const totalWins   = periodData ? periodData.wins        : seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
-  const totalPoints = periodData ? periodData.points      : calcTotalRawPoints(seasonStats);
-  const winRate     = totalApps > 0 ? Math.round((totalWins / totalApps) * 100) : 0;
+  const totalApps        = periodData ? periodData.appearances : seasonStats.reduce((a, s) => a + (s.appearances || 0), 0);
+  const totalGoals       = periodData ? periodData.goals       : seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
+  const totalMotm        = periodData ? periodData.motm        : seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
+  const totalWins        = periodData ? periodData.wins        : seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
+  const totalPoints      = periodData ? periodData.points      : calcTotalRawPoints(seasonStats);
+  const totalCleansheets = seasonStats.reduce((a, s) => a + (s.cleansheets || 0), 0);
+  const totalHattricks   = seasonStats.reduce((a, s) => a + (s.hattricks || 0), 0);
+  const winRate          = totalApps > 0 ? Math.round((totalWins / totalApps) * 100) : 0;
+  const primaryRole      = (player.playerRoles ?? [])[0] || 'FORWARD';
 
   const isMonthly = subtitle.toLowerCase().includes('month');
   const isMVP = Boolean(title && title.toUpperCase().includes('MVP')) || subtitle.toLowerCase().includes('week') || subtitle.toLowerCase().includes('month');
@@ -175,12 +178,35 @@ export function PlayerProfileCard({
           </div>
         </div>
 
-        {/* Left Side: 3 Skewed Red/Gold Stat Badges (Exact Ref 5 style) */}
+        {/* Left Side: Skewed Stat Badges & Details (Ref 5 style) */}
         <div style={{
-          position: 'absolute', left: 24, bottom: 150,
-          display: 'flex', flexDirection: 'column', gap: 12,
+          position: 'absolute', left: 24, bottom: 110,
+          display: 'flex', flexDirection: 'column', gap: 10,
           zIndex: 20,
         }}>
+          {/* Position & Squad Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            padding: '3px 10px', borderRadius: 4, width: 'fit-content',
+            transform: 'skewX(-10deg)',
+          }}>
+            <span style={{
+              fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 900,
+              color: accent, letterSpacing: 2, textTransform: 'uppercase',
+            }}>
+              {primaryRole}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>•</span>
+            <span style={{
+              fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 700,
+              color: 'rgba(255,255,255,0.7)', letterSpacing: 1.5, textTransform: 'uppercase',
+            }}>
+              {totalApps} APPS ({winRate}% W)
+            </span>
+          </div>
+
           {/* Goals Pill */}
           <div style={{
             background: isMonthly
@@ -192,6 +218,7 @@ export function PlayerProfileCard({
             borderRadius: 8,
             display: 'flex', alignItems: 'baseline', gap: 8,
             transform: 'skewX(-12deg)',
+            width: 'fit-content',
           }}>
             <span style={{
               fontFamily: "'Oswald', sans-serif", fontSize: 32, fontWeight: 900,
@@ -203,7 +230,7 @@ export function PlayerProfileCard({
               fontFamily: "'Caveat', cursive", fontSize: 18, fontWeight: 700,
               color: isMonthly ? '#FEF08A' : '#FECACA', fontStyle: 'italic',
             }}>
-              Goals
+              Goals {totalHattricks > 0 ? `(${totalHattricks} HT)` : ''}
             </span>
           </div>
 
@@ -218,6 +245,7 @@ export function PlayerProfileCard({
             borderRadius: 8,
             display: 'flex', alignItems: 'baseline', gap: 8,
             transform: 'skewX(-12deg)',
+            width: 'fit-content',
           }}>
             <span style={{
               fontFamily: "'Oswald', sans-serif", fontSize: 30, fontWeight: 900,
@@ -244,6 +272,7 @@ export function PlayerProfileCard({
             borderRadius: 8,
             display: 'flex', alignItems: 'baseline', gap: 8,
             transform: 'skewX(-12deg)',
+            width: 'fit-content',
           }}>
             <span style={{
               fontFamily: "'Oswald', sans-serif", fontSize: 28, fontWeight: 900,
@@ -454,34 +483,53 @@ export function PlayerProfileCard({
           {role} · #{player.jerseyNumber || '10'}
         </div>
 
-        {/* Stats row inside banner */}
+        {/* Stats grid inside banner */}
         <div style={{
-          marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8,
+          marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(2, auto)', gap: 6, width: 'fit-content',
         }}>
           <div style={{
             background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 12px', borderRadius: 6,
+            padding: '4px 10px', borderRadius: 6,
             fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#fff', letterSpacing: 1,
+            color: '#fff', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
           }}>
-            {totalGoals} GOALS
+            <span style={{ color: '#93C5FD' }}>⚽</span> {totalGoals} GOALS
           </div>
           <div style={{
             background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 12px', borderRadius: 6,
+            padding: '4px 10px', borderRadius: 6,
             fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#fff', letterSpacing: 1,
+            color: '#fff', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
           }}>
-            {totalApps} MATCHES
+            <span style={{ color: '#93C5FD' }}>🏟️</span> {totalApps} MATCHES
           </div>
           <div style={{
             background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 12px', borderRadius: 6,
+            padding: '4px 10px', borderRadius: 6,
             fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#93C5FD', letterSpacing: 1,
+            color: '#fff', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
           }}>
-            {winRate}% WIN RATE
+            <span style={{ color: '#FCD34D' }}>⭐</span> {totalMotm} MOTM
           </div>
+          <div style={{
+            background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
+            padding: '4px 10px', borderRadius: 6,
+            fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
+            color: '#93C5FD', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <span style={{ color: '#86EFAC' }}>📈</span> {winRate}% WINS
+          </div>
+          {totalCleansheets > 0 && (
+            <div style={{
+              gridColumn: 'span 2',
+              background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(6px)',
+              padding: '3px 10px', borderRadius: 6,
+              fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 800,
+              color: '#E0E7FF', letterSpacing: 1,
+            }}>
+              🧤 {totalCleansheets} CLEAN SHEETS
+            </div>
+          )}
         </div>
       </div>
 
