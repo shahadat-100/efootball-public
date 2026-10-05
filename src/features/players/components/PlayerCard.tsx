@@ -140,34 +140,40 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
           {/* Layer 1 — Player image */}
           {displayImage ? (
             isCutout ? (
-              /* Cutout image: no bg, object-contain, pinned to bottom */
+              /* Cutout: fills full width, feet at bottom, no float */
               <img
                 src={displayImage}
                 alt={player.name}
                 style={{
-                  position: 'absolute', bottom: 0, left: '50%',
-                  transform: 'translateX(-50%)',
+                  position: 'absolute',
+                  bottom: 0, left: 0, right: 0,
                   zIndex: 1,
-                  height: '95%', width: 'auto', maxWidth: '100%',
-                  objectFit: 'contain', objectPosition: 'bottom center',
-                  filter: hovered ? 'drop-shadow(0 0 18px ' + accent + '55) brightness(1.04)' : 'drop-shadow(0 4px 12px rgba(0,0,0,0.8))',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  objectPosition: 'bottom center',
+                  filter: hovered
+                    ? `drop-shadow(0 -2px 20px ${accent}60) brightness(1.05)`
+                    : `drop-shadow(0 4px 16px rgba(0,0,0,0.85))`,
                   transition: 'filter 0.35s ease',
                 }}
               />
             ) : (
-              /* Profile photo: full cover */
+              /* Profile photo: cover, face properly framed */
               <img
                 src={displayImage}
                 alt={player.name}
                 style={{
                   position: 'absolute', inset: 0, zIndex: 1,
                   width: '100%', height: '100%',
-                  objectFit: 'cover', objectPosition: 'top center',
+                  objectFit: 'cover',
+                  objectPosition: 'center 15%',
                   filter: hovered ? 'brightness(1.06) contrast(1.02)' : 'brightness(0.92)',
                   transition: 'filter 0.35s ease',
                 }}
               />
             )
+
           ) : (
             /* Fallback initial */
             <div style={{
