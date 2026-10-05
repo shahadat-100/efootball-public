@@ -187,7 +187,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        height: 610,
+        height: 700,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
@@ -199,8 +199,8 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 600,
-            maxWidth: '96%',
+            maxHeight: 690,
+            maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom center',
             filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 14px rgba(212,175,55,0.65)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',

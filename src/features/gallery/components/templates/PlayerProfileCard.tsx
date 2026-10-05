@@ -286,9 +286,9 @@ export function PlayerProfileCard({
         <div style={{
           position: 'absolute',
           bottom: 38,
-          right: -18,
-          width: 490,
-          height: 630,
+          right: -25,
+          width: 530,
+          height: 720,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'flex-end',
@@ -300,11 +300,11 @@ export function PlayerProfileCard({
             alt={player.name}
             crossOrigin="anonymous"
             style={{
-              maxHeight: 620,
+              maxHeight: 710,
               maxWidth: '100%',
               objectFit: 'contain',
               objectPosition: 'bottom right',
-              filter: `drop-shadow(0 0 16px ${accentGlow}) drop-shadow(0 15px 35px rgba(0,0,0,0.95))`,
+              filter: `drop-shadow(0 0 20px ${accentGlow}) drop-shadow(0 15px 40px rgba(0,0,0,0.95))`,
             }}
           />
         </div>
@@ -489,9 +489,9 @@ export function PlayerProfileCard({
       <div style={{
         position: 'absolute',
         bottom: 38,
-        right: -18,
-        width: 490,
-        height: 640,
+        right: -25,
+        width: 530,
+        height: 720,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
@@ -503,11 +503,11 @@ export function PlayerProfileCard({
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 630,
+            maxHeight: 710,
             maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom right',
-            filter: 'drop-shadow(-6px 0 20px rgba(0,0,0,0.35)) drop-shadow(0 15px 35px rgba(0,0,0,0.5))',
+            filter: 'drop-shadow(-6px 0 24px rgba(0,0,0,0.4)) drop-shadow(0 15px 40px rgba(0,0,0,0.6))',
           }}
         />
       </div>
