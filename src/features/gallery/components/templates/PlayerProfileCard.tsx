@@ -2,11 +2,12 @@ import React from 'react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { RankedPlayer } from '@/features/gallery/utils/galleryStats';
 import { calcTotalRawPoints } from '@/utils/playerStats';
+import { useCutoutImage } from '../../utils/useCutoutImage';
 
 interface PlayerProfileCardProps {
   player: Player;
   seasonStats?: PlayerSeasonStat[];
-  periodData?: RankedPlayer;  // When set, shows period-specific stats instead of career totals
+  periodData?: RankedPlayer;
   title?: string;
   subtitle?: string;
   cardRef?: React.RefObject<HTMLDivElement>;
@@ -20,7 +21,6 @@ export function PlayerProfileCard({
   subtitle = 'Player of the Week',
   cardRef,
 }: PlayerProfileCardProps) {
-  // Use period-specific data if provided, otherwise fall back to career totals
   const totalApps   = periodData ? periodData.appearances : seasonStats.reduce((a, s) => a + (s.appearances || 0), 0);
   const totalGoals  = periodData ? periodData.goals       : seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
   const totalMotm   = periodData ? periodData.motm        : seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
@@ -31,15 +31,15 @@ export function PlayerProfileCard({
   const isMonthly = subtitle.toLowerCase().includes('month');
   const isMVP = Boolean(title && title.toUpperCase().includes('MVP')) || subtitle.toLowerCase().includes('week') || subtitle.toLowerCase().includes('month');
 
-  // Primary cutout image: prefer coverImageUrl, fallback to profileImageUrl
-  const cutoutImage = player.coverImageUrl || player.profileImageUrl;
+  // Automatic transparency processing for black-background cutouts
+  const rawImage = player.coverImageUrl || player.profileImageUrl;
+  const cutoutImage = useCutoutImage(rawImage);
 
-  // Visual Theme Colors
-  const accentColor = isMonthly ? '#FFD700' : '#38BDF8'; // Gold for monthly, vibrant Cyan/Sky for weekly/profile
+  // Colors
+  const accentColor = isMonthly ? '#FFD700' : '#38BDF8';
   const accentGlow  = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(56,189,248,0.45)';
 
   return (
-    /* 600 × 750 — 4:5 pro sports poster export size */
     <div
       ref={cardRef}
       style={{
@@ -47,60 +47,29 @@ export function PlayerProfileCard({
         height: 750,
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 0,
-        background: '#07090E',
-        fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-        boxShadow: '0 30px 80px rgba(0,0,0,0.9)',
+        background: '#040711',
+        fontFamily: "'Inter', system-ui, sans-serif",
+        boxShadow: '0 30px 80px rgba(0,0,0,0.95)',
       }}
     >
-      {/* ── Background: Dramatic Stadium Lighting & Vignette ──────── */}
+      {/* ── Background: Deep Dramatic Stadium Lighting ────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
         background: isMonthly
-          ? 'radial-gradient(circle at 50% 38%, rgba(212,175,55,0.22) 0%, rgba(184,134,11,0.08) 45%, #07090E 80%)'
-          : 'radial-gradient(circle at 50% 38%, rgba(14,165,233,0.25) 0%, rgba(37,99,235,0.10) 45%, #06080E 80%)',
+          ? 'radial-gradient(circle at 50% 32%, rgba(212,175,55,0.22) 0%, rgba(184,134,11,0.06) 50%, #040711 85%)'
+          : 'radial-gradient(circle at 50% 32%, rgba(14,165,233,0.28) 0%, rgba(37,99,235,0.08) 50%, #040711 85%)',
         zIndex: 1,
       }} />
 
-      {/* Subtle Stadium Floodlight Spotlights */}
+      {/* Stadium Spotlight Cone behind player */}
       <div style={{
         position: 'absolute',
-        top: -60, left: '50%', transform: 'translateX(-50%)',
-        width: 480, height: 400,
-        background: `radial-gradient(ellipse at 50% 20%, ${accentGlow} 0%, transparent 65%)`,
-        filter: 'blur(30px)',
+        top: -40, left: '50%', transform: 'translateX(-50%)',
+        width: 500, height: 460,
+        background: `radial-gradient(ellipse at 50% 25%, ${accentGlow} 0%, transparent 65%)`,
+        filter: 'blur(35px)',
         zIndex: 2,
         pointerEvents: 'none',
-      }} />
-
-      {/* Subtle halftone/dot grid texture */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: `radial-gradient(rgba(255,255,255,0.06) 1.2px, transparent 1.2px)`,
-        backgroundSize: '20px 20px',
-        opacity: 0.7,
-        zIndex: 2,
-        pointerEvents: 'none',
-      }} />
-
-      {/* Dynamic diagonal sports angle beams (Ref 1 & 4 inspired) */}
-      <div style={{
-        position: 'absolute',
-        top: 140, left: -100, width: 420, height: 160,
-        background: `linear-gradient(115deg, ${accentGlow} 0%, transparent 70%)`,
-        transform: 'rotate(-16deg)',
-        filter: 'blur(20px)',
-        opacity: 0.5,
-        zIndex: 2,
-      }} />
-      <div style={{
-        position: 'absolute',
-        top: 220, right: -120, width: 380, height: 140,
-        background: `linear-gradient(295deg, ${isMonthly ? 'rgba(245,158,11,0.2)' : 'rgba(37,99,235,0.3)'} 0%, transparent 70%)`,
-        transform: 'rotate(12deg)',
-        filter: 'blur(25px)',
-        opacity: 0.6,
-        zIndex: 2,
       }} />
 
       {/* ── Top Header Bar ────────────────────────────────────────── */}
@@ -110,112 +79,117 @@ export function PlayerProfileCard({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 25,
       }}>
-        {/* Club Logo + Official Title */}
+        {/* Club Crest & Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
             src="/images/club-logo.jpg"
             alt="Club Logo"
             crossOrigin="anonymous"
             style={{
-              width: 42, height: 42,
+              width: 44, height: 44,
               borderRadius: 10,
               objectFit: 'cover',
-              border: `1.5px solid ${isMonthly ? 'rgba(212,175,55,0.6)' : 'rgba(56,189,248,0.5)'}`,
+              border: `1.5px solid ${accentColor}`,
               boxShadow: `0 0 15px ${accentGlow}`,
             }}
           />
           <div>
-            <div style={{ fontSize: 13, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>
+            <div style={{ fontSize: 13, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2, fontFamily: "'Oswald', sans-serif" }}>
               THE ENIGMATIC ELITE
             </div>
-            <div style={{ fontSize: 9, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.5, fontStyle: 'italic' }}>
+            <div style={{ fontSize: 9.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.5, fontStyle: 'italic' }}>
               In Mystery We Reign
             </div>
           </div>
         </div>
 
-        {/* Jersey Number Badge */}
+        {/* Clean Jersey Number Badge */}
         {player.jerseyNumber && (
           <div style={{
-            background: isMonthly
-              ? 'linear-gradient(135deg, #AA7C11, #FFD700)'
-              : 'linear-gradient(135deg, #0284C7, #38BDF8)',
-            color: '#07090E',
-            fontSize: 22, fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
-            width: 46, height: 46,
+            background: 'rgba(6, 14, 28, 0.85)',
+            backdropFilter: 'blur(10px)',
+            border: `1.5px solid ${accentColor}`,
+            boxShadow: `0 4px 16px rgba(0,0,0,0.6), 0 0 12px ${accentGlow}`,
             borderRadius: 12,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `0 4px 20px ${accentGlow}`,
+            padding: '5px 14px',
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 2,
           }}>
-            #{player.jerseyNumber}
+            <span style={{ fontSize: 13, fontWeight: 700, color: accentColor }}>#</span>
+            <span style={{
+              fontSize: 22,
+              fontWeight: 800,
+              fontFamily: "'Oswald', sans-serif",
+              color: '#fff',
+              lineHeight: 1,
+            }}>
+              {player.jerseyNumber}
+            </span>
           </div>
         )}
       </div>
 
-      {/* ── Giant Layered Background Typography (Behind Player Cutout) ── */}
+      {/* ── Giant Athletic Typography: "MVP" or "TEE" (Clean Bebas Neue) ── */}
       <div style={{
         position: 'absolute',
-        top: 80, left: 0, right: 0,
+        top: 72, left: 0, right: 0,
         textAlign: 'center',
-        zIndex: 3,
+        zIndex: 4,
         pointerEvents: 'none',
         userSelect: 'none',
       }}>
-        {/* Giant Main Title ("MVP" or "TEE") */}
         <div style={{
-          fontSize: isMVP ? 180 : 160,
+          fontSize: isMVP ? 190 : 175,
           fontWeight: 900,
-          fontFamily: "'Maximum Voltage', 'Action Comics Black', 'Impact', sans-serif",
-          color: 'rgba(255, 255, 255, 0.88)',
-          letterSpacing: 4,
+          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
+          color: '#ffffff',
+          letterSpacing: 8,
           lineHeight: 0.85,
           textTransform: 'uppercase',
-          textShadow: `0 0 40px ${accentGlow}, 0 10px 40px rgba(0,0,0,0.8)`,
-          WebkitTextStroke: '2px rgba(255,255,255,0.4)',
+          textShadow: `0 0 40px ${accentGlow}, 0 8px 30px rgba(0,0,0,0.9)`,
         }}>
           {isMVP ? 'MVP' : 'TEE'}
         </div>
 
-        {/* Sub-label banner right under MVP */}
         <div style={{
           fontSize: 18,
-          fontWeight: 900,
-          fontFamily: "'Neon Sans', 'Impact', sans-serif",
+          fontWeight: 700,
+          fontFamily: "'Oswald', sans-serif",
           color: accentColor,
           letterSpacing: 8,
           textTransform: 'uppercase',
           marginTop: 6,
-          textShadow: `0 0 15px ${accentGlow}`,
+          textShadow: `0 0 16px ${accentGlow}`,
         }}>
           {isMVP ? 'OF THE GAME!' : 'PLAYER PROFILE'}
         </div>
 
-        {/* Period / Context Subtitle */}
         <div style={{
-          fontSize: 13,
-          fontWeight: 700,
+          fontSize: 12,
+          fontWeight: 600,
           color: 'rgba(255,255,255,0.7)',
-          letterSpacing: 2,
+          letterSpacing: 3,
           marginTop: 4,
           textTransform: 'uppercase',
+          fontFamily: "'Oswald', sans-serif",
         }}>
           {subtitle}
         </div>
       </div>
 
-      {/* ── Center Stage: Player Cutout Image ─────────────────────── */}
+      {/* ── Hero Stage: Large Player Cutout (Zero Black Box) ──────── */}
       <div style={{
         position: 'absolute',
-        bottom: 0,
+        bottom: 38,
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        height: 520,
+        height: 560,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        zIndex: 8,
+        zIndex: 10,
         pointerEvents: 'none',
       }}>
         <img
@@ -223,8 +197,8 @@ export function PlayerProfileCard({
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 510,
-            maxWidth: '92%',
+            maxHeight: 550,
+            maxWidth: '96%',
             objectFit: 'contain',
             objectPosition: 'bottom center',
             filter: isMonthly
@@ -234,271 +208,269 @@ export function PlayerProfileCard({
         />
       </div>
 
-      {/* ── Floating Sports Stat Pills: LEFT COLUMN (Ref 2 & 5 Style) ── */}
+      {/* ── Floating Sports Stat Pills: LEFT SIDE ─────────────────── */}
       <div style={{
         position: 'absolute',
-        left: 20,
+        left: 24,
         bottom: 110,
         display: 'flex',
         flexDirection: 'column',
-        gap: 10,
-        zIndex: 15,
+        gap: 12,
+        zIndex: 20,
       }}>
-        {/* Points Pill */}
+        {/* Points Badge */}
         <div style={{
-          background: 'rgba(7, 12, 22, 0.85)',
-          backdropFilter: 'blur(10px)',
-          border: `1.5px solid ${isMonthly ? 'rgba(212,175,55,0.5)' : 'rgba(56,189,248,0.5)'}`,
-          boxShadow: `0 8px 24px rgba(0,0,0,0.6), inset 0 0 15px ${isMonthly ? 'rgba(212,175,55,0.15)' : 'rgba(56,189,248,0.15)'}`,
+          background: 'rgba(6, 12, 24, 0.8)',
+          backdropFilter: 'blur(12px)',
+          border: `1.5px solid ${accentColor}`,
+          boxShadow: `0 8px 24px rgba(0,0,0,0.7), 0 0 14px ${accentGlow}`,
           padding: '6px 14px',
-          borderRadius: 14,
+          borderRadius: 12,
           display: 'flex',
           alignItems: 'baseline',
           gap: 6,
           transform: 'skewX(-6deg)',
         }}>
           <span style={{
-            fontSize: 24,
-            fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 22,
+            fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: '#fff',
             lineHeight: 1,
+            fontStyle: 'italic',
           }}>
             +{totalPoints}
           </span>
           <span style={{
             fontSize: 10,
-            fontWeight: 800,
+            fontWeight: 700,
             color: accentColor,
             textTransform: 'uppercase',
             letterSpacing: 1.5,
+            fontFamily: "'Oswald', sans-serif",
           }}>
             PTS
           </span>
         </div>
 
-        {/* Goals Pill */}
+        {/* Goals Badge */}
         <div style={{
-          background: 'rgba(7, 12, 22, 0.85)',
-          backdropFilter: 'blur(10px)',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+          background: 'rgba(6, 12, 24, 0.8)',
+          backdropFilter: 'blur(12px)',
+          border: '1.5px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
           padding: '6px 14px',
-          borderRadius: 14,
+          borderRadius: 12,
           display: 'flex',
           alignItems: 'baseline',
           gap: 6,
           transform: 'skewX(-6deg)',
         }}>
           <span style={{
-            fontSize: 22,
-            fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 20,
+            fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: '#fff',
             lineHeight: 1,
+            fontStyle: 'italic',
           }}>
             {totalGoals}
           </span>
           <span style={{
             fontSize: 10,
-            fontWeight: 800,
+            fontWeight: 700,
             color: 'rgba(255,255,255,0.7)',
             textTransform: 'uppercase',
             letterSpacing: 1.5,
+            fontFamily: "'Oswald', sans-serif",
           }}>
             GOAL{totalGoals === 1 ? '' : 'S'}
           </span>
         </div>
 
-        {/* Wins Pill */}
+        {/* Wins Badge */}
         <div style={{
-          background: 'rgba(7, 12, 22, 0.85)',
-          backdropFilter: 'blur(10px)',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+          background: 'rgba(6, 12, 24, 0.8)',
+          backdropFilter: 'blur(12px)',
+          border: '1.5px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
           padding: '6px 14px',
-          borderRadius: 14,
+          borderRadius: 12,
           display: 'flex',
           alignItems: 'baseline',
           gap: 6,
           transform: 'skewX(-6deg)',
         }}>
           <span style={{
-            fontSize: 22,
-            fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 20,
+            fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: '#fff',
             lineHeight: 1,
+            fontStyle: 'italic',
           }}>
             {totalWins}
           </span>
           <span style={{
             fontSize: 10,
-            fontWeight: 800,
+            fontWeight: 700,
             color: 'rgba(255,255,255,0.7)',
             textTransform: 'uppercase',
             letterSpacing: 1.5,
+            fontFamily: "'Oswald', sans-serif",
           }}>
             WINS
           </span>
         </div>
       </div>
 
-      {/* ── Floating Sports Stat Pills: RIGHT COLUMN (Ref 2 & 5 Style) ── */}
+      {/* ── Floating Sports Stat Pills: RIGHT SIDE ────────────────── */}
       <div style={{
         position: 'absolute',
-        right: 20,
+        right: 24,
         bottom: 110,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
-        gap: 10,
-        zIndex: 15,
+        gap: 12,
+        zIndex: 20,
       }}>
-        {/* MOTM Pill */}
+        {/* Dominates Field Tag */}
         <div style={{
-          background: 'rgba(7, 12, 22, 0.85)',
+          background: isMonthly ? 'rgba(212,175,55,0.18)' : 'rgba(14,165,233,0.18)',
+          border: `1.5px solid ${accentColor}`,
+          boxShadow: `0 0 15px ${accentGlow}`,
           backdropFilter: 'blur(10px)',
-          border: `1.5px solid ${isMonthly ? 'rgba(212,175,55,0.5)' : 'rgba(56,189,248,0.5)'}`,
-          boxShadow: `0 8px 24px rgba(0,0,0,0.6), inset 0 0 15px ${isMonthly ? 'rgba(212,175,55,0.15)' : 'rgba(56,189,248,0.15)'}`,
+          padding: '5px 12px',
+          borderRadius: 10,
+          fontSize: 9.5,
+          fontWeight: 800,
+          color: accentColor,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+          fontFamily: "'Oswald', sans-serif",
+          transform: 'skewX(6deg)',
+        }}>
+          DOMINATES THE PITCH
+        </div>
+
+        {/* MOTM Badge */}
+        <div style={{
+          background: 'rgba(6, 12, 24, 0.8)',
+          backdropFilter: 'blur(12px)',
+          border: '1.5px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
           padding: '6px 14px',
-          borderRadius: 14,
+          borderRadius: 12,
           display: 'flex',
           alignItems: 'baseline',
           gap: 6,
           transform: 'skewX(6deg)',
         }}>
           <span style={{
-            fontSize: 22,
-            fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 20,
+            fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: '#fff',
             lineHeight: 1,
+            fontStyle: 'italic',
           }}>
             {totalMotm}
           </span>
           <span style={{
             fontSize: 10,
-            fontWeight: 800,
+            fontWeight: 700,
             color: accentColor,
             textTransform: 'uppercase',
             letterSpacing: 1.5,
+            fontFamily: "'Oswald', sans-serif",
           }}>
             MOTM
           </span>
         </div>
 
-        {/* Win Rate Pill */}
+        {/* Win Rate Badge */}
         <div style={{
-          background: 'rgba(7, 12, 22, 0.85)',
-          backdropFilter: 'blur(10px)',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+          background: 'rgba(6, 12, 24, 0.8)',
+          backdropFilter: 'blur(12px)',
+          border: '1.5px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
           padding: '6px 14px',
-          borderRadius: 14,
+          borderRadius: 12,
           display: 'flex',
           alignItems: 'baseline',
           gap: 6,
           transform: 'skewX(6deg)',
         }}>
           <span style={{
-            fontSize: 22,
-            fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+            fontSize: 20,
+            fontWeight: 800,
+            fontFamily: "'Oswald', sans-serif",
             color: '#fff',
             lineHeight: 1,
+            fontStyle: 'italic',
           }}>
             {winRate}%
           </span>
           <span style={{
             fontSize: 10,
-            fontWeight: 800,
+            fontWeight: 700,
             color: 'rgba(255,255,255,0.7)',
             textTransform: 'uppercase',
             letterSpacing: 1.5,
+            fontFamily: "'Oswald', sans-serif",
           }}>
-            WIN RATE
-          </span>
-        </div>
-
-        {/* Appearances Pill */}
-        <div style={{
-          background: 'rgba(7, 12, 22, 0.85)',
-          backdropFilter: 'blur(10px)',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
-          padding: '6px 14px',
-          borderRadius: 14,
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: 6,
-          transform: 'skewX(6deg)',
-        }}>
-          <span style={{
-            fontSize: 22,
-            fontWeight: 900,
-            fontFamily: "'Action Comics Black', 'Impact', sans-serif",
-            color: '#fff',
-            lineHeight: 1,
-          }}>
-            {totalApps}
-          </span>
-          <span style={{
-            fontSize: 10,
-            fontWeight: 800,
-            color: 'rgba(255,255,255,0.7)',
-            textTransform: 'uppercase',
-            letterSpacing: 1.5,
-          }}>
-            MATCHES
+            WIN ACCURACY
           </span>
         </div>
       </div>
 
-      {/* ── Handwritten Signature Script Overlay Across Jersey (Ref 2 & 5) ── */}
+      {/* ── Signature Script Overlay (Caveat Natural Handwriting) ──── */}
       <div style={{
         position: 'absolute',
-        bottom: 56,
+        bottom: 58,
         left: '50%',
         transform: 'translateX(-50%) rotate(-4deg)',
-        fontSize: 48,
-        fontFamily: "'The Wildeast', 'Elegant Bloom', cursive",
-        color: isMonthly ? '#FFE57F' : '#E0F2FE',
-        textShadow: `0 2px 10px rgba(0,0,0,0.9), 0 0 25px ${accentGlow}`,
+        fontSize: 50,
+        fontFamily: "'Caveat', cursive",
+        color: '#FFFFFF',
+        textShadow: `0 2px 10px rgba(0,0,0,0.95), 0 0 25px ${accentGlow}`,
         whiteSpace: 'nowrap',
-        zIndex: 16,
+        zIndex: 22,
         pointerEvents: 'none',
         userSelect: 'none',
+        letterSpacing: 1,
       }}>
         {player.name}
       </div>
 
-      {/* ── Solid Bottom Information Bar (Ref 1 Style) ────────────── */}
+      {/* ── Solid Bottom Information Bar ──────────────────────────── */}
       <div style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
         height: 38,
-        background: '#04060A',
-        borderTop: `1px solid ${isMonthly ? 'rgba(212,175,55,0.35)' : 'rgba(56,189,248,0.35)'}`,
+        background: '#020408',
+        borderTop: `1px solid ${accentGlow}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 24px',
-        zIndex: 20,
+        zIndex: 30,
       }}>
         <div style={{
-          fontSize: 9,
-          fontWeight: 900,
+          fontSize: 9.5,
+          fontWeight: 800,
           color: accentColor,
           letterSpacing: 2,
           textTransform: 'uppercase',
+          fontFamily: "'Oswald', sans-serif",
         }}>
           THE ENIGMATIC ELITE FC
         </div>
 
         <div style={{
           fontSize: 8.5,
-          fontWeight: 700,
+          fontWeight: 600,
           color: 'rgba(255,255,255,0.4)',
           letterSpacing: 2,
           textTransform: 'uppercase',
@@ -507,11 +479,12 @@ export function PlayerProfileCard({
         </div>
 
         <div style={{
-          fontSize: 9,
-          fontWeight: 900,
+          fontSize: 9.5,
+          fontWeight: 800,
           color: '#fff',
           letterSpacing: 1.5,
           textTransform: 'uppercase',
+          fontFamily: "'Oswald', sans-serif",
         }}>
           OFFICIAL AWARDS
         </div>
