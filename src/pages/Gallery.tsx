@@ -75,8 +75,15 @@ export function Gallery() {
   }, [fetchPlayers, fetchPlayerSeasonStats, fetchPlayerWeeklyStats, fetchPlayerMonthlyStats]);
 
   const [activeTemplate, setActiveTemplate] = useState<TemplateType>('player-profile');
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>(players[0]?.id || '');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [playerSearchQuery, setPlayerSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!selectedPlayerId && players.length > 0) {
+      const shakib = players.find(p => p.coverImageUrl || p.name.toLowerCase().includes('shakib'));
+      setSelectedPlayerId(shakib ? shakib.id : players[0].id);
+    }
+  }, [players, selectedPlayerId]);
   const aspectRatio = (TEMPLATES.find(t => t.id === activeTemplate)?.defaultAspect ?? '4:5') as AspectRatioType;
   const [isDownloading, setIsDownloading] = useState(false);
 

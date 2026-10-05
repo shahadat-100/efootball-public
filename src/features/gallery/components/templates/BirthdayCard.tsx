@@ -1,6 +1,5 @@
 import React from 'react';
 import { Player } from '@/features/players/types';
-import { Avatar } from '@/shared/components';
 
 interface BirthdayCardProps {
   player: Player;
@@ -9,9 +8,9 @@ interface BirthdayCardProps {
 }
 
 export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
-  const nameParts = player.name.trim().split(' ');
-  const lastName  = nameParts.pop() || '';
-  const firstName = nameParts.join(' ');
+  const cutoutImage = player.coverImageUrl || player.profileImageUrl;
+  const accentColor = '#FFD700';
+  const accentGlow = 'rgba(212, 175, 55, 0.45)';
 
   return (
     <div
@@ -22,220 +21,335 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 0,
-        background: '#0B0B0F',
+        background: '#08080C',
         fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-        boxShadow: '0 35px 90px rgba(0,0,0,0.85)',
-        border: '1.5px solid rgba(212,175,55,0.25)', // Subtle gold border
+        boxShadow: '0 35px 90px rgba(0,0,0,0.9)',
       }}
     >
-      {/* ── Luxury gold & dark carbon radial background ─────────────────── */}
+      {/* ── Background: Luxury Gold Atmosphere & Radial Glow ──────── */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 130% 90% at 75% 25%, rgba(184,134,11,0.24) 0%, transparent 65%), radial-gradient(ellipse 90% 70% at 20% 80%, rgba(139,101,8,0.18) 0%, transparent 60%)',
+        background: 'radial-gradient(circle at 50% 36%, rgba(212,175,55,0.25) 0%, rgba(184,134,11,0.08) 45%, #08080C 80%)',
         zIndex: 1,
       }} />
 
-      {/* ── Subtle grid overlay for tech/sport look ─────────────────────── */}
+      {/* Gold Top Spotlight */}
       <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'linear-gradient(rgba(212,175,55,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.03) 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
+        position: 'absolute',
+        top: -60, left: '50%', transform: 'translateX(-50%)',
+        width: 500, height: 420,
+        background: `radial-gradient(ellipse at 50% 20%, ${accentGlow} 0%, transparent 65%)`,
+        filter: 'blur(30px)',
         zIndex: 2,
-        opacity: 0.6,
+        pointerEvents: 'none',
       }} />
 
-      {/* ── Floating premium gold sparkles/dots ─────────────────────────── */}
+      {/* Sparkles / Confetti Dots */}
       {[
-        { top: '15%', left: '10%', size: 6, color: '#FFD700', opacity: 0.8 },
-        { top: '10%', left: '80%', size: 8, color: '#D4AF37', opacity: 0.7 },
-        { top: '22%', left: '90%', size: 5, color: '#FFD700', opacity: 0.6 },
-        { top: '30%', left: '7%',  size: 4, color: '#AA7C11', opacity: 0.7 },
-        { top: '42%', left: '93%', size: 7, color: '#FFD700', opacity: 0.6 },
-        { top: '75%', left: '8%',  size: 5, color: '#D4AF37', opacity: 0.5 },
-        { top: '85%', left: '90%', size: 6, color: '#FFD700', opacity: 0.7 },
-        { top: '65%', left: '92%', size: 4, color: '#AA7C11', opacity: 0.5 },
+        { top: '15%', left: '8%',  size: 6, color: '#FFD700', opacity: 0.8 },
+        { top: '12%', left: '84%', size: 8, color: '#D4AF37', opacity: 0.7 },
+        { top: '24%', left: '92%', size: 5, color: '#FFD700', opacity: 0.6 },
+        { top: '35%', left: '6%',  size: 5, color: '#AA7C11', opacity: 0.7 },
+        { top: '48%', left: '94%', size: 7, color: '#FFD700', opacity: 0.6 },
+        { top: '65%', left: '8%',  size: 6, color: '#D4AF37', opacity: 0.5 },
+        { top: '78%', left: '92%', size: 5, color: '#FFD700', opacity: 0.7 },
       ].map((dot, i) => (
         <div key={i} style={{
           position: 'absolute', top: dot.top, left: dot.left,
           width: dot.size, height: dot.size,
           borderRadius: '50%', background: dot.color,
           opacity: dot.opacity, zIndex: 3,
-          boxShadow: `0 0 10px ${dot.color}`,
+          boxShadow: `0 0 12px ${dot.color}`,
         }} />
       ))}
 
-      {/* ── Giant Outline Watermark: "LEGEND" ───────────────────────────── */}
-      <div style={{
-        position: 'absolute',
-        bottom: 40, left: 0, right: 0,
-        textAlign: 'center',
-        fontSize: 150,
-        fontFamily: "'Supersonic Rocketship', 'Impact', sans-serif",
-        color: 'rgba(212,175,55,0.07)',
-        letterSpacing: 6,
-        lineHeight: 1,
-        userSelect: 'none',
-        pointerEvents: 'none',
-        zIndex: 3,
-      }}>
-        LEGEND
-      </div>
-
-      {/* ── Top Header Bar ─────────────────────────────────────────────── */}
+      {/* ── Top Header Bar ────────────────────────────────────────── */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
-        padding: '24px 28px',
+        padding: '20px 24px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        zIndex: 20,
+        zIndex: 25,
       }}>
-        {/* Logo and Club Name/Slogan */}
+        {/* Logo and Club Name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
             src="/images/club-logo.jpg"
             alt="Club Logo"
+            crossOrigin="anonymous"
             style={{
-              width: 44, height: 44,
-              borderRadius: 8,
+              width: 42, height: 42,
+              borderRadius: 10,
               objectFit: 'cover',
-              border: '1.5px solid rgba(212,175,55,0.45)',
+              border: '1.5px solid rgba(212,175,55,0.6)',
+              boxShadow: `0 0 15px ${accentGlow}`,
             }}
           />
           <div>
-            <div style={{ fontSize: 13, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+            <div style={{ fontSize: 13, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>
               THE ENIGMATIC ELITE
             </div>
-            <div style={{ fontSize: 10, color: '#D4AF37', fontFamily: "'Elegant Bloom', Georgia, serif", textTransform: 'uppercase', letterSpacing: 1.5 }}>
+            <div style={{ fontSize: 9, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.5, fontStyle: 'italic' }}>
               In Mystery We Reign
             </div>
           </div>
         </div>
 
-        {/* Birthday Badge */}
+        {/* Birthday Emoji Badge */}
         <div style={{
           background: 'linear-gradient(135deg, #AA7C11, #FFD700)',
-          color: '#0B0B0F',
+          color: '#08080C',
           fontSize: 22,
-          width: 48, height: 48,
+          width: 46, height: 46,
           borderRadius: 12,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 25px rgba(212,175,55,0.5)',
+          boxShadow: `0 4px 20px ${accentGlow}`,
         }}>
           🎂
         </div>
       </div>
 
-      {/* ── Premium Birthday Script Subtitle ────────────────────────────────────── */}
-      <div style={{
-        position: 'absolute', top: 78, left: 0, right: 0,
-        textAlign: 'center',
-        fontSize: 38,
-        fontFamily: "'Bunny Cartoon', Georgia, serif",
-        color: '#FFD700',
-        letterSpacing: 3,
-        zIndex: 20,
-        textShadow: '0 3px 25px rgba(212,175,55,0.7), 0 0 50px rgba(184,134,11,0.5)',
-      }}>
-        Happy Birthday!
-      </div>
-
-      {/* ── Player avatar with luxury double ring & glow ────────────────── */}
+      {/* ── Giant Layered Background Typography ───────────────────── */}
       <div style={{
         position: 'absolute',
-        top: '51%', left: '50%',
-        transform: 'translate(-45%, -52%)',
-        zIndex: 15,
+        top: 75, left: 0, right: 0,
+        textAlign: 'center',
+        zIndex: 3,
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        {/* Double border golden ring */}
         <div style={{
-          width: 250, height: 250,
-          borderRadius: '50%',
-          border: '4px double #FFD700',
-          padding: 6,
-          background: 'radial-gradient(circle, rgba(11,11,15,0.9) 0%, rgba(20,20,30,0.4) 100%)',
-          boxShadow: '0 0 70px rgba(212,175,55,0.4), 0 25px 70px rgba(0,0,0,0.8)',
-          display: 'flex', alignItems: 'center', justifyItems: 'center',
+          fontSize: 110,
+          fontWeight: 900,
+          fontFamily: "'Maximum Voltage', 'Action Comics Black', 'Impact', sans-serif",
+          color: 'rgba(255, 255, 255, 0.88)',
+          letterSpacing: 6,
+          lineHeight: 0.85,
+          textTransform: 'uppercase',
+          textShadow: `0 0 40px ${accentGlow}, 0 10px 40px rgba(0,0,0,0.8)`,
+          WebkitTextStroke: '2px rgba(255,255,255,0.4)',
         }}>
-          <div style={{
-            width: '100%', height: '100%',
-            borderRadius: '50%',
-            background: '#15151A',
-            overflow: 'hidden',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Avatar name={player.name} src={player.profileImageUrl} size={230} />
-          </div>
+          LEGEND
         </div>
 
-        {/* Celebrating Badge */}
         <div style={{
-          marginTop: 16,
-          textAlign: 'center',
+          fontSize: 22,
+          fontWeight: 900,
+          fontFamily: "'Neon Sans', 'Impact', sans-serif",
+          color: accentColor,
+          letterSpacing: 6,
+          textTransform: 'uppercase',
+          marginTop: 6,
+          textShadow: `0 0 15px ${accentGlow}`,
         }}>
+          HAPPY BIRTHDAY!
+        </div>
+
+        <div style={{
+          fontSize: 12,
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.7)',
+          letterSpacing: 2,
+          marginTop: 4,
+          textTransform: 'uppercase',
+        }}>
+          ✦ CELEBRATING OUR CHAMPION TODAY ✦
+        </div>
+      </div>
+
+      {/* ── Center Stage: Player Cutout Image ─────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        height: 520,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        zIndex: 8,
+        pointerEvents: 'none',
+      }}>
+        <img
+          src={cutoutImage}
+          alt={player.name}
+          crossOrigin="anonymous"
+          style={{
+            maxHeight: 510,
+            maxWidth: '92%',
+            objectFit: 'contain',
+            objectPosition: 'bottom center',
+            filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 16px rgba(212,175,55,0.7)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',
+          }}
+        />
+      </div>
+
+      {/* ── Floating Badges: LEFT SIDE ────────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        left: 20,
+        bottom: 110,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        zIndex: 15,
+      }}>
+        <div style={{
+          background: 'rgba(15, 12, 5, 0.9)',
+          backdropFilter: 'blur(10px)',
+          border: '1.5px solid #FFD700',
+          boxShadow: '0 8px 24px rgba(212,175,55,0.3)',
+          padding: '8px 16px',
+          borderRadius: 14,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          transform: 'skewX(-6deg)',
+        }}>
+          <span style={{ fontSize: 18 }}>👑</span>
           <span style={{
-            display: 'inline-flex',
-            alignItems: 'center', gap: 6,
-            background: 'linear-gradient(135deg, #8B6508, #FFD700)',
-            color: '#0B0B0F',
-            fontSize: 10, fontWeight: 900,
-            textTransform: 'uppercase', letterSpacing: 2.5,
-            padding: '6px 20px',
-            borderRadius: 25,
-            boxShadow: '0 5px 25px rgba(212,175,55,0.55)',
-            border: '1px solid rgba(255,255,255,0.3)',
+            fontSize: 12,
+            fontWeight: 900,
+            color: '#FFD700',
+            textTransform: 'uppercase',
+            letterSpacing: 1.5,
           }}>
-            ✦ Celebrating Today ✦
+            CLUB LEGEND
+          </span>
+        </div>
+
+        {player.jerseyNumber && (
+          <div style={{
+            background: 'rgba(7, 10, 18, 0.85)',
+            backdropFilter: 'blur(10px)',
+            border: '1.5px solid rgba(255,255,255,0.15)',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+            padding: '6px 14px',
+            borderRadius: 14,
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 6,
+            transform: 'skewX(-6deg)',
+          }}>
+            <span style={{
+              fontSize: 20,
+              fontWeight: 900,
+              fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+              color: '#fff',
+              lineHeight: 1,
+            }}>
+              #{player.jerseyNumber}
+            </span>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 800,
+              color: accentColor,
+              textTransform: 'uppercase',
+              letterSpacing: 1.5,
+            }}>
+              JERSEY
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Floating Badges: RIGHT SIDE ───────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        right: 20,
+        bottom: 110,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: 10,
+        zIndex: 15,
+      }}>
+        <div style={{
+          background: 'rgba(15, 12, 5, 0.9)',
+          backdropFilter: 'blur(10px)',
+          border: '1.5px solid #FFD700',
+          boxShadow: '0 8px 24px rgba(212,175,55,0.3)',
+          padding: '8px 16px',
+          borderRadius: 14,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          transform: 'skewX(6deg)',
+        }}>
+          <span style={{ fontSize: 18 }}>⭐</span>
+          <span style={{
+            fontSize: 12,
+            fontWeight: 900,
+            color: '#FFD700',
+            textTransform: 'uppercase',
+            letterSpacing: 1.5,
+          }}>
+            ELITE WARRIOR
           </span>
         </div>
       </div>
 
-      {/* ── Bottom Left Wish text ───────────────────────────────────────── */}
+      {/* ── Handwritten Signature Script Overlay Across Jersey ──── */}
       <div style={{
-        position: 'absolute', bottom: 26, left: 30,
-        maxWidth: 220, zIndex: 20,
+        position: 'absolute',
+        bottom: 56,
+        left: '50%',
+        transform: 'translateX(-50%) rotate(-4deg)',
+        fontSize: 48,
+        fontFamily: "'The Wildeast', 'Elegant Bloom', cursive",
+        color: '#FFE57F',
+        textShadow: `0 2px 10px rgba(0,0,0,0.9), 0 0 25px ${accentGlow}`,
+        whiteSpace: 'nowrap',
+        zIndex: 16,
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        <div style={{ color: '#FFD700', fontSize: 14, fontWeight: 900, marginBottom: 6 }}>✦</div>
-        <p style={{
-          color: 'rgba(255,255,255,0.6)',
-          fontSize: 9, fontStyle: 'italic', lineHeight: 1.6, margin: 0,
-        }}>
-          "Wishing you a fantastic birthday! Thank you for your incredible dedication and magic on the pitch."
-        </p>
+        {player.name}
       </div>
 
-      {/* ── Bottom Right Name & Jersey area ─────────────────────────────── */}
+      {/* ── Solid Bottom Information Bar ──────────────────────────── */}
       <div style={{
-        position: 'absolute', bottom: 26, right: 30,
-        textAlign: 'right', zIndex: 20,
+        position: 'absolute',
+        bottom: 0, left: 0, right: 0,
+        height: 38,
+        background: '#040508',
+        borderTop: '1px solid rgba(212,175,55,0.35)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
+        zIndex: 20,
       }}>
-        {firstName && (
-          <div style={{
-            fontSize: 34, fontWeight: 900,
-            fontFamily: "'Maximum Voltage', 'Impact', sans-serif",
-            color: '#fff', textTransform: 'uppercase',
-            letterSpacing: 0.5, lineHeight: 0.95,
-          }}>
-            {firstName}
-          </div>
-        )}
         <div style={{
-          fontSize: 36, fontWeight: 700,
-          fontFamily: "'Elegant Bloom', Georgia, serif",
-          color: '#FFD700', lineHeight: 1, marginTop: 4,
-          textShadow: '0 2px 18px rgba(212,175,55,0.6)',
+          fontSize: 9,
+          fontWeight: 900,
+          color: accentColor,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
         }}>
-          {lastName}
+          THE ENIGMATIC ELITE FC
         </div>
-        {player.jerseyNumber && (
-          <div style={{
-            fontSize: 10, color: 'rgba(212,175,55,0.65)',
-            fontWeight: 800, textTransform: 'uppercase',
-            letterSpacing: 2, marginTop: 8,
-          }}>
-            Jersey #{player.jerseyNumber}
-          </div>
-        )}
-      </div>
 
+        <div style={{
+          fontSize: 8.5,
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.4)',
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+        }}>
+          WWW.THEENIGMATICELITE.COM
+        </div>
+
+        <div style={{
+          fontSize: 9,
+          fontWeight: 900,
+          color: '#fff',
+          letterSpacing: 1.5,
+          textTransform: 'uppercase',
+        }}>
+          BIRTHDAY SPECIAL
+        </div>
+      </div>
     </div>
   );
 }
