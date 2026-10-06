@@ -336,7 +336,7 @@ export function PlayerProfileCard({
               transformOrigin: 'bottom right',
               objectFit: 'contain',
               objectPosition: 'bottom right',
-              filter: `drop-shadow(0 0 20px ${accentGlow}) drop-shadow(0 15px 40px rgba(0,0,0,0.95))`,
+              filter: `drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 20px ${accentGlow}) drop-shadow(0 15px 40px rgba(0,0,0,0.95))`,
             }}
           />
         </div>
@@ -559,6 +559,7 @@ export function PlayerProfileCard({
             transformOrigin: 'bottom right',
             objectFit: 'contain',
             objectPosition: 'bottom right',
+            filter: 'drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 8px rgba(255,255,255,0.5)) drop-shadow(0 14px 30px rgba(0,0,0,0.35))',
           }}
         />
       </div>

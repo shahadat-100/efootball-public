@@ -49,7 +49,7 @@ export function useCutoutImage(src?: string): string {
           const isDark = (di: number) => {
             const r = data[di], g = data[di + 1], b = data[di + 2];
             const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-            return luminance < 60; // threshold: luminance < 60
+            return luminance < 75; // cleanly removes dark JPEG compression artifacts
           };
 
           // Check if any perimeter pixel is dark — if none, image has no dark bg
@@ -102,72 +102,6 @@ export function useCutoutImage(src?: string): string {
                   visited[npi] = 1;
                   qx.push(nx);
                   qy.push(ny);
-                }
-              }
-            }
-          }
-
-          // ── Phase 2: Detect and peel artificial white sticker outline ──
-          const isBrightWhite = (pi: number) => {
-            const r = data[pi * 4], g = data[pi * 4 + 1], b = data[pi * 4 + 2];
-            return r > 215 && g > 215 && b > 215;
-          };
-
-          // Find boundary pixels (visible pixels directly touching transparent background)
-          const boundaryPixels: number[] = [];
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const pi = y * w + x;
-              if (data[pi * 4 + 3] !== 0) {
-                let touchesTransparent = false;
-                if (x > 0 && data[(pi - 1) * 4 + 3] === 0) touchesTransparent = true;
-                else if (x < w - 1 && data[(pi + 1) * 4 + 3] === 0) touchesTransparent = true;
-                else if (y > 0 && data[(pi - w) * 4 + 3] === 0) touchesTransparent = true;
-                else if (y < h - 1 && data[(pi + w) * 4 + 3] === 0) touchesTransparent = true;
-                if (touchesTransparent) {
-                  boundaryPixels.push(pi);
-                }
-              }
-            }
-          }
-
-          // Count how much of the outer perimeter is white sticker line
-          let whiteBoundaryCount = 0;
-          for (const pi of boundaryPixels) {
-            if (isBrightWhite(pi)) whiteBoundaryCount++;
-          }
-
-          const whiteRatio = boundaryPixels.length > 0 ? whiteBoundaryCount / boundaryPixels.length : 0;
-
-          // If more than 30% of perimeter is white sticker stroke, peel it off inwards
-          if (whiteRatio > 0.30) {
-            const whiteVisited = new Uint8Array(w * h);
-            const wq: { x: number; y: number; depth: number }[] = [];
-            for (const pi of boundaryPixels) {
-              if (isBrightWhite(pi)) {
-                whiteVisited[pi] = 1;
-                wq.push({ x: pi % w, y: Math.floor(pi / w), depth: 0 });
-              }
-            }
-
-            let wqi = 0;
-            while (wqi < wq.length) {
-              const { x: cx, y: cy, depth: cdepth } = wq[wqi++];
-              const cpi = cy * w + cx;
-              data[cpi * 4 + 3] = 0; // Strip white sticker pixel
-
-              if (cdepth < 14) {
-                const neighbors: [number, number][] = [
-                  [cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1],
-                ];
-                for (const [nx, ny] of neighbors) {
-                  if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                    const npi = ny * w + nx;
-                    if (!whiteVisited[npi] && data[npi * 4 + 3] !== 0 && isBrightWhite(npi)) {
-                      whiteVisited[npi] = 1;
-                      wq.push({ x: nx, y: ny, depth: cdepth + 1 });
-                    }
-                  }
                 }
               }
             }
