@@ -180,7 +180,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
                 transformOrigin: 'bottom center',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',
-                filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 14px rgba(212,175,55,0.65)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',
+                filter: 'drop-shadow(0 0 16px rgba(212,175,55,0.60)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',
               }}
             />
           </div>
