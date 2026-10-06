@@ -123,7 +123,7 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         {leaderCutout && (
           <div style={{
             position: 'absolute',
-            bottom: 0, left: 10, width: 350, height: 380,
+            bottom: 0, left: 10, width: 370, height: 430,
             display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
             zIndex: 15,
             pointerEvents: 'none',
@@ -133,7 +133,7 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
               alt={topLeader?.player.name}
               crossOrigin="anonymous"
               style={{
-                maxHeight: 370,
+                maxHeight: 420,
                 maxWidth: '96%',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',
@@ -154,14 +154,19 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
               boxShadow: `0 4px 18px rgba(0,0,0,0.8), 0 0 14px ${accentGlow}`,
             }}>
               <span style={{ fontSize: 15 }}>👑</span>
-              <span style={{
-                fontSize: 12, fontWeight: 900,
+              <div style={{
+                fontSize: 11, fontWeight: 900,
                 fontFamily: "'Oswald', sans-serif",
                 color: '#fff', textTransform: 'uppercase',
-                letterSpacing: 1.5,
+                letterSpacing: 1.2, lineHeight: 1.15,
               }}>
-                {topLeader?.player.name}
-              </span>
+                {(() => {
+                  const parts = (topLeader?.player.name || '').trim().split(' ');
+                  const fn = parts[0];
+                  const ln = parts.slice(1).join(' ');
+                  return (<><div>{fn}</div>{ln && <div>{ln}</div>}</>);
+                })()}
+              </div>
             </div>
           </div>
         )}

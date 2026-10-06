@@ -163,7 +163,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
-            height: 700,
+            height: 770,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -175,7 +175,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
               alt={data.player.name}
               crossOrigin="anonymous"
               style={{
-                maxHeight: 690,
+                maxHeight: 760,
                 maxWidth: '100%',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',
@@ -349,23 +349,33 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           </div>
 
           {/* ── Handwritten Signature Script (Caveat) ───────────────── */}
-          <div style={{
-            position: 'absolute',
-            bottom: 58,
-            left: '50%',
-            transform: 'translateX(-50%) rotate(-4deg)',
-            fontSize: 50,
-            fontFamily: "'Caveat', cursive",
-            color: '#FFE57F',
-            textShadow: `0 2px 10px rgba(0,0,0,0.95), 0 0 25px ${accentGlow}`,
-            whiteSpace: 'nowrap',
-            zIndex: 22,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            letterSpacing: 1,
-          }}>
-            {data.player.name}
-          </div>
+          {(() => {
+            const parts = data.player.name.trim().split(' ');
+            const fn = parts[0];
+            const ln = parts.slice(1).join(' ');
+            return (
+              <div style={{
+                position: 'absolute',
+                bottom: 52,
+                left: '50%',
+                transform: 'translateX(-50%) rotate(-4deg)',
+                fontSize: 38,
+                fontFamily: "'Caveat', cursive",
+                color: '#FFE57F',
+                textShadow: `0 2px 10px rgba(0,0,0,0.95), 0 0 25px ${accentGlow}`,
+                zIndex: 22,
+                pointerEvents: 'none',
+                userSelect: 'none',
+                letterSpacing: 1,
+                textAlign: 'center',
+                lineHeight: 1.15,
+                whiteSpace: 'pre',
+              }}>
+                <div>{fn}</div>
+                {ln && <div>{ln}</div>}
+              </div>
+            );
+          })()}
         </>
       ) : (
         <div style={{

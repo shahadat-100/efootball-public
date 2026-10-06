@@ -19,7 +19,7 @@ const RANK_CONFIG = [
     bg: 'linear-gradient(180deg, rgba(212,175,55,0.28) 0%, rgba(20,16,8,0.96) 100%)',
     border: 'rgba(255, 215, 0, 0.7)',
     pedestalHeight: 185,
-    cutoutHeight: 285,
+    cutoutHeight: 330,
   },
   {
     rank: 2,
@@ -29,7 +29,7 @@ const RANK_CONFIG = [
     bg: 'linear-gradient(180deg, rgba(148,163,184,0.22) 0%, rgba(15,20,30,0.96) 100%)',
     border: 'rgba(226, 232, 240, 0.5)',
     pedestalHeight: 155,
-    cutoutHeight: 250,
+    cutoutHeight: 290,
   },
   {
     rank: 3,
@@ -39,7 +39,7 @@ const RANK_CONFIG = [
     bg: 'linear-gradient(180deg, rgba(217,119,6,0.22) 0%, rgba(22,15,8,0.96) 100%)',
     border: 'rgba(245, 158, 11, 0.5)',
     pedestalHeight: 135,
-    cutoutHeight: 230,
+    cutoutHeight: 265,
   },
 ];
 
@@ -253,19 +253,25 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                     background: `linear-gradient(90deg, transparent, ${config.color}, transparent)`,
                   }} />
 
-                  {/* Player Name */}
+                  {/* Player Name — 2 lines */}
                   <div style={{
-                    fontSize: originalIdx === 0 ? 17 : 14,
+                    fontSize: originalIdx === 0 ? 15 : 13,
                     fontWeight: 900,
                     fontFamily: "'Oswald', sans-serif",
                     color: '#fff',
                     textTransform: 'uppercase',
                     textAlign: 'center',
-                    lineHeight: 1.1,
+                    lineHeight: 1.15,
                     letterSpacing: 1.5,
                     textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                    wordBreak: 'break-word',
                   }}>
-                    {r.player.name}
+                    {(() => {
+                      const parts = r.player.name.trim().split(' ');
+                      const fn = parts[0];
+                      const ln = parts.slice(1).join(' ');
+                      return (<><div>{fn}</div>{ln && <div>{ln}</div>}</>);
+                    })()}
                   </div>
 
                   {/* Points Badge */}
