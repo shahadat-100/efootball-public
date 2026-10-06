@@ -537,9 +537,9 @@ export function PlayerProfileCard({
       <div style={{
         position: 'absolute',
         bottom: 38,
-        right: -25,
-        width: 530,
-        height: 720,
+        right: -40,
+        width: 580,
+        height: 790,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
@@ -551,7 +551,7 @@ export function PlayerProfileCard({
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 710,
+            maxHeight: 780,
             maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom right',
