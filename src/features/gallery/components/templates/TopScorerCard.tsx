@@ -119,11 +119,10 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           fontSize: 160,
           fontWeight: 900,
           fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          color: '#ffffff',
+          color: 'rgba(255,255,255,0.06)',
           letterSpacing: 8,
           lineHeight: 0.85,
           textTransform: 'uppercase',
-          textShadow: `0 0 40px ${accentGlow}, 0 8px 30px rgba(0,0,0,0.9)`,
         }}>
           SCORER
         </div>
@@ -348,7 +347,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             </div>
           </div>
 
-          {/* ── Handwritten Signature Script (Caveat) ───────────────── */}
+          {/* ── Name Plate: dark backdrop so it doesn't float on player ── */}
           {(() => {
             const parts = data.player.name.trim().split(' ');
             const fn = parts[0];
@@ -356,23 +355,40 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             return (
               <div style={{
                 position: 'absolute',
-                bottom: 52,
+                bottom: 44,
                 left: '50%',
-                transform: 'translateX(-50%) rotate(-4deg)',
-                fontSize: 38,
-                fontFamily: "'Caveat', cursive",
-                color: '#FFE57F',
-                textShadow: `0 2px 10px rgba(0,0,0,0.95), 0 0 25px ${accentGlow}`,
+                transform: 'translateX(-50%)',
+                background: 'rgba(4, 7, 17, 0.82)',
+                backdropFilter: 'blur(14px)',
+                border: '1px solid rgba(212,175,55,0.35)',
+                borderRadius: 10,
+                padding: '5px 20px',
                 zIndex: 22,
                 pointerEvents: 'none',
                 userSelect: 'none',
-                letterSpacing: 1,
                 textAlign: 'center',
-                lineHeight: 1.15,
-                whiteSpace: 'pre',
+                whiteSpace: 'nowrap',
               }}>
-                <div>{fn}</div>
-                {ln && <div>{ln}</div>}
+                <div style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: 30,
+                  color: '#FFE57F',
+                  lineHeight: 1.2,
+                  letterSpacing: 1,
+                }}>
+                  {fn}
+                </div>
+                {ln && (
+                  <div style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontSize: 30,
+                    color: '#FFE57F',
+                    lineHeight: 1.2,
+                    letterSpacing: 1,
+                  }}>
+                    {ln}
+                  </div>
+                )}
               </div>
             );
           })()}

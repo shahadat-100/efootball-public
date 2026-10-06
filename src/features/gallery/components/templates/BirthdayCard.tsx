@@ -133,53 +133,75 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         )}
       </div>
 
-      {/* ── Giant Layered Background Typography (Clean Bebas Neue) ── */}
-      <div style={{
-        position: 'absolute',
-        top: 72, left: 0, right: 0,
-        textAlign: 'center',
-        zIndex: 4,
-        pointerEvents: 'none',
-        userSelect: 'none',
-      }}>
-        <div style={{
-          fontSize: 160,
-          fontWeight: 900,
-          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          color: '#ffffff',
-          letterSpacing: 8,
-          lineHeight: 0.85,
-          textTransform: 'uppercase',
-          textShadow: `0 0 40px ${accentGlow}, 0 8px 30px rgba(0,0,0,0.9)`,
-        }}>
-          LEGEND
-        </div>
+      {/* ── Giant Layered Background Typography — Player Name as Watermark ── */}
+      {(() => {
+        const nameParts = player.name.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
+        return (
+          <div style={{
+            position: 'absolute',
+            top: 68, left: 0, right: 0,
+            textAlign: 'center',
+            zIndex: 4,
+            pointerEvents: 'none',
+            userSelect: 'none',
+            lineHeight: 0.88,
+          }}>
+            {/* First name */}
+            <div style={{
+              fontSize: lastName ? 105 : 115,
+              fontWeight: 900,
+              fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
+              color: 'rgba(255,255,255,0.13)',
+              letterSpacing: 6,
+              textTransform: 'uppercase',
+            }}>
+              {firstName}
+            </div>
 
-        <div style={{
-          fontSize: 18,
-          fontWeight: 700,
-          fontFamily: "'Oswald', sans-serif",
-          color: accentColor,
-          letterSpacing: 8,
-          textTransform: 'uppercase',
-          marginTop: 6,
-          textShadow: `0 0 16px ${accentGlow}`,
-        }}>
-          HAPPY BIRTHDAY!
-        </div>
+            {/* Last name */}
+            {lastName && (
+              <div style={{
+                fontSize: 105,
+                fontWeight: 900,
+                fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
+                color: 'rgba(255,255,255,0.13)',
+                letterSpacing: 6,
+                textTransform: 'uppercase',
+                marginTop: 4,
+              }}>
+                {lastName}
+              </div>
+            )}
 
-        <div style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.7)',
-          letterSpacing: 3,
-          marginTop: 4,
-          textTransform: 'uppercase',
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          ✦ CELEBRATING OUR CHAMPION TODAY ✦
-        </div>
-      </div>
+            {/* HAPPY BIRTHDAY subtitle */}
+            <div style={{
+              fontSize: 16,
+              fontWeight: 700,
+              fontFamily: "'Oswald', sans-serif",
+              color: 'rgba(212,175,55,0.55)',
+              letterSpacing: 8,
+              textTransform: 'uppercase',
+              marginTop: 10,
+            }}>
+              HAPPY BIRTHDAY!
+            </div>
+
+            <div style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.30)',
+              letterSpacing: 3,
+              marginTop: 4,
+              textTransform: 'uppercase',
+              fontFamily: "'Oswald', sans-serif",
+            }}>
+              ✦ CELEBRATING OUR CHAMPION TODAY ✦
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Center Stage: Player Cutout Image ─────────────────────── */}
       <div style={{
@@ -282,33 +304,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         </div>
       </div>
 
-      {/* ── Signature Script Overlay (Caveat) ─────────────────────── */}
-      {(() => {
-        const parts = player.name.trim().split(' ');
-        const fn = parts[0];
-        const ln = parts.slice(1).join(' ');
-        return (
-          <div style={{
-            position: 'absolute',
-            bottom: 52,
-            left: '50%',
-            transform: 'translateX(-50%) rotate(-4deg)',
-            fontSize: 38,
-            fontFamily: "'Caveat', cursive",
-            color: '#FFE57F',
-            textShadow: `0 2px 10px rgba(0,0,0,0.95), 0 0 25px ${accentGlow}`,
-            zIndex: 22,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            letterSpacing: 1,
-            textAlign: 'center',
-            lineHeight: 1.15,
-          }}>
-            <div>{fn}</div>
-            {ln && <div>{ln}</div>}
-          </div>
-        );
-      })()}
+      {/* Signature removed — name shown as watermark background text above */}
 
 
       {/* ── Solid Bottom Information Bar ──────────────────────────── */}
