@@ -44,8 +44,6 @@ function PlayerCutoutImg({
   );
 }
 
-const MEDAL = ['🥇', '🥈', '🥉'];
-
 export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardProps) {
   const isMonthly = title.toLowerCase().includes('monthly') || subtitle.toLowerCase().includes('month');
 

@@ -66,7 +66,6 @@ const RANK_ACCENTS: Record<number, { color: string; glow: string; border: string
 export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardProps) {
   const isMonthly = title.toLowerCase().includes('monthly') || subtitle.toLowerCase().includes('month');
   const accent = isMonthly ? '#FFD700' : '#38BDF8';
-  const accentGlow = isMonthly ? 'rgba(212,175,55,0.55)' : 'rgba(56,189,248,0.55)';
 
   /* 
    * Team Lineup Squad Formation (10 players side-by-side):
@@ -234,9 +233,6 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
           const { rank, leftPercent, zIndex, imgHeight, player: r, styling } = slot;
           const isTop3 = rank <= 3;
           const medal = MEDAL_EMOJI[rank];
-
-          const nameParts = r.player.name.trim().split(' ');
-          const displayName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
 
           return (
             <div
