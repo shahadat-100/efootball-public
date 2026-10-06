@@ -347,51 +347,26 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             </div>
           </div>
 
-          {/* ── Name Plate: dark backdrop so it doesn't float on player ── */}
-          {(() => {
-            const parts = data.player.name.trim().split(' ');
-            const fn = parts[0];
-            const ln = parts.slice(1).join(' ');
-            return (
-              <div style={{
-                position: 'absolute',
-                bottom: 44,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(4, 7, 17, 0.82)',
-                backdropFilter: 'blur(14px)',
-                border: '1px solid rgba(212,175,55,0.35)',
-                borderRadius: 10,
-                padding: '5px 20px',
-                zIndex: 22,
-                pointerEvents: 'none',
-                userSelect: 'none',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-              }}>
-                <div style={{
-                  fontFamily: "'Caveat', cursive",
-                  fontSize: 30,
-                  color: '#FFE57F',
-                  lineHeight: 1.2,
-                  letterSpacing: 1,
-                }}>
-                  {fn}
-                </div>
-                {ln && (
-                  <div style={{
-                    fontFamily: "'Caveat', cursive",
-                    fontSize: 30,
-                    color: '#FFE57F',
-                    lineHeight: 1.2,
-                    letterSpacing: 1,
-                  }}>
-                    {ln}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
+          {/* ── Authentic Handwritten Signature (No Box) ─────────────── */}
+          <div style={{
+            position: 'absolute',
+            bottom: 48,
+            left: '50%',
+            transform: 'translateX(-50%) rotate(-5deg)',
+            fontFamily: "'Caveat', cursive",
+            fontSize: 42,
+            color: '#FFE57F',
+            lineHeight: 1,
+            letterSpacing: 1.5,
+            whiteSpace: 'nowrap',
+            textShadow: '0 3px 12px rgba(0,0,0,0.95), 0 0 25px rgba(212,175,55,0.65)',
+            zIndex: 22,
+            pointerEvents: 'none',
+            userSelect: 'none',
+            textAlign: 'center',
+          }}>
+            {data.player.name}
+          </div>
         </>
       ) : (
         <div style={{
