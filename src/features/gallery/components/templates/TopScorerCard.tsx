@@ -155,14 +155,14 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
 
       {data ? (
         <>
-          {/* ── Center Stage: Player Cutout Image ───────────────────── */}
+          {/* ── Center Stage: Player Cutout Image (MUCH BIGGER) ──────── */}
           <div style={{
             position: 'absolute',
-            bottom: 38,
+            bottom: 10,
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
-            height: 770,
+            height: 840,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -174,8 +174,10 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
               alt={data.player.name}
               crossOrigin="anonymous"
               style={{
-                maxHeight: 760,
-                maxWidth: '100%',
+                maxHeight: 840,
+                maxWidth: 'none',
+                transform: 'scale(1.18)',
+                transformOrigin: 'bottom center',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',
                 filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 14px rgba(212,175,55,0.65)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',

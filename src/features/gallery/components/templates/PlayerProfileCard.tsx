@@ -312,13 +312,13 @@ export function PlayerProfileCard({
           </div>
         </div>
 
-        {/* Hero Stage: Player Cutout — RIGHT SHIFTED (Ref 5) */}
+        {/* Hero Stage: Player Cutout — MUCH BIGGER, RIGHT SHIFTED */}
         <div style={{
           position: 'absolute',
-          bottom: 38,
-          right: -25,
-          width: 530,
-          height: 720,
+          bottom: 0,
+          right: -45,
+          width: 620,
+          height: 820,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'flex-end',
@@ -330,8 +330,10 @@ export function PlayerProfileCard({
             alt={player.name}
             crossOrigin="anonymous"
             style={{
-              maxHeight: 710,
-              maxWidth: '100%',
+              maxHeight: 820,
+              maxWidth: 'none',
+              transform: 'scale(1.18)',
+              transformOrigin: 'bottom right',
               objectFit: 'contain',
               objectPosition: 'bottom right',
               filter: `drop-shadow(0 0 20px ${accentGlow}) drop-shadow(0 15px 40px rgba(0,0,0,0.95))`,
@@ -533,13 +535,13 @@ export function PlayerProfileCard({
         </div>
       </div>
 
-      {/* Hero Stage: Player Cutout — RIGHT ALIGNED (Ref 4) */}
+      {/* Hero Stage: Player Cutout — MUCH BIGGER, RIGHT ALIGNED */}
       <div style={{
         position: 'absolute',
-        bottom: 38,
-        right: -40,
-        width: 580,
-        height: 790,
+        bottom: 0,
+        right: -55,
+        width: 650,
+        height: 850,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
@@ -551,8 +553,10 @@ export function PlayerProfileCard({
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 780,
-            maxWidth: '100%',
+            maxHeight: 850,
+            maxWidth: 'none',
+            transform: 'scale(1.20)',
+            transformOrigin: 'bottom right',
             objectFit: 'contain',
             objectPosition: 'bottom right',
           }}
