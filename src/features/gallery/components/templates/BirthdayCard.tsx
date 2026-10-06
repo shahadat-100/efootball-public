@@ -136,53 +136,35 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
       {/* ── Giant Layered Background Typography — Player Name as Watermark ── */}
       {(() => {
         const nameParts = player.name.trim().split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.slice(1).join(' ');
+        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
         return (
           <div style={{
             position: 'absolute',
-            top: 68, left: 0, right: 0,
+            top: 180, left: 0, right: 0,
             textAlign: 'center',
             zIndex: 4,
             pointerEvents: 'none',
             userSelect: 'none',
-            lineHeight: 0.88,
+            lineHeight: 0.85,
           }}>
-            {/* First name */}
             <div style={{
-              fontSize: lastName ? 105 : 115,
+              fontSize: 120,
               fontWeight: 900,
               fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-              color: 'rgba(255,255,255,0.13)',
-              letterSpacing: 6,
+              color: 'rgba(255,255,255,0.07)',
+              letterSpacing: 10,
               textTransform: 'uppercase',
             }}>
-              {firstName}
+              {lastName}
             </div>
-
-            {/* Last name */}
-            {lastName && (
-              <div style={{
-                fontSize: 105,
-                fontWeight: 900,
-                fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-                color: 'rgba(255,255,255,0.13)',
-                letterSpacing: 6,
-                textTransform: 'uppercase',
-                marginTop: 4,
-              }}>
-                {lastName}
-              </div>
-            )}
-
           </div>
         );
       })()}
 
-      {/* ── PROMINENT Birthday Banner ─────────────────────────────── */}
+      {/* ── PROMINENT Birthday Wish Header (Cleanly at Top, Zero Collision) ── */}
       <div style={{
         position: 'absolute',
-        top: 80, left: 0, right: 0,
+        top: 76, left: 0, right: 0,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -190,12 +172,9 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         pointerEvents: 'none',
         userSelect: 'none',
       }}>
-        {/* Big emoji row */}
-        <div style={{ fontSize: 30, letterSpacing: 12, lineHeight: 1, marginBottom: 6 }}>🎂🎉🎁</div>
-
         {/* HAPPY BIRTHDAY text — big, gold, clearly visible */}
         <div style={{
-          fontSize: 32,
+          fontSize: 36,
           fontWeight: 900,
           fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
           color: '#FFD700',
@@ -203,22 +182,22 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
           textTransform: 'uppercase',
           lineHeight: 1,
           textShadow: [
-            '0 0 30px rgba(212,175,55,0.90)',
-            '0 0 60px rgba(212,175,55,0.55)',
+            '0 0 25px rgba(212,175,55,0.75)',
+            '0 0 50px rgba(212,175,55,0.40)',
             '0 3px 12px rgba(0,0,0,0.95)',
           ].join(', '),
         }}>
-          HAPPY BIRTHDAY!
+          HAPPY BIRTHDAY
         </div>
 
         {/* Subtitle */}
         <div style={{
-          fontSize: 10.5,
+          fontSize: 10,
           fontWeight: 800,
-          color: 'rgba(255,255,255,0.75)',
+          color: 'rgba(255,255,255,0.80)',
           letterSpacing: 4,
           textTransform: 'uppercase',
-          marginTop: 6,
+          marginTop: 5,
           fontFamily: "'Oswald', sans-serif",
           textShadow: '0 2px 8px rgba(0,0,0,0.95)',
         }}>
@@ -254,80 +233,53 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         />
       </div>
 
-      {/* ── Floating Badges: LEFT SIDE ────────────────────────────── */}
+      {/* ── Prestigious Player Name Plate (Foreground, Bottom Center) ── */}
       <div style={{
         position: 'absolute',
-        left: 24,
-        bottom: 110,
+        bottom: 50,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(5, 8, 20, 0.92)',
+        backdropFilter: 'blur(14px)',
+        border: '1.5px solid #FFD700',
+        borderRadius: 14,
+        padding: '7px 24px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 12,
-        zIndex: 20,
+        alignItems: 'center',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.90), 0 0 16px rgba(212,175,55,0.35)',
+        zIndex: 25,
+        whiteSpace: 'nowrap',
       }}>
         <div style={{
-          background: 'rgba(15, 12, 5, 0.9)',
-          backdropFilter: 'blur(12px)',
-          border: '1.5px solid #FFD700',
-          boxShadow: '0 8px 24px rgba(212,175,55,0.3)',
-          padding: '8px 16px',
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          transform: 'skewX(-6deg)',
+          fontSize: 20,
+          fontWeight: 900,
+          fontFamily: "'Oswald', sans-serif",
+          color: '#fff',
+          textTransform: 'uppercase',
+          letterSpacing: 2,
+          lineHeight: 1.1,
+          textShadow: '0 2px 8px rgba(0,0,0,0.9)',
         }}>
-          <span style={{ fontSize: 18 }}>👑</span>
-          <span style={{
-            fontSize: 12,
-            fontWeight: 800,
-            color: '#FFD700',
-            textTransform: 'uppercase',
-            letterSpacing: 1.5,
-            fontFamily: "'Oswald', sans-serif",
-          }}>
-            CLUB LEGEND
-          </span>
+          {player.name}
         </div>
-      </div>
-
-      {/* ── Floating Badges: RIGHT SIDE ───────────────────────────── */}
-      <div style={{
-        position: 'absolute',
-        right: 24,
-        bottom: 110,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: 12,
-        zIndex: 20,
-      }}>
         <div style={{
-          background: 'rgba(15, 12, 5, 0.9)',
-          backdropFilter: 'blur(12px)',
-          border: '1.5px solid #FFD700',
-          boxShadow: '0 8px 24px rgba(212,175,55,0.3)',
-          padding: '8px 16px',
-          borderRadius: 12,
+          fontSize: 9,
+          fontWeight: 800,
+          color: '#FFD700',
+          letterSpacing: 2.5,
+          textTransform: 'uppercase',
+          marginTop: 3,
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          transform: 'skewX(6deg)',
+          gap: 6,
+          fontFamily: "'Oswald', sans-serif",
         }}>
-          <span style={{ fontSize: 18 }}>⭐</span>
-          <span style={{
-            fontSize: 12,
-            fontWeight: 800,
-            color: '#FFD700',
-            textTransform: 'uppercase',
-            letterSpacing: 1.5,
-            fontFamily: "'Oswald', sans-serif",
-          }}>
-            ELITE WARRIOR
-          </span>
+          <span>👑</span>
+          <span>CLUB LEGEND</span>
+          <span>⭐</span>
         </div>
       </div>
-
-      {/* Signature removed — name shown as watermark background text above */}
 
 
       {/* ── Solid Bottom Information Bar ──────────────────────────── */}
