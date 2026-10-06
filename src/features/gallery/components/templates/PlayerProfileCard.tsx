@@ -555,7 +555,6 @@ export function PlayerProfileCard({
             maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom right',
-            filter: 'drop-shadow(-6px 0 24px rgba(0,0,0,0.4)) drop-shadow(0 15px 40px rgba(0,0,0,0.6))',
           }}
         />
       </div>
