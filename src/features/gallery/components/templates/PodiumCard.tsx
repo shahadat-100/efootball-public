@@ -54,9 +54,10 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
   const p3 = topPlayers[2];
 
   /* 
-   * Same Z-Index squad layering as Top 10 Card:
-   * Center player (#1 / Champion) has highest zIndex (15) and largest height.
-   * Flanked on left (#2) and right (#3) with lower zIndex (10) behind #1's shoulders.
+   * Z-Index Squad Layering:
+   * Center (#1 / Champion): highest zIndex (15), largest size (450px) at left: 50%
+   * Flanked on left (#2) at left: 27% (zIndex 10, 405px)
+   * Flanked on right (#3) at left: 73% (zIndex 10, 395px)
    */
   const slots = [
     {
@@ -67,9 +68,9 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       color: '#E2E8F0',
       border: '#CBD5E1',
       glow: 'rgba(226,232,240,0.50)',
-      leftPercent: 26,
+      leftPercent: 27,
       zIndex: 10,
-      imgHeight: 395,
+      imgHeight: 405,
     },
     {
       player: p1,
@@ -79,9 +80,9 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       color: '#FFD700',
       border: '#FFD700',
       glow: 'rgba(255,215,0,0.65)',
-      leftPercent: 50, // DEAD CENTER
-      zIndex: 15,     // HIGHEST Z-INDEX
-      imgHeight: 440, // LARGEST
+      leftPercent: 50, // CENTER
+      zIndex: 15,     // HIGHEST
+      imgHeight: 450, // LARGEST (~83% card height)
     },
     {
       player: p3,
@@ -91,9 +92,9 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       color: '#F59E0B',
       border: '#F59E0B',
       glow: 'rgba(245,158,11,0.50)',
-      leftPercent: 74,
+      leftPercent: 73,
       zIndex: 10,
-      imgHeight: 380,
+      imgHeight: 395,
     },
   ];
 
@@ -162,10 +163,10 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         TOP 3
       </div>
 
-      {/* ── Bottom Ground Shadow ──────────────────────────────────── */}
+      {/* ── Bottom Ground Shadow (Smooth atmospheric fade) ────────── */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 210,
-        background: 'linear-gradient(0deg, rgba(0,0,12,0.96) 0%, rgba(0,0,12,0.68) 50%, transparent 100%)',
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 230,
+        background: 'linear-gradient(0deg, rgba(0,0,12,0.96) 0%, rgba(0,0,12,0.60) 55%, transparent 100%)',
         zIndex: 18,
         pointerEvents: 'none',
       }} />
@@ -220,7 +221,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       </div>
 
       {/* ════════════════════════════════════════════════════════════ */}
-      {/* ── TOP 3 PODIUM SQUAD (Layered with Z-Index like Top 10) ─── */}
+      {/* ── TOP 3 PODIUM SQUAD (3 Players Layered with Z-Index) ───── */}
       {/* ════════════════════════════════════════════════════════════ */}
       {!p1 ? (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 14, zIndex: 20 }}>
@@ -228,18 +229,15 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         </div>
       ) : (
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          {slots.map(({ player: r, rank, label, medal, color, glow, leftPercent, zIndex, imgHeight }) => {
+          {slots.map(({ player: r, rank, medal, glow, leftPercent, zIndex, imgHeight }) => {
             if (!r) return null;
-            const nameParts = r.player.name.trim().split(' ');
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(' ');
 
             return (
               <div
                 key={rank}
                 style={{
                   position: 'absolute',
-                  bottom: 78, // Sits right above the bottom info panels
+                  bottom: 0,
                   left: `${leftPercent}%`,
                   transform: 'translateX(-50%)',
                   zIndex,
@@ -249,7 +247,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                   justifyContent: 'flex-end',
                 }}
               >
-                {/* Floating Medal */}
+                {/* Floating Medal above player */}
                 <div style={{
                   marginBottom: -16,
                   zIndex: zIndex + 2,
@@ -267,37 +265,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
                   imgHeight={imgHeight}
                   glow={glow}
                 />
-
-                {/* Floating Tag for Champion (#1) */}
-                {rank === 1 && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: 30,
-                    background: 'rgba(0, 5, 20, 0.90)',
-                    backdropFilter: 'blur(12px)',
-                    border: `1.5px solid #FFD700`,
-                    borderRadius: 20,
-                    padding: '3px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    boxShadow: '0 4px 18px rgba(0,0,0,0.9), 0 0 16px rgba(255,215,0,0.6)',
-                    zIndex: zIndex + 5,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    <span style={{ fontSize: 14 }}>👑</span>
-                    <span style={{
-                      fontSize: 11.5,
-                      fontWeight: 900,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: '#FFD700',
-                      letterSpacing: 1.5,
-                      textTransform: 'uppercase',
-                    }}>
-                      CHAMPION
-                    </span>
-                  </div>
-                )}
               </div>
             );
           })}
@@ -305,120 +272,219 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       )}
 
       {/* ════════════════════════════════════════════════════════════ */}
-      {/* ── BOTTOM DOCK: 3 Player Info Panels (Layered Z-Index) ──── */}
+      {/* ── PLAYER DETAILS ON THE SIDES (No Clunky Bottom Boxes) ─── */}
       {/* ════════════════════════════════════════════════════════════ */}
       {p1 && (
-        <div style={{
-          position: 'absolute',
-          bottom: 0, left: 0, right: 0,
-          height: 80,
-          zIndex: 25,
-          display: 'flex',
-          alignItems: 'stretch',
-          padding: '0 16px 6px',
-          gap: 12,
-        }}>
-          {slots.map(({ player: r, rank, label, medal, color, glow, zIndex }) => {
-            if (!r) return <div key={rank} style={{ flex: 1 }} />;
-            const isChamp = rank === 1;
-            const nameParts = r.player.name.trim().split(' ');
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(' ');
-
-            return (
-              <div
-                key={rank}
-                style={{
-                  flex: isChamp ? 1.25 : 1,
-                  position: 'relative',
-                  background: isChamp
-                    ? 'rgba(0, 6, 22, 0.94)'
-                    : 'rgba(0, 4, 16, 0.88)',
-                  backdropFilter: 'blur(12px)',
-                  border: `1.5px solid ${isChamp ? color : color + '55'}`,
-                  borderTop: `3px solid ${color}`,
-                  borderRadius: 10,
-                  padding: '7px 12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  boxShadow: isChamp
-                    ? `0 6px 20px rgba(0,0,0,0.8), 0 0 16px ${glow}`
-                    : `0 4px 14px rgba(0,0,0,0.6)`,
-                  zIndex: isChamp ? 30 : 22,
-                }}
-              >
-                {/* Left: Medal + Rank + Name */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                  <div style={{ fontSize: isChamp ? 22 : 18, lineHeight: 1 }}>{medal}</div>
-                  <div>
-                    <div style={{
-                      fontSize: 8.5,
-                      fontWeight: 900,
-                      color,
-                      letterSpacing: 2,
-                      textTransform: 'uppercase',
-                      fontFamily: "'Oswald', sans-serif",
-                    }}>
-                      {label}
-                    </div>
-                    <div style={{
-                      fontSize: isChamp ? 13 : 11.5,
-                      fontWeight: 900,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: '#fff',
-                      textTransform: 'uppercase',
-                      letterSpacing: 1,
-                      lineHeight: 1.1,
-                      marginTop: 2,
-                      maxWidth: 150,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {firstName} {lastName}
-                    </div>
-                    <div style={{
-                      fontSize: 8,
-                      fontWeight: 700,
-                      color: 'rgba(255,255,255,0.48)',
-                      fontFamily: "'Oswald', sans-serif",
-                      letterSpacing: 0.8,
-                      marginTop: 2,
-                    }}>
-                      {r.goals}G · {r.appearances}APP · {r.motm}M
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Points */}
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{
-                    fontSize: isChamp ? 24 : 19,
-                    fontWeight: 900,
-                    fontFamily: "'Oswald', sans-serif",
-                    color,
-                    fontStyle: 'italic',
-                    lineHeight: 1,
-                    textShadow: `0 0 14px ${color}88`,
-                  }}>
-                    +{r.points}
-                  </div>
-                  <div style={{
-                    fontSize: 7.5,
-                    fontWeight: 800,
-                    color: 'rgba(255,255,255,0.42)',
-                    textTransform: 'uppercase',
-                    letterSpacing: 1,
-                    marginTop: 2,
-                  }}>
-                    PTS
-                  </div>
-                </div>
+        <>
+          {/* ── 1. RUNNER UP DETAILS (Left Side of Player 2) ──────── */}
+          {p2 && (
+            <div style={{
+              position: 'absolute',
+              left: 24,
+              bottom: 65,
+              width: 175,
+              background: 'rgba(4, 9, 22, 0.90)',
+              backdropFilter: 'blur(16px)',
+              border: '1.5px solid rgba(226,232,240,0.45)',
+              borderLeft: '4px solid #CBD5E1',
+              borderRadius: 12,
+              padding: '10px 14px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.85), 0 0 16px rgba(226,232,240,0.20)',
+              zIndex: 25,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 16 }}>🥈</span>
+                <span style={{
+                  fontSize: 9.5,
+                  fontWeight: 900,
+                  color: '#CBD5E1',
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  fontFamily: "'Oswald', sans-serif",
+                }}>
+                  RUNNER UP
+                </span>
               </div>
-            );
-          })}
-        </div>
+              <div style={{
+                fontSize: 14,
+                fontWeight: 900,
+                fontFamily: "'Oswald', sans-serif",
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                lineHeight: 1.15,
+                marginTop: 4,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
+                {p2.player.name}
+              </div>
+              <div style={{
+                fontSize: 23,
+                fontWeight: 900,
+                fontFamily: "'Oswald', sans-serif",
+                color: '#E2E8F0',
+                fontStyle: 'italic',
+                lineHeight: 1,
+                marginTop: 4,
+                textShadow: '0 0 12px rgba(226,232,240,0.6)',
+              }}>
+                +{p2.points} <span style={{ fontSize: 8.5, fontStyle: 'normal', color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>PTS</span>
+              </div>
+              <div style={{
+                fontSize: 8.5,
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.5)',
+                fontFamily: "'Oswald', sans-serif",
+                letterSpacing: 0.8,
+                marginTop: 3,
+              }}>
+                {p2.goals}G · {p2.appearances}APP · {p2.motm}M
+              </div>
+            </div>
+          )}
+
+          {/* ── 2. CHAMPION DETAILS (Center, Integrated Under Champion) ─ */}
+          <div style={{
+            position: 'absolute',
+            bottom: 18,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(4, 8, 24, 0.94)',
+            backdropFilter: 'blur(16px)',
+            border: '1.5px solid #FFD700',
+            borderTop: '3.5px solid #FFD700',
+            borderRadius: 14,
+            padding: '8px 22px',
+            textAlign: 'center',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.92), 0 0 22px rgba(255,215,0,0.55)',
+            zIndex: 30,
+            minWidth: 215,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <span style={{ fontSize: 15 }}>🥇</span>
+              <span style={{
+                fontSize: 10,
+                fontWeight: 900,
+                color: '#FFD700',
+                letterSpacing: 2.5,
+                textTransform: 'uppercase',
+                fontFamily: "'Oswald', sans-serif",
+              }}>
+                CHAMPION
+              </span>
+              <span style={{ fontSize: 13 }}>👑</span>
+            </div>
+            <div style={{
+              fontSize: 16,
+              fontWeight: 900,
+              fontFamily: "'Oswald', sans-serif",
+              color: '#fff',
+              textTransform: 'uppercase',
+              letterSpacing: 1.5,
+              lineHeight: 1.15,
+              marginTop: 4,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>
+              {p1.player.name}
+            </div>
+            <div style={{
+              fontSize: 26,
+              fontWeight: 900,
+              fontFamily: "'Oswald', sans-serif",
+              color: '#FFD700',
+              fontStyle: 'italic',
+              lineHeight: 1,
+              marginTop: 3,
+              textShadow: '0 0 16px rgba(255,215,0,0.7)',
+            }}>
+              +{p1.points} <span style={{ fontSize: 9.5, fontStyle: 'normal', color: 'rgba(255,255,255,0.55)', letterSpacing: 1 }}>PTS</span>
+            </div>
+            <div style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.52)',
+              fontFamily: "'Oswald', sans-serif",
+              letterSpacing: 1,
+              marginTop: 3,
+            }}>
+              {p1.goals}G · {p1.appearances}APP · {p1.motm}M
+            </div>
+          </div>
+
+          {/* ── 3. 3RD PLACE DETAILS (Right Side of Player 3) ─────── */}
+          {p3 && (
+            <div style={{
+              position: 'absolute',
+              right: 24,
+              bottom: 65,
+              width: 175,
+              background: 'rgba(4, 9, 22, 0.90)',
+              backdropFilter: 'blur(16px)',
+              border: '1.5px solid rgba(245,158,11,0.45)',
+              borderRight: '4px solid #F59E0B',
+              borderRadius: 12,
+              padding: '10px 14px',
+              textAlign: 'right',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.85), 0 0 16px rgba(245,158,11,0.20)',
+              zIndex: 25,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                <span style={{
+                  fontSize: 9.5,
+                  fontWeight: 900,
+                  color: '#F59E0B',
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  fontFamily: "'Oswald', sans-serif",
+                }}>
+                  3RD PLACE
+                </span>
+                <span style={{ fontSize: 16 }}>🥉</span>
+              </div>
+              <div style={{
+                fontSize: 14,
+                fontWeight: 900,
+                fontFamily: "'Oswald', sans-serif",
+                color: '#fff',
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                lineHeight: 1.15,
+                marginTop: 4,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
+                {p3.player.name}
+              </div>
+              <div style={{
+                fontSize: 23,
+                fontWeight: 900,
+                fontFamily: "'Oswald', sans-serif",
+                color: '#F59E0B',
+                fontStyle: 'italic',
+                lineHeight: 1,
+                marginTop: 4,
+                textShadow: '0 0 12px rgba(245,158,11,0.6)',
+              }}>
+                +{p3.points} <span style={{ fontSize: 8.5, fontStyle: 'normal', color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>PTS</span>
+              </div>
+              <div style={{
+                fontSize: 8.5,
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.5)',
+                fontFamily: "'Oswald', sans-serif",
+                letterSpacing: 0.8,
+                marginTop: 3,
+              }}>
+                {p3.goals}G · {p3.appearances}APP · {p3.motm}M
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Bottom Accent Line ────────────────────────────────────── */}
