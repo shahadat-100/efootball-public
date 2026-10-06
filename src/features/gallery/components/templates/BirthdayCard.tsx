@@ -303,17 +303,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
           textTransform: 'uppercase',
           fontFamily: "'Oswald', sans-serif",
         }}>
-          THE ENIGMATIC ELITE FC
-        </div>
-
-        <div style={{
-          fontSize: 8.5,
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.4)',
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-        }}>
-          WWW.THEENIGMATICELITE.COM
+          THE ENIGMATIC ELITE
         </div>
 
         <div style={{

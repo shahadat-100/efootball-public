@@ -368,26 +368,14 @@ export function PlayerProfileCard({
           position: 'absolute', bottom: 0, left: 0, right: 0,
           height: 38, background: '#020408',
           borderTop: `1px solid ${accentGlow}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '0 24px', zIndex: 30,
         }}>
           <span style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 800,
-            color: accent, letterSpacing: 2, textTransform: 'uppercase',
+            fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 800,
+            color: accent, letterSpacing: 2.5, textTransform: 'uppercase',
           }}>
-            THE ENIGMATIC ELITE FC
-          </span>
-          <span style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 8.5, fontWeight: 600,
-            color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase',
-          }}>
-            WWW.THEENIGMATICELITE.COM
-          </span>
-          <span style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 800,
-            color: '#fff', letterSpacing: 1.5, textTransform: 'uppercase',
-          }}>
-            OFFICIAL MVP HONOUR
+            THE ENIGMATIC ELITE
           </span>
         </div>
       </div>
@@ -576,13 +564,7 @@ export function PlayerProfileCard({
           fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 800,
           color: '#60A5FA', letterSpacing: 2, textTransform: 'uppercase',
         }}>
-          THE ENIGMATIC ELITE FC
-        </span>
-        <span style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 8.5, fontWeight: 600,
-          color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase',
-        }}>
-          WWW.THEENIGMATICELITE.COM
+          THE ENIGMATIC ELITE
         </span>
         <span style={{
           fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 800,
