@@ -10,53 +10,19 @@ interface PodiumCardProps {
 }
 
 const MEDAL = ['🥇', '🥈', '🥉'];
-const RANK_CONFIG = [
-  {
-    rank: 1,
-    label: 'CHAMPION',
-    color: '#FFD700',
-    glow: 'rgba(255, 215, 0, 0.5)',
-    bg: 'linear-gradient(180deg, rgba(212,175,55,0.28) 0%, rgba(20,16,8,0.96) 100%)',
-    border: 'rgba(255, 215, 0, 0.7)',
-    pedestalHeight: 185,
-    cutoutHeight: 330,
-  },
-  {
-    rank: 2,
-    label: 'RUNNER UP',
-    color: '#E2E8F0',
-    glow: 'rgba(226, 232, 240, 0.45)',
-    bg: 'linear-gradient(180deg, rgba(148,163,184,0.22) 0%, rgba(15,20,30,0.96) 100%)',
-    border: 'rgba(226, 232, 240, 0.5)',
-    pedestalHeight: 155,
-    cutoutHeight: 290,
-  },
-  {
-    rank: 3,
-    label: '3RD PLACE',
-    color: '#F59E0B',
-    glow: 'rgba(245, 158, 11, 0.45)',
-    bg: 'linear-gradient(180deg, rgba(217,119,6,0.22) 0%, rgba(22,15,8,0.96) 100%)',
-    border: 'rgba(245, 158, 11, 0.5)',
-    pedestalHeight: 135,
-    cutoutHeight: 265,
-  },
-];
 
 export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardProps) {
   const isMonthly = title.toLowerCase().includes('monthly') || subtitle.toLowerCase().includes('month');
-  const accentColor = isMonthly ? '#FFD700' : '#38BDF8';
-  const accentGlow = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(56,189,248,0.45)';
 
-  // Rearrange top 3 for classic sports podium order: [2nd, 1st, 3rd]
   const p1 = topPlayers[0];
   const p2 = topPlayers[1];
   const p3 = topPlayers[2];
 
-  const orderedSlots = [
-    { player: p2, config: RANK_CONFIG[1], originalIdx: 1 },
-    { player: p1, config: RANK_CONFIG[0], originalIdx: 0 },
-    { player: p3, config: RANK_CONFIG[2], originalIdx: 2 },
+  // Podium order: [2nd LEFT | 1st CENTER | 3rd RIGHT]
+  const slots = [
+    { player: p2, rank: 2, label: 'RUNNER UP',  medal: '🥈', color: '#C0C0C0', imgHeight: 400, flex: 1   },
+    { player: p1, rank: 1, label: 'CHAMPION',   medal: '🥇', color: '#FFD700', imgHeight: 490, flex: 1.3 },
+    { player: p3, rank: 3, label: '3RD PLACE',  medal: '🥉', color: '#F59E0B', imgHeight: 370, flex: 1   },
   ];
 
   return (
@@ -68,97 +34,103 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 0,
-        background: '#07080E',
+        background: isMonthly
+          ? 'linear-gradient(145deg, #1a0a00 0%, #7c3a00 35%, #1a0800 100%)'
+          : 'linear-gradient(145deg, #012a5e 0%, #0d47a1 40%, #01194a 100%)',
         fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-        boxShadow: '0 30px 80px rgba(0,0,0,0.9)',
       }}
     >
-      {/* ── Background: Dark Stadium Lighting ─────────────────────── */}
+      {/* ── BG: Centre glow ────────────────────────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
         background: isMonthly
-          ? 'radial-gradient(circle at 50% 25%, rgba(212,175,55,0.20) 0%, rgba(184,134,11,0.06) 45%, #07080E 80%)'
-          : 'radial-gradient(circle at 50% 25%, rgba(14,165,233,0.22) 0%, rgba(37,99,235,0.06) 45%, #06080E 80%)',
+          ? 'radial-gradient(ellipse at 50% 70%, rgba(220,120,0,0.40) 0%, transparent 65%)'
+          : 'radial-gradient(ellipse at 50% 70%, rgba(56,189,248,0.38) 0%, transparent 65%)',
         zIndex: 1,
       }} />
 
-      {/* Stadium Light Beam */}
+      {/* ── BG: Diagonal stripe texture ───────────────────────────── */}
       <div style={{
-        position: 'absolute',
-        top: -60, left: '50%', transform: 'translateX(-50%)',
-        width: 700, height: 350,
-        background: `radial-gradient(ellipse at 50% 20%, ${accentGlow} 0%, transparent 65%)`,
-        filter: 'blur(30px)',
-        zIndex: 2,
-        pointerEvents: 'none',
+        position: 'absolute', inset: 0,
+        backgroundImage: 'repeating-linear-gradient(55deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 22px)',
+        zIndex: 1,
       }} />
 
-      {/* Giant Watermark Typography: "TOP 3" */}
+      {/* ── BG: Bottom dark gradient (anchor players to ground) ────── */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 200,
+        background: 'linear-gradient(0deg, rgba(0,0,0,0.75) 0%, transparent 100%)',
+        zIndex: 2,
+      }} />
+
+      {/* ── Watermark: "TOP 3" ───────────────────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 280, fontWeight: 900,
-        fontFamily: "'Action Comics Black', 'Impact', sans-serif",
+        fontSize: 260, fontWeight: 900,
+        fontFamily: "'Impact', 'Arial Black', sans-serif",
         color: 'rgba(255,255,255,0.04)',
-        letterSpacing: -10, lineHeight: 1,
+        letterSpacing: -8, lineHeight: 1,
         userSelect: 'none', pointerEvents: 'none',
         zIndex: 2,
       }}>
         TOP 3
       </div>
 
-      {/* ── Top Header Bar ────────────────────────────────────────── */}
+      {/* ── Header ──────────────────────────────────────────────── */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
-        padding: '18px 28px',
+        padding: '16px 26px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 30,
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 100%)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Club branding */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
           <img
             src="/images/club-logo.jpg"
             alt="Club Logo"
             crossOrigin="anonymous"
             style={{
-              width: 38, height: 38,
-              borderRadius: 8,
-              objectFit: 'cover',
-              border: `1.5px solid ${accentColor}`,
-              boxShadow: `0 0 12px ${accentGlow}`,
+              width: 42, height: 42,
+              borderRadius: 9, objectFit: 'cover',
+              border: '2px solid rgba(255,255,255,0.55)',
+              boxShadow: '0 0 18px rgba(255,255,255,0.25)',
             }}
           />
           <div>
-            <div style={{ fontSize: 12, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>
+            <div style={{ fontSize: 12, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2, lineHeight: 1 }}>
               THE ENIGMATIC ELITE
             </div>
-            <div style={{ fontSize: 8.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>
+            <div style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.65)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic', marginTop: 3 }}>
               In Mystery We Reign
             </div>
           </div>
         </div>
 
+        {/* Title */}
         <div style={{ textAlign: 'right' }}>
           <div style={{
-            fontSize: 28, fontWeight: 900,
+            fontSize: 30, fontWeight: 900,
             fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
             color: '#fff', textTransform: 'uppercase',
-            letterSpacing: 3, lineHeight: 1,
-            textShadow: `0 0 25px ${accentGlow}`,
+            letterSpacing: 4, lineHeight: 1,
+            textShadow: '0 0 30px rgba(255,255,255,0.4)',
           }}>
             {title}
           </div>
           <div style={{
             fontSize: 10, fontWeight: 800,
             fontFamily: "'Oswald', sans-serif",
-            color: accentColor, textTransform: 'uppercase',
-            letterSpacing: 2, marginTop: 4,
+            color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase',
+            letterSpacing: 3, marginTop: 4,
           }}>
             {subtitle}
           </div>
         </div>
       </div>
 
-      {/* ── Podium Stage: 3 Standing Cutouts on Pedestals ─────────── */}
+      {/* ── NO DATA fallback ───────────────────────────────────────── */}
       {!p1 ? (
         <div style={{
           position: 'absolute', inset: 0,
@@ -168,186 +140,149 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
           No stats recorded for this period yet.
         </div>
       ) : (
+        /* ── Three-Player Panorama ───────────────────────────────── */
         <div style={{
           position: 'absolute',
-          bottom: 38, left: 30, right: 30,
-          height: 420,
+          bottom: 0, left: 0, right: 0,
+          height: '100%',
           display: 'flex',
           alignItems: 'flex-end',
-          justifyContent: 'center',
-          gap: 20,
           zIndex: 10,
         }}>
-          {orderedSlots.map(({ player: r, config, originalIdx }) => {
-            if (!r) return null;
-            const cutoutImage = r.player.coverImageUrl;
+          {slots.map(({ player: r, rank, label, medal, color, imgHeight, flex }) => {
+            if (!r) return <div key={rank} style={{ flex }} />;
+            const parts = r.player.name.trim().split(' ');
+            const firstName = parts[0];
+            const lastName = parts.slice(1).join(' ');
 
             return (
               <div
-                key={r.player.id || originalIdx}
+                key={rank}
                 style={{
-                  flex: originalIdx === 0 ? 1.15 : 1,
+                  flex,
+                  position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  position: 'relative',
-                  zIndex: originalIdx === 0 ? 15 : 10,
+                  justifyContent: 'flex-end',
+                  zIndex: rank === 1 ? 15 : 10,
                 }}
               >
-                {/* ── Standing Player Cutout ────────────────────────── */}
+                {/* ── Medal badge ──────────────────────────────── */}
                 <div style={{
-                  height: config.cutoutHeight,
+                  position: 'absolute',
+                  top: 62,
+                  fontSize: rank === 1 ? 30 : 22,
+                  filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.7))',
+                  zIndex: 20,
+                }}>
+                  {medal}
+                </div>
+
+                {/* ── Player cutout image ───────────────────────── */}
+                <div style={{
                   width: '100%',
                   display: 'flex',
                   alignItems: 'flex-end',
                   justifyContent: 'center',
-                  marginBottom: -10,
-                  zIndex: 5,
-                  position: 'relative',
+                  overflow: 'visible',
                 }}>
                   <img
-                    src={cutoutImage}
+                    src={r.player.coverImageUrl}
                     alt={r.player.name}
                     crossOrigin="anonymous"
                     style={{
-                      maxHeight: config.cutoutHeight,
-                      maxWidth: '90%',
+                      height: imgHeight,
+                      maxWidth: rank === 1 ? '100%' : '92%',
                       objectFit: 'contain',
                       objectPosition: 'bottom center',
-                      filter: `drop-shadow(0 0 2px #fff) drop-shadow(0 0 12px ${config.glow}) drop-shadow(0 15px 25px rgba(0,0,0,0.9))`,
+                      filter: [
+                        'drop-shadow(0 0 1px rgba(255,255,255,0.6))',
+                        `drop-shadow(0 0 20px ${rank === 1 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.10)'})`,
+                        'drop-shadow(0 20px 40px rgba(0,0,0,0.85))',
+                      ].join(' '),
                     }}
                   />
-
-                  {/* Medal Icon floating next to head */}
-                  <div style={{
-                    position: 'absolute',
-                    top: 10,
-                    right: originalIdx === 0 ? 15 : 5,
-                    fontSize: originalIdx === 0 ? 28 : 22,
-                    filter: `drop-shadow(0 2px 8px ${config.glow})`,
-                  }}>
-                    {MEDAL[originalIdx]}
-                  </div>
                 </div>
 
-                {/* ── Podium Pedestal Block ──────────────────────────── */}
+                {/* ── Bottom name/stats panel ───────────────────── */}
                 <div style={{
-                  width: '100%',
-                  height: config.pedestalHeight,
-                  background: config.bg,
-                  border: `1.5px solid ${config.border}`,
-                  borderRadius: 14,
-                  boxShadow: `0 12px 35px rgba(0,0,0,0.85), inset 0 0 24px ${config.glow}`,
-                  backdropFilter: 'blur(10px)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 10px',
-                  position: 'relative',
-                  overflow: 'hidden',
+                  position: 'absolute',
+                  bottom: 0, left: 0, right: 0,
+                  padding: rank === 1 ? '44px 8px 10px' : '36px 6px 8px',
+                  background: 'linear-gradient(0deg, rgba(0,5,20,0.92) 0%, rgba(0,5,20,0.55) 60%, transparent 100%)',
+                  textAlign: 'center',
+                  zIndex: 18,
                 }}>
-                  {/* Subtle top pedestal accent highlight */}
+                  {/* Name */}
                   <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, height: 2.5,
-                    background: `linear-gradient(90deg, transparent, ${config.color}, transparent)`,
-                  }} />
-
-                  {/* Player Name — 2 lines */}
-                  <div style={{
-                    fontSize: originalIdx === 0 ? 15 : 13,
+                    fontSize: rank === 1 ? 16 : 13,
                     fontWeight: 900,
                     fontFamily: "'Oswald', sans-serif",
                     color: '#fff',
                     textTransform: 'uppercase',
-                    textAlign: 'center',
-                    lineHeight: 1.15,
                     letterSpacing: 1.5,
-                    textShadow: '0 2px 10px rgba(0,0,0,0.8)',
-                    wordBreak: 'break-word',
+                    lineHeight: 1.15,
+                    textShadow: '0 2px 8px rgba(0,0,0,0.9)',
                   }}>
-                    {(() => {
-                      const parts = r.player.name.trim().split(' ');
-                      const fn = parts[0];
-                      const ln = parts.slice(1).join(' ');
-                      return (<><div>{fn}</div>{ln && <div>{ln}</div>}</>);
-                    })()}
+                    <div>{firstName}</div>
+                    {lastName && <div>{lastName}</div>}
                   </div>
 
-                  {/* Points Badge */}
+                  {/* Rank label */}
                   <div style={{
-                    background: 'rgba(0,0,0,0.65)',
-                    border: `1px solid ${config.border}`,
-                    borderRadius: 10,
-                    padding: '3px 12px',
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: 5,
-                    boxShadow: `0 4px 12px rgba(0,0,0,0.6)`,
+                    fontSize: 8.5,
+                    fontWeight: 900,
+                    color: color,
+                    letterSpacing: 2.5,
+                    textTransform: 'uppercase',
+                    marginTop: 4,
+                    textShadow: `0 0 12px ${color}`,
                   }}>
-                    <span style={{
-                      fontSize: originalIdx === 0 ? 24 : 20,
-                      fontWeight: 900,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: config.color,
-                      lineHeight: 1,
-                      fontStyle: 'italic',
-                    }}>
-                      +{r.points}
-                    </span>
-                    <span style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(255,255,255,0.7)', fontFamily: "'Oswald', sans-serif", letterSpacing: 1 }}>
-                      PTS
-                    </span>
+                    {label}
                   </div>
 
-                  {/* Mini Stats (Goals, Apps, MOTM) */}
-                  <div style={{ display: 'flex', gap: 5 }}>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.08)',
-                      borderRadius: 6,
-                      padding: '2px 7px',
-                      fontSize: 10,
-                      fontWeight: 800,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: '#fff',
-                    }}>
-                      {r.goals} <span style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.5)' }}>GLS</span>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.08)',
-                      borderRadius: 6,
-                      padding: '2px 7px',
-                      fontSize: 10,
-                      fontWeight: 800,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: '#fff',
-                    }}>
-                      {r.appearances} <span style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.5)' }}>APP</span>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.08)',
-                      borderRadius: 6,
-                      padding: '2px 7px',
-                      fontSize: 10,
-                      fontWeight: 800,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: '#fff',
-                    }}>
-                      {r.motm} <span style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.5)' }}>MOTM</span>
-                    </div>
-                  </div>
-
-                  {/* Rank Label Banner at Bottom of Pedestal */}
+                  {/* Points */}
                   <div style={{
-                    fontSize: 9.5,
+                    fontSize: rank === 1 ? 28 : 22,
                     fontWeight: 900,
                     fontFamily: "'Oswald', sans-serif",
-                    color: config.color,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
+                    color,
+                    fontStyle: 'italic',
+                    lineHeight: 1,
+                    marginTop: 3,
+                    textShadow: `0 0 20px ${color}88`,
                   }}>
-                    {config.label}
+                    +{r.points}
+                    <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.55)', marginLeft: 4, fontStyle: 'normal', letterSpacing: 1 }}>PTS</span>
                   </div>
+
+                  {/* Mini stats */}
+                  <div style={{
+                    fontSize: 8.5,
+                    color: 'rgba(255,255,255,0.55)',
+                    fontFamily: "'Oswald', sans-serif",
+                    letterSpacing: 1,
+                    marginTop: 2,
+                  }}>
+                    {r.goals}G · {r.appearances}APP · {r.motm}M
+                  </div>
+                </div>
+
+                {/* Rank number - top corner */}
+                <div style={{
+                  position: 'absolute',
+                  top: 65,
+                  right: rank === 1 ? 12 : 6,
+                  fontSize: rank === 1 ? 64 : 50,
+                  fontWeight: 900,
+                  fontFamily: "'Oswald', 'Impact', sans-serif",
+                  color: 'rgba(255,255,255,0.06)',
+                  lineHeight: 1,
+                  userSelect: 'none',
+                  zIndex: 3,
+                }}>
+                  {rank}
                 </div>
               </div>
             );
@@ -355,47 +290,31 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         </div>
       )}
 
-      {/* ── Solid Bottom Information Bar ──────────────────────────── */}
+      {/* ── Bottom thin accent line ──────────────────────────────── */}
       <div style={{
         position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        height: 38,
-        background: '#040508',
-        borderTop: `1px solid ${accentGlow}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 28px',
+        bottom: 0, left: 0, right: 0, height: 3,
+        background: isMonthly
+          ? 'linear-gradient(90deg, transparent, #FFD700, transparent)'
+          : 'linear-gradient(90deg, transparent, #38BDF8, transparent)',
         zIndex: 30,
+      }} />
+
+      {/* ── Footer branding ──────────────────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        bottom: 8, left: 0, right: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 35,
       }}>
         <div style={{
-          fontSize: 9,
-          fontWeight: 900,
-          color: accentColor,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-        }}>
-          THE ENIGMATIC ELITE FC
-        </div>
-
-        <div style={{
-          fontSize: 8.5,
+          fontSize: 8,
           fontWeight: 700,
-          color: 'rgba(255,255,255,0.4)',
-          letterSpacing: 2,
+          color: 'rgba(255,255,255,0.30)',
+          letterSpacing: 2.5,
           textTransform: 'uppercase',
         }}>
-          OFFICIAL LEADERBOARD RESULTS • WWW.THEENIGMATICELITE.COM
-        </div>
-
-        <div style={{
-          fontSize: 9,
-          fontWeight: 900,
-          color: '#fff',
-          letterSpacing: 1.5,
-          textTransform: 'uppercase',
-        }}>
-          PODIUM SPECIAL
+          THE ENIGMATIC ELITE FC · OFFICIAL LEADERBOARD
         </div>
       </div>
     </div>

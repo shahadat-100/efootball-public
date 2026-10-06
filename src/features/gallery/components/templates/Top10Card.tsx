@@ -9,22 +9,28 @@ interface Top10CardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
+const MEDAL: Record<number, string> = { 0: '🥇', 1: '🥈', 2: '🥉' };
 const RANK_COLOR: Record<number, string> = {
   0: '#FFD700',
-  1: '#E2E8F0',
+  1: '#C0C0C0',
   2: '#F59E0B',
 };
 
 export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardProps) {
   const isMonthly = title.toLowerCase().includes('monthly') || subtitle.toLowerCase().includes('month');
-  const accentColor = isMonthly ? '#FFD700' : '#38BDF8';
-  const accentGlow = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(56,189,248,0.45)';
+  const accent = isMonthly ? '#FFD700' : '#38BDF8';
+  const accentGlow = isMonthly ? 'rgba(212,175,55,0.50)' : 'rgba(56,189,248,0.50)';
+  const bgFrom  = isMonthly ? '#1a0a00' : '#012a5e';
+  const bgMid   = isMonthly ? '#7c3a00' : '#0d47a1';
+  const bgTo    = isMonthly ? '#12060a' : '#01194a';
 
   const topLeader = topPlayers[0];
-  const firstCol = topPlayers.slice(0, 5);
-  const secondCol = topPlayers.slice(5, 10);
-
   const leaderCutout = topLeader?.player.coverImageUrl;
+
+  // Rows 1–10 for the list
+  const listRows = topPlayers.slice(0, 10);
+  const colA = listRows.slice(0, 5);
+  const colB = listRows.slice(5, 10);
 
   return (
     <div
@@ -35,41 +41,53 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 0,
-        background: '#07080E',
+        background: `linear-gradient(145deg, ${bgFrom} 0%, ${bgMid} 42%, ${bgTo} 100%)`,
         fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-        boxShadow: '0 30px 80px rgba(0,0,0,0.9)',
       }}
     >
-      {/* ── Background: Dark Atmospheric Lighting ─────────────────── */}
+      {/* ── BG: glow spot left (leader) ─────────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: isMonthly
-          ? 'radial-gradient(circle at 20% 40%, rgba(212,175,55,0.22) 0%, rgba(184,134,11,0.06) 50%, #07080E 80%)'
-          : 'radial-gradient(circle at 20% 40%, rgba(14,165,233,0.25) 0%, rgba(37,99,235,0.06) 50%, #06080E 80%)',
+        background: `radial-gradient(ellipse at 22% 60%, ${accentGlow.replace('0.50', '0.30')} 0%, transparent 55%)`,
         zIndex: 1,
       }} />
 
-      {/* Giant Watermark Typography: "TOP 10" */}
+      {/* ── BG: diagonal stripe texture ──────────────────────────── */}
       <div style={{
-        position: 'absolute', right: -30, bottom: -30,
-        fontSize: 320, fontWeight: 900,
-        fontFamily: "'Action Comics Black', 'Impact', sans-serif",
-        color: 'rgba(255,255,255,0.03)',
+        position: 'absolute', inset: 0,
+        backgroundImage: 'repeating-linear-gradient(55deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 22px)',
+        zIndex: 1,
+      }} />
+
+      {/* ── BG: bottom shadow anchor ─────────────────────────────── */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 180,
+        background: 'linear-gradient(0deg, rgba(0,0,0,0.65) 0%, transparent 100%)',
+        zIndex: 2,
+      }} />
+
+      {/* ── Watermark "10" ───────────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', right: -20, bottom: -30,
+        fontSize: 340, fontWeight: 900,
+        fontFamily: "'Impact', 'Arial Black', sans-serif",
+        color: 'rgba(255,255,255,0.04)',
         lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
         zIndex: 2,
       }}>
         10
       </div>
 
-      {/* ── Left Section: Featured #1 Player Cutout & Title Banner ── */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* LEFT PANEL — #1 Player large cutout + branding             */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, width: 380, height: '100%',
-        zIndex: 10,
-        overflow: 'hidden',
+        position: 'absolute', top: 0, left: 0, width: 340, height: '100%',
+        zIndex: 10, overflow: 'hidden',
       }}>
-        {/* Top Club Branding */}
+        {/* Header branding */}
         <div style={{
-          position: 'absolute', top: 22, left: 24,
+          position: 'absolute', top: 16, left: 20,
           display: 'flex', alignItems: 'center', gap: 10,
           zIndex: 25,
         }}>
@@ -78,52 +96,52 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
             alt="Club Logo"
             crossOrigin="anonymous"
             style={{
-              width: 36, height: 36,
-              borderRadius: 8,
-              objectFit: 'cover',
-              border: `1.5px solid ${accentColor}`,
-              boxShadow: `0 0 12px ${accentGlow}`,
+              width: 38, height: 38,
+              borderRadius: 8, objectFit: 'cover',
+              border: '2px solid rgba(255,255,255,0.5)',
+              boxShadow: '0 0 16px rgba(255,255,255,0.25)',
             }}
           />
           <div>
             <div style={{ fontSize: 11, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5, lineHeight: 1 }}>
               THE ENIGMATIC ELITE
             </div>
-            <div style={{ fontSize: 8.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' }}>
+            <div style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.6)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic', marginTop: 2 }}>
               In Mystery We Reign
             </div>
           </div>
         </div>
 
-        {/* Title Block */}
+        {/* Title */}
         <div style={{
-          position: 'absolute', top: 72, left: 24, right: 24,
+          position: 'absolute', top: 66, left: 20, right: 16,
           zIndex: 25,
         }}>
           <div style={{
-            fontSize: 34, fontWeight: 900, lineHeight: 0.95,
+            fontSize: 32, fontWeight: 900, lineHeight: 0.95,
             fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
             color: '#fff', textTransform: 'uppercase',
             letterSpacing: 3,
-            textShadow: `0 0 25px ${accentGlow}`,
+            textShadow: '0 0 25px rgba(255,255,255,0.35)',
           }}>
             {title}
           </div>
           <div style={{
-            fontSize: 11, fontWeight: 800,
+            fontSize: 10, fontWeight: 800,
             fontFamily: "'Oswald', sans-serif",
-            color: accentColor, textTransform: 'uppercase',
-            letterSpacing: 2.5, marginTop: 4,
+            color: accent, textTransform: 'uppercase',
+            letterSpacing: 3, marginTop: 5,
           }}>
             {subtitle}
           </div>
         </div>
 
-        {/* Standing #1 Player Cutout */}
+        {/* #1 Player large cutout */}
         {leaderCutout && (
           <div style={{
             position: 'absolute',
-            bottom: 0, left: 10, width: 370, height: 430,
+            bottom: 0, left: 0, right: 0,
+            height: 440,
             display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
             zIndex: 15,
             pointerEvents: 'none',
@@ -133,27 +151,32 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
               alt={topLeader?.player.name}
               crossOrigin="anonymous"
               style={{
-                maxHeight: 420,
-                maxWidth: '96%',
+                height: 430,
+                maxWidth: '100%',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',
-                filter: `drop-shadow(0 0 2px #fff) drop-shadow(0 0 14px ${accentGlow}) drop-shadow(0 15px 30px rgba(0,0,0,0.95))`,
+                filter: [
+                  'drop-shadow(0 0 1px rgba(255,255,255,0.7))',
+                  `drop-shadow(0 0 22px ${accentGlow})`,
+                  'drop-shadow(0 20px 40px rgba(0,0,0,0.95))',
+                ].join(' '),
               }}
             />
 
-            {/* #1 Leader Badge */}
+            {/* Crown badge */}
             <div style={{
               position: 'absolute',
-              bottom: 46, left: 14,
-              background: 'rgba(7, 12, 22, 0.92)',
-              backdropFilter: 'blur(10px)',
-              border: `1.5px solid ${accentColor}`,
+              bottom: 14, left: 10,
+              background: 'rgba(0,5,20,0.88)',
+              backdropFilter: 'blur(12px)',
+              border: `1.5px solid ${accent}`,
               borderRadius: 10,
               padding: '5px 12px',
               display: 'flex', alignItems: 'center', gap: 7,
               boxShadow: `0 4px 18px rgba(0,0,0,0.8), 0 0 14px ${accentGlow}`,
+              zIndex: 20,
             }}>
-              <span style={{ fontSize: 15 }}>👑</span>
+              <span style={{ fontSize: 16 }}>👑</span>
               <div style={{
                 fontSize: 11, fontWeight: 900,
                 fontFamily: "'Oswald', sans-serif",
@@ -162,9 +185,12 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
               }}>
                 {(() => {
                   const parts = (topLeader?.player.name || '').trim().split(' ');
-                  const fn = parts[0];
-                  const ln = parts.slice(1).join(' ');
-                  return (<><div>{fn}</div>{ln && <div>{ln}</div>}</>);
+                  return (
+                    <>
+                      <div>{parts[0]}</div>
+                      {parts.slice(1).join(' ') && <div>{parts.slice(1).join(' ')}</div>}
+                    </>
+                  );
                 })()}
               </div>
             </div>
@@ -172,26 +198,29 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         )}
       </div>
 
-      {/* Vertical Accent Divider */}
+      {/* Vertical divider */}
       <div style={{
-        position: 'absolute', top: 20, bottom: 45, left: 380, width: 1.5,
-        background: `linear-gradient(180deg, transparent, ${accentColor}, transparent)`,
+        position: 'absolute', top: 20, bottom: 20, left: 340, width: 1.5,
+        background: `linear-gradient(180deg, transparent, ${accent}, transparent)`,
         zIndex: 20,
       }} />
 
-      {/* ── Right Section: 2 Columns of Top 10 Ranked Players ──────── */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* RIGHT PANEL — Top 10 list (2 columns)                      */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <div style={{
-        position: 'absolute', top: 20, left: 400, right: 24, bottom: 42,
-        display: 'flex', gap: 14,
+        position: 'absolute', top: 18, left: 356, right: 20, bottom: 18,
+        display: 'flex', gap: 12,
         zIndex: 20,
       }}>
-        {[firstCol, secondCol].map((col, cIdx) => (
-          <div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
+        {[colA, colB].map((col, cIdx) => (
+          <div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7, justifyContent: 'center' }}>
             {col.map((r, rowIdx) => {
               const absIdx = cIdx * 5 + rowIdx;
-              const rankColor = RANK_COLOR[absIdx] || 'rgba(255,255,255,0.7)';
+              const rankColor = RANK_COLOR[absIdx] || 'rgba(255,255,255,0.65)';
               const isTop3 = absIdx < 3;
               const rowCutout = r.player.coverImageUrl;
+              const nameParts = r.player.name.trim().split(' ');
 
               return (
                 <div
@@ -199,41 +228,51 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 9,
                     background: isTop3
-                      ? `linear-gradient(90deg, ${isMonthly ? 'rgba(212,175,55,0.18)' : 'rgba(14,165,233,0.18)'}, rgba(255,255,255,0.03))`
-                      : 'rgba(255,255,255,0.03)',
-                    border: isTop3 ? `1px solid ${rankColor}60` : '1px solid rgba(255,255,255,0.08)',
-                    borderLeft: `4px solid ${rankColor}`,
-                    borderRadius: 12,
-                    padding: '6px 12px',
-                    boxShadow: isTop3 ? `0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px ${rankColor}20` : '0 2px 10px rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(6px)',
+                      ? `linear-gradient(90deg, ${isMonthly ? 'rgba(212,175,55,0.20)' : 'rgba(14,165,233,0.20)'} 0%, rgba(255,255,255,0.04) 100%)`
+                      : 'rgba(255,255,255,0.04)',
+                    border: isTop3
+                      ? `1px solid ${rankColor}55`
+                      : '1px solid rgba(255,255,255,0.10)',
+                    borderLeft: `3.5px solid ${rankColor}`,
+                    borderRadius: 10,
+                    padding: '6px 10px',
+                    boxShadow: isTop3
+                      ? `0 4px 14px rgba(0,0,0,0.5), inset 0 0 10px ${rankColor}18`
+                      : '0 2px 8px rgba(0,0,0,0.4)',
                   }}
                 >
                   {/* Rank number */}
                   <div style={{
-                    fontSize: isTop3 ? 18 : 14,
+                    fontSize: isTop3 ? 17 : 13,
                     fontWeight: 900,
                     fontFamily: "'Oswald', sans-serif",
                     color: rankColor,
-                    minWidth: 20,
+                    minWidth: 18,
                     textAlign: 'center',
                     lineHeight: 1,
                     fontStyle: 'italic',
+                    textShadow: isTop3 ? `0 0 10px ${rankColor}` : 'none',
                   }}>
                     {absIdx + 1}
                   </div>
 
-                  {/* Cutout / Avatar Thumb */}
+                  {/* Medal (top 3 only) */}
+                  {isTop3 && (
+                    <span style={{ fontSize: 13, lineHeight: 1, flexShrink: 0 }}>
+                      {MEDAL[absIdx]}
+                    </span>
+                  )}
+
+                  {/* Player avatar — transparent bg, no black box */}
                   <div style={{
-                    width: 36, height: 36,
-                    borderRadius: 8,
-                    background: '#111522',
-                    border: `1.5px solid ${isTop3 ? rankColor : 'rgba(255,255,255,0.15)'}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 34, height: 34,
+                    borderRadius: 7,
                     overflow: 'hidden',
                     flexShrink: 0,
+                    border: `1.5px solid ${isTop3 ? rankColor + '88' : 'rgba(255,255,255,0.18)'}`,
+                    background: 'transparent',
                   }}>
                     <img
                       src={rowCutout}
@@ -247,10 +286,10 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                     />
                   </div>
 
-                  {/* Player Info */}
+                  {/* Name + mini stats */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
-                      fontSize: isTop3 ? 13 : 11.5,
+                      fontSize: isTop3 ? 12 : 10.5,
                       fontWeight: 800,
                       fontFamily: "'Oswald', sans-serif",
                       color: '#fff',
@@ -258,38 +297,59 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      letterSpacing: 1,
+                      letterSpacing: 0.8,
+                      lineHeight: 1,
                     }}>
-                      {r.player.name}
+                      {nameParts[0]}
                     </div>
+                    {nameParts.length > 1 && (
+                      <div style={{
+                        fontSize: isTop3 ? 10.5 : 9.5,
+                        fontWeight: 700,
+                        fontFamily: "'Oswald', sans-serif",
+                        color: 'rgba(255,255,255,0.7)',
+                        textTransform: 'uppercase',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        letterSpacing: 0.5,
+                        lineHeight: 1,
+                        marginTop: 1,
+                      }}>
+                        {nameParts.slice(1).join(' ')}
+                      </div>
+                    )}
                     <div style={{
-                      fontSize: 8.5,
+                      fontSize: 8,
                       fontWeight: 700,
-                      fontFamily: "'Oswald', sans-serif",
-                      color: 'rgba(255,255,255,0.55)',
-                      letterSpacing: 1,
+                      color: 'rgba(255,255,255,0.45)',
+                      letterSpacing: 0.5,
                       marginTop: 2,
                     }}>
                       {r.goals}G · {r.appearances}APP · {r.motm}M
                     </div>
                   </div>
 
-                  {/* Points Badge */}
-                  <div style={{
-                    textAlign: 'right',
-                    flexShrink: 0,
-                  }}>
+                  {/* Points */}
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{
-                      fontSize: isTop3 ? 18 : 15,
+                      fontSize: isTop3 ? 18 : 14,
                       fontWeight: 900,
                       fontFamily: "'Oswald', sans-serif",
                       color: rankColor,
                       lineHeight: 1,
                       fontStyle: 'italic',
+                      textShadow: isTop3 ? `0 0 10px ${rankColor}80` : 'none',
                     }}>
                       +{r.points}
                     </div>
-                    <div style={{ fontSize: 7.5, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontFamily: "'Oswald', sans-serif", letterSpacing: 0.5 }}>
+                    <div style={{
+                      fontSize: 7,
+                      fontWeight: 800,
+                      color: 'rgba(255,255,255,0.38)',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                    }}>
                       PTS
                     </div>
                   </div>
@@ -300,49 +360,15 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         ))}
       </div>
 
-      {/* ── Solid Bottom Information Bar ──────────────────────────── */}
+      {/* ── Bottom accent line ───────────────────────────────────── */}
       <div style={{
         position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        height: 38,
-        background: '#040508',
-        borderTop: `1px solid ${accentGlow}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 28px',
+        bottom: 0, left: 0, right: 0, height: 3,
+        background: isMonthly
+          ? 'linear-gradient(90deg, transparent, #FFD700, transparent)'
+          : 'linear-gradient(90deg, transparent, #38BDF8, transparent)',
         zIndex: 30,
-      }}>
-        <div style={{
-          fontSize: 9,
-          fontWeight: 900,
-          color: accentColor,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-        }}>
-          THE ENIGMATIC ELITE FC
-        </div>
-
-        <div style={{
-          fontSize: 8.5,
-          fontWeight: 700,
-          color: 'rgba(255,255,255,0.4)',
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-        }}>
-          OFFICIAL SQUAD POWER RANKINGS • WWW.THEENIGMATICELITE.COM
-        </div>
-
-        <div style={{
-          fontSize: 9,
-          fontWeight: 900,
-          color: '#fff',
-          letterSpacing: 1.5,
-          textTransform: 'uppercase',
-        }}>
-          TOP 10 SQUAD
-        </div>
-      </div>
+      }} />
     </div>
   );
 }
