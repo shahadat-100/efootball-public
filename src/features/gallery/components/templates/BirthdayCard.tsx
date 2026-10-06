@@ -175,33 +175,56 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
               </div>
             )}
 
-            {/* HAPPY BIRTHDAY subtitle */}
-            <div style={{
-              fontSize: 16,
-              fontWeight: 700,
-              fontFamily: "'Oswald', sans-serif",
-              color: 'rgba(212,175,55,0.55)',
-              letterSpacing: 8,
-              textTransform: 'uppercase',
-              marginTop: 10,
-            }}>
-              HAPPY BIRTHDAY!
-            </div>
-
-            <div style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: 'rgba(255,255,255,0.30)',
-              letterSpacing: 3,
-              marginTop: 4,
-              textTransform: 'uppercase',
-              fontFamily: "'Oswald', sans-serif",
-            }}>
-              ✦ CELEBRATING OUR CHAMPION TODAY ✦
-            </div>
           </div>
         );
       })()}
+
+      {/* ── PROMINENT Birthday Banner ─────────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        top: 80, left: 0, right: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        zIndex: 25,
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}>
+        {/* Big emoji row */}
+        <div style={{ fontSize: 30, letterSpacing: 12, lineHeight: 1, marginBottom: 6 }}>🎂🎉🎁</div>
+
+        {/* HAPPY BIRTHDAY text — big, gold, clearly visible */}
+        <div style={{
+          fontSize: 32,
+          fontWeight: 900,
+          fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
+          color: '#FFD700',
+          letterSpacing: 8,
+          textTransform: 'uppercase',
+          lineHeight: 1,
+          textShadow: [
+            '0 0 30px rgba(212,175,55,0.90)',
+            '0 0 60px rgba(212,175,55,0.55)',
+            '0 3px 12px rgba(0,0,0,0.95)',
+          ].join(', '),
+        }}>
+          HAPPY BIRTHDAY!
+        </div>
+
+        {/* Subtitle */}
+        <div style={{
+          fontSize: 10.5,
+          fontWeight: 800,
+          color: 'rgba(255,255,255,0.75)',
+          letterSpacing: 4,
+          textTransform: 'uppercase',
+          marginTop: 6,
+          fontFamily: "'Oswald', sans-serif",
+          textShadow: '0 2px 8px rgba(0,0,0,0.95)',
+        }}>
+          ✦ CELEBRATING OUR CHAMPION TODAY ✦
+        </div>
+      </div>
 
       {/* ── Center Stage: Player Cutout Image ─────────────────────── */}
       <div style={{
