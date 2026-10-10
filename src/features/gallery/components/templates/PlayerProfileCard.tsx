@@ -34,7 +34,7 @@ export function PlayerProfileCard({
   const isMonthly = subtitle.toLowerCase().includes('month');
   const isMVP = Boolean(title && title.toUpperCase().includes('MVP')) || subtitle.toLowerCase().includes('week') || subtitle.toLowerCase().includes('month');
 
-  // Only use coverImageUrl (never profileImageUrl), and remove black background via canvas
+  // Cover image with full transparency preserved
   const coverImage = useCutoutImage(player.coverImageUrl);
 
   // Split name for two-tone athletic typography

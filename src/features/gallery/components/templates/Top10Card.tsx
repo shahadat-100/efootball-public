@@ -10,7 +10,7 @@ interface Top10CardProps {
   cardRef?: React.RefObject<HTMLDivElement>;
 }
 
-/* ─── Sub-component: Player cutout image using canvas background stripper ─── */
+/* ─── Sub-component: Player cutout image ─── */
 function PlayerCutoutImg({
   src,
   alt,

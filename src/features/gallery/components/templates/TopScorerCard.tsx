@@ -11,7 +11,7 @@ interface TopScorerCardProps {
 
 export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCardProps) {
   const isMonthly = type === 'monthly';
-  // Only use coverImageUrl and remove black background via canvas
+  // Cover image with full transparency preserved
   const coverImage = useCutoutImage(data?.player.coverImageUrl);
 
   const accentColor = '#FFD700'; // Gold theme for Top Scorer / Golden Boot

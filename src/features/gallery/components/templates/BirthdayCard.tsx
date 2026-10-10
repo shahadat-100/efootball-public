@@ -9,7 +9,7 @@ interface BirthdayCardProps {
 }
 
 export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
-  // Only use coverImageUrl and strip black background
+  // Cover image with full transparency preserved
   const coverImage = useCutoutImage(player.coverImageUrl);
   const accentColor = '#FFD700';
   const accentGlow = 'rgba(212, 175, 55, 0.45)';
