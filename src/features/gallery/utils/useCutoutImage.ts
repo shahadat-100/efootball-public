@@ -45,20 +45,41 @@ export function useCutoutImage(src?: string): string {
           const imgData = ctx.getImageData(0, 0, w, h);
           const data = imgData.data;
 
-          // Luminance-based dark check — catches black, dark navy, dark grey
-          const isDark = (di: number) => {
-            const r = data[di], g = data[di + 1], b = data[di + 2];
+          // 1. Check if the image is ALREADY a transparent PNG cutout.
+          // If perimeter pixels are already transparent (alpha < 50), do NOT process.
+          let transparentPerimeterCount = 0;
+          const totalPerimeterSamples = (w + h) * 2;
+
+          for (let x = 0; x < w; x++) {
+            if (data[x * 4 + 3] < 50) transparentPerimeterCount++;
+            if (data[((h - 1) * w + x) * 4 + 3] < 50) transparentPerimeterCount++;
+          }
+          for (let y = 1; y < h - 1; y++) {
+            if (data[(y * w) * 4 + 3] < 50) transparentPerimeterCount++;
+            if (data[(y * w + w - 1) * 4 + 3] < 50) transparentPerimeterCount++;
+          }
+
+          // If more than 2% of the perimeter is already transparent, it's already a transparent cutout!
+          if (transparentPerimeterCount > totalPerimeterSamples * 0.02) {
+            if (isMounted) setProcessedSrc(src);
+            return;
+          }
+
+          // Luminance-based dark check for OPAQUE black background images
+          const isOpaqueDark = (di: number) => {
+            const r = data[di], g = data[di + 1], b = data[di + 2], a = data[di + 3];
+            if (a < 200) return false; // Ignore already transparent pixels
             const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-            return luminance < 75; // cleanly removes dark JPEG compression artifacts
+            return luminance < 75; // dark background
           };
 
-          // Check if any perimeter pixel is dark — if none, image has no dark bg
+          // Check if any perimeter pixel is dark
           let hasAnyDarkPerimeter = false;
           for (let x = 0; x < w && !hasAnyDarkPerimeter; x++) {
-            if (isDark(x * 4) || isDark((( h - 1) * w + x) * 4)) hasAnyDarkPerimeter = true;
+            if (isOpaqueDark(x * 4) || isOpaqueDark(((h - 1) * w + x) * 4)) hasAnyDarkPerimeter = true;
           }
           for (let y = 0; y < h && !hasAnyDarkPerimeter; y++) {
-            if (isDark(y * w * 4) || isDark((y * w + w - 1) * 4)) hasAnyDarkPerimeter = true;
+            if (isOpaqueDark(y * w * 4) || isOpaqueDark((y * w + w - 1) * 4)) hasAnyDarkPerimeter = true;
           }
 
           if (!hasAnyDarkPerimeter) {
@@ -69,13 +90,12 @@ export function useCutoutImage(src?: string): string {
 
           // BFS flood-fill from ALL perimeter pixels inward
           const visited = new Uint8Array(w * h);
-          // Use a simple array as queue (fast enough for typical image sizes)
           const qx: number[] = [];
           const qy: number[] = [];
 
           const seed = (x: number, y: number) => {
             const pi = y * w + x;
-            if (!visited[pi] && isDark(pi * 4)) {
+            if (!visited[pi] && isOpaqueDark(pi * 4)) {
               visited[pi] = 1;
               qx.push(x);
               qy.push(y);
@@ -98,7 +118,7 @@ export function useCutoutImage(src?: string): string {
             for (const [nx, ny] of neighbors) {
               if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
                 const npi = ny * w + nx;
-                if (!visited[npi] && isDark(npi * 4)) {
+                if (!visited[npi] && isOpaqueDark(npi * 4)) {
                   visited[npi] = 1;
                   qx.push(nx);
                   qy.push(ny);
