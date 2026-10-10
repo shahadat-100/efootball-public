@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Avatar, Badge, Button, PieChart } from '@/shared/components';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
@@ -15,13 +15,32 @@ import { AvatarSpeechBubble } from './AvatarSpeechBubble';
 import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
-import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
+import { Download, Upload, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
 }
 export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
-  const { players, matchEntries, playerSeasonStats, playerMonthlyStats, seasons, fetchPlayerMatchEntries, fetchPlayerMonthlyStats } = useFootballStore();
+  const { players, matchEntries, playerSeasonStats, playerMonthlyStats, seasons, fetchPlayerMatchEntries, fetchPlayerMonthlyStats, updatePlayerCoverImage } = useFootballStore();
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [coverError, setCoverError] = useState<string | null>(null);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { setCoverError('File too large (max 10MB)'); return; }
+    try {
+      setCoverUploading(true);
+      setCoverError(null);
+      await updatePlayerCoverImage(playerId, file);
+    } catch (err: any) {
+      setCoverError(err.message || 'Upload failed');
+    } finally {
+      setCoverUploading(false);
+      if (coverInputRef.current) coverInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     fetchPlayerMatchEntries(playerId);
@@ -552,6 +571,39 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
                 )}>
                   #{currentRank}
                 </div>
+              )}
+            </div>
+
+            {/* Cover Image Upload Button */}
+            <div className="mt-2 flex flex-col items-center gap-1">
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/png,image/webp"
+                className="hidden"
+                onChange={handleCoverUpload}
+              />
+              <button
+                type="button"
+                disabled={coverUploading}
+                onClick={() => coverInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                style={{
+                  background: coverUploading ? 'rgba(255,255,255,0.06)' : 'rgba(99,102,241,0.18)',
+                  color: coverUploading ? 'rgba(255,255,255,0.4)' : '#a5b4fc',
+                  border: '1px solid rgba(99,102,241,0.3)',
+                  cursor: coverUploading ? 'not-allowed' : 'pointer',
+                }}
+                title="Upload transparent PNG cutout for gallery cards"
+              >
+                <Upload className="w-3 h-3" />
+                {coverUploading ? 'Uploading…' : 'Cover Image'}
+              </button>
+              {coverError && (
+                <span className="text-[10px] text-red-400">{coverError}</span>
+              )}
+              {!coverError && !coverUploading && (
+                <span className="text-[9px] text-white/25">PNG/WebP transparent cutout</span>
               )}
             </div>
 

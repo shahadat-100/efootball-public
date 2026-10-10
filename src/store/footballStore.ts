@@ -97,6 +97,7 @@ export const mapPlayerFromDb = (p: any): Player => ({
 export const mapPlayerToDb = (p: any) => ({
   name: p.name,
   profileimageurl: p.profileImageUrl || '',
+  coverimageurl: p.coverImageUrl || '',
   jerseynumber: p.jerseyNumber ?? null,
   email: p.email || null,
   dateOFbirth: p.dateOfBirth || null,
@@ -228,6 +229,7 @@ interface FootballStore {
   fetchFriendlyMatches: () => Promise<void>;
   isInitialized: boolean;
   initializeData: () => Promise<void>;
+  updatePlayerCoverImage: (playerId: string, file: File) => Promise<void>;
 }
 
 export const useFootballStore = create<FootballStore>()(
@@ -290,7 +292,51 @@ export const useFootballStore = create<FootballStore>()(
         
         set({ isInitialized: true });
       },
-      
+
+      /**
+       * Upload a new cover/cutout image for a player.
+       * Always stores as raw PNG/WebP bytes — NO canvas, NO JPEG conversion.
+       * Transparency is 100% preserved. Saves to images/covers/ folder.
+       */
+      updatePlayerCoverImage: async (playerId: string, file: File) => {
+        // Always treat as PNG to preserve transparency
+        const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+        const isWebp = file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp');
+        const ext = isPng ? 'png' : isWebp ? 'webp' : 'png';
+        const contentType = isPng ? 'image/png' : isWebp ? 'image/webp' : 'image/png';
+
+        // Store in dedicated covers/ folder — easy to find in Supabase dashboard
+        const fileName = `covers/${playerId}-${Date.now()}.${ext}`;
+
+        // 1. Upload RAW file bytes — zero pixel manipulation
+        const { error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(fileName, file, { contentType, upsert: true });
+
+        if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
+
+        // 2. Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('images')
+          .getPublicUrl(fileName);
+
+        // 3. Save URL to players table
+        const { error: dbError } = await supabase
+          .from('players')
+          .update({ coverimageurl: publicUrl })
+          .eq('id', playerId);
+
+        if (dbError) throw new Error('DB update failed: ' + dbError.message);
+
+        // 4. Update local store immediately — no page reload needed
+        set(state => ({
+          players: state.players.map(p =>
+            p.id === playerId ? { ...p, coverImageUrl: publicUrl } : p
+          ),
+        }));
+      },
+
+
       fetchPlayers: async () => {
         if (get().players.length > 0) return;
         try {
