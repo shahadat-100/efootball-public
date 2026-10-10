@@ -249,18 +249,7 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                 justifyContent: 'flex-end',
               }}
             >
-              {/* Floating Rank Crown / Medal Badge for Top 3 */}
-              {isTop3 && (
-                <div style={{
-                  marginBottom: -16,
-                  zIndex: zIndex + 2,
-                  fontSize: rank === 1 ? 28 : 22,
-                  filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.8))',
-                  lineHeight: 1,
-                }}>
-                  {medal}
-                </div>
-              )}
+
 
               {/* Player Cutout Image (Hook called cleanly per player) */}
               <PlayerCutoutImg
