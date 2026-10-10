@@ -62,22 +62,22 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
   const accent = isMonthly ? '#FFD700' : '#38BDF8';
 
   /* 
-   * Team Lineup Squad Formation (10 players side-by-side):
-   * Center (#1) is in front with highest z-index & largest size (~81% card height).
+   * Team Lineup Squad Formation (10 players side-by-side with clean horizontal spacing):
+   * Center (#1) is in front with highest z-index & largest size.
    * Flanked on left & right across 960px width:
    * [#10, #8, #6, #4, #2, #1, #3, #5, #7, #9]
    */
   const slotDefinitions = [
-    { rank: 10, leftPercent: 7,  zIndex: 4,  imgHeight: 335 },
-    { rank: 8,  leftPercent: 16, zIndex: 6,  imgHeight: 350 },
-    { rank: 6,  leftPercent: 25, zIndex: 8,  imgHeight: 365 },
-    { rank: 4,  leftPercent: 35, zIndex: 10, imgHeight: 385 },
-    { rank: 2,  leftPercent: 44, zIndex: 13, imgHeight: 410 },
-    { rank: 1,  leftPercent: 53, zIndex: 16, imgHeight: 440 }, // CENTER CHAMPION: HIGHEST Z-INDEX & LARGEST
-    { rank: 3,  leftPercent: 62, zIndex: 13, imgHeight: 410 },
-    { rank: 5,  leftPercent: 71, zIndex: 10, imgHeight: 385 },
-    { rank: 7,  leftPercent: 81, zIndex: 8,  imgHeight: 365 },
-    { rank: 9,  leftPercent: 91, zIndex: 6,  imgHeight: 350 },
+    { rank: 10, leftPercent: 5.5,  zIndex: 4,  imgHeight: 300 },
+    { rank: 8,  leftPercent: 15.0, zIndex: 6,  imgHeight: 315 },
+    { rank: 6,  leftPercent: 24.5, zIndex: 8,  imgHeight: 335 },
+    { rank: 4,  leftPercent: 34.0, zIndex: 10, imgHeight: 355 },
+    { rank: 2,  leftPercent: 43.5, zIndex: 13, imgHeight: 380 },
+    { rank: 1,  leftPercent: 52.5, zIndex: 16, imgHeight: 405 }, // CENTER CHAMPION: HIGHEST Z-INDEX & LARGEST
+    { rank: 3,  leftPercent: 62.0, zIndex: 13, imgHeight: 380 },
+    { rank: 5,  leftPercent: 71.5, zIndex: 10, imgHeight: 355 },
+    { rank: 7,  leftPercent: 81.0, zIndex: 8,  imgHeight: 335 },
+    { rank: 9,  leftPercent: 90.5, zIndex: 6,  imgHeight: 315 },
   ];
 
   const slots = slotDefinitions.map((s) => {
@@ -301,10 +301,11 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         borderTop: `1px solid rgba(255,255,255,0.12)`,
         display: 'flex',
         alignItems: 'center',
-        padding: '0 8px',
+        padding: '0 10px',
+        gap: 4,
       }}>
         {/* Ordered to match the exact visual positions of players directly above */}
-        {slotDefinitions.map((slotDef, idx) => {
+        {slotDefinitions.map((slotDef) => {
           const rank = slotDef.rank;
           const r = topPlayers[rank - 1];
           const styling = RANK_ACCENTS[rank] || RANK_ACCENTS[10];
@@ -342,13 +343,18 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
-                padding: '4px 2px',
-                borderRight: idx < 9 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                padding: '4px 3px',
+                borderRadius: 6,
+                border: rank === 1
+                  ? '1px solid rgba(255,215,0,0.35)'
+                  : isTop3
+                    ? '1px solid rgba(255,255,255,0.12)'
+                    : '1px solid rgba(255,255,255,0.05)',
                 background: rank === 1
-                  ? 'rgba(255,215,0,0.08)'
+                  ? 'rgba(255,215,0,0.1)'
                   : isTop3
                     ? 'rgba(255,255,255,0.04)'
-                    : 'transparent',
+                    : 'rgba(255,255,255,0.02)',
               }}
             >
               {/* Highlight top border for Top 3 */}
