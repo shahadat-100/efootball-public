@@ -306,19 +306,19 @@ export const useFootballStore = create<FootballStore>()(
         const ext = isPng ? 'png' : isWebp ? 'webp' : 'png';
         const contentType = isPng ? 'image/png' : isWebp ? 'image/webp' : 'image/png';
 
-        // Store in dedicated covers/ folder — easy to find in Supabase dashboard
-        const fileName = `covers/${playerId}-${Date.now()}.${ext}`;
+        // Store in dedicated 'covers' bucket
+        const fileName = `${playerId}-${Date.now()}.${ext}`;
 
-        // 1. Upload RAW file bytes — zero pixel manipulation
+        // 1. Upload RAW file bytes to 'covers' bucket — zero pixel manipulation
         const { error: uploadError } = await supabase.storage
-          .from('images')
+          .from('covers')
           .upload(fileName, file, { contentType, upsert: true });
 
         if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
 
-        // 2. Get public URL
+        // 2. Get public URL from 'covers' bucket
         const { data: { publicUrl } } = supabase.storage
-          .from('images')
+          .from('covers')
           .getPublicUrl(fileName);
 
         // 3. Save URL to players table
