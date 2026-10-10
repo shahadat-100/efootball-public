@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { Button } from './Button';
-import { fileToBase64 } from '../lib/utils';
 import { ImagePlus, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -24,21 +23,15 @@ export function ImageUpload({ value, onChange, onRemove, className }: ImageUploa
       }
       try {
         setIsUploading(true);
-        // Resize image to base64
-        const b64 = await fileToBase64(file);
         
-        // Convert base64 back to Blob for upload
-        const res = await fetch(b64);
-        const blob = await res.blob();
-        
-        // Upload to Supabase 'images' bucket
+        // Upload directly to Supabase 'images' bucket (preserves 100% original transparent PNG/WebP bytes)
         const ext = file.name.split('.').pop()?.toLowerCase() || (file.type === 'image/png' ? 'png' : 'jpg');
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
         const contentType = file.type || (ext === 'png' ? 'image/png' : 'image/jpeg');
         
         const { error } = await supabase.storage
           .from('images')
-          .upload(fileName, blob, { contentType, upsert: false });
+          .upload(fileName, file, { contentType, upsert: true });
           
         if (error) {
           console.error("Upload error:", error);
