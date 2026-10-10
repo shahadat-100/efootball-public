@@ -55,7 +55,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 25,
       }}>
-        {/* Club Logo + Official Title */}
+        {/* Club Logo + Official Title & Subtitle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img
             src="/images/club-logo.jpg"
@@ -73,8 +73,8 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             <div style={{ fontSize: 13, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2, fontFamily: "'Oswald', sans-serif" }}>
               THE ENIGMATIC ELITE
             </div>
-            <div style={{ fontSize: 9.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.5, fontStyle: 'italic' }}>
-              In Mystery We Reign
+            <div style={{ fontSize: 10.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.2, fontStyle: 'italic', marginTop: 2 }}>
+              {isMonthly ? 'Top Scorer of the Month' : 'Top Scorer of the Week'} · {periodLabel}
             </div>
           </div>
         </div>
@@ -106,50 +106,47 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
         )}
       </div>
 
-      {/* ── Giant Layered Background Typography (Behind Player) ───── */}
+      {/* ── Giant Layered Background Typography (Behind Player / Center Back) ───── */}
       <div style={{
         position: 'absolute',
-        top: 72, left: 0, right: 0,
+        top: '40%',
+        left: 0,
+        right: 0,
+        transform: 'translateY(-50%)',
         textAlign: 'center',
         zIndex: 4,
         pointerEvents: 'none',
         userSelect: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}>
         <div style={{
-          fontSize: 160,
+          fontSize: 104,
           fontWeight: 900,
           fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          color: 'rgba(255,255,255,0.06)',
+          color: 'rgba(255, 215, 0, 0.08)',
           letterSpacing: 8,
-          lineHeight: 0.85,
+          lineHeight: 0.88,
           textTransform: 'uppercase',
+          textShadow: '0 0 40px rgba(212,175,55,0.15)',
         }}>
-          SCORER
+          TOP SCORER
         </div>
 
         <div style={{
-          fontSize: 18,
-          fontWeight: 700,
+          fontSize: 15,
+          fontWeight: 800,
           fontFamily: "'Oswald', sans-serif",
           color: accentColor,
           letterSpacing: 8,
           textTransform: 'uppercase',
-          marginTop: 6,
+          marginTop: 8,
+          opacity: 0.85,
           textShadow: `0 0 16px ${accentGlow}`,
         }}>
           GOLDEN BOOT AWARD
-        </div>
-
-        <div style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: 'rgba(255,255,255,0.7)',
-          letterSpacing: 3,
-          marginTop: 4,
-          textTransform: 'uppercase',
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          {isMonthly ? 'Top Scorer of the Month' : 'Top Scorer of the Week'} · {periodLabel}
         </div>
       </div>
 

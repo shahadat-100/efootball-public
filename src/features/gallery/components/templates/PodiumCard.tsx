@@ -60,7 +60,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       player: p2,
       rank: 2,
       label: 'RUNNER UP',
-      medal: '🥈',
       color: '#E2E8F0',
       border: '#CBD5E1',
       glow: 'rgba(226,232,240,0.50)',
@@ -72,7 +71,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       player: p1,
       rank: 1,
       label: 'CHAMPION',
-      medal: '🥇',
       color: '#FFD700',
       border: '#FFD700',
       glow: 'rgba(255,215,0,0.65)',
@@ -84,7 +82,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       player: p3,
       rank: 3,
       label: '3RD PLACE',
-      medal: '🥉',
       color: '#F59E0B',
       border: '#F59E0B',
       glow: 'rgba(245,158,11,0.50)',
@@ -165,7 +162,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         padding: '14px 26px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 35,
-        background: 'linear-gradient(180deg, rgba(0,0,15,0.85) 0%, rgba(0,0,15,0.3) 70%, transparent 100%)',
+        background: 'linear-gradient(180deg, rgba(1,27,61,0.92) 0%, rgba(1,27,61,0.4) 70%, transparent 100%)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
           <img
@@ -340,7 +337,6 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
               padding: '3px 12px', borderRadius: 4,
               transform: 'skewX(-10deg)',
             }}>
-              <span style={{ fontSize: 13 }}>👑</span>
               <span style={{
                 fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 900,
                 color: '#FFD700', letterSpacing: 2, textTransform: 'uppercase',

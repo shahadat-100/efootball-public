@@ -44,12 +44,6 @@ function PlayerCutoutImg({
   );
 }
 
-const MEDAL_EMOJI: Record<number, string> = {
-  1: '🥇',
-  2: '🥈',
-  3: '🥉',
-};
-
 const RANK_ACCENTS: Record<number, { color: string; glow: string; border: string }> = {
   1: { color: '#FFD700', glow: 'rgba(255,215,0,0.6)', border: '#FFD700' },
   2: { color: '#E2E8F0', glow: 'rgba(226,232,240,0.5)', border: '#CBD5E1' },
@@ -168,7 +162,9 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         padding: '14px 26px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 35,
-        background: 'linear-gradient(180deg, rgba(0,0,15,0.85) 0%, rgba(0,0,15,0.3) 70%, transparent 100%)',
+        background: isMonthly
+          ? 'linear-gradient(180deg, rgba(28,9,0,0.92) 0%, rgba(28,9,0,0.4) 70%, transparent 100%)'
+          : 'linear-gradient(180deg, rgba(1,27,61,0.92) 0%, rgba(1,27,61,0.4) 70%, transparent 100%)',
       }}>
         {/* Left: Club identity */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
@@ -274,7 +270,6 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                   zIndex: zIndex + 5,
                   whiteSpace: 'nowrap',
                 }}>
-                  <span style={{ fontSize: 13 }}>👑</span>
                   <span style={{
                     fontSize: 11,
                     fontWeight: 900,
@@ -315,7 +310,6 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
           const r = topPlayers[idx];
           const styling = RANK_ACCENTS[rank] || RANK_ACCENTS[10];
           const isTop3 = rank <= 3;
-          const medal = MEDAL_EMOJI[rank];
 
           if (!r) {
             return (
@@ -368,7 +362,7 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                 }} />
               )}
 
-              {/* Rank & Medal */}
+              {/* Rank */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -379,7 +373,6 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
                 color: styling.color,
                 lineHeight: 1,
               }}>
-                {medal && <span style={{ fontSize: 9 }}>{medal}</span>}
                 <span>#{rank}</span>
               </div>
 
