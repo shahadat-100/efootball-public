@@ -77,6 +77,7 @@ export const mapPlayerFromDb = (p: any): Player => ({
   id: p.id,
   name: p.name,
   profileImageUrl: p.profileimageurl || '',
+  coverImageUrl: p.coverimageurl || '',
   jerseyNumber: p.jerseynumber ?? undefined,
   email: p.email || '',
   dateOfBirth: p.dateOFbirth || undefined,
