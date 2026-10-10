@@ -250,14 +250,16 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
       {/* ════════════════════════════════════════════════════════════ */}
       {p1 && (
         <>
-          {/* ── 1. RUNNER UP DETAILS (Left — MVP skewed pill style) ── */}
+          {/* ── 1. RUNNER UP DETAILS (Left — centered under player #2) ── */}
           {p2 && (
             <div style={{
               position: 'absolute',
-              left: 20,
-              bottom: 28,
+              left: '27%',
+              bottom: 20,
+              transform: 'translateX(-50%)',
               display: 'flex',
               flexDirection: 'column',
+              alignItems: 'center',
               gap: 6,
               zIndex: 25,
             }}>
@@ -318,7 +320,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
             </div>
           )}
 
-          {/* ── 2. CHAMPION DETAILS (Center — MVP skewed pill style) ── */}
+          {/* ── 2. CHAMPION DETAILS (Center — centered under player #1) ── */}
           <div style={{
             position: 'absolute',
             bottom: 16,
@@ -386,15 +388,16 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
             </div>
           </div>
 
-          {/* ── 3. 3RD PLACE DETAILS (Right — MVP skewed pill style) ── */}
+          {/* ── 3. 3RD PLACE DETAILS (Right — centered under player #3) ── */}
           {p3 && (
             <div style={{
               position: 'absolute',
-              right: 20,
-              bottom: 28,
+              left: '73%',
+              bottom: 20,
+              transform: 'translateX(-50%)',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'flex-end',
+              alignItems: 'center',
               gap: 6,
               zIndex: 25,
             }}>

@@ -30,8 +30,7 @@ function PlayerCutoutImg({
       crossOrigin="anonymous"
       style={{
         height: imgHeight,
-        maxHeight: imgHeight,
-        maxWidth: 155,
+        maxWidth: 'none',
         objectFit: 'contain',
         objectPosition: 'bottom center',
         display: 'block',
@@ -64,21 +63,21 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
 
   /* 
    * Team Lineup Squad Formation (10 players side-by-side):
-   * 10 distinct horizontal positions with clean spacing so every player is visible.
-   * Order from Left to Right across 960px width:
+   * Center (#1) is in front with highest z-index & largest size (~81% card height).
+   * Flanked on left & right across 960px width:
    * [#10, #8, #6, #4, #2, #1, #3, #5, #7, #9]
    */
   const slotDefinitions = [
-    { rank: 10, leftPercent: 5,  zIndex: 4,  imgHeight: 285 },
-    { rank: 8,  leftPercent: 15, zIndex: 6,  imgHeight: 300 },
-    { rank: 6,  leftPercent: 25, zIndex: 8,  imgHeight: 315 },
-    { rank: 4,  leftPercent: 35, zIndex: 10, imgHeight: 335 },
-    { rank: 2,  leftPercent: 45, zIndex: 13, imgHeight: 355 },
-    { rank: 1,  leftPercent: 55, zIndex: 16, imgHeight: 380 }, // CENTER CHAMPION: HIGHEST Z-INDEX
-    { rank: 3,  leftPercent: 65, zIndex: 13, imgHeight: 355 },
-    { rank: 5,  leftPercent: 75, zIndex: 10, imgHeight: 335 },
-    { rank: 7,  leftPercent: 85, zIndex: 8,  imgHeight: 315 },
-    { rank: 9,  leftPercent: 95, zIndex: 6,  imgHeight: 300 },
+    { rank: 10, leftPercent: 7,  zIndex: 4,  imgHeight: 335 },
+    { rank: 8,  leftPercent: 16, zIndex: 6,  imgHeight: 350 },
+    { rank: 6,  leftPercent: 25, zIndex: 8,  imgHeight: 365 },
+    { rank: 4,  leftPercent: 35, zIndex: 10, imgHeight: 385 },
+    { rank: 2,  leftPercent: 44, zIndex: 13, imgHeight: 410 },
+    { rank: 1,  leftPercent: 53, zIndex: 16, imgHeight: 440 }, // CENTER CHAMPION: HIGHEST Z-INDEX & LARGEST
+    { rank: 3,  leftPercent: 62, zIndex: 13, imgHeight: 410 },
+    { rank: 5,  leftPercent: 71, zIndex: 10, imgHeight: 385 },
+    { rank: 7,  leftPercent: 81, zIndex: 8,  imgHeight: 365 },
+    { rank: 9,  leftPercent: 91, zIndex: 6,  imgHeight: 350 },
   ];
 
   const slots = slotDefinitions.map((s) => {

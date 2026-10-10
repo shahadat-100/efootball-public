@@ -46,8 +46,8 @@ const TEMPLATES: { id: TemplateType; label: string; category: string; defaultAsp
   { id: 'player-month', label: 'Player of the Month MVP', category: 'Individual', defaultAspect: '4:5' },
   { id: 'birthday', label: 'Birthday Celebration Card', category: 'Individual', defaultAspect: '4:5' },
 
-  { id: 'podium-weekly', label: 'Top 3 Podium (Weekly)', category: 'Leaderboard', defaultAspect: '16:9' },
-  { id: 'podium-monthly', label: 'Top 3 Podium (Monthly)', category: 'Leaderboard', defaultAspect: '16:9' },
+  { id: 'podium-weekly', label: 'Top 3 Squad (Weekly)', category: 'Leaderboard', defaultAspect: '16:9' },
+  { id: 'podium-monthly', label: 'Top 3 Squad (Monthly)', category: 'Leaderboard', defaultAspect: '16:9' },
   { id: 'top10-weekly', label: 'Top 10 Squad (Weekly)', category: 'Leaderboard', defaultAspect: '16:9' },
   { id: 'top10-monthly', label: 'Top 10 Squad (Monthly)', category: 'Leaderboard', defaultAspect: '16:9' },
 
@@ -490,7 +490,7 @@ export function Gallery() {
               <PodiumCard
                 cardRef={cardRef}
                 topPlayers={top3Weekly}
-                title="TOP 3 WEEKLY PODIUM"
+                title="TOP 3 SQUAD OF THE WEEK"
                 subtitle={selectedWeek.label}
                 aspect={aspectRatio}
               />
@@ -500,7 +500,7 @@ export function Gallery() {
               <PodiumCard
                 cardRef={cardRef}
                 topPlayers={top3Monthly}
-                title="TOP 3 MONTHLY PODIUM"
+                title="TOP 3 SQUAD OF THE MONTH"
                 subtitle={selectedMonth.label}
                 aspect={aspectRatio}
               />
