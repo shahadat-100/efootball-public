@@ -51,30 +51,30 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
       {/* ── Top Header Bar ────────────────────────────────────────── */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0,
-        padding: '20px 24px',
+        padding: '18px 24px 8px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 25,
       }}>
-        {/* Club Logo + Official Title & Subtitle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Club Logo + Official Title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <img
             src="/images/club-logo.jpg"
             alt="Club Logo"
             crossOrigin="anonymous"
             style={{
-              width: 44, height: 44,
-              borderRadius: 10,
+              width: 38, height: 38,
+              borderRadius: 8,
               objectFit: 'cover',
               border: '1.5px solid rgba(212,175,55,0.6)',
-              boxShadow: `0 0 15px ${accentGlow}`,
+              boxShadow: `0 0 12px ${accentGlow}`,
             }}
           />
           <div>
-            <div style={{ fontSize: 13, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2, fontFamily: "'Oswald', sans-serif" }}>
+            <div style={{ fontSize: 12.5, color: '#fff', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2, fontFamily: "'Oswald', sans-serif" }}>
               THE ENIGMATIC ELITE
             </div>
-            <div style={{ fontSize: 10.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.2, fontStyle: 'italic', marginTop: 2 }}>
-              {isMonthly ? 'Top Scorer of the Month' : 'Top Scorer of the Week'} · {periodLabel}
+            <div style={{ fontSize: 9.5, color: accentColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic', marginTop: 1 }}>
+              {isMonthly ? 'MONTHLY AWARDS' : 'WEEKLY AWARDS'} · {periodLabel}
             </div>
           </div>
         </div>
@@ -86,15 +86,15 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
             backdropFilter: 'blur(10px)',
             border: `1.5px solid ${accentColor}`,
             boxShadow: `0 4px 16px rgba(0,0,0,0.6), 0 0 12px ${accentGlow}`,
-            borderRadius: 12,
-            padding: '5px 14px',
+            borderRadius: 10,
+            padding: '4px 12px',
             display: 'flex',
             alignItems: 'baseline',
             gap: 2,
           }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: accentColor }}>#</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: accentColor }}>#</span>
             <span style={{
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: 800,
               fontFamily: "'Oswald', sans-serif",
               color: '#fff',
@@ -106,60 +106,55 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
         )}
       </div>
 
-      {/* ── Giant Layered Background Typography (Behind Player / Center Back) ───── */}
+      {/* ── Prominent Card Title on Top: TOP SCORER ──────────────── */}
       <div style={{
         position: 'absolute',
-        top: '40%',
+        top: 62,
         left: 0,
         right: 0,
-        transform: 'translateY(-50%)',
         textAlign: 'center',
-        zIndex: 4,
+        zIndex: 5,
         pointerEvents: 'none',
         userSelect: 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}>
         <div style={{
-          fontSize: 104,
+          fontSize: 62,
           fontWeight: 900,
           fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          color: 'rgba(255, 215, 0, 0.08)',
-          letterSpacing: 8,
-          lineHeight: 0.88,
+          background: 'linear-gradient(180deg, #FFF8DC 0%, #FFD700 45%, #D4AF37 70%, #996515 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: 6,
+          lineHeight: 0.9,
           textTransform: 'uppercase',
-          textShadow: '0 0 40px rgba(212,175,55,0.15)',
+          filter: 'drop-shadow(0 4px 18px rgba(0,0,0,0.95)) drop-shadow(0 0 25px rgba(212,175,55,0.45))',
         }}>
           TOP SCORER
         </div>
-
         <div style={{
-          fontSize: 15,
+          fontSize: 11,
           fontWeight: 800,
           fontFamily: "'Oswald', sans-serif",
-          color: accentColor,
-          letterSpacing: 8,
+          color: 'rgba(255, 215, 0, 0.85)',
+          letterSpacing: 4,
           textTransform: 'uppercase',
-          marginTop: 8,
-          opacity: 0.85,
-          textShadow: `0 0 16px ${accentGlow}`,
+          marginTop: 2,
+          textShadow: '0 2px 8px rgba(0,0,0,0.8)',
         }}>
-          GOLDEN BOOT AWARD
+          {isMonthly ? 'TOP SCORER OF THE MONTH' : 'TOP SCORER OF THE WEEK'}
         </div>
       </div>
 
       {data ? (
         <>
-          {/* ── Center Stage: Player Cutout Image (MUCH BIGGER) ──────── */}
+          {/* ── Center Stage: Player Cutout Image ────────────────────── */}
           <div style={{
             position: 'absolute',
-            bottom: 10,
+            bottom: 38,
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
-            height: 840,
+            height: 600,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -171,13 +166,11 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
               alt={data.player.name}
               crossOrigin="anonymous"
               style={{
-                maxHeight: 840,
-                maxWidth: 'none',
-                transform: 'scale(1.18)',
-                transformOrigin: 'bottom center',
+                maxHeight: 580,
+                maxWidth: '92%',
                 objectFit: 'contain',
                 objectPosition: 'bottom center',
-                filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 14px rgba(212,175,55,0.65)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',
+                filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 16px rgba(212,175,55,0.65)) drop-shadow(0 20px 40px rgba(0,0,0,0.95))',
               }}
             />
           </div>
