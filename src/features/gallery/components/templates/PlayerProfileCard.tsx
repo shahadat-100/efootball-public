@@ -29,7 +29,7 @@ export function PlayerProfileCard({
   const totalCleansheets = seasonStats.reduce((a, s) => a + (s.cleansheets || 0), 0);
   const totalHattricks   = seasonStats.reduce((a, s) => a + (s.hattricks || 0), 0);
   const winRate          = totalApps > 0 ? Math.round((totalWins / totalApps) * 100) : 0;
-  const primaryRole      = (player.playerRoles ?? [])[0] || 'FORWARD';
+  const primaryRole      = (player.playerRoles ?? [])[0] || '';
 
   const isMonthly = subtitle.toLowerCase().includes('month');
   const isMVP = Boolean(title && title.toUpperCase().includes('MVP')) || subtitle.toLowerCase().includes('week') || subtitle.toLowerCase().includes('month');
@@ -185,7 +185,7 @@ export function PlayerProfileCard({
           display: 'flex', flexDirection: 'column', gap: 10,
           zIndex: 20,
         }}>
-          {/* Position & Squad Badge */}
+          {/* Squad & Stats Badge */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'rgba(255,255,255,0.06)',
@@ -193,18 +193,22 @@ export function PlayerProfileCard({
             padding: '3px 10px', borderRadius: 4, width: 'fit-content',
             transform: 'skewX(-10deg)',
           }}>
-            <span style={{
-              fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 900,
-              color: accent, letterSpacing: 2, textTransform: 'uppercase',
-            }}>
-              {primaryRole}
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>•</span>
+            {primaryRole && (
+              <>
+                <span style={{
+                  fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 900,
+                  color: accent, letterSpacing: 2, textTransform: 'uppercase',
+                }}>
+                  {primaryRole}
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>•</span>
+              </>
+            )}
             <span style={{
               fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 700,
-              color: 'rgba(255,255,255,0.7)', letterSpacing: 1.5, textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.85)', letterSpacing: 1.5, textTransform: 'uppercase',
             }}>
-              {totalApps} APPS ({winRate}% W)
+              {totalApps} MATCHES ({winRate}% W)
             </span>
           </div>
 
@@ -385,7 +389,7 @@ export function PlayerProfileCard({
   // ═══════════════════════════════════════════════════════════════════════════
   // DESIGN B: SQUAD PROFILE SHOWCASE (Reference 4 — Diagonal Blue Banner, Player Right)
   // ═══════════════════════════════════════════════════════════════════════════
-  const role = (player.playerRoles ?? [])[0]?.toUpperCase() || 'OFFICIAL SQUAD';
+  const role = (player.playerRoles ?? [])[0]?.toUpperCase() || '';
 
   return (
     <div
@@ -470,7 +474,7 @@ export function PlayerProfileCard({
           color: '#93C5FD', letterSpacing: 2, textTransform: 'uppercase',
           marginTop: 8,
         }}>
-          {role} · #{player.jerseyNumber || '10'}
+          {role ? `${role} · ` : ''}#{player.jerseyNumber || '10'} · THE ENIGMATIC ELITE
         </div>
 
         {/* Stats grid inside banner */}
