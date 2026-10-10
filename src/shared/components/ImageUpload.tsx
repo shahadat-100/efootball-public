@@ -32,12 +32,13 @@ export function ImageUpload({ value, onChange, onRemove, className }: ImageUploa
         const blob = await res.blob();
         
         // Upload to Supabase 'images' bucket
-        const ext = file.name.split('.').pop() || 'jpg';
+        const ext = file.name.split('.').pop()?.toLowerCase() || (file.type === 'image/png' ? 'png' : 'jpg');
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        const contentType = file.type || (ext === 'png' ? 'image/png' : 'image/jpeg');
         
         const { error } = await supabase.storage
           .from('images')
-          .upload(fileName, blob, { contentType: blob.type, upsert: false });
+          .upload(fileName, blob, { contentType, upsert: false });
           
         if (error) {
           console.error("Upload error:", error);
