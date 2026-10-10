@@ -233,52 +233,26 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         />
       </div>
 
-      {/* ── Prestigious Player Name Plate (Foreground, Bottom Center) ── */}
+      {/* ── Player Name (Clean Authentic Script / No Box / No Legend) ── */}
       <div style={{
         position: 'absolute',
-        bottom: 50,
+        bottom: 46,
         left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(5, 8, 20, 0.92)',
-        backdropFilter: 'blur(14px)',
-        border: '1.5px solid #FFD700',
-        borderRadius: 14,
-        padding: '7px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.90), 0 0 16px rgba(212,175,55,0.35)',
-        zIndex: 25,
+        transform: 'translateX(-50%) rotate(-4deg)',
+        fontFamily: "'Caveat', cursive",
+        fontSize: 48,
+        fontWeight: 700,
+        color: '#FFE57F',
+        lineHeight: 1,
+        letterSpacing: 2,
         whiteSpace: 'nowrap',
+        textShadow: '0 4px 16px rgba(0,0,0,0.98), 0 0 25px rgba(212,175,55,0.7)',
+        zIndex: 25,
+        pointerEvents: 'none',
+        userSelect: 'none',
+        textAlign: 'center',
       }}>
-        <div style={{
-          fontSize: 20,
-          fontWeight: 900,
-          fontFamily: "'Oswald', sans-serif",
-          color: '#fff',
-          textTransform: 'uppercase',
-          letterSpacing: 2,
-          lineHeight: 1.1,
-          textShadow: '0 2px 8px rgba(0,0,0,0.9)',
-        }}>
-          {player.name}
-        </div>
-        <div style={{
-          fontSize: 9,
-          fontWeight: 800,
-          color: '#FFD700',
-          letterSpacing: 2.5,
-          textTransform: 'uppercase',
-          marginTop: 3,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          <span>👑</span>
-          <span>CLUB LEGEND</span>
-          <span>⭐</span>
-        </div>
+        {player.name}
       </div>
 
 
