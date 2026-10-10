@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { Avatar, Badge, Button, PieChart } from '@/shared/components';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { useFootballStore } from '@/store/footballStore';
@@ -15,7 +15,7 @@ import { AvatarSpeechBubble } from './AvatarSpeechBubble';
 import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
 import { toPng } from 'html-to-image';
-import { Download, Upload, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
+import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 interface PlayerDetailProps {
   playerId: string;
   onBack: () => void;
