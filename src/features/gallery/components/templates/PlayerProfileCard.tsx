@@ -547,10 +547,7 @@ export function PlayerProfileCard({
             transformOrigin: 'bottom right',
             objectFit: 'contain',
             objectPosition: 'bottom right',
-            // mix-blend-mode: multiply makes black pixels transparent on light backgrounds.
-            // This handles legacy images that were uploaded with a black background (old JPEG pipeline).
-            mixBlendMode: 'multiply',
-            filter: 'drop-shadow(0 14px 30px rgba(0,0,0,0.25))',
+            filter: 'drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 8px rgba(255,255,255,0.5)) drop-shadow(0 14px 30px rgba(0,0,0,0.35))',
           }}
         />
       </div>
