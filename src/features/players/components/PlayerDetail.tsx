@@ -29,13 +29,21 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setCoverError('File too large (max 10MB)'); return; }
+    if (file.size > 10 * 1024 * 1024) { 
+      setCoverError('File too large (max 10MB)'); 
+      alert('File too large (max 10MB)');
+      return; 
+    }
     try {
       setCoverUploading(true);
       setCoverError(null);
       await updatePlayerCoverImage(playerId, file);
+      alert('Cover image uploaded successfully! It is now saved in the covers bucket.');
     } catch (err: any) {
-      setCoverError(err.message || 'Upload failed');
+      console.error('Cover upload error:', err);
+      const msg = err.message || 'Upload failed';
+      setCoverError(msg);
+      alert('Cover Upload Error: ' + msg);
     } finally {
       setCoverUploading(false);
       if (coverInputRef.current) coverInputRef.current.value = '';
