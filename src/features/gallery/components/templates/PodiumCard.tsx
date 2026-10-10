@@ -45,8 +45,6 @@ function PlayerCutoutImg({
 }
 
 export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardProps) {
-  const isMonthly = title.toLowerCase().includes('monthly') || subtitle.toLowerCase().includes('month');
-
   const p1 = topPlayers[0];
   const p2 = topPlayers[1];
   const p3 = topPlayers[2];
@@ -219,7 +217,7 @@ export function PodiumCard({ topPlayers, title, subtitle, cardRef }: PodiumCardP
         </div>
       ) : (
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          {slots.map(({ player: r, rank, medal, glow, leftPercent, zIndex, imgHeight }) => {
+          {slots.map(({ player: r, rank, glow, leftPercent, zIndex, imgHeight }) => {
             if (!r) return null;
 
             return (

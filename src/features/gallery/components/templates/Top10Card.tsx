@@ -231,8 +231,6 @@ export function Top10Card({ topPlayers, title, subtitle, cardRef }: Top10CardPro
         {slots.map((slot) => {
           if (!slot.player) return null;
           const { rank, leftPercent, zIndex, imgHeight, player: r, styling } = slot;
-          const isTop3 = rank <= 3;
-          const medal = MEDAL_EMOJI[rank];
 
           return (
             <div
