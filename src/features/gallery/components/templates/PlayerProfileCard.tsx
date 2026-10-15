@@ -316,13 +316,13 @@ export function PlayerProfileCard({
           </div>
         </div>
 
-        {/* Hero Stage: Player Cutout — MUCH BIGGER, RIGHT SHIFTED */}
+        {/* Hero Stage: Player Cutout — RIGHT SHIFTED, 4:5 HEAD-SAFE BOUNDED */}
         <div style={{
           position: 'absolute',
-          bottom: 0,
-          right: -45,
-          width: 620,
-          height: 820,
+          bottom: 38,
+          right: -10,
+          width: 480,
+          height: 680,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'flex-end',
@@ -334,10 +334,8 @@ export function PlayerProfileCard({
             alt={player.name}
             crossOrigin="anonymous"
             style={{
-              maxHeight: 820,
-              maxWidth: 'none',
-              transform: 'scale(1.18)',
-              transformOrigin: 'bottom right',
+              maxHeight: 680,
+              maxWidth: '100%',
               objectFit: 'contain',
               objectPosition: 'bottom right',
               filter: `drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 20px ${accentGlow}) drop-shadow(0 15px 40px rgba(0,0,0,0.95))`,
@@ -527,13 +525,13 @@ export function PlayerProfileCard({
         </div>
       </div>
 
-      {/* Hero Stage: Player Cutout — MUCH BIGGER, RIGHT ALIGNED */}
+      {/* Hero Stage: Player Cutout — RIGHT ALIGNED, 4:5 HEAD-SAFE BOUNDED */}
       <div style={{
         position: 'absolute',
-        bottom: 0,
-        right: -55,
-        width: 650,
-        height: 850,
+        bottom: 38,
+        right: -10,
+        width: 500,
+        height: 680,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
@@ -545,10 +543,8 @@ export function PlayerProfileCard({
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 850,
-            maxWidth: 'none',
-            transform: 'scale(1.20)',
-            transformOrigin: 'bottom right',
+            maxHeight: 680,
+            maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom right',
             filter: 'drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 8px rgba(255,255,255,0.5)) drop-shadow(0 14px 30px rgba(0,0,0,0.35))',
