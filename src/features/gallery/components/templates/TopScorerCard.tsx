@@ -150,11 +150,11 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           {/* ── Center Stage: Player Cutout Image ────────────────────── */}
           <div style={{
             position: 'absolute',
-            bottom: 38,
+            bottom: 0,
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
-            height: 600,
+            height: 640,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -342,7 +342,7 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           {/* ── Authentic Handwritten Signature (No Box) ─────────────── */}
           <div style={{
             position: 'absolute',
-            bottom: 48,
+            bottom: 22,
             left: '50%',
             transform: 'translateX(-50%) rotate(-5deg)',
             fontFamily: "'Caveat', cursive",
@@ -369,42 +369,6 @@ export function TopScorerCard({ data, periodLabel, type, cardRef }: TopScorerCar
           No stats recorded for this period yet.
         </div>
       )}
-
-      {/* ── Solid Bottom Information Bar ──────────────────────────── */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        height: 38,
-        background: '#020408',
-        borderTop: '1px solid rgba(212,175,55,0.35)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 24px',
-        zIndex: 30,
-      }}>
-        <div style={{
-          fontSize: 9.5,
-          fontWeight: 800,
-          color: accentColor,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          THE ENIGMATIC ELITE
-        </div>
-
-        <div style={{
-          fontSize: 9.5,
-          fontWeight: 800,
-          color: '#fff',
-          letterSpacing: 1.5,
-          textTransform: 'uppercase',
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          TOP SCORER
-        </div>
-      </div>
     </div>
   );
 }

@@ -50,11 +50,6 @@ export function MilestoneCard({ player, milestoneTitle, milestoneValue, aspect =
           <p className="text-[11px] font-bold text-slate-300">FEAT ACHIEVED IN CLUB MATCHES</p>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="bg-slate-950/80 border-t border-slate-700 -mx-6 -mb-6 p-4 text-center text-[10px] font-black text-slate-400 tracking-wider">
-        THE ENIGMATIC ELITES · MILESTONE RECOGNITION
-      </div>
     </CardFrame>
   );
 }

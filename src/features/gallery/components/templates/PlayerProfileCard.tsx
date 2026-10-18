@@ -25,9 +25,12 @@ export function PlayerProfileCard({
   const totalGoals       = periodData ? periodData.goals       : seasonStats.reduce((a, s) => a + (s.goals || 0), 0);
   const totalMotm        = periodData ? periodData.motm        : seasonStats.reduce((a, s) => a + (s.motmCount || 0), 0);
   const totalWins        = periodData ? periodData.wins        : seasonStats.reduce((a, s) => a + (s.wins || 0), 0);
+  const totalDraws       = periodData ? periodData.draws       : seasonStats.reduce((a, s) => a + (s.draws || 0), 0);
+  const totalLosses      = periodData ? periodData.losses      : seasonStats.reduce((a, s) => a + (s.losses || 0), 0);
   const totalPoints      = periodData ? periodData.points      : calcTotalRawPoints(seasonStats);
   const totalCleansheets = seasonStats.reduce((a, s) => a + (s.cleansheets || 0), 0);
   const totalHattricks   = seasonStats.reduce((a, s) => a + (s.hattricks || 0), 0);
+  const totalConceded    = seasonStats.reduce((a, s) => a + (s.goalsConceded || 0), 0);
   const winRate          = totalApps > 0 ? Math.round((totalWins / totalApps) * 100) : 0;
   const primaryRole      = (player.playerRoles ?? [])[0] || '';
 
@@ -208,7 +211,7 @@ export function PlayerProfileCard({
               fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 700,
               color: 'rgba(255,255,255,0.85)', letterSpacing: 1.5, textTransform: 'uppercase',
             }}>
-              {totalApps} MATCHES ({winRate}% W)
+              {totalApps} MATCHES ({totalWins}W · {totalDraws}D · {totalLosses}L · {winRate}%)
             </span>
           </div>
 
@@ -319,10 +322,10 @@ export function PlayerProfileCard({
         {/* Hero Stage: Player Cutout — RIGHT SHIFTED, 4:5 HEAD-SAFE BOUNDED */}
         <div style={{
           position: 'absolute',
-          bottom: 38,
+          bottom: 0,
           right: -10,
           width: 480,
-          height: 680,
+          height: 700,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'flex-end',
@@ -334,7 +337,7 @@ export function PlayerProfileCard({
             alt={player.name}
             crossOrigin="anonymous"
             style={{
-              maxHeight: 680,
+              maxHeight: 700,
               maxWidth: '100%',
               objectFit: 'contain',
               objectPosition: 'bottom right',
@@ -345,7 +348,7 @@ export function PlayerProfileCard({
 
         {/* Bottom Right Player Name (Clean Sans + Fiery Red Script like Ref 5) */}
         <div style={{
-          position: 'absolute', bottom: 48, right: 28,
+          position: 'absolute', bottom: 20, right: 28,
           zIndex: 22, textAlign: 'right', pointerEvents: 'none',
         }}>
           <div style={{
@@ -363,22 +366,6 @@ export function PlayerProfileCard({
           }}>
             {lastName || firstName}
           </div>
-        </div>
-
-        {/* Solid Bottom Bar */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: 38, background: '#020408',
-          borderTop: `1px solid ${accentGlow}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '0 24px', zIndex: 30,
-        }}>
-          <span style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 800,
-            color: accent, letterSpacing: 2.5, textTransform: 'uppercase',
-          }}>
-            THE ENIGMATIC ELITE
-          </span>
         </div>
       </div>
     );
@@ -452,12 +439,12 @@ export function PlayerProfileCard({
 
       {/* Inside Blue Banner (Left side): Giant Tilted Name & Role (Ref 4) */}
       <div style={{
-        position: 'absolute', bottom: 85, left: 28, width: 280,
+        position: 'absolute', bottom: 28, left: 28, width: 320,
         zIndex: 15, transform: 'rotate(-5deg)',
       }}>
         <div style={{
           fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-          fontSize: 64,
+          fontSize: 60,
           fontWeight: 400,
           color: '#ffffff',
           lineHeight: 0.88,
@@ -468,58 +455,98 @@ export function PlayerProfileCard({
           {firstName}<br />{lastName || 'ELITE'}
         </div>
         <div style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 12, fontWeight: 800,
+          fontFamily: "'Oswald', sans-serif", fontSize: 11.5, fontWeight: 800,
           color: '#93C5FD', letterSpacing: 2, textTransform: 'uppercase',
-          marginTop: 8,
+          marginTop: 6,
         }}>
           {role ? `${role} · ` : ''}#{player.jerseyNumber || '10'} · THE ENIGMATIC ELITE
         </div>
 
         {/* Stats grid inside banner */}
         <div style={{
-          marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(2, auto)', gap: 6, width: 'fit-content',
+          marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, auto)', gap: 5, width: 'fit-content',
         }}>
+          {/* Win / Draw / Loss Record badge */}
+          <div style={{
+            gridColumn: 'span 2',
+            background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(6px)',
+            padding: '3px 10px', borderRadius: 6,
+            fontFamily: "'Oswald', sans-serif", fontSize: 10.5, fontWeight: 800,
+            color: '#fff', letterSpacing: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          }}>
+            <span>🏆 RECORD</span>
+            <span style={{ color: '#93C5FD' }}>
+              <span style={{ color: '#86EFAC' }}>{totalWins}W</span> · <span style={{ color: '#FDE047' }}>{totalDraws}D</span> · <span style={{ color: '#FCA5A5' }}>{totalLosses}L</span> ({winRate}%)
+            </span>
+          </div>
+
           <div style={{
             background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 10px', borderRadius: 6,
-            fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#fff', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '4px 9px', borderRadius: 6,
+            fontFamily: "'Oswald', sans-serif", fontSize: 10.5, fontWeight: 800,
+            color: '#fff', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
           }}>
             <span style={{ color: '#93C5FD' }}>⚽</span> {totalGoals} GOALS
           </div>
           <div style={{
             background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 10px', borderRadius: 6,
-            fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#fff', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '4px 9px', borderRadius: 6,
+            fontFamily: "'Oswald', sans-serif", fontSize: 10.5, fontWeight: 800,
+            color: '#fff', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
           }}>
             <span style={{ color: '#93C5FD' }}>🏟️</span> {totalApps} MATCHES
           </div>
+
           <div style={{
             background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 10px', borderRadius: 6,
-            fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#fff', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '4px 9px', borderRadius: 6,
+            fontFamily: "'Oswald', sans-serif", fontSize: 10.5, fontWeight: 800,
+            color: '#fff', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
           }}>
             <span style={{ color: '#FCD34D' }}>⭐</span> {totalMotm} MOTM
           </div>
-          <div style={{
-            background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-            padding: '4px 10px', borderRadius: 6,
-            fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 800,
-            color: '#93C5FD', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            <span style={{ color: '#86EFAC' }}>📈</span> {winRate}% WINS
-          </div>
+
+          {totalHattricks > 0 && (
+            <div style={{
+              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
+              padding: '4px 9px', borderRadius: 6,
+              fontFamily: "'Oswald', sans-serif", fontSize: 10.5, fontWeight: 800,
+              color: '#fff', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
+            }}>
+              <span>🎩</span> {totalHattricks} HATTRICKS
+            </div>
+          )}
+
           {totalCleansheets > 0 && (
             <div style={{
-              gridColumn: 'span 2',
-              background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(6px)',
-              padding: '3px 10px', borderRadius: 6,
+              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
+              padding: '4px 9px', borderRadius: 6,
               fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 800,
-              color: '#E0E7FF', letterSpacing: 1,
+              color: '#E0E7FF', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
             }}>
-              🧤 {totalCleansheets} CLEAN SHEETS
+              <span>🧤</span> {totalCleansheets} CLEAN SHEETS
+            </div>
+          )}
+
+          {totalConceded > 0 && (
+            <div style={{
+              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
+              padding: '4px 9px', borderRadius: 6,
+              fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 800,
+              color: '#FECACA', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
+            }}>
+              <span>🛡️</span> {totalConceded} CONCEDED
+            </div>
+          )}
+
+          {totalPoints > 0 && (
+            <div style={{
+              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
+              padding: '4px 9px', borderRadius: 6,
+              fontFamily: "'Oswald', sans-serif", fontSize: 10.5, fontWeight: 800,
+              color: '#FEF08A', letterSpacing: 0.8, display: 'flex', alignItems: 'center', gap: 5,
+            }}>
+              <span>⚡</span> +{totalPoints} PTS
             </div>
           )}
         </div>
@@ -528,10 +555,10 @@ export function PlayerProfileCard({
       {/* Hero Stage: Player Cutout — RIGHT ALIGNED, 4:5 HEAD-SAFE BOUNDED */}
       <div style={{
         position: 'absolute',
-        bottom: 38,
+        bottom: 0,
         right: -10,
         width: 500,
-        height: 680,
+        height: 700,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'flex-end',
@@ -543,35 +570,13 @@ export function PlayerProfileCard({
           alt={player.name}
           crossOrigin="anonymous"
           style={{
-            maxHeight: 680,
+            maxHeight: 700,
             maxWidth: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom right',
             filter: 'drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 8px rgba(255,255,255,0.5)) drop-shadow(0 14px 30px rgba(0,0,0,0.35))',
           }}
         />
-      </div>
-
-      {/* Solid Bottom Bar */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: 38, background: '#0F172A',
-        borderTop: '1px solid #1E40AF',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px', zIndex: 30,
-      }}>
-        <span style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 800,
-          color: '#60A5FA', letterSpacing: 2, textTransform: 'uppercase',
-        }}>
-          THE ENIGMATIC ELITE
-        </span>
-        <span style={{
-          fontFamily: "'Oswald', sans-serif", fontSize: 9.5, fontWeight: 800,
-          color: '#fff', letterSpacing: 1.5, textTransform: 'uppercase',
-        }}>
-          OFFICIAL SQUAD
-        </span>
       </div>
     </div>
   );

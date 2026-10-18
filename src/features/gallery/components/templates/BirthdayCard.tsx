@@ -208,7 +208,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
       {/* ── Center Stage: Player Cutout Image ─────────────────────── */}
       <div style={{
         position: 'absolute',
-        bottom: 38,
+        bottom: 0,
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
@@ -236,7 +236,7 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
       {/* ── Player Name (Clean Authentic Script / No Box / No Legend) ── */}
       <div style={{
         position: 'absolute',
-        bottom: 46,
+        bottom: 22,
         left: '50%',
         transform: 'translateX(-50%) rotate(-4deg)',
         fontFamily: "'Caveat', cursive",
@@ -253,43 +253,6 @@ export function BirthdayCard({ player, cardRef }: BirthdayCardProps) {
         textAlign: 'center',
       }}>
         {player.name}
-      </div>
-
-
-      {/* ── Solid Bottom Information Bar ──────────────────────────── */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        height: 38,
-        background: '#020408',
-        borderTop: '1px solid rgba(212,175,55,0.35)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 24px',
-        zIndex: 30,
-      }}>
-        <div style={{
-          fontSize: 9.5,
-          fontWeight: 800,
-          color: accentColor,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          THE ENIGMATIC ELITE
-        </div>
-
-        <div style={{
-          fontSize: 9.5,
-          fontWeight: 800,
-          color: '#fff',
-          letterSpacing: 1.5,
-          textTransform: 'uppercase',
-          fontFamily: "'Oswald', sans-serif",
-        }}>
-          BIRTHDAY SPECIAL
-        </div>
       </div>
     </div>
   );
