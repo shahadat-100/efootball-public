@@ -248,7 +248,7 @@ export function Overview({ setTab }: OverviewProps) {
       {/* Hero Banner Section */}
       <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[3/1] group">
         <img
-          src="/images/hero-banner.jpg"
+          src="/images/hero-banner.png"
           alt="The Enigmatic Elite Banner"
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />
