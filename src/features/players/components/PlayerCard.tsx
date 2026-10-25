@@ -82,11 +82,11 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
           {/* Avatar */}
           <div className="relative shrink-0">
             <div className={cn(
-              'w-[68px] h-[68px] rounded-2xl overflow-hidden border-2 transition-all duration-300 shadow-lg',
+              'w-[68px] h-[68px] rounded-2xl overflow-hidden border-2 transition-all duration-300 shadow-lg bg-white',
               hover ? 'border-primary/60 scale-105' : 'border-white/10'
             )}>
               {player.profileImageUrl ? (
-                <img src={player.profileImageUrl} alt={player.name} className="w-full h-full object-cover" />
+                <img src={player.profileImageUrl} alt={player.name} className="w-full h-full object-cover object-center" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-zinc-600 to-zinc-800 flex items-center justify-center">
                   <span className="text-white font-black text-2xl">{player.name.charAt(0)}</span>

@@ -284,7 +284,7 @@ export function DynamicTrivia({ players, playerSeasonStats, playerMonthlyStats, 
         {(fact.player || fact.rankImageUrl) && (
           <div className="relative shrink-0">
             <div 
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl border-4 transition-all duration-500 group-hover:scale-105" 
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl border-4 bg-white transition-all duration-500 group-hover:scale-105" 
               style={{ borderColor: `${fact.accentColor}80` }}
             >
               {fact.player ? (
