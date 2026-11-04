@@ -40,6 +40,17 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Lock body scroll while modal is active to prevent double-scroll / background bleed
+  useEffect(() => {
+    if (isOpen) {
+      const originalStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isOpen]);
+
   // Fallback player loading in case store has not yet populated players
   const [internalPlayers, setInternalPlayers] = useState<Player[]>([]);
   const [loadingInternal, setLoadingInternal] = useState(false);
@@ -184,48 +195,49 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   const inApp = isInAppBrowser();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-[#09152b] border border-white/10 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition"
-          aria-label="Close"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm p-3 sm:p-6">
+      <div className="min-h-full flex items-center justify-center py-3 sm:py-6">
+        <div className="relative w-full max-w-4xl bg-[#09152b] border border-white/10 rounded-3xl shadow-2xl p-5 sm:p-8">
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-        {success ? (
-          <div className="p-8 sm:p-12 flex flex-col items-center text-center overflow-y-auto">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-5 border border-emerald-500/30">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-            <h3 className="text-2xl font-black text-white mb-2">Registration Submitted!</h3>
-            <p className="text-white/70 max-w-md mb-6 text-sm leading-relaxed">
-              Your application has been received. Our admin team will verify your Facebook post link. Once verified, you will be added to the tournament draw!
-            </p>
-            <button
-              onClick={onClose}
-              className="py-2.5 px-7 rounded-xl bg-[#c89850] text-[#00265a] font-black text-sm shadow hover:bg-[#b58641] transition"
-            >
-              Done
-            </button>
-          </div>
-        ) : (
-          <div className="overflow-y-auto p-5 sm:p-8">
-            {/* In-App Browser Helper Tip */}
-            {inApp && (
-              <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <span className="leading-snug">
-                  <strong>Notice:</strong> Inside Facebook/Instagram browser? Tap <strong>•••</strong> and select <strong>Open in External Browser</strong> for seamless downloads. You can also tap and hold your card image to save directly to Photos!
-                </span>
+          {success ? (
+            <div className="p-6 sm:p-10 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-5 border border-emerald-500/30">
+                <CheckCircle2 className="w-10 h-10" />
               </div>
-            )}
+              <h3 className="text-2xl font-black text-white mb-2">Registration Submitted!</h3>
+              <p className="text-white/70 max-w-md mb-6 text-sm leading-relaxed">
+                Your application has been received. Our admin team will verify your Facebook post link. Once verified, you will be added to the tournament draw!
+              </p>
+              <button
+                onClick={onClose}
+                className="py-2.5 px-7 rounded-xl bg-[#c89850] text-[#00265a] font-black text-sm shadow hover:bg-[#b58641] transition"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div>
+              {/* In-App Browser Helper Tip */}
+              {inApp && (
+                <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-center gap-2.5">
+                  <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <span className="leading-snug">
+                    <strong>Notice:</strong> Inside Facebook/Instagram browser? Tap <strong>•••</strong> and select <strong>Open in External Browser</strong> for seamless downloads. You can also tap and hold your card image to save directly to Photos!
+                  </span>
+                </div>
+              )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Left Column: Form & Steps */}
-              <div className="lg:col-span-6 flex flex-col justify-between">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Left Column: Form & Steps */}
+                <div className="lg:col-span-6 flex flex-col justify-between">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c89850]/15 border border-[#c89850]/30 text-[#c89850] text-xs font-bold uppercase tracking-wider mb-3">
                     <Share2 className="w-3.5 h-3.5" />
@@ -464,6 +476,7 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
