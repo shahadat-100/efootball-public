@@ -6,7 +6,7 @@ import { TournamentRegistrationModal } from '@/features/tournaments/components/T
 import { MatchScoreSubmissionModal } from '@/features/tournaments/components/MatchScoreSubmissionModal';
 import { TournamentKnockoutBracket } from '@/features/tournaments/components/TournamentKnockoutBracket';
 import { TournamentPlayerCard } from '@/features/tournaments/components/TournamentPlayerCard';
-import { useFootballStore } from '@/store/footballStore';
+import { useFootballStore, mapPlayerFromDb } from '@/store/footballStore';
 import { 
   Trophy, Calendar, Users, Smartphone,
   Clock, Sparkles, Eye, X, Hash, GitBranch, UserPlus, CheckCircle2
@@ -15,6 +15,8 @@ import { cn } from '@/shared/lib/cn';
 
 export function PublicTournaments() {
   const storePlayers = useFootballStore((state) => state.players) || [];
+  const fetchPlayers = useFootballStore((state) => state.fetchPlayers);
+  const [playersLoading, setPlayersLoading] = useState(true);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   
@@ -55,17 +57,47 @@ export function PublicTournaments() {
   // Fetch details for the selected tournament
   const fetchTournamentDetails = async (tournamentId: string) => {
     try {
-      const [groupsRes, participantsRes, matchesRes, regRes] = await Promise.all([
+      // NOTE: select plain rows and join players in JS. The public API does not
+      // expose foreign keys between tournament tables and `players`, so
+      // PostgREST nested selects (`player:players(*)`) return a 400.
+      const [groupsRes, participantsRes, matchesRes, regRes, playersRes] = await Promise.all([
         supabase.from('tournament_groups').select('*').eq('tournament_id', tournamentId).order('name', { ascending: true }),
-        supabase.from('tournament_participants').select('*, player:players(*)').eq('tournament_id', tournamentId),
-        supabase.from('tournament_matches').select('*, player1:players!player1_id(*), player2:players!player2_id(*)').eq('tournament_id', tournamentId).order('matchday', { ascending: true }),
-        supabase.from('tournament_registrations').select('*, player:players(*)').eq('tournament_id', tournamentId).eq('status', 'approved')
+        supabase.from('tournament_participants').select('*').eq('tournament_id', tournamentId),
+        supabase.from('tournament_matches').select('*').eq('tournament_id', tournamentId).order('matchday', { ascending: true }),
+        supabase.from('tournament_registrations').select('*').eq('tournament_id', tournamentId).eq('status', 'approved'),
+        supabase.from('players').select('*').limit(2000),
       ]);
 
-      setGroups(groupsRes.data || []);
-      setParticipants(participantsRes.data || []);
-      setMatches(matchesRes.data || []);
-      setRegistrations(regRes.data || []);
+      if (groupsRes.error) console.error('Error fetching groups:', groupsRes.error);
+      if (participantsRes.error) console.error('Error fetching participants:', participantsRes.error);
+      if (matchesRes.error) console.error('Error fetching matches:', matchesRes.error);
+      if (regRes.error) console.error('Error fetching registrations:', regRes.error);
+      if (playersRes.error) console.error('Error fetching players:', playersRes.error);
+
+      const playerMap = new Map<string, ReturnType<typeof mapPlayerFromDb>>(
+        (playersRes.data || []).map((p: any) => [p.id, mapPlayerFromDb(p)])
+      );
+
+      setGroups((groupsRes.data as TournamentGroup[]) || []);
+      setParticipants(
+        ((participantsRes.data as any[]) || []).map((p) => ({
+          ...p,
+          player: p.player_id ? playerMap.get(p.player_id) : undefined,
+        })) as TournamentParticipant[]
+      );
+      setMatches(
+        ((matchesRes.data as any[]) || []).map((m) => ({
+          ...m,
+          player1: m.player1_id ? playerMap.get(m.player1_id) : undefined,
+          player2: m.player2_id ? playerMap.get(m.player2_id) : undefined,
+        })) as TournamentMatch[]
+      );
+      setRegistrations(
+        ((regRes.data as any[]) || []).map((r) => ({
+          ...r,
+          player: r.player_id ? playerMap.get(r.player_id) : undefined,
+        })) as TournamentRegistration[]
+      );
 
       const cur = tournaments.find(t => t.id === tournamentId);
       if (cur?.status === 'group_stage') {
@@ -82,6 +114,9 @@ export function PublicTournaments() {
 
   useEffect(() => {
     fetchTournaments();
+    // Public visitors land here directly, so make sure the player list is
+    // available for the registration form's player picker.
+    fetchPlayers().finally(() => setPlayersLoading(false));
   }, []);
 
   useEffect(() => {
@@ -627,6 +662,7 @@ export function PublicTournaments() {
           tournamentId={selectedTournament.id}
           tournamentTitle={selectedTournament.title}
           players={storePlayers}
+          playersLoading={playersLoading}
           onRegistrationSuccess={() => {
             if (selectedTournament) fetchTournamentDetails(selectedTournament.id);
           }}

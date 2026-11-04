@@ -11,6 +11,7 @@ interface TournamentRegistrationModalProps {
   tournamentTitle: string;
   seasonName?: string;
   players: Player[];
+  playersLoading?: boolean;
   onRegistrationSuccess?: () => void;
 }
 
@@ -21,6 +22,7 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   tournamentTitle,
   seasonName = 'SEASON 1 • 2026',
   players,
+  playersLoading = false,
   onRegistrationSuccess
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
@@ -196,7 +198,9 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
                       {isPlayerMenuOpen && (
                         <div className="absolute z-30 mt-1.5 w-full max-h-56 overflow-y-auto rounded-xl bg-[#0b1d3a] border border-white/10 shadow-2xl">
                           {filteredPlayers.length === 0 ? (
-                            <div className="px-4 py-3 text-xs text-white/50">No players found.</div>
+                            <div className="px-4 py-3 text-xs text-white/50">
+                              {playersLoading ? 'Loading players…' : 'No players found.'}
+                            </div>
                           ) : (
                             filteredPlayers.map((p) => {
                               const isSelected = p.id === selectedPlayerId;
