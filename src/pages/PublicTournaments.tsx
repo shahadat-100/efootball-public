@@ -659,7 +659,7 @@ export function PublicTournaments() {
 
       {/* View Official Tournament Player Card Modal */}
       {viewingPlayerCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <div className="relative w-full max-w-sm bg-card border border-border rounded-3xl p-6 shadow-2xl">
             <button
               onClick={() => setViewingPlayerCard(null)}

@@ -40,13 +40,15 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Lock body scroll while modal is active to prevent double-scroll / background bleed
+  // Lock body scroll and hide bottom navigation while modal is active
   useEffect(() => {
     if (isOpen) {
       const originalStyle = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
       return () => {
         document.body.style.overflow = originalStyle;
+        document.body.classList.remove('modal-open');
       };
     }
   }, [isOpen]);
@@ -195,7 +197,7 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   const inApp = isInAppBrowser();
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm p-3 sm:p-6">
+    <div className="fixed inset-0 z-[70] overflow-y-auto overscroll-contain bg-black/80 backdrop-blur-sm p-3 sm:p-6">
       <div className="min-h-full flex items-center justify-center py-3 sm:py-6">
         <div className="relative w-full max-w-4xl bg-[#09152b] border border-white/10 rounded-3xl shadow-2xl p-5 sm:p-8">
           {/* Close Button */}
@@ -320,7 +322,12 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
                                 setPlayerSearch(e.target.value);
                                 setIsPlayerMenuOpen(true);
                               }}
-                              onFocus={() => setIsPlayerMenuOpen(true)}
+                              onFocus={() => {
+                                setIsPlayerMenuOpen(true);
+                                setTimeout(() => {
+                                  searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }, 120);
+                              }}
                               placeholder={selectedPlayer ? `Selected: ${selectedPlayer.name} (type to search...)` : 'Search your name...'}
                               className="w-full py-2.5 pl-9 pr-9 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-[#c89850] transition"
                             />

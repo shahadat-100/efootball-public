@@ -276,7 +276,7 @@ export const MatchScoreSubmissionModal: React.FC<MatchScoreSubmissionModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
       <div className="relative w-full max-w-lg bg-[#001738] border border-[#c89850]/30 rounded-3xl shadow-2xl p-6 sm:p-8 text-white my-8">
         <button
           onClick={onClose}
