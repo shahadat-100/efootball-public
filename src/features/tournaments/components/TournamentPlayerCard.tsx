@@ -167,14 +167,14 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
             {/* Club wordmark — gold plaque, top centre */}
             <div className="flex w-full justify-center">
               <div
-                className="px-4 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
+                className="px-5 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
                 style={{
                   backgroundColor: GOLD,
                   clipPath: 'polygon(3% 6%, 100% 0%, 97% 94%, 0% 100%)',
                 }}
               >
                 <span
-                  className="block text-[12px] font-black uppercase leading-none tracking-[0.14em]"
+                  className="block text-[14px] font-black uppercase leading-none tracking-[0.11em]"
                   style={{ color: '#00142f' }}
                 >
                   The Enigmatic Elite
