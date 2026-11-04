@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Copy, Check, Shield, Smartphone, Hash } from 'lucide-react';
+import { Download, Copy, Check, Shield } from 'lucide-react';
 
 interface TournamentPlayerCardProps {
   playerName: string;
-  playerAvatarUrl?: string | null;
+  playerImageUrl?: string | null;
   gameId: string;
   deviceModel: string;
   tournamentTitle?: string;
@@ -12,13 +12,15 @@ interface TournamentPlayerCardProps {
   onDownloaded?: (dataUrl: string) => void;
 }
 
+const GOLD = '#c89850';
+const NAVY = '#00265a';
+
 export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   playerName,
-  playerAvatarUrl,
+  playerImageUrl,
   gameId,
   deviceModel,
   tournamentTitle = 'EFOOTBALL CHAMPIONSHIP',
-  seasonName = 'SEASON 1 • 2026',
   onDownloaded
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -52,112 +54,188 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
 
   // Handle Copy Facebook Caption
   const handleCopyCaption = () => {
-    const caption = `⚽ Officially registered for ${tournamentTitle} (${seasonName})! 🔥\n\n👤 Player: ${playerName}\n🔢 Game ID: ${gameId}\n📱 Device: ${deviceModel}\n\nReady for the challenge! Wish me luck! 🏆⚡\n#eFootball #Tournament #OfficialContender`;
+    const caption = `⚽ Officially registered for ${tournamentTitle}! 🔥\n\n👤 Player: ${playerName}\n🔢 Game ID: ${gameId}\n📱 Device: ${deviceModel}\n\nReady for the challenge! Wish me luck! 🏆⚡\n#eFootball #Tournament #OfficialContender`;
     navigator.clipboard.writeText(caption);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const nameWords = playerName.trim().split(/\s+/).filter(Boolean);
+  const longestWord = nameWords.reduce((max, word) => Math.max(max, word.length), 0);
+
+  // Poster-style headline sizing: keep it huge, but fit long names inside the left column.
+  const baseSize =
+    longestWord > 12 ? 30 :
+    longestWord > 10 ? 34 :
+    longestWord > 8 ? 40 :
+    longestWord > 6 ? 46 : 54;
+  const lineCountFactor = nameWords.length >= 4 ? 0.68 : nameWords.length === 3 ? 0.82 : 1;
+  const nameSize = Math.round(baseSize * lineCountFactor);
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto">
-      {/* 4:5 Aspect Ratio Card Container */}
+      {/* 4:5 Poster Card — white frame, navy grunge poster */}
       <div
         ref={cardRef}
-        className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl select-none flex flex-col justify-between p-5 border-2 border-[#c89850]/40"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 20%, #002c6b 0%, #00173d 60%, #000c22 100%)',
-          fontFamily: "'Bebas Neue', sans-serif, system-ui",
-        }}
+        className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl select-none bg-white p-2"
+        style={{ fontFamily: "'Oswald', sans-serif" }}
       >
-        {/* Subtle Luxury Card Background Lines */}
-        <div 
-          className="absolute inset-0 opacity-10 pointer-events-none"
+        <div
+          className="relative w-full h-full overflow-hidden rounded-xl"
           style={{
-            backgroundImage: `radial-gradient(#c89850 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
+            background: `radial-gradient(circle at 30% 16%, #003a7a 0%, ${NAVY} 40%, #00132c 100%)`,
           }}
-        />
+        >
+          {/* Grain / grunge */}
+          <svg className="absolute inset-0 w-full h-full opacity-[0.18] pointer-events-none mix-blend-overlay">
+            <filter id="poster-grain">
+              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" />
+              <feColorMatrix type="saturate" values="0" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#poster-grain)" />
+          </svg>
 
-        {/* Top Metallic Border Line */}
-        <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-[#c89850] to-transparent opacity-80" />
+          {/* Gold brush shapes */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 400 500"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="poster-gold" x1="0" y1="0" x2="0.55" y2="1">
+                <stop offset="0%" stopColor="#e0b76f" />
+                <stop offset="45%" stopColor={GOLD} />
+                <stop offset="100%" stopColor="#9f6f2c" />
+              </linearGradient>
+            </defs>
 
-        {/* ─── 1. Header: Tournament & Season ─── */}
-        <div className="relative z-10 flex items-center justify-between border-b border-[#c89850]/20 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#c89850] text-[#00173d] flex items-center justify-center font-bold shadow">
-              <Shield className="w-4 h-4 fill-current" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[15px] tracking-wider text-[#c89850] uppercase font-black leading-none truncate max-w-[170px]">
-                {tournamentTitle}
-              </span>
-              <span className="text-[10px] tracking-widest text-white/50 uppercase font-sans font-bold mt-0.5">
-                OFFICIAL CONTENDER
-              </span>
-            </div>
-          </div>
+            {/* Main vertical brush panel behind the player */}
+            <path
+              d="M228 52 L400 56 L400 306 L360 300 L330 310 L300 301 L272 309 L246 300 L228 296 L236 266 L222 238 L233 208 L221 178 L231 148 L221 118 L229 90 Z"
+              fill="url(#poster-gold)"
+            />
 
-          <div className="px-2.5 py-1 rounded-md bg-[#c89850]/15 border border-[#c89850]/40 text-[#c89850] text-[11px] font-sans font-bold tracking-wider">
-            {seasonName}
-          </div>
-        </div>
+            {/* Waist brush accent */}
+            <path
+              d="M204 236 L240 230 L266 240 L260 254 L232 262 L208 256 Z"
+              fill="url(#poster-gold)"
+              opacity="0.95"
+            />
 
-        {/* ─── 2. Center: Centered Player Photo in Luxury Frame ─── */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center py-2">
-          <div className="relative w-[65%] aspect-square rounded-2xl overflow-hidden border-2 border-[#c89850]/60 shadow-[0_12px_30px_rgba(0,0,0,0.6)] bg-white">
-            {playerAvatarUrl ? (
+            {/* Bottom-right brush swoosh */}
+            <path
+              d="M248 396 C300 382 352 406 400 394 L400 436 C352 448 298 424 246 442 L234 418 Z"
+              fill="url(#poster-gold)"
+              opacity="0.98"
+            />
+            <path d="M300 450 L400 444 L398 454 L298 460 Z" fill="url(#poster-gold)" opacity="0.9" />
+            <path d="M262 412 C 300 404 330 416 352 410 L 354 418 C 330 424 300 414 266 422 Z" fill="#e0b76f" opacity="0.7" />
+
+            {/* Small grunge specks */}
+            <path d="M318 0 L400 0 L400 42 L384 36 L372 46 L360 32 L346 40 L334 26 Z" fill="#ffffff" opacity="0.07" />
+            <path d="M0 470 L22 462 L34 474 L18 484 L0 480 Z" fill="#ffffff" opacity="0.05" />
+            <circle cx="356" cy="26" r="2.3" fill="#ffffff" opacity="0.55" />
+            <circle cx="372" cy="38" r="1.6" fill="#ffffff" opacity="0.45" />
+            <circle cx="340" cy="16" r="1.4" fill={GOLD} opacity="0.7" />
+            <circle cx="388" cy="24" r="1.2" fill={GOLD} opacity="0.6" />
+            <circle cx="350" cy="48" r="1" fill="#ffffff" opacity="0.4" />
+            <circle cx="380" cy="54" r="1.8" fill={GOLD} opacity="0.5" />
+          </svg>
+
+          {/* Player cutout — grayscale, right side */}
+          <div className="absolute right-0 top-[5%] w-[60%] h-[86%] z-20">
+            {playerImageUrl ? (
               <img
-                src={playerAvatarUrl}
+                src={playerImageUrl}
                 alt={playerName}
-                className="w-full h-full object-cover object-top"
+                className="w-full h-full object-contain object-bottom grayscale contrast-125 drop-shadow-[0_18px_28px_rgba(0,0,0,0.5)]"
                 crossOrigin="anonymous"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-[#00173d] text-white/40 p-4 text-center">
-                <span className="text-5xl font-bold mb-1">⚽</span>
-                <span className="text-xs font-sans">No Avatar</span>
+              <div className="w-full h-full flex flex-col items-center justify-center text-white/40 p-4 text-center">
+                <Shield className="w-16 h-16 mb-2 text-[#c89850]/60" />
+                <span className="text-[10px] font-sans tracking-widest uppercase">No Photo</span>
               </div>
             )}
-            {/* Subtle inner bottom gradient for depth */}
-            <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+
+            {/* Fade the feet into the navy base */}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#00142f] via-[#00142f]/60 to-transparent pointer-events-none" />
           </div>
 
-          {/* Player Name Directly Below Photo */}
-          <div className="mt-3 text-center px-2 w-full">
-            <h2 className="text-[26px] sm:text-[30px] font-black text-white tracking-wider uppercase leading-none truncate drop-shadow-md">
-              {playerName}
-            </h2>
-            <div className="w-16 h-[2px] bg-gradient-to-r from-transparent via-[#c89850] to-transparent mx-auto mt-1.5" />
-          </div>
-        </div>
-
-        {/* ─── 3. Bottom: Game ID & Device Pills ─── */}
-        <div className="relative z-10 pt-2">
-          <div className="grid grid-cols-2 gap-2 bg-[#00112a]/90 border border-[#c89850]/30 rounded-2xl p-2.5 shadow-lg">
-            {/* Game ID */}
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/5">
-              <Hash className="w-4 h-4 text-[#c89850] flex-shrink-0" />
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] uppercase font-sans font-bold text-white/50 tracking-wider leading-none">
-                  Game ID
-                </span>
-                <span className="text-[12px] font-mono font-bold text-white tracking-wide truncate mt-0.5">
-                  {gameId || '—'}
+          {/* Content */}
+          <div className="relative z-10 flex h-full flex-col px-5 py-5">
+            {/* Tournament name — gold brush banner */}
+            <div className="self-start max-w-[62%]">
+              <div
+                className="inline-block px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+                style={{
+                  backgroundColor: GOLD,
+                  transform: 'rotate(-1.5deg)',
+                  clipPath:
+                    'polygon(1% 14%, 99% 0%, 98% 86%, 2% 100%, 0% 52%)',
+                }}
+              >
+                <span
+                  className="block text-[11px] font-bold uppercase leading-tight tracking-[0.12em]"
+                  style={{ color: '#00142f' }}
+                >
+                  {tournamentTitle}
                 </span>
               </div>
             </div>
 
-            {/* Device */}
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/5">
-              <Smartphone className="w-4 h-4 text-[#c89850] flex-shrink-0" />
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] uppercase font-sans font-bold text-white/50 tracking-wider leading-none">
-                  Device
-                </span>
-                <span className="text-[12px] font-sans font-bold text-white truncate mt-0.5">
-                  {deviceModel || '—'}
+            {/* Player name — giant poster headline */}
+            <div className="mt-[7%] flex-1">
+              <h2
+                className="max-w-[68%] uppercase text-white"
+                style={{
+                  fontFamily: "'Oswald', sans-serif",
+                  fontWeight: 900,
+                  fontSize: `${nameSize}px`,
+                  lineHeight: 0.82,
+                  letterSpacing: '-0.015em',
+                  textShadow: '0 6px 18px rgba(0,0,0,0.35)',
+                }}
+              >
+                {nameWords.map((word, index) => (
+                  <span key={`${word}-${index}`} className="block break-words">
+                    {word}
+                  </span>
+                ))}
+              </h2>
+            </div>
+
+            {/* Bottom-left label + decorative brush arrow */}
+            <div className="flex flex-col items-start gap-2">
+              <div className="flex items-center gap-2">
+                <span className="h-[2px] w-7 rounded-full" style={{ backgroundColor: GOLD }} />
+                <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-white/60">
+                  Official Contender
                 </span>
               </div>
+              <svg
+                width="82"
+                height="30"
+                viewBox="0 0 100 36"
+                fill="none"
+                className="opacity-95"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 24C22 10 42 30 62 15C70 9 78 10 86 14"
+                  stroke="#ffffff"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M73 6L89 14L76 25"
+                  stroke="#ffffff"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
           </div>
         </div>

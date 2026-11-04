@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Tournament, TournamentMatch, TournamentGroup, TournamentParticipant, TournamentRegistration } from '@/features/tournaments/types';
+import { Tournament, TournamentMatch, TournamentGroup, TournamentParticipant, TournamentRegistration, TournamentStatus } from '@/features/tournaments/types';
 import { calculateGroupStandings } from '@/features/tournaments/utils/tournamentEngine';
 import { TournamentRegistrationModal } from '@/features/tournaments/components/TournamentRegistrationModal';
 import { MatchScoreSubmissionModal } from '@/features/tournaments/components/MatchScoreSubmissionModal';
@@ -9,7 +9,7 @@ import { TournamentPlayerCard } from '@/features/tournaments/components/Tourname
 import { useFootballStore } from '@/store/footballStore';
 import { 
   Trophy, Calendar, Users, Smartphone,
-  Clock, Sparkles, Eye, X, Hash, GitBranch
+  Clock, Sparkles, Eye, X, Hash, GitBranch, UserPlus, CheckCircle2
 } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
@@ -105,6 +105,69 @@ export function PublicTournaments() {
 
   const currentStep = getStageIndex(selectedTournament?.status);
 
+  const formatShortDate = (value?: string | null) => {
+    if (!value) return 'TBA';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'TBA';
+    return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  };
+
+  const statusMeta: Record<TournamentStatus, {
+    label: string;
+    hint: (t: Tournament) => string;
+    icon: typeof Trophy;
+    dot: string;
+    badge: string;
+    iconWrap: string;
+    bar: string;
+  }> = {
+    registration_open: {
+      label: 'Registration Open',
+      hint: (t) => `Register by ${formatShortDate(t.registration_deadline)}`,
+      icon: UserPlus,
+      dot: 'bg-emerald-500',
+      badge: 'bg-emerald-500/10 text-emerald-600',
+      iconWrap: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600',
+      bar: 'bg-emerald-500',
+    },
+    group_stage: {
+      label: 'Group Stage',
+      hint: (t) => `Kicked off ${formatShortDate(t.start_date)}`,
+      icon: Users,
+      dot: 'bg-blue-500',
+      badge: 'bg-blue-500/10 text-blue-600',
+      iconWrap: 'bg-blue-500/10 border-blue-500/20 text-blue-600',
+      bar: 'bg-blue-500',
+    },
+    knockout_stage: {
+      label: 'Knockouts',
+      hint: (t) => `Finals by ${formatShortDate(t.final_deadline)}`,
+      icon: GitBranch,
+      dot: 'bg-amber-500',
+      badge: 'bg-amber-500/10 text-amber-600',
+      iconWrap: 'bg-amber-500/10 border-amber-500/20 text-amber-600',
+      bar: 'bg-amber-500',
+    },
+    completed: {
+      label: 'Completed',
+      hint: () => 'Champion crowned',
+      icon: Trophy,
+      dot: 'bg-slate-400',
+      badge: 'bg-slate-500/10 text-slate-600',
+      iconWrap: 'bg-slate-500/10 border-slate-500/20 text-slate-600',
+      bar: 'bg-slate-400',
+    },
+    draft: {
+      label: 'Coming Soon',
+      hint: (t) => `Starts ${formatShortDate(t.start_date)}`,
+      icon: Clock,
+      dot: 'bg-gray-400',
+      badge: 'bg-gray-500/10 text-gray-600',
+      iconWrap: 'bg-gray-500/10 border-gray-500/20 text-gray-600',
+      bar: 'bg-gray-400',
+    },
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-16">
       {/* ─── Page Header ─── */}
@@ -129,37 +192,94 @@ export function PublicTournaments() {
         )}
       </div>
 
-      {/* ─── Tournament Selector Chips ─── */}
+      {/* ─── Tournament Selector ─── */}
       {tournaments.length > 0 ? (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6">
-          {tournaments.map((t) => {
-            const isSelected = selectedTournament?.id === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setSelectedTournament(t)}
-                className={cn(
-                  'py-2.5 px-4 rounded-xl text-sm font-bold whitespace-nowrap transition border flex items-center gap-2.5 shadow-sm',
-                  isSelected
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:bg-muted/50'
-                )}
-              >
-                <span>{t.title}</span>
-                <span className={cn(
-                  'text-[10px] px-2 py-0.5 rounded-full uppercase font-black',
-                  isSelected
-                    ? 'bg-black/20 text-white'
-                    : t.status === 'registration_open' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                    : t.status === 'group_stage' ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
-                    : t.status === 'knockout_stage' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                    : 'bg-muted text-muted-foreground'
-                )}>
-                  {t.status.replace('_', ' ')}
-                </span>
-              </button>
-            );
-          })}
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h2 className="text-xs font-black uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-2">
+              <Trophy className="w-3.5 h-3.5 text-amber-500" />
+              Choose a Tournament
+            </h2>
+            <span className="text-[11px] font-semibold text-muted-foreground">
+              {tournaments.length} available
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {tournaments.map((t) => {
+              const isSelected = selectedTournament?.id === t.id;
+              const meta = statusMeta[t.status];
+              const StatusIcon = meta.icon;
+
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTournament(t)}
+                  className={cn(
+                    'group relative overflow-hidden rounded-2xl border p-4 text-left transition-all duration-200 active:scale-[0.99]',
+                    isSelected
+                      ? 'bg-[#00265a] border-[#c89850] shadow-lg ring-1 ring-[#c89850]/30'
+                      : 'bg-card border-border hover:border-[#c89850]/50 hover:shadow-md'
+                  )}
+                >
+                  {/* Status accent bar */}
+                  <span className={cn('absolute inset-y-0 left-0 w-1', meta.bar)} />
+
+                  <div className="flex items-start gap-3 pl-1.5">
+                    <div
+                      className={cn(
+                        'w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition',
+                        isSelected
+                          ? 'bg-white/10 border-white/20 text-[#c89850]'
+                          : meta.iconWrap
+                      )}
+                    >
+                      <StatusIcon className="w-5 h-5" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className={cn(
+                          'text-sm font-black leading-tight truncate',
+                          isSelected ? 'text-white' : 'text-foreground'
+                        )}>
+                          {t.title}
+                        </h3>
+                        {isSelected && (
+                          <CheckCircle2 className="w-4 h-4 text-[#c89850] flex-shrink-0" />
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <span className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                          isSelected ? 'bg-white/10 text-white/80' : meta.badge
+                        )}>
+                          <span className={cn('w-1.5 h-1.5 rounded-full', meta.dot)} />
+                          {meta.label}
+                        </span>
+                        {t.season_name && (
+                          <span className={cn(
+                            'text-[10px] font-semibold truncate',
+                            isSelected ? 'text-white/50' : 'text-muted-foreground/70'
+                          )}>
+                            {t.season_name}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className={cn(
+                        'mt-1.5 text-[11px] font-medium truncate',
+                        isSelected ? 'text-white/60' : 'text-muted-foreground'
+                      )}>
+                        {meta.hint(t)}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : !loading ? (
         <div className="p-12 text-center rounded-2xl bg-card border border-border text-muted-foreground text-sm shadow-sm mb-6">
@@ -539,7 +659,7 @@ export function PublicTournaments() {
 
             <TournamentPlayerCard
               playerName={viewingPlayerCard.player?.name || 'PLAYER'}
-              playerAvatarUrl={viewingPlayerCard.player?.profileImageUrl}
+              playerImageUrl={viewingPlayerCard.player?.coverImageUrl}
               gameId={viewingPlayerCard.game_id}
               deviceModel={viewingPlayerCard.device_model}
               tournamentTitle={selectedTournament?.title}

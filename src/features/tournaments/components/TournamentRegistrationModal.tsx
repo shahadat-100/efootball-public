@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Player } from '@/features/players/types';
 import { TournamentPlayerCard } from './TournamentPlayerCard';
 import { supabase } from '@/lib/supabase';
-import { X, CheckCircle2, AlertCircle, Share2, ArrowRight } from 'lucide-react';
+import { X, CheckCircle2, AlertCircle, Share2, ArrowRight, Search, ChevronDown, Check } from 'lucide-react';
 
 interface TournamentRegistrationModalProps {
   isOpen: boolean;
@@ -24,6 +24,9 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   onRegistrationSuccess
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [playerSearch, setPlayerSearch] = useState('');
+  const [isPlayerMenuOpen, setIsPlayerMenuOpen] = useState(false);
+  const playerMenuRef = useRef<HTMLDivElement>(null);
   const [gameId, setGameId] = useState('');
   const [deviceModel, setDeviceModel] = useState('');
   const [facebookPostUrl, setFacebookPostUrl] = useState('');
@@ -32,9 +35,32 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (playerMenuRef.current && !playerMenuRef.current.contains(event.target as Node)) {
+        setIsPlayerMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   if (!isOpen) return null;
 
   const selectedPlayer = players.find(p => p.id === selectedPlayerId);
+
+  const searchTerm = playerSearch.trim().toLowerCase();
+  const filteredPlayers = searchTerm
+    ? players.filter((p) => {
+        const role = p.playerRoles?.[0]?.toLowerCase() ?? '';
+        const jersey = p.jerseyNumber != null ? String(p.jerseyNumber) : '';
+        return (
+          p.name.toLowerCase().includes(searchTerm) ||
+          role.includes(searchTerm) ||
+          jersey.includes(searchTerm)
+        );
+      })
+    : players;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +149,7 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c89850]/15 border border-[#c89850]/30 text-[#c89850] text-xs font-bold uppercase tracking-wider mb-3">
                   <Share2 className="w-3.5 h-3.5" />
-                  Viral Registration Flow
+                  Registration Flow
                 </div>
                 <h2 className="text-2xl font-black text-white tracking-tight mb-1">
                   Tournament Registration
@@ -140,26 +166,83 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Select Player Profile */}
+                  {/* Select Player Profile (searchable) */}
                   <div>
                     <label className="block text-xs font-semibold text-white/80 mb-1.5">
                       Select Player Profile *
                     </label>
-                    <select
-                      value={selectedPlayerId}
-                      onChange={(e) => setSelectedPlayerId(e.target.value)}
-                      required
-                      className="w-full py-2.5 px-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#c89850] transition"
-                    >
-                      <option value="" disabled className="bg-[#09152b] text-white/50">
-                        -- Choose your profile --
-                      </option>
-                      {players.map((p) => (
-                        <option key={p.id} value={p.id} className="bg-[#09152b] text-white">
-                          {p.name} {p.playerRoles?.[0] ? `(${p.playerRoles[0]})` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <div ref={playerMenuRef} className="relative">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={isPlayerMenuOpen ? playerSearch : (selectedPlayer?.name ?? '')}
+                          onChange={(e) => {
+                            setPlayerSearch(e.target.value);
+                            setIsPlayerMenuOpen(true);
+                          }}
+                          onFocus={() => {
+                            setIsPlayerMenuOpen(true);
+                            setPlayerSearch('');
+                          }}
+                          placeholder="Search player by name..."
+                          className="w-full py-2.5 pl-9 pr-9 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-[#c89850] transition"
+                        />
+                        <ChevronDown
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none transition-transform ${isPlayerMenuOpen ? 'rotate-180' : ''}`}
+                        />
+                      </div>
+
+                      {isPlayerMenuOpen && (
+                        <div className="absolute z-30 mt-1.5 w-full max-h-56 overflow-y-auto rounded-xl bg-[#0b1d3a] border border-white/10 shadow-2xl">
+                          {filteredPlayers.length === 0 ? (
+                            <div className="px-4 py-3 text-xs text-white/50">No players found.</div>
+                          ) : (
+                            filteredPlayers.map((p) => {
+                              const isSelected = p.id === selectedPlayerId;
+                              return (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedPlayerId(p.id);
+                                    setIsPlayerMenuOpen(false);
+                                    setPlayerSearch('');
+                                  }}
+                                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition ${
+                                    isSelected ? 'bg-[#c89850]/15' : 'hover:bg-white/5'
+                                  }`}
+                                >
+                                  <div className="w-7 h-7 rounded-full overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0">
+                                    {p.profileImageUrl ? (
+                                      <img
+                                        src={p.profileImageUrl}
+                                        alt={p.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <span className="text-[11px] font-bold text-white/60">
+                                        {p.name.charAt(0).toUpperCase()}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="text-sm text-white truncate">{p.name}</span>
+                                    {(p.playerRoles?.[0] || p.jerseyNumber != null) && (
+                                      <span className="text-[10px] text-white/45 truncate">
+                                        {p.playerRoles?.[0] ?? 'Player'}
+                                        {p.jerseyNumber != null ? ` • #${p.jerseyNumber}` : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {isSelected && <Check className="w-4 h-4 text-[#c89850] flex-shrink-0" />}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Game ID & Device in 2 cols */}
@@ -233,7 +316,7 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
 
               <TournamentPlayerCard
                 playerName={selectedPlayer ? selectedPlayer.name : 'YOUR NAME'}
-                playerAvatarUrl={selectedPlayer?.profileImageUrl}
+                playerImageUrl={selectedPlayer?.coverImageUrl}
                 gameId={gameId || 'YOUR_GAME_ID'}
                 deviceModel={deviceModel || 'YOUR DEVICE'}
                 tournamentTitle={tournamentTitle}
