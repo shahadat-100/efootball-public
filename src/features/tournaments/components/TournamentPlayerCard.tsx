@@ -24,15 +24,16 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   onDownloaded
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const posterRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Handle Download Image (High Res 4:5)
+  // Handle Download Image (High Res 4:5) — exports the poster only, without the preview frame
   const handleDownload = async () => {
-    if (!cardRef.current) return;
+    if (!posterRef.current) return;
     try {
       setDownloading(true);
-      const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toPng(posterRef.current, {
         quality: 0.98,
         pixelRatio: 3, // Ultra-crisp 3x resolution for Facebook
       });
@@ -74,14 +75,15 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto">
-      {/* 4:5 Poster Card — white frame, navy grunge poster */}
+      {/* 4:5 Poster Card — white frame preview, navy grunge poster */}
       <div
         ref={cardRef}
         className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl select-none bg-white p-2"
         style={{ fontFamily: "'Oswald', sans-serif" }}
       >
         <div
-          className="relative w-full h-full overflow-hidden rounded-xl"
+          ref={posterRef}
+          className="relative w-full h-full overflow-hidden"
           style={{
             background: `radial-gradient(circle at 30% 16%, #003a7a 0%, ${NAVY} 40%, #00132c 100%)`,
           }}
