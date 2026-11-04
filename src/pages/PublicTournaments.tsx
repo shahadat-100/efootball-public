@@ -675,6 +675,7 @@ export function PublicTournaments() {
               deviceModel={viewingPlayerCard.device_model}
               tournamentTitle={selectedTournament?.title}
               seasonName={selectedTournament?.season_name || 'SEASON 1 • 2026'}
+              showActions={false}
             />
           </div>
         </div>

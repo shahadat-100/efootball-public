@@ -10,6 +10,7 @@ interface TournamentPlayerCardProps {
   deviceModel: string;
   tournamentTitle?: string;
   seasonName?: string;
+  showActions?: boolean;
   onDownloaded?: (dataUrl: string) => void;
 }
 
@@ -22,6 +23,7 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   gameId,
   deviceModel,
   tournamentTitle = 'EFOOTBALL CHAMPIONSHIP',
+  showActions = true,
   onDownloaded
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -301,40 +303,42 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
       </div>
 
       {/* ─── Actions Below Card ─── */}
-      <div className="flex items-center gap-3 w-full">
-        <button
-          onClick={handleDownload}
-          disabled={downloading}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#c89850] hover:bg-[#b58641] text-[#00173d] font-bold text-sm shadow-lg transition active:scale-[0.98] disabled:opacity-50"
-        >
-          {downloading ? (
-            <span>Generating...</span>
-          ) : (
-            <>
-              <Download className="w-4 h-4" />
-              <span>Download Card (HD)</span>
-            </>
-          )}
-        </button>
+      {showActions && (
+        <div className="flex items-center gap-3 w-full">
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#c89850] hover:bg-[#b58641] text-[#00173d] font-bold text-sm shadow-lg transition active:scale-[0.98] disabled:opacity-50"
+          >
+            {downloading ? (
+              <span>Generating...</span>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Download Card (HD)</span>
+              </>
+            )}
+          </button>
 
-        <button
-          onClick={handleCopyCaption}
-          className="flex items-center justify-center gap-1.5 py-2.5 px-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-sm border border-white/10 shadow transition active:scale-[0.98]"
-          title="Copy Facebook post caption"
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-400">Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4 text-white/80" />
-              <span>Copy Caption</span>
-            </>
-          )}
-        </button>
-      </div>
+          <button
+            onClick={handleCopyCaption}
+            className="flex items-center justify-center gap-1.5 py-2.5 px-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-sm border border-white/10 shadow transition active:scale-[0.98]"
+            title="Copy Facebook post caption"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-400">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4 text-white/80" />
+                <span>Copy Caption</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* ─── In-App / Mobile Save Modal (Resolves "Page Not Found / Deleted" issue) ─── */}
       {saveModalImage && (
