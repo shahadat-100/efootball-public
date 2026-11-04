@@ -6,6 +6,7 @@ import {
   Trophy, Plus, CheckCircle, XCircle, 
   ExternalLink, Play, ShieldAlert, Image as ImageIcon, Trash2
 } from 'lucide-react';
+import { useFootballStore } from '@/store/footballStore';
 
 export function AdminTournaments() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -22,7 +23,11 @@ export function AdminTournaments() {
   const [resolveScores, setResolveScores] = useState<Record<string, { s1: number; s2: number }>>({});
 
   // New Tournament Form State
+  const seasons = useFootballStore((state) => state.seasons) || [];
+  const fetchSeasons = useFootballStore((state) => state.fetchSeasons);
   const [title, setTitle] = useState('');
+  const [selectedSeasonId, setSelectedSeasonId] = useState<number | ''>('');
+  const [customSeasonName, setCustomSeasonName] = useState('');
   const [registrationDeadline, setRegistrationDeadline] = useState('');
   const [intervalDays, setIntervalDays] = useState(2);
   const [graceHours] = useState(24);
@@ -69,7 +74,17 @@ export function AdminTournaments() {
 
   useEffect(() => {
     fetchTournaments();
-  }, []);
+    fetchSeasons();
+  }, [fetchSeasons]);
+
+  useEffect(() => {
+    if (seasons.length > 0 && selectedSeasonId === '') {
+      const current = seasons.find(s => s.is_current) || seasons[0];
+      if (current) {
+        setSelectedSeasonId(current.id);
+      }
+    }
+  }, [seasons, selectedSeasonId]);
 
   useEffect(() => {
     if (selectedTournament) {
@@ -99,10 +114,15 @@ export function AdminTournaments() {
 
       const finalStage = timeline[timeline.length - 1];
 
+      const chosenSeason = seasons.find(s => s.id === Number(selectedSeasonId));
+      const finalSeasonName = chosenSeason ? chosenSeason.name : (customSeasonName.trim() || 'Season 1 • 2026');
+
       const { data, error } = await supabase
         .from('tournaments')
         .insert({
           title,
+          season_id: selectedSeasonId ? Number(selectedSeasonId) : null,
+          season_name: finalSeasonName,
           status: 'registration_open',
           group_size: groupSize,
           registration_deadline: regDate.toISOString(),
@@ -724,6 +744,34 @@ export function AdminTournaments() {
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full py-2 px-3 rounded-xl bg-background border border-border text-sm"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Season *</label>
+                {seasons.length > 0 ? (
+                  <select
+                    value={selectedSeasonId}
+                    onChange={(e) => setSelectedSeasonId(e.target.value ? Number(e.target.value) : '')}
+                    className="w-full py-2 px-3 rounded-xl bg-background border border-border text-sm font-semibold"
+                  >
+                    {seasons.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} {s.is_current ? '• (Current Season)' : ''}
+                      </option>
+                    ))}
+                    <option value="">Custom Season Name...</option>
+                  </select>
+                ) : null}
+
+                {(seasons.length === 0 || selectedSeasonId === '') && (
+                  <input
+                    type="text"
+                    placeholder="e.g. Season 1 • 2026"
+                    value={customSeasonName}
+                    onChange={(e) => setCustomSeasonName(e.target.value)}
+                    className="w-full mt-2 py-2 px-3 rounded-xl bg-background border border-border text-sm"
+                  />
+                )}
               </div>
 
               <div>

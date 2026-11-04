@@ -170,7 +170,7 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
             </div>
 
             {/* Tournament name — gold brush banner */}
-            <div className="self-start max-w-[62%] mt-8">
+            <div className="self-start max-w-[62%] mt-5">
               <div
                 className="inline-block px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
                 style={{
