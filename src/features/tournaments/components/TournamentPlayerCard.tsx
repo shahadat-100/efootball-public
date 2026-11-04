@@ -142,13 +142,13 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
             <circle cx="380" cy="54" r="1.8" fill={GOLD} opacity="0.5" />
           </svg>
 
-          {/* Player cutout — grayscale, right side */}
-          <div className="absolute right-0 top-[5%] w-[60%] h-[86%] z-20">
+          {/* Player cutout — full colour, large but never cropped */}
+          <div className="absolute right-[-6%] bottom-0 w-[80%] aspect-[4/5] z-20">
             {playerImageUrl ? (
               <img
                 src={playerImageUrl}
                 alt={playerName}
-                className="w-full h-full object-contain object-bottom grayscale contrast-125 drop-shadow-[0_18px_28px_rgba(0,0,0,0.5)]"
+                className="w-full h-full object-contain object-bottom drop-shadow-[0_18px_28px_rgba(0,0,0,0.5)]"
                 crossOrigin="anonymous"
               />
             ) : (
@@ -163,9 +163,27 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
           </div>
 
           {/* Content */}
-          <div className="relative z-10 flex h-full flex-col px-5 py-5">
+          <div className="relative z-30 flex h-full flex-col px-5 pt-6 pb-5">
+            {/* Club wordmark — gold plaque, top centre */}
+            <div className="flex w-full justify-center">
+              <div
+                className="px-4 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
+                style={{
+                  backgroundColor: GOLD,
+                  clipPath: 'polygon(3% 6%, 100% 0%, 97% 94%, 0% 100%)',
+                }}
+              >
+                <span
+                  className="block text-[12px] font-black uppercase leading-none tracking-[0.14em]"
+                  style={{ color: '#00142f' }}
+                >
+                  The Enigmatic Elite
+                </span>
+              </div>
+            </div>
+
             {/* Tournament name — gold brush banner */}
-            <div className="self-start max-w-[62%]">
+            <div className="self-start max-w-[62%] mt-8">
               <div
                 className="inline-block px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
                 style={{
@@ -184,8 +202,8 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
               </div>
             </div>
 
-            {/* Player name — giant poster headline */}
-            <div className="mt-[7%] flex-1">
+            {/* Player name — giant poster headline, 20px below tournament name */}
+            <div className="mt-5">
               <h2
                 className="max-w-[68%] uppercase text-white"
                 style={{
@@ -205,37 +223,41 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
               </h2>
             </div>
 
-            {/* Bottom-left label + decorative brush arrow */}
-            <div className="flex flex-col items-start gap-2">
+            {/* Spacer keeps the stats pinned to the bottom */}
+            <div className="flex-1" />
+
+            {/* Bottom-left: contender label + Game ID / Device */}
+            <div className="flex flex-col items-start gap-1.5">
               <div className="flex items-center gap-2">
                 <span className="h-[2px] w-7 rounded-full" style={{ backgroundColor: GOLD }} />
-                <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-white/60">
+                <span className="text-[8px] font-semibold uppercase tracking-[0.24em] text-white/60">
                   Official Contender
                 </span>
               </div>
-              <svg
-                width="82"
-                height="30"
-                viewBox="0 0 100 36"
-                fill="none"
-                className="opacity-95"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 24C22 10 42 30 62 15C70 9 78 10 86 14"
-                  stroke="#ffffff"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M73 6L89 14L76 25"
-                  stroke="#ffffff"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+
+              <div className="flex max-w-[64%] items-baseline gap-1.5">
+                <span
+                  className="flex-shrink-0 text-[7px] font-bold uppercase tracking-[0.16em]"
+                  style={{ color: GOLD }}
+                >
+                  Game ID
+                </span>
+                <span className="min-w-0 break-all font-mono text-[11px] font-semibold leading-tight text-white">
+                  {gameId || '—'}
+                </span>
+              </div>
+
+              <div className="flex max-w-[64%] items-baseline gap-1.5">
+                <span
+                  className="flex-shrink-0 text-[7px] font-bold uppercase tracking-[0.16em]"
+                  style={{ color: GOLD }}
+                >
+                  Device
+                </span>
+                <span className="min-w-0 truncate text-[11px] font-semibold leading-tight text-white">
+                  {deviceModel || '—'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ import { TournamentPlayerCard } from '@/features/tournaments/components/Tourname
 import { useFootballStore, mapPlayerFromDb } from '@/store/footballStore';
 import { 
   Trophy, Calendar, Users, Smartphone,
-  Clock, Sparkles, Eye, X, Hash, GitBranch, UserPlus, CheckCircle2
+  Clock, Sparkles, Eye, X, Hash, GitBranch, UserPlus
 } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
@@ -227,12 +227,12 @@ export function PublicTournaments() {
         )}
       </div>
 
-      {/* ─── Tournament Selector ─── */}
+      {/* ─── Tournament Selector (compact red chips) ─── */}
       {tournaments.length > 0 ? (
         <div className="mb-6">
-          <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center justify-between gap-3 mb-2.5">
             <h2 className="text-xs font-black uppercase tracking-[0.16em] text-muted-foreground flex items-center gap-2">
-              <Trophy className="w-3.5 h-3.5 text-amber-500" />
+              <Trophy className="w-3.5 h-3.5 text-primary" />
               Choose a Tournament
             </h2>
             <span className="text-[11px] font-semibold text-muted-foreground">
@@ -240,77 +240,30 @@ export function PublicTournaments() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
             {tournaments.map((t) => {
               const isSelected = selectedTournament?.id === t.id;
-              const meta = statusMeta[t.status];
-              const StatusIcon = meta.icon;
-
               return (
                 <button
                   key={t.id}
                   onClick={() => setSelectedTournament(t)}
                   className={cn(
-                    'group relative overflow-hidden rounded-2xl border p-4 text-left transition-all duration-200 active:scale-[0.99]',
+                    'flex items-center gap-2.5 rounded-xl border py-2.5 px-4 text-sm font-bold whitespace-nowrap shadow-sm transition active:scale-[0.98]',
                     isSelected
-                      ? 'bg-[#00265a] border-[#c89850] shadow-lg ring-1 ring-[#c89850]/30'
-                      : 'bg-card border-border hover:border-[#c89850]/50 hover:shadow-md'
+                      ? 'border-primary bg-primary text-primary-foreground shadow-primary/20'
+                      : 'border-border bg-card text-muted-foreground hover:border-primary/40 hover:bg-muted/50 hover:text-foreground'
                   )}
                 >
-                  {/* Status accent bar */}
-                  <span className={cn('absolute inset-y-0 left-0 w-1', meta.bar)} />
-
-                  <div className="flex items-start gap-3 pl-1.5">
-                    <div
-                      className={cn(
-                        'w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition',
-                        isSelected
-                          ? 'bg-white/10 border-white/20 text-[#c89850]'
-                          : meta.iconWrap
-                      )}
-                    >
-                      <StatusIcon className="w-5 h-5" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className={cn(
-                          'text-sm font-black leading-tight truncate',
-                          isSelected ? 'text-white' : 'text-foreground'
-                        )}>
-                          {t.title}
-                        </h3>
-                        {isSelected && (
-                          <CheckCircle2 className="w-4 h-4 text-[#c89850] flex-shrink-0" />
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
-                          isSelected ? 'bg-white/10 text-white/80' : meta.badge
-                        )}>
-                          <span className={cn('w-1.5 h-1.5 rounded-full', meta.dot)} />
-                          {meta.label}
-                        </span>
-                        {t.season_name && (
-                          <span className={cn(
-                            'text-[10px] font-semibold truncate',
-                            isSelected ? 'text-white/50' : 'text-muted-foreground/70'
-                          )}>
-                            {t.season_name}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className={cn(
-                        'mt-1.5 text-[11px] font-medium truncate',
-                        isSelected ? 'text-white/60' : 'text-muted-foreground'
-                      )}>
-                        {meta.hint(t)}
-                      </p>
-                    </div>
-                  </div>
+                  <Trophy className={cn('w-4 h-4', isSelected ? 'text-white' : 'text-primary/70')} />
+                  <span>{t.title}</span>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide',
+                      isSelected ? 'bg-black/20 text-white' : 'bg-muted text-muted-foreground'
+                    )}
+                  >
+                    {statusMeta[t.status].label}
+                  </span>
                 </button>
               );
             })}
