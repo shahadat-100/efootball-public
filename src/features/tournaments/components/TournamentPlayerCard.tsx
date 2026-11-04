@@ -109,19 +109,6 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
               </linearGradient>
             </defs>
 
-            {/* Main vertical brush panel behind the player */}
-            <path
-              d="M228 52 L400 56 L400 306 L360 300 L330 310 L300 301 L272 309 L246 300 L228 296 L236 266 L222 238 L233 208 L221 178 L231 148 L221 118 L229 90 Z"
-              fill="url(#poster-gold)"
-            />
-
-            {/* Waist brush accent */}
-            <path
-              d="M204 236 L240 230 L266 240 L260 254 L232 262 L208 256 Z"
-              fill="url(#poster-gold)"
-              opacity="0.95"
-            />
-
             {/* Bottom-right brush swoosh */}
             <path
               d="M248 396 C300 382 352 406 400 394 L400 436 C352 448 298 424 246 442 L234 418 Z"
@@ -141,6 +128,16 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
             <circle cx="350" cy="48" r="1" fill="#ffffff" opacity="0.4" />
             <circle cx="380" cy="54" r="1.8" fill={GOLD} opacity="0.5" />
           </svg>
+
+          {/* Gold backdrop behind the player — slightly cut rectangle */}
+          <div
+            className="absolute right-[1%] top-[15%] bottom-[9%] w-[70%] z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(160deg, #e0b76f 0%, #c89850 46%, #9f6f2c 100%)',
+              clipPath: 'polygon(4% 2%, 100% 0%, 97% 97%, 0% 100%)',
+              boxShadow: '0 18px 40px rgba(0,0,0,0.28)',
+            }}
+          />
 
           {/* Player cutout — full colour, large but never cropped */}
           <div className="absolute right-[-6%] bottom-0 w-[80%] aspect-[4/5] z-20">
@@ -164,22 +161,12 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
 
           {/* Content */}
           <div className="relative z-30 flex h-full flex-col px-5 pt-6 pb-5">
-            {/* Club wordmark — gold plaque, top centre */}
-            <div className="flex w-full justify-center">
-              <div
-                className="px-5 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
-                style={{
-                  backgroundColor: GOLD,
-                  clipPath: 'polygon(3% 6%, 100% 0%, 97% 94%, 0% 100%)',
-                }}
-              >
-                <span
-                  className="block text-[14px] font-black uppercase leading-none tracking-[0.11em]"
-                  style={{ color: '#00142f' }}
-                >
-                  The Enigmatic Elite
-                </span>
-              </div>
+            {/* Club wordmark — top centre */}
+            <div className="w-full text-center">
+              <span className="text-[15px] font-black uppercase tracking-[0.2em] text-white">
+                The Enigmatic Elite
+              </span>
+              <div className="mx-auto mt-1.5 h-[2px] w-16" style={{ backgroundColor: GOLD }} />
             </div>
 
             {/* Tournament name — gold brush banner */}
