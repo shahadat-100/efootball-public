@@ -16,6 +16,7 @@ import { cn } from '@/shared/lib/cn';
 export function PublicTournaments() {
   const storePlayers = useFootballStore((state) => state.players) || [];
   const fetchPlayers = useFootballStore((state) => state.fetchPlayers);
+  const [directPlayers, setDirectPlayers] = useState<any[]>([]);
   const [playersLoading, setPlayersLoading] = useState(true);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
@@ -74,28 +75,33 @@ export function PublicTournaments() {
       if (regRes.error) console.error('Error fetching registrations:', regRes.error);
       if (playersRes.error) console.error('Error fetching players:', playersRes.error);
 
+      const rawPlayerList = (playersRes.data || []).map((p: any) => mapPlayerFromDb(p));
+      if (rawPlayerList.length > 0) {
+        setDirectPlayers(rawPlayerList);
+      }
+
       const playerMap = new Map<string, ReturnType<typeof mapPlayerFromDb>>(
-        (playersRes.data || []).map((p: any) => [p.id, mapPlayerFromDb(p)])
+        rawPlayerList.map((p: any) => [String(p.id), p])
       );
 
       setGroups((groupsRes.data as TournamentGroup[]) || []);
       setParticipants(
         ((participantsRes.data as any[]) || []).map((p) => ({
           ...p,
-          player: p.player_id ? playerMap.get(p.player_id) : undefined,
+          player: p.player_id ? (playerMap.get(String(p.player_id)) || playerMap.get(p.player_id)) : undefined,
         })) as TournamentParticipant[]
       );
       setMatches(
         ((matchesRes.data as any[]) || []).map((m) => ({
           ...m,
-          player1: m.player1_id ? playerMap.get(m.player1_id) : undefined,
-          player2: m.player2_id ? playerMap.get(m.player2_id) : undefined,
+          player1: m.player1_id ? (playerMap.get(String(m.player1_id)) || playerMap.get(m.player1_id)) : undefined,
+          player2: m.player2_id ? (playerMap.get(String(m.player2_id)) || playerMap.get(m.player2_id)) : undefined,
         })) as TournamentMatch[]
       );
       setRegistrations(
         ((regRes.data as any[]) || []).map((r) => ({
           ...r,
-          player: r.player_id ? playerMap.get(r.player_id) : undefined,
+          player: r.player_id ? (playerMap.get(String(r.player_id)) || playerMap.get(r.player_id)) : undefined,
         })) as TournamentRegistration[]
       );
 
@@ -117,7 +123,22 @@ export function PublicTournaments() {
     // Public visitors land here directly, so make sure the player list is
     // available for the registration form's player picker.
     fetchPlayers().finally(() => setPlayersLoading(false));
+
+    // Fallback fetch directly from players table so registration never fails on phone/public
+    supabase
+      .from('players')
+      .select('*')
+      .order('name', { ascending: true })
+      .limit(2000)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setDirectPlayers(data.map((p: any) => mapPlayerFromDb(p)));
+          setPlayersLoading(false);
+        }
+      });
   }, []);
+
+  const effectivePlayers = storePlayers.length > 0 ? storePlayers : directPlayers;
 
   useEffect(() => {
     if (selectedTournament) {
@@ -614,8 +635,9 @@ export function PublicTournaments() {
           onClose={() => setIsRegModalOpen(false)}
           tournamentId={selectedTournament.id}
           tournamentTitle={selectedTournament.title}
-          players={storePlayers}
-          playersLoading={playersLoading}
+          seasonName={selectedTournament.season_name ?? undefined}
+          players={effectivePlayers}
+          playersLoading={playersLoading && effectivePlayers.length === 0}
           onRegistrationSuccess={() => {
             if (selectedTournament) fetchTournamentDetails(selectedTournament.id);
           }}
@@ -648,7 +670,7 @@ export function PublicTournaments() {
 
             <TournamentPlayerCard
               playerName={viewingPlayerCard.player?.name || 'PLAYER'}
-              playerImageUrl={viewingPlayerCard.player?.coverImageUrl}
+              playerImageUrl={viewingPlayerCard.player?.coverImageUrl || viewingPlayerCard.player?.profileImageUrl}
               gameId={viewingPlayerCard.game_id}
               deviceModel={viewingPlayerCard.device_model}
               tournamentTitle={selectedTournament?.title}

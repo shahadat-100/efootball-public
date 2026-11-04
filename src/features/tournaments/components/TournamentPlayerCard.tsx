@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Copy, Check, Shield } from 'lucide-react';
+import { Download, Copy, Check, Shield, Sparkles, X } from 'lucide-react';
+import { dataUrlToBlob, isInAppBrowser, isMobileDevice } from '@/shared/lib/downloadHelper';
 
 interface TournamentPlayerCardProps {
   playerName: string;
@@ -27,8 +28,9 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   const posterRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [saveModalImage, setSaveModalImage] = useState<string | null>(null);
 
-  // Handle Download Image (High Res 4:5) — exports the poster only, without the preview frame
+  // Handle Download Image (High Res 4:5) — handles mobile, in-app webviews (FB/IG), and desktop
   const handleDownload = async () => {
     if (!posterRef.current) return;
     try {
@@ -38,10 +40,56 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
         pixelRatio: 3, // Ultra-crisp 3x resolution for Facebook
       });
 
+      const cleanName = playerName.trim().toLowerCase().replace(/\s+/g, '_') || 'player';
+      const filename = `${cleanName}_card.png`;
+      const blob = dataUrlToBlob(dataUrl);
+
+      const inApp = isInAppBrowser();
+      const mobile = isMobileDevice();
+
+      // 1. Try Web Share API (native sheet on iOS / Android with "Save Image")
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          const file = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `${playerName} - Tournament Card`,
+              text: `⚽ Officially registered for ${tournamentTitle}! 🔥`,
+            });
+            if (onDownloaded) onDownloaded(dataUrl);
+            return;
+          }
+        } catch (shareErr: any) {
+          if (shareErr.name === 'AbortError') return;
+          console.warn('Web Share failed, falling back:', shareErr);
+        }
+      }
+
+      // 2. If inside Facebook / Instagram in-app browser, standard <a download> is blocked
+      // and produces "Page not found or maybe deleted". Open the save modal instead!
+      if (inApp) {
+        setSaveModalImage(dataUrl);
+        if (onDownloaded) onDownloaded(dataUrl);
+        return;
+      }
+
+      // 3. Standard Download via Blob URL (Clean & safe for Safari, Chrome, Edge)
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.download = `${playerName.toLowerCase().replace(/\s+/g, '_')}_card.png`;
-      link.href = dataUrl;
+      link.download = filename;
+      link.href = blobUrl;
+      document.body.appendChild(link);
       link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 3000);
+
+      // On mobile devices, also pop up the save modal as a fallback so user can long-press
+      if (mobile) {
+        setSaveModalImage(dataUrl);
+      }
 
       if (onDownloaded) {
         onDownloaded(dataUrl);
@@ -259,8 +307,14 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
           disabled={downloading}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#c89850] hover:bg-[#b58641] text-[#00173d] font-bold text-sm shadow-lg transition active:scale-[0.98] disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
-          {downloading ? 'Generating...' : 'Download Card (HD)'}
+          {downloading ? (
+            <span>Generating...</span>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              <span>Download Card (HD)</span>
+            </>
+          )}
         </button>
 
         <button
@@ -281,6 +335,63 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
           )}
         </button>
       </div>
+
+      {/* ─── In-App / Mobile Save Modal (Resolves "Page Not Found / Deleted" issue) ─── */}
+      {saveModalImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-sm bg-[#09152b] border border-white/15 rounded-3xl p-5 shadow-2xl flex flex-col items-center text-center my-6">
+            <button
+              onClick={() => setSaveModalImage(null)}
+              className="absolute top-3.5 right-3.5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-11 h-11 rounded-full bg-[#c89850]/20 text-[#c89850] border border-[#c89850]/30 flex items-center justify-center mb-2.5">
+              <Sparkles className="w-5 h-5" />
+            </div>
+
+            <h3 className="text-lg font-black text-white tracking-wide mb-1">
+              Save Your Official Card
+            </h3>
+            
+            <div className="p-3 my-3 rounded-xl bg-[#c89850]/15 border border-[#c89850]/30 text-left text-xs text-white/90">
+              <p className="font-bold text-[#c89850] mb-0.5 flex items-center gap-1.5">
+                <span>📱 How to save to your phone:</span>
+              </p>
+              <p className="text-[11px] text-white/80 leading-relaxed">
+                <strong>Tap & hold (long-press)</strong> the image below and select <strong>"Save Image"</strong> or <strong>"Download Image"</strong> to save to your Photos!
+              </p>
+            </div>
+
+            {/* High-res Image preview that allows long-press native saving */}
+            <div className="w-full max-w-[270px] rounded-xl overflow-hidden shadow-2xl border border-white/20 mb-4 bg-black">
+              <img
+                src={saveModalImage}
+                alt={playerName}
+                className="w-full h-auto object-contain select-all cursor-pointer pointer-events-auto"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2 w-full">
+              <button
+                onClick={handleCopyCaption}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#c89850] text-[#00173d] font-bold text-xs flex items-center justify-center gap-2 shadow hover:bg-[#b58641] transition"
+              >
+                {copied ? <Check className="w-4 h-4 text-emerald-800" /> : <Copy className="w-4 h-4" />}
+                <span>{copied ? 'Caption Copied!' : 'Copy Facebook Caption'}</span>
+              </button>
+
+              <button
+                onClick={() => setSaveModalImage(null)}
+                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-xs font-semibold transition"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
