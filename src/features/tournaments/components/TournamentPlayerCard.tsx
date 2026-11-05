@@ -10,6 +10,7 @@ interface TournamentPlayerCardProps {
   deviceModel: string;
   tournamentTitle?: string;
   seasonName?: string;
+  sponsorName?: string;
   showActions?: boolean;
   onDownloaded?: (dataUrl: string) => void;
 }
@@ -23,6 +24,7 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   gameId,
   deviceModel,
   tournamentTitle = 'EFOOTBALL CHAMPIONSHIP',
+  sponsorName = 'Diagram',
   showActions = true,
   onDownloaded
 }) => {
@@ -105,7 +107,9 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
 
   // Handle Copy Facebook Caption
   const handleCopyCaption = () => {
-    const caption = `⚽ Officially registered for ${tournamentTitle}! 🔥\n\n👤 Player: ${playerName}\n🔢 Game ID: ${gameId}\n📱 Device: ${deviceModel}\n\nReady for the challenge! Wish me luck! 🏆⚡\n#eFootball #Tournament #OfficialContender`;
+    const sponsorTag = sponsorName ? `\n🤝 Sponsored by: ${sponsorName}` : '';
+    const sponsorHashtag = sponsorName ? ` #${sponsorName.replace(/\s+/g, '')}` : '';
+    const caption = `⚽ Officially registered for ${tournamentTitle}! 🔥\n\n👤 Player: ${playerName}\n🔢 Game ID: ${gameId}\n📱 Device: ${deviceModel}${sponsorTag}\n\nReady for the challenge! Wish me luck! 🏆⚡\n#eFootball #Tournament #OfficialContender${sponsorHashtag}`;
     navigator.clipboard.writeText(caption);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -213,16 +217,29 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
 
           {/* Content */}
           <div className="relative z-30 flex h-full flex-col px-5 pt-6 pb-5">
-            {/* Club wordmark — top centre */}
+            {/* Club wordmark & Sponsor — top centre */}
             <div className="w-full text-center">
               <span className="text-[15px] font-black uppercase tracking-[0.2em] text-white">
                 The Enigmatic Elite
               </span>
-              <div className="mx-auto mt-1.5 h-[2px] w-16" style={{ backgroundColor: GOLD }} />
+              <div className="mx-auto mt-1 h-[2px] w-16" style={{ backgroundColor: GOLD }} />
+              {sponsorName && (
+                <div className="mt-1 flex items-center justify-center gap-1.5">
+                  <span className="text-[7.5px] font-semibold uppercase tracking-[0.22em] text-white/60">
+                    Sponsored by
+                  </span>
+                  <span
+                    className="text-[8.5px] font-black uppercase tracking-[0.24em]"
+                    style={{ color: GOLD }}
+                  >
+                    {sponsorName}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Tournament name — gold brush banner */}
-            <div className="self-start max-w-[62%] mt-5">
+            <div className="self-start max-w-[62%] mt-4">
               <div
                 className="inline-block px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
                 style={{
