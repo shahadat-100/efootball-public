@@ -251,7 +251,7 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
                   </span>
                   <span
                     className="text-[8.5px] font-black uppercase tracking-[0.22em] px-1.5 py-0.5 rounded bg-white/10 border border-[#c89850]/40"
-                    style={{ color: GOLD }}
+                    style={{ color: '#ffffff' }}
                   >
                     {sponsorName}
                   </span>

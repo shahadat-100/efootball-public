@@ -19,6 +19,7 @@ export const TournamentKnockoutBracket: React.FC<TournamentKnockoutBracketProps>
     .filter(m => m.stage === 'semi_final')
     .sort((a, b) => (a.bracket_match_number || 0) - (b.bracket_match_number || 0));
   const finalMatch = matches.find(m => m.stage === 'final');
+  const thirdPlaceMatch = matches.find(m => m.stage === 'third_place');
 
   // A Single Match Card in the Bracket
   const MatchCard = ({
@@ -174,6 +175,14 @@ export const TournamentKnockoutBracket: React.FC<TournamentKnockoutBracketProps>
             Grand Championship
           </div>
           <MatchCard match={finalMatch} title="Grand Final" />
+
+          {/* 3RD PLACE PLAYOFF 🥉 */}
+          <div className="mt-10">
+            <div className="text-xs font-black uppercase text-orange-400 tracking-wider mb-2 px-1 flex items-center gap-1">
+              🥉 3rd Place Playoff
+            </div>
+            <MatchCard match={thirdPlaceMatch} title="3rd Place" />
+          </div>
         </div>
       </div>
     </div>
