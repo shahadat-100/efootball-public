@@ -118,13 +118,12 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   const nameWords = playerName.trim().split(/\s+/).filter(Boolean);
   const longestWord = nameWords.reduce((max, word) => Math.max(max, word.length), 0);
 
-  // Poster-style headline sizing: keep it huge, but fit long names inside the left column.
+  // Scaled for a clean, compact look positioned directly on top of Game ID
   const baseSize =
-    longestWord > 12 ? 30 :
-    longestWord > 10 ? 34 :
-    longestWord > 8 ? 40 :
-    longestWord > 6 ? 46 : 54;
-  const lineCountFactor = nameWords.length >= 4 ? 0.68 : nameWords.length === 3 ? 0.82 : 1;
+    longestWord > 14 ? 17 :
+    longestWord > 11 ? 19 :
+    longestWord > 8 ? 22 : 25;
+  const lineCountFactor = nameWords.length >= 4 ? 0.8 : nameWords.length === 3 ? 0.9 : 1;
   const nameSize = Math.round(baseSize * lineCountFactor);
 
   return (
@@ -217,25 +216,12 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
 
           {/* Content */}
           <div className="relative z-30 flex h-full flex-col px-5 pt-6 pb-5">
-            {/* Club wordmark & Sponsor — top centre */}
+            {/* Club wordmark — top centre */}
             <div className="w-full text-center">
               <span className="text-[15px] font-black uppercase tracking-[0.2em] text-white">
                 The Enigmatic Elite
               </span>
-              <div className="mx-auto mt-1 h-[2px] w-16" style={{ backgroundColor: GOLD }} />
-              {sponsorName && (
-                <div className="mt-1 flex items-center justify-center gap-1.5">
-                  <span className="text-[7.5px] font-semibold uppercase tracking-[0.22em] text-white/60">
-                    Sponsored by
-                  </span>
-                  <span
-                    className="text-[8.5px] font-black uppercase tracking-[0.24em]"
-                    style={{ color: GOLD }}
-                  >
-                    {sponsorName}
-                  </span>
-                </div>
-              )}
+              <div className="mx-auto mt-1.5 h-[2px] w-16" style={{ backgroundColor: GOLD }} />
             </div>
 
             {/* Tournament name — gold brush banner */}
@@ -256,19 +242,42 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
                   {tournamentTitle}
                 </span>
               </div>
+
+              {/* Sponsor badge — placed under tournament name */}
+              {sponsorName && (
+                <div className="mt-1.5 flex items-center gap-1.5 pl-0.5">
+                  <span className="text-[7.5px] font-semibold uppercase tracking-[0.2em] text-white/60">
+                    Sponsored by
+                  </span>
+                  <span
+                    className="text-[8.5px] font-black uppercase tracking-[0.22em] px-1.5 py-0.5 rounded bg-white/10 border border-[#c89850]/40"
+                    style={{ color: GOLD }}
+                  >
+                    {sponsorName}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Player name — giant poster headline, 20px below tournament name */}
-            <div className="mt-5">
+            {/* Spacer keeps the player & contender stats pinned to the bottom */}
+            <div className="flex-1" />
+
+            {/* Bottom-left: contender label + Player Name directly on top of Game ID / Device */}
+            <div className="flex flex-col items-start gap-1 max-w-[66%]">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="h-[2px] w-7 rounded-full" style={{ backgroundColor: GOLD }} />
+                <span className="text-[8px] font-semibold uppercase tracking-[0.24em] text-white/60">
+                  Official Contender
+                </span>
+              </div>
+
+              {/* Player name — positioned directly on top of Game ID, with smaller font */}
               <h2
-                className="max-w-[68%] uppercase text-white"
+                className="uppercase text-white font-black leading-[1.05] tracking-tight mb-1"
                 style={{
                   fontFamily: "'Oswald', sans-serif",
-                  fontWeight: 900,
                   fontSize: `${nameSize}px`,
-                  lineHeight: 0.82,
-                  letterSpacing: '-0.015em',
-                  textShadow: '0 6px 18px rgba(0,0,0,0.35)',
+                  textShadow: '0 4px 12px rgba(0,0,0,0.5)',
                 }}
               >
                 {nameWords.map((word, index) => (
@@ -277,21 +286,8 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
                   </span>
                 ))}
               </h2>
-            </div>
 
-            {/* Spacer keeps the stats pinned to the bottom */}
-            <div className="flex-1" />
-
-            {/* Bottom-left: contender label + Game ID / Device */}
-            <div className="flex flex-col items-start gap-1.5">
-              <div className="flex items-center gap-2">
-                <span className="h-[2px] w-7 rounded-full" style={{ backgroundColor: GOLD }} />
-                <span className="text-[8px] font-semibold uppercase tracking-[0.24em] text-white/60">
-                  Official Contender
-                </span>
-              </div>
-
-              <div className="flex max-w-[64%] items-baseline gap-1.5">
+              <div className="flex max-w-full items-baseline gap-1.5">
                 <span
                   className="flex-shrink-0 text-[7px] font-bold uppercase tracking-[0.16em]"
                   style={{ color: GOLD }}
@@ -303,7 +299,7 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
                 </span>
               </div>
 
-              <div className="flex max-w-[64%] items-baseline gap-1.5">
+              <div className="flex max-w-full items-baseline gap-1.5">
                 <span
                   className="flex-shrink-0 text-[7px] font-bold uppercase tracking-[0.16em]"
                   style={{ color: GOLD }}
