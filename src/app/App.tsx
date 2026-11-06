@@ -79,9 +79,9 @@ export function AppShell() {
     <div className="flex flex-col h-screen min-h-[600px] max-h-screen bg-background text-foreground font-sans overflow-hidden">
       {/* Topbar */}
       <header className="bg-white/80 backdrop-blur-xl border-b border-border/60 h-16 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm z-20 w-full relative">
-        <div className="flex items-center gap-6 lg:gap-8">
+        <div className="flex items-center gap-6 lg:gap-8 min-w-0 flex-1">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <button
               className="md:hidden p-1.5 -ml-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -101,7 +101,7 @@ export function AppShell() {
           </div>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center gap-0.5 relative">
+          <nav className="hidden md:flex items-center gap-0.5 relative overflow-x-auto no-scrollbar min-w-0 flex-1">
             {NAV.map(t => {
               const Icon = t.icon;
               const isActive = location.pathname.includes('/' + t.id);
@@ -110,7 +110,7 @@ export function AppShell() {
                   key={t.id}
                   to={`/${t.id}`}
                   className={cn(
-                    "relative flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary group",
+                    "relative flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary group whitespace-nowrap flex-shrink-0",
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                   )}
                 >
@@ -140,7 +140,7 @@ export function AppShell() {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/8 border border-primary/15">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-primary leading-none hidden sm:block">The Enigmatic Elite</span>
