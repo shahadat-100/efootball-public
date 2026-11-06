@@ -74,9 +74,9 @@ export const TournamentKnockoutBracket: React.FC<TournamentKnockoutBracketProps>
           )}>
             <div className="flex items-center gap-2 truncate">
               {match?.player1?.profileImageUrl ? (
-                <img src={match.player1.profileImageUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                <img src={match.player1.profileImageUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-1 ring-border" />
               ) : (
-                <span className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[9px]">⚽</span>
+                <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px]">⚽</span>
               )}
               <span className="truncate">{match?.player1?.name || 'TBD'}</span>
             </div>
@@ -92,9 +92,9 @@ export const TournamentKnockoutBracket: React.FC<TournamentKnockoutBracketProps>
           )}>
             <div className="flex items-center gap-2 truncate">
               {match?.player2?.profileImageUrl ? (
-                <img src={match.player2.profileImageUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                <img src={match.player2.profileImageUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-1 ring-border" />
               ) : (
-                <span className="w-4 h-4 rounded-full bg-muted flex items-center justify-center text-[9px]">⚽</span>
+                <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px]">⚽</span>
               )}
               <span className="truncate">{match?.player2?.name || 'TBD'}</span>
             </div>
