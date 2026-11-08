@@ -36,12 +36,24 @@ export function isInAppBrowser(): boolean {
 }
 
 /**
- * Detects if the current device is mobile (iOS or Android).
+ * Detects whether the device is an iPad (including iPadOS where userAgent reports as Macintosh).
+ */
+export function isIPadDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return (
+    /iPad/i.test(ua) ||
+    (ua.includes('Macintosh') && typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 1)
+  );
+}
+
+/**
+ * Detects if the current device is mobile or tablet (iPhone, iPad, iPod, Android).
  */
 export function isMobileDevice(): boolean {
   if (typeof window === 'undefined') return false;
   const ua = navigator.userAgent || '';
-  return /iPhone|iPad|iPod|Android/i.test(ua);
+  return /iPhone|iPod|Android/i.test(ua) || isIPadDevice();
 }
 
 /**

@@ -451,7 +451,7 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
             
             <div className="p-3 my-3 rounded-xl bg-[#c89850]/15 border border-[#c89850]/30 text-left text-xs text-white/90">
               <p className="font-bold text-[#c89850] mb-0.5 flex items-center gap-1.5">
-                <span>📱 How to save to your phone:</span>
+                <span>📱 How to save to your device (Phone / iPad):</span>
               </p>
               <p className="text-[11px] text-white/80 leading-relaxed">
                 <strong>Tap & hold (long-press)</strong> the image below and select <strong>"Save Image"</strong> or <strong>"Download Image"</strong> to save to your Photos!
