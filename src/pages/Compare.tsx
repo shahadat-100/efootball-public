@@ -7,7 +7,7 @@ import { StatCompareBar } from '@/features/compare/components/StatCompareBar';
 import { aggregatePlayerStats } from '@/features/compare/utils';
 import { cn } from '@/shared/lib/cn';
 import { BarChart3, Trophy, Flame, Target, Shield, Zap, Download, Filter, Search } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import { downloadCard } from '@/features/gallery/components/shared/downloadCard';
 
 function StatCompareText({ label, p1Value, p2Value, better = 'higher' }: any) {
   const isTie = p1Value === p2Value;
@@ -189,14 +189,13 @@ export function Compare() {
     if (!captureRef.current) return;
     setIsExporting(true);
     try {
-      const dataUrl = await toPng(captureRef.current, {
-        cacheBust: true,
-        pixelRatio: 2,
-      });
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `compare_${p1.player?.name.replace(/\s+/g, '_')}_vs_${p2.player?.name.replace(/\s+/g, '_')}.png`;
-      a.click();
+      const p1Name = p1?.player?.name ? p1.player.name.replace(/\s+/g, '_') : 'p1';
+      const p2Name = p2?.player?.name ? p2.player.name.replace(/\s+/g, '_') : 'p2';
+      await downloadCard(
+        captureRef.current,
+        `compare_${p1Name}_vs_${p2Name}`,
+        'png'
+      );
     } catch (err) {
       console.error('Export failed', err);
     } finally {

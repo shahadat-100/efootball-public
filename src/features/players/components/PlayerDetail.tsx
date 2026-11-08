@@ -14,7 +14,7 @@ import { PlayerOverviewDashboard } from './detail-tabs/PlayerOverviewDashboard';
 import { AvatarSpeechBubble } from './AvatarSpeechBubble';
 import { useAvatarSpeechBubble } from '../hooks/useAvatarSpeechBubble';
 import { cn } from '@/shared/lib/cn';
-import { toPng } from 'html-to-image';
+import { downloadCard } from '@/features/gallery/components/shared/downloadCard';
 import { Download, User, Activity, BarChart2, Award, MapPin, CalendarDays, GraduationCap } from 'lucide-react';
 interface PlayerDetailProps {
   playerId: string;
@@ -57,14 +57,11 @@ export function PlayerDetail({ playerId, onBack }: PlayerDetailProps) {
     if (!captureRef.current || !player) return;
     setIsExporting(true);
     try {
-      const dataUrl = await toPng(captureRef.current, {
-        cacheBust: true,
-        pixelRatio: 2,
-      });
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `player_card_${player.name.replace(/\s+/g, '_')}.png`;
-      a.click();
+      await downloadCard(
+        captureRef.current,
+        `player_card_${player.name.replace(/\s+/g, '_')}`,
+        'png'
+      );
     } catch (err) {
       console.error('Export failed', err);
     } finally {
