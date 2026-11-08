@@ -43,3 +43,80 @@ export function isMobileDevice(): boolean {
   const ua = navigator.userAgent || '';
   return /iPhone|iPad|iPod|Android/i.test(ua);
 }
+
+/**
+ * Safely converts an image URL to a base64 Data URL.
+ * Solves cross-origin (CORS), browser cache poisoning, and mobile WebKit / WebView issues
+ * where external images are silently dropped during canvas / html-to-image export on mobile devices.
+ */
+export async function imageUrlToDataUrl(url: string): Promise<string> {
+  if (!url || typeof window === 'undefined') return '';
+  if (url.startsWith('data:')) return url;
+
+  // 1. First attempt: fetch with CORS and cache-busting timestamp
+  try {
+    const separator = url.includes('?') ? '&' : '?';
+    const cacheBustedUrl = `${url}${separator}_cb=${Date.now()}`;
+    const res = await fetch(cacheBustedUrl, {
+      mode: 'cors',
+      cache: 'no-cache',
+      credentials: 'omit',
+    });
+
+    if (res.ok) {
+      const blob = await res.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') resolve(reader.result);
+          else reject(new Error('FileReader did not return string'));
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      if (dataUrl && dataUrl.startsWith('data:image')) {
+        return dataUrl;
+      }
+    }
+  } catch (fetchErr) {
+    console.warn('imageUrlToDataUrl fetch attempt failed, trying HTMLImage fallback:', fetchErr);
+  }
+
+  // 2. Second attempt: HTML Image element + Canvas
+  try {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const separator = url.includes('?') ? '&' : '?';
+      img.src = `${url}${separator}_cb=${Date.now()}`;
+
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || img.width || 400;
+          canvas.height = img.naturalHeight || img.height || 500;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(url);
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } catch (canvasErr) {
+          reject(canvasErr);
+        }
+      };
+
+      img.onerror = (err) => reject(err);
+    });
+
+    if (dataUrl && dataUrl.startsWith('data:image')) {
+      return dataUrl;
+    }
+  } catch (canvasErr) {
+    console.warn('imageUrlToDataUrl canvas fallback failed:', canvasErr);
+  }
+
+  return url;
+}

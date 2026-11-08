@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import { Download, Copy, Check, Shield, Sparkles, X } from 'lucide-react';
-import { dataUrlToBlob, isInAppBrowser, isMobileDevice } from '@/shared/lib/downloadHelper';
+import { dataUrlToBlob, isInAppBrowser, isMobileDevice, imageUrlToDataUrl } from '@/shared/lib/downloadHelper';
 
 interface TournamentPlayerCardProps {
   playerName: string;
@@ -33,23 +33,98 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saveModalImage, setSaveModalImage] = useState<string | null>(null);
+  const [inlinedPlayerImage, setInlinedPlayerImage] = useState<string | null>(null);
+
+  // Pre-inline the player image to base64 Data URL so mobile browsers / WebViews never drop it on canvas export
+  useEffect(() => {
+    let isMounted = true;
+    if (!playerImageUrl) {
+      setInlinedPlayerImage(null);
+      return;
+    }
+
+    if (playerImageUrl.startsWith('data:')) {
+      setInlinedPlayerImage(playerImageUrl);
+      return;
+    }
+
+    imageUrlToDataUrl(playerImageUrl).then((dataUrl) => {
+      if (isMounted && dataUrl && dataUrl.startsWith('data:')) {
+        setInlinedPlayerImage(dataUrl);
+      }
+    }).catch((err) => {
+      console.warn('Background inlining of player image failed:', err);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [playerImageUrl]);
 
   // Handle Download Image (High Res 4:5) — handles mobile, in-app webviews (FB/IG), and desktop
   const handleDownload = async () => {
     if (!posterRef.current) return;
     try {
       setDownloading(true);
-      const dataUrl = await toPng(posterRef.current, {
+
+      const mobile = isMobileDevice();
+
+      // 1. Ensure the player image is fully converted to base64 before export
+      let activeImage = inlinedPlayerImage;
+      if (playerImageUrl && (!activeImage || !activeImage.startsWith('data:'))) {
+        try {
+          activeImage = await imageUrlToDataUrl(playerImageUrl);
+          if (activeImage && activeImage.startsWith('data:')) {
+            setInlinedPlayerImage(activeImage);
+            // Allow DOM to paint the updated base64 image
+            await new Promise((r) => setTimeout(r, 80));
+          }
+        } catch (convErr) {
+          console.warn('Failed to convert image before download:', convErr);
+        }
+      }
+
+      // 2. Wait for image decoding in the DOM
+      const imgEl = posterRef.current.querySelector('img');
+      if (imgEl) {
+        if (imgEl.decode) {
+          try {
+            await imgEl.decode();
+          } catch {
+            // ignore decode error
+          }
+        } else if (!imgEl.complete) {
+          await new Promise<void>((resolve) => {
+            imgEl.onload = () => resolve();
+            imgEl.onerror = () => resolve();
+          });
+        }
+      }
+
+      const captureOptions = {
         quality: 0.98,
-        pixelRatio: 3, // Ultra-crisp 3x resolution for Facebook
-      });
+        pixelRatio: mobile ? 2 : 3, // 2x on mobile prevents canvas allocation crashes and drops; 3x on desktop
+        cacheBust: true,
+        fetchRequestInit: { mode: 'cors' as RequestMode },
+      };
+
+      // 3. WebKit warmup pass: On iOS Safari / WebKit, foreignObject rasterization can skip images on first draw
+      if (mobile) {
+        try {
+          await toPng(posterRef.current, captureOptions);
+          await new Promise((r) => setTimeout(r, 60));
+        } catch {
+          // ignore warmup pass errors
+        }
+      }
+
+      const dataUrl = await toPng(posterRef.current, captureOptions);
 
       const cleanName = playerName.trim().toLowerCase().replace(/\s+/g, '_') || 'player';
       const filename = `${cleanName}_card.png`;
       const blob = dataUrlToBlob(dataUrl);
 
       const inApp = isInAppBrowser();
-      const mobile = isMobileDevice();
 
       // 1. Try Web Share API (native sheet on iOS / Android with "Save Image")
       if (typeof navigator !== 'undefined' && navigator.share) {
@@ -198,10 +273,12 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
           <div className="absolute right-[-6%] bottom-0 w-[80%] aspect-[4/5] z-20">
             {playerImageUrl ? (
               <img
-                src={playerImageUrl}
+                src={inlinedPlayerImage || playerImageUrl}
                 alt={playerName}
                 className="w-full h-full object-contain object-bottom drop-shadow-[0_18px_28px_rgba(0,0,0,0.5)]"
                 crossOrigin="anonymous"
+                loading="eager"
+                decoding="sync"
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-white/40 p-4 text-center">
