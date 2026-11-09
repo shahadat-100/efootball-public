@@ -20,15 +20,6 @@ const NAV = [
   { id: 'club-info', label: 'Club Info', icon: Shield },
 ];
 
-// Bottom nav items for mobile (top 5)
-const BOTTOM_NAV = [
-  { id: 'overview', label: 'Overview', icon: Hexagon },
-  { id: 'players', label: 'Players', icon: Users },
-  { id: 'matches', label: 'Matches', icon: Trophy },
-  { id: 'leaderboard', label: 'Leaderboard', icon: Medal },
-  { id: 'friendly', label: 'Friendly', icon: Swords },
-];
-
 // Page title map
 const PAGE_TITLES: Record<string, string> = {
   overview: 'Overview',
@@ -109,6 +100,7 @@ export function AppShell() {
                 <NavLink
                   key={t.id}
                   to={`/${t.id}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "relative flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary group whitespace-nowrap flex-shrink-0",
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -157,6 +149,7 @@ export function AppShell() {
                 <NavLink
                   key={t.id}
                   to={`/${t.id}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium transition-all",
                     isActive
@@ -190,43 +183,13 @@ export function AppShell() {
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
-        <main className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-10 relative w-full h-full pb-20 md:pb-0">
+        <main className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-10 relative w-full h-full">
           <div className="max-w-[1600px] mx-auto pb-12 w-full">
             <Outlet />
           </div>
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="bottom-nav md:hidden flex items-center justify-around py-2 px-1">
-        {BOTTOM_NAV.map(t => {
-          const Icon = t.icon;
-          const isActive = location.pathname.includes('/' + t.id);
-          return (
-            <NavLink
-              key={t.id}
-              to={`/${t.id}`}
-              className={cn(
-                "flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all min-w-[56px]",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
-            >
-              <div className={cn(
-                "p-1.5 rounded-xl transition-all",
-                isActive ? "bg-primary/10" : ""
-              )}>
-                <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-              </div>
-              <span className={cn(
-                "text-[10px] font-semibold leading-none",
-                isActive ? "text-primary" : "text-muted-foreground"
-              )}>{t.label}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
       <Analytics />
     </div>
   );
