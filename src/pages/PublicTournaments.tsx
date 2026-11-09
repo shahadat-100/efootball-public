@@ -8,7 +8,7 @@ import { TournamentKnockoutBracket } from '@/features/tournaments/components/Tou
 import { TournamentPlayerCard } from '@/features/tournaments/components/TournamentPlayerCard';
 import { useFootballStore, mapPlayerFromDb } from '@/store/footballStore';
 import { 
-  Trophy, Calendar, Users, Smartphone,
+  Trophy, Calendar, Users, Smartphone, AlertTriangle, RefreshCw,
   Clock, Sparkles, Eye, X, Hash, GitBranch, UserPlus
 } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
@@ -24,6 +24,8 @@ export function PublicTournaments() {
   const [groups, setGroups] = useState<TournamentGroup[]>([]);
   const [participants, setParticipants] = useState<TournamentParticipant[]>([]);
   const [registrations, setRegistrations] = useState<TournamentRegistration[]>([]);
+  const [rejectedRegistrations, setRejectedRegistrations] = useState<TournamentRegistration[]>([]);
+  const [selectedPlayerForFix, setSelectedPlayerForFix] = useState<string | null>(null);
   const [matches, setMatches] = useState<TournamentMatch[]>([]);
   
   const [activeTab, setActiveTab] = useState<'participants' | 'matches' | 'groups' | 'bracket'>('participants');
@@ -65,7 +67,7 @@ export function PublicTournaments() {
         supabase.from('tournament_groups').select('*').eq('tournament_id', tournamentId).order('name', { ascending: true }),
         supabase.from('tournament_participants').select('*').eq('tournament_id', tournamentId),
         supabase.from('tournament_matches').select('*').eq('tournament_id', tournamentId).order('matchday', { ascending: true }),
-        supabase.from('tournament_registrations').select('*').eq('tournament_id', tournamentId).eq('status', 'approved'),
+        supabase.from('tournament_registrations').select('*').eq('tournament_id', tournamentId),
         supabase.from('players').select('*').limit(2000),
       ]);
 
@@ -98,12 +100,13 @@ export function PublicTournaments() {
           player2: m.player2_id ? (playerMap.get(String(m.player2_id)) || playerMap.get(m.player2_id)) : undefined,
         })) as TournamentMatch[]
       );
-      setRegistrations(
-        ((regRes.data as any[]) || []).map((r) => ({
-          ...r,
-          player: r.player_id ? (playerMap.get(String(r.player_id)) || playerMap.get(r.player_id)) : undefined,
-        })) as TournamentRegistration[]
-      );
+      const allMappedRegistrations = ((regRes.data as any[]) || []).map((r) => ({
+        ...r,
+        player: r.player_id ? (playerMap.get(String(r.player_id)) || playerMap.get(r.player_id)) : undefined,
+      })) as TournamentRegistration[];
+
+      setRegistrations(allMappedRegistrations.filter(r => r.status === 'approved'));
+      setRejectedRegistrations(allMappedRegistrations.filter(r => r.status === 'rejected'));
 
       const cur = tournaments.find(t => t.id === tournamentId);
       if (cur?.status === 'group_stage') {
@@ -456,6 +459,76 @@ export function PublicTournaments() {
                   ))}
                 </div>
               )}
+
+              {/* ─── REJECTED / NEEDS CORRECTION SECTION ─── */}
+              {rejectedRegistrations.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-border/80">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        <span>Action Required • Needs Correction ({rejectedRegistrations.length})</span>
+                      </h3>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      Click &quot;Fix &amp; Re-Submit&quot; to correct your submission details
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {rejectedRegistrations.map((reg) => (
+                      <div
+                        key={reg.id}
+                        className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/25 hover:border-amber-500/40 transition shadow-sm flex flex-col justify-between"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-muted/50 border border-border overflow-hidden flex-shrink-0">
+                            {reg.player?.profileImageUrl ? (
+                              <img src={reg.player.profileImageUrl} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-lg">⚽</div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <h4 className="font-bold text-sm text-foreground truncate">
+                                {reg.player?.name || 'Player'}
+                              </h4>
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0">
+                                Needs Fix
+                              </span>
+                            </div>
+
+                            <p className="text-[11px] text-muted-foreground font-mono truncate mt-0.5">
+                              ID: {reg.game_id || 'N/A'} • {reg.device_model || 'Device'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 p-2.5 rounded-xl bg-card border border-amber-500/20 text-[11px] text-foreground leading-snug">
+                          <span className="font-bold text-amber-500">Reason: </span>
+                          <span className="text-muted-foreground">
+                            {reg.rejection_reason || 'Facebook post proof URL or Game ID not properly submitted. Please check and re-submit.'}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setSelectedPlayerForFix(reg.player_id);
+                            setIsRegModalOpen(true);
+                          }}
+                          className="mt-3.5 w-full py-2 px-3 rounded-xl bg-[#c89850] hover:bg-[#b58641] text-[#00265a] font-black text-xs transition flex items-center justify-center gap-1.5 shadow"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>Fix &amp; Re-Submit Application</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -632,14 +705,20 @@ export function PublicTournaments() {
       {selectedTournament && (
         <TournamentRegistrationModal
           isOpen={isRegModalOpen}
-          onClose={() => setIsRegModalOpen(false)}
+          onClose={() => {
+            setIsRegModalOpen(false);
+            setSelectedPlayerForFix(null);
+          }}
           tournamentId={selectedTournament.id}
           tournamentTitle={selectedTournament.title}
           seasonName={selectedTournament.season_name ?? undefined}
           players={effectivePlayers}
           playersLoading={playersLoading && effectivePlayers.length === 0}
+          initialPlayerId={selectedPlayerForFix || undefined}
           onRegistrationSuccess={() => {
             if (selectedTournament) fetchTournamentDetails(selectedTournament.id);
+            setIsRegModalOpen(false);
+            setSelectedPlayerForFix(null);
           }}
         />
       )}

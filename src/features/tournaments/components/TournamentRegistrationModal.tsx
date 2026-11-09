@@ -24,6 +24,7 @@ interface TournamentRegistrationModalProps {
   seasonName?: string;
   players: Player[];
   playersLoading?: boolean;
+  initialPlayerId?: string;
   onRegistrationSuccess?: () => void;
 }
 
@@ -35,9 +36,16 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
   seasonName = 'SEASON 1 • 2026',
   players,
   playersLoading = false,
+  initialPlayerId,
   onRegistrationSuccess
 }) => {
-  const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [selectedPlayerId, setSelectedPlayerId] = useState(initialPlayerId || '');
+
+  useEffect(() => {
+    if (isOpen && initialPlayerId) {
+      setSelectedPlayerId(initialPlayerId);
+    }
+  }, [isOpen, initialPlayerId]);
   const [playerSearch, setPlayerSearch] = useState('');
   const [isPlayerMenuOpen, setIsPlayerMenuOpen] = useState(false);
   const playerMenuRef = useRef<HTMLDivElement>(null);
@@ -426,11 +434,9 @@ export const TournamentRegistrationModal: React.FC<TournamentRegistrationModalPr
                       <p className="text-white/80 text-[11px] leading-relaxed">
                         Your previous registration was rejected. Please review or correct your Facebook link, Game ID, or device model below and re-submit!
                       </p>
-                      {existingReg?.rejection_reason && (
-                        <div className="mt-2 p-2 rounded-lg bg-black/40 border border-amber-500/20 text-[11px] text-amber-100">
-                          <span className="font-bold text-amber-300">Admin Reason:</span> {existingReg.rejection_reason}
-                        </div>
-                      )}
+                      <div className="mt-2 p-2 rounded-lg bg-black/40 border border-amber-500/20 text-[11px] text-amber-100">
+                        <span className="font-bold text-amber-300">Admin Note:</span> {existingReg?.rejection_reason || 'Facebook post proof URL or Game ID not properly verified. Please check your submission and re-submit.'}
+                      </div>
                     </div>
                   )}
 
