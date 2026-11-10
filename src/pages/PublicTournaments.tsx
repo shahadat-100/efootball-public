@@ -446,6 +446,11 @@ export function PublicTournaments() {
                           <Smartphone className="w-2.5 h-2.5" />
                           <span className="truncate max-w-[110px]">{reg.device_model}</span>
                         </span>
+                        {reg.updated_at && reg.last_update_type && (
+                          <span className="mt-1 inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                            ⚡ Updated
+                          </span>
+                        )}
                       </div>
 
                       <button
@@ -752,6 +757,8 @@ export function PublicTournaments() {
               playerImageUrl={viewingPlayerCard.player?.coverImageUrl || viewingPlayerCard.player?.profileImageUrl}
               gameId={viewingPlayerCard.game_id}
               deviceModel={viewingPlayerCard.device_model}
+              updatedAt={viewingPlayerCard.updated_at}
+              lastUpdateType={viewingPlayerCard.last_update_type}
               tournamentTitle={selectedTournament?.title}
               seasonName={selectedTournament?.season_name || 'SEASON 1 • 2026'}
               showActions={false}

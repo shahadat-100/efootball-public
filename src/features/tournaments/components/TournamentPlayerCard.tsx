@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Copy, Check, Shield, Sparkles, X } from 'lucide-react';
+import { Download, Copy, Check, Shield, Sparkles, X, Zap } from 'lucide-react';
 import { dataUrlToBlob, isInAppBrowser, isMobileDevice, imageUrlToDataUrl } from '@/shared/lib/downloadHelper';
 
 interface TournamentPlayerCardProps {
@@ -11,8 +11,28 @@ interface TournamentPlayerCardProps {
   tournamentTitle?: string;
   seasonName?: string;
   sponsorName?: string;
+  updatedAt?: string | null;
+  lastUpdateType?: 'id' | 'device' | 'both' | null;
   showActions?: boolean;
   onDownloaded?: (dataUrl: string) => void;
+}
+
+
+function formatUpdateDateTime(dateStr?: string | null): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const day = d.getDate().toString().padStart(2, '0');
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const formattedHours = hours.toString().padStart(2, '0');
+  return day + ' ' + month + ' ' + year + ' • ' + formattedHours + ':' + minutes + ' ' + ampm;
 }
 
 const GOLD = '#c89850';
@@ -25,6 +45,8 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
   deviceModel,
   tournamentTitle = 'EFOOTBALL CHAMPIONSHIP',
   sponsorName = 'Diagram',
+  updatedAt,
+  lastUpdateType,
   showActions = true,
   onDownloaded
 }) => {
@@ -387,6 +409,18 @@ export const TournamentPlayerCard: React.FC<TournamentPlayerCardProps> = ({
                   {deviceModel || '—'}
                 </span>
               </div>
+
+              {updatedAt && lastUpdateType && (
+                <div className="mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/60 border border-[#c89850]/50 text-amber-300 text-[8px] font-sans font-bold tracking-wider uppercase shadow-inner">
+                  <Zap className="w-2.5 h-2.5 text-amber-400 fill-current animate-pulse flex-shrink-0" />
+                  <span>
+                    {lastUpdateType === 'id' && 'GAME ID UPDATED'}
+                    {lastUpdateType === 'device' && 'DEVICE UPDATED'}
+                    {lastUpdateType === 'both' && 'ID & DEVICE UPDATED'}
+                  </span>
+                  <span className="text-white/80 font-mono">• {formatUpdateDateTime(updatedAt)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
