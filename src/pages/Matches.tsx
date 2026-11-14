@@ -1,16 +1,14 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { Match } from '@/features/matches/types';
+import { isClubTeam, getClubResult } from '@/features/matches/utils';
 import { Button, Input, Modal, Badge } from '@/shared/components';
 import { fuzzyFilter } from '@/shared/lib/utils';
 import { Search, Swords, TrendingUp, TrendingDown, Minus, Trophy, Flame, ChevronDown, ChevronUp } from 'lucide-react';
-import { STATUS_BADGE } from '@/shared/lib/constants';
+import { STATUS_BADGE, HOME_TEAM } from '@/shared/lib/constants';
 import { cn } from '@/shared/lib/cn';
-import { HOME_TEAM } from '@/shared/lib/constants';
 
-// ── Types & Helpers ──────────────────────────────────────────────
-
-type MatchResult = 'win' | 'draw' | 'loss';
+// ── Helpers ──────────────────────────────────────────────────────
 
 function formatDateLabel(dateStr: string): string {
   const today = new Date();
@@ -23,31 +21,6 @@ function formatDateLabel(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
-}
-
-function isClubTeam(name?: string | null): boolean {
-  const n = name?.toLowerCase() ?? '';
-  return n.includes('elite') || n.includes('enigmatic');
-}
-
-function getClubResult(match: Match, matchResultsMap: Map<string, string>): MatchResult | undefined {
-  if (match.status !== 'upcoming' && match.homeScore != null && match.awayScore != null) {
-    const clubIsHome = isClubTeam(match.homeTeam);
-    const clubIsAway = isClubTeam(match.awayTeam);
-    if (clubIsHome) {
-      if (match.homeScore > match.awayScore) return 'win';
-      if (match.homeScore < match.awayScore) return 'loss';
-      return 'draw';
-    }
-    if (clubIsAway) {
-      if (match.awayScore > match.homeScore) return 'win';
-      if (match.awayScore < match.homeScore) return 'loss';
-      return 'draw';
-    }
-  }
-  const stored = matchResultsMap.get(match.id);
-  if (stored === 'win' || stored === 'draw' || stored === 'loss') return stored;
-  return undefined;
 }
 
 function getClubGoalDiff(match: Match): number {

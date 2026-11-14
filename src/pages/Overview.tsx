@@ -12,6 +12,7 @@ import { OverviewPointsLeaderboard } from '@/features/overview/components/Overvi
 import { MonthlyTopXI } from '@/features/overview/components/MonthlyTopXI';
 import { LatestNewsCards } from '@/features/overview/components/LatestNewsCards';
 import { RecentMatchesCard } from '@/features/overview/components/RecentMatchesCard';
+import { getClubResult } from '@/features/matches/utils';
 import { ClubRecords } from '@/features/overview/components/ClubRecords';
 import { TeamMilestones } from '@/features/overview/components/TeamMilestones';
 import { GoldenBootRace } from '@/features/overview/components/GoldenBootRace';
@@ -66,13 +67,17 @@ export function Overview({ setTab }: OverviewProps) {
   // ── 2. Win / Draw / Loss Data ──
   const uniqueMatchesResults = useMemo(() => {
     const matchResultsMap = new Map<string, string>();
+    matches.forEach(m => {
+      const res = getClubResult(m);
+      if (res) matchResultsMap.set(m.id, res);
+    });
     matchEntries.forEach(e => {
       if (e.matchId && !matchResultsMap.has(e.matchId) && e.result) {
         matchResultsMap.set(e.matchId, e.result);
       }
     });
     return { matchResultsMap };
-  }, [matchEntries]);
+  }, [matches, matchEntries]);
 
   const donutStats = useMemo(() => {
     const wins = playerSeasonStats.reduce((s, e) => s + (e.wins || 0), 0);

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Match } from '@/features/matches/types';
+import { getClubResult, isClubTeam } from '@/features/matches/utils';
 import { Badge } from '@/shared/components';
 import { STATUS_BADGE } from '@/shared/lib/constants';
 import { Activity, Swords } from 'lucide-react';
@@ -7,7 +8,7 @@ import { cn } from '@/shared/lib/cn';
 
 interface RecentMatchesCardProps {
   matches: Match[];
-  matchResultsMap: Map<string, string>;
+  matchResultsMap?: Map<string, string>;
 }
 
 function TeamInitials({ name }: { name: string }) {
@@ -47,7 +48,7 @@ export function RecentMatchesCard({ matches, matchResultsMap }: RecentMatchesCar
   );
 
   const getResultMeta = (match: Match) => {
-    const result = matchResultsMap.get(match.id);
+    const result = getClubResult(match, matchResultsMap);
     if (match.status !== 'finished' || !result) {
       return {
         label: null,
@@ -128,9 +129,9 @@ export function RecentMatchesCard({ matches, matchResultsMap }: RecentMatchesCar
 
                 {/* Main: Teams + Score */}
                 <div className="flex items-center justify-between gap-3">
-                  {/* Home Team (Club Logo) */}
+                  {/* Home Team */}
                   <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                    <ClubLogo />
+                    {isClubTeam(m.homeTeam) || !isClubTeam(m.awayTeam) ? <ClubLogo /> : <TeamInitials name={m.homeTeam} />}
                     <span className="text-[13px] font-bold text-foreground text-center line-clamp-1 w-full px-1">
                       {m.homeTeam}
                     </span>
@@ -149,9 +150,9 @@ export function RecentMatchesCard({ matches, matchResultsMap }: RecentMatchesCar
                     }
                   </div>
 
-                  {/* Away Team (Initials) */}
+                  {/* Away Team */}
                   <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                    <TeamInitials name={m.awayTeam} />
+                    {isClubTeam(m.awayTeam) ? <ClubLogo /> : <TeamInitials name={m.awayTeam} />}
                     <span className="text-[13px] font-bold text-foreground text-center line-clamp-1 w-full px-1">
                       {m.awayTeam}
                     </span>

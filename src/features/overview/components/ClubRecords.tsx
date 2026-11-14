@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Player } from '@/features/players/types';
 import { Match } from '@/features/matches/types';
+import { getClubResult } from '@/features/matches/utils';
 import { MatchEntry } from '@/features/match-entries/types';
 import { Avatar } from '@/shared/components';
 import { Trophy, Flame, Shield } from 'lucide-react';
@@ -26,7 +27,7 @@ export function ClubRecords({ players, matches, matchEntries }: ClubRecordsProps
     let bestMatch: Match | null = null;
 
     for (const m of matches) {
-      const result = matchResultsMap.get(m.id as string);
+      const result = getClubResult(m, matchResultsMap);
       if (result === 'win' && m.status === 'finished') {
         const diff = Math.abs((m.homeScore || 0) - (m.awayScore || 0));
         if (diff > maxDiff) {
