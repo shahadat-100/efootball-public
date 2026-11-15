@@ -184,10 +184,27 @@ export function AdminTournaments() {
       return;
     }
 
-    const confirmGen = window.confirm(
-      `Generate equal groups for ${approved.length} approved participants? (Any missing slots will be filled with BYE walkover bots)`
-    );
-    if (!confirmGen) return;
+    // Safety check: If groups already exist, show strict warning and require typed confirmation
+    const alreadyHasGroups = matches.some(m => m.stage === 'group');
+    if (alreadyHasGroups) {
+      const confirmReset = window.confirm(
+        `⚠️ কঠোর সতর্কতা (CRITICAL WARNING):\n\nএই টুর্নামেন্টে ইতিমধ্যে গ্রুপ এবং ফিক্সচার তৈরি করা আছে!\n\nআপনি কি নিশ্চিত যে আগের সব গ্রুপ, ম্যাচ এবং ফলাফল সম্পূর্ণ মুছে ফেলে নতুন করে ড্র করবেন?\n\n(This will permanently wipe all existing group matches and results!)`
+      );
+      if (!confirmReset) return;
+
+      const secondConfirm = window.prompt(
+        'সত্যিই আগের সব গ্রুপ ও ম্যাচ মুছে নতুন ড্র করতে টাইপ করুন: RESET'
+      );
+      if (secondConfirm?.trim().toUpperCase() !== 'RESET') {
+        alert('অ্যাকশন বাতিল করা হয়েছে। কোনো ডাটা পরিবর্তন করা হয়নি।');
+        return;
+      }
+    } else {
+      const confirmGen = window.confirm(
+        `Generate equal groups for ${approved.length} approved participants? (Any missing slots will be filled with BYE walkover bots)`
+      );
+      if (!confirmGen) return;
+    }
 
     try {
       setLoading(true);
