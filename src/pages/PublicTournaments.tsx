@@ -86,18 +86,25 @@ export function PublicTournaments() {
         rawPlayerList.map((p: any) => [String(p.id), p])
       );
 
-      setGroups((groupsRes.data as TournamentGroup[]) || []);
-      setParticipants(
-        ((participantsRes.data as any[]) || []).map((p) => ({
+      const participantPlayerMap = new Map<string, ReturnType<typeof mapPlayerFromDb>>();
+      const mappedParticipants = ((participantsRes.data as any[]) || []).map((p) => {
+        const resolvedPlayer = p.player_id ? (playerMap.get(String(p.player_id)) || playerMap.get(p.player_id)) : undefined;
+        if (p.id && resolvedPlayer) {
+          participantPlayerMap.set(String(p.id), resolvedPlayer);
+        }
+        return {
           ...p,
-          player: p.player_id ? (playerMap.get(String(p.player_id)) || playerMap.get(p.player_id)) : undefined,
-        })) as TournamentParticipant[]
-      );
+          player: resolvedPlayer,
+        };
+      }) as TournamentParticipant[];
+
+      setGroups((groupsRes.data as TournamentGroup[]) || []);
+      setParticipants(mappedParticipants);
       setMatches(
         ((matchesRes.data as any[]) || []).map((m) => ({
           ...m,
-          player1: m.player1_id ? (playerMap.get(String(m.player1_id)) || playerMap.get(m.player1_id)) : undefined,
-          player2: m.player2_id ? (playerMap.get(String(m.player2_id)) || playerMap.get(m.player2_id)) : undefined,
+          player1: m.player1_id ? (playerMap.get(String(m.player1_id)) || participantPlayerMap.get(String(m.player1_id))) : undefined,
+          player2: m.player2_id ? (playerMap.get(String(m.player2_id)) || participantPlayerMap.get(String(m.player2_id))) : undefined,
         })) as TournamentMatch[]
       );
       const allMappedRegistrations = ((regRes.data as any[]) || []).map((r) => ({
@@ -582,7 +589,9 @@ export function PublicTournaments() {
                               <img src={m.player1.profileImageUrl} alt="" className="w-full h-full object-cover" />
                             ) : '⚽'}
                           </div>
-                          <span className="font-bold text-sm text-foreground truncate">{m.player1?.name || 'TBD'}</span>
+                          <span className="font-bold text-sm text-foreground truncate">
+                            {m.player1_is_dummy ? 'BYE / Walkover' : (m.player1?.name || 'TBD')}
+                          </span>
                         </div>
 
                         {/* Score */}
@@ -600,7 +609,9 @@ export function PublicTournaments() {
 
                         {/* Player 2 */}
                         <div className="flex items-center justify-end gap-2.5 flex-1 min-w-0 text-right">
-                          <span className="font-bold text-sm text-foreground truncate">{m.player2?.name || 'TBD'}</span>
+                          <span className="font-bold text-sm text-foreground truncate">
+                            {m.player2_is_dummy ? 'BYE / Walkover' : (m.player2?.name || 'TBD')}
+                          </span>
                           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs overflow-hidden flex-shrink-0">
                             {m.player2?.profileImageUrl ? (
                               <img src={m.player2.profileImageUrl} alt="" className="w-full h-full object-cover" />

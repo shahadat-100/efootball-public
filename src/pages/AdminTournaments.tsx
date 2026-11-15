@@ -219,6 +219,11 @@ export function AdminTournaments() {
         };
       });
 
+      // Clean up previous groups, participants, and matches for this tournament to prevent duplicates
+      await supabase.from('tournament_matches').delete().eq('tournament_id', selectedTournament.id);
+      await supabase.from('tournament_participants').delete().eq('tournament_id', selectedTournament.id);
+      await supabase.from('tournament_groups').delete().eq('tournament_id', selectedTournament.id);
+
       for (const g of groups) {
         const { data: groupData, error: gErr } = await supabase
           .from('tournament_groups')
@@ -234,7 +239,8 @@ export function AdminTournaments() {
         const participantIdMap: { id: string; is_dummy?: boolean }[] = [];
         for (const p of g.participants) {
           const isDummy = Boolean((p as any).is_dummy);
-          const { data: pData, error: pErr } = await supabase
+          const pPlayerId = isDummy ? (p.id || `dummy_${Math.random().toString(36).substring(7)}`) : p.id;
+          const { error: pErr } = await supabase
             .from('tournament_participants')
             .insert({
               tournament_id: selectedTournament.id,
@@ -249,7 +255,8 @@ export function AdminTournaments() {
             .single();
 
           if (pErr) throw pErr;
-          participantIdMap.push({ id: pData.id, is_dummy: isDummy });
+          // Use the player ID (or dummy id) so matches link directly to the player
+          participantIdMap.push({ id: pPlayerId, is_dummy: isDummy });
         }
 
         const fixtures = generateGroupFixtures(participantIdMap, deadlinesByMatchday);
