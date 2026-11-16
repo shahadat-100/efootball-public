@@ -18,6 +18,7 @@ import { TeamMilestones } from '@/features/overview/components/TeamMilestones';
 import { GoldenBootRace } from '@/features/overview/components/GoldenBootRace';
 import { DynamicTrivia } from '@/features/overview/components/DynamicTrivia';
 import { HallOfFameCarousel } from '@/features/overview/components/HallOfFameCarousel';
+import { TiltedPlayerMarquee } from '@/features/overview/components/TiltedPlayerMarquee';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -119,6 +120,52 @@ export function Overview({ setTab }: OverviewProps) {
         hattricks: histHT,
       };
     });
+  }, [players, playerSeasonStats]);
+
+  // ── Marquee: Top 10 Monthly + Top 10 Overall ──
+  const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
+    s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
+
+  const monthlyTop10 = useMemo(() => {
+    const now = new Date();
+    const curMonth = now.getMonth();
+    const curYear = now.getFullYear();
+
+    const ranked = players.map(p => {
+      const stats = playerMonthlyStats.filter(s =>
+        s.playerId === p.id && s.monthIndex === curMonth && s.year === curYear
+      );
+      const wins = stats.reduce((t, s) => t + s.wins, 0);
+      const draws = stats.reduce((t, s) => t + s.draws, 0);
+      const losses = stats.reduce((t, s) => t + s.losses, 0);
+      const gf = stats.reduce((t, s) => t + s.goals, 0);
+      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+      const matches = wins + draws + losses;
+      const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
+      return { player: p, points, matches };
+    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points).slice(0, 10);
+
+    return ranked.map((r, i) => ({ player: r.player, points: r.points, rank: i + 1 }));
+  }, [players, playerMonthlyStats]);
+
+  const overallTop10 = useMemo(() => {
+    const ranked = players.map(p => {
+      const stats = playerSeasonStats.filter(s => s.playerId === p.id);
+      const wins = stats.reduce((t, s) => t + s.wins, 0);
+      const draws = stats.reduce((t, s) => t + s.draws, 0);
+      const losses = stats.reduce((t, s) => t + s.losses, 0);
+      const gf = stats.reduce((t, s) => t + s.goals, 0);
+      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+      const matches = wins + draws + losses;
+      const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
+      return { player: p, points, matches };
+    }).sort((a, b) => b.points - a.points).slice(0, 10);
+
+    return ranked.map((r, i) => ({ player: r.player, points: r.points, rank: i + 1 }));
   }, [players, playerSeasonStats]);
 
   // ── 4. Activity Timeline Data ──
@@ -251,12 +298,24 @@ export function Overview({ setTab }: OverviewProps) {
       )}
 
       {/* Hero Banner Section */}
-      <div className="relative w-full rounded-3xl overflow-hidden mb-12 shadow-2xl aspect-[3/1] group">
+      <div className="relative w-full rounded-3xl overflow-hidden mb-8 shadow-2xl aspect-[3/1] group">
         <img
           src="/images/hero-banner.png"
           alt="The Enigmatic Elite Banner"
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
         />
+      </div>
+
+      {/* ═══ Full-Width Edge-to-Edge Player Marquee ═══ */}
+      <div 
+        className="relative overflow-hidden mb-12"
+        style={{
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+        }}
+      >
+        <TiltedPlayerMarquee monthlyTop10={monthlyTop10} overallTop10={overallTop10} />
       </div>
 
       {/* Stat Cards Row */}

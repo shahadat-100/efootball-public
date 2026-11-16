@@ -183,7 +183,7 @@ export function AppShell() {
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
-        <main className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-10 relative w-full h-full">
+        <main className="flex-1 bg-background overflow-y-auto overflow-x-clip p-4 sm:p-6 lg:p-10 relative w-full h-full">
           <div className="max-w-[1600px] mx-auto pb-12 w-full">
             <Outlet />
           </div>
