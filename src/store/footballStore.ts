@@ -6,6 +6,7 @@ import { MatchEntry } from '@/features/match-entries/types';
 import { NewsArticle } from '@/features/news/types';
 import { FriendlyMatch } from '@/features/friendly-matches/types';
 import { supabase } from '@/lib/supabase';
+import { fitImageForGallery } from '@/shared/lib/imageProcessing';
 
 export interface PlayerMonthlyStat {
   playerId: string;
@@ -302,17 +303,26 @@ export const useFootballStore = create<FootballStore>()(
       updatePlayerCoverImage: async (playerId: string, file: File) => {
         // Always treat as PNG to preserve transparency
         const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
-        const isWebp = file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp');
-        const ext = isPng ? 'png' : isWebp ? 'webp' : 'png';
-        const contentType = isPng ? 'image/png' : isWebp ? 'image/webp' : 'image/png';
+        // Fit and compress to 4:5 WebP (max 1600 width, target < 150KB)
+        const processedFile = await fitImageForGallery(file, {
+          aspectRatio: 4 / 5,
+          targetWidth: 1080,
+          format: 'image/webp',
+          quality: 0.80,
+        });
 
-        // Store in dedicated 'covers' bucket
-        const fileName = `${playerId}-${Date.now()}.${ext}`;
+        // Store in dedicated 'covers' bucket with unique filename
+        const uniqueSuffix = Math.random().toString(36).substring(2, 9);
+        const fileName = `${playerId}-${Date.now()}-${uniqueSuffix}.webp`;
 
-        // 1. Upload RAW file bytes to 'covers' bucket — zero pixel manipulation
+        // Upload optimized WebP with 1-year immutable cacheControl
         const { error: uploadError } = await supabase.storage
           .from('covers')
-          .upload(fileName, file, { contentType, upsert: true });
+          .upload(fileName, processedFile, {
+            contentType: 'image/webp',
+            cacheControl: '31536000',
+            upsert: true
+          });
 
         if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
 

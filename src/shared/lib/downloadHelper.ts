@@ -65,13 +65,10 @@ export async function imageUrlToDataUrl(url: string): Promise<string> {
   if (!url || typeof window === 'undefined') return '';
   if (url.startsWith('data:')) return url;
 
-  // 1. First attempt: fetch with CORS and cache-busting timestamp
+  // 1. First attempt: fetch with CORS using browser/CDN caching
   try {
-    const separator = url.includes('?') ? '&' : '?';
-    const cacheBustedUrl = `${url}${separator}_cb=${Date.now()}`;
-    const res = await fetch(cacheBustedUrl, {
+    const res = await fetch(url, {
       mode: 'cors',
-      cache: 'no-cache',
       credentials: 'omit',
     });
 
@@ -100,8 +97,7 @@ export async function imageUrlToDataUrl(url: string): Promise<string> {
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      const separator = url.includes('?') ? '&' : '?';
-      img.src = `${url}${separator}_cb=${Date.now()}`;
+      img.src = url;
 
       img.onload = () => {
         try {

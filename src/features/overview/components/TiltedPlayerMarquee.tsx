@@ -43,8 +43,10 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
         >
           {/* Card Template Background: Row 1 = POTM (White/Red), Row 2 = MVP (Golden Flame) */}
           <img
-            src={isMonthly ? '/assets/potm-bg.jpg?v=4' : '/assets/overall-bg.jpg?v=4'}
+            src={isMonthly ? '/assets/potm-bg.jpg' : '/assets/overall-bg.jpg'}
             alt={isMonthly ? 'Player of the Month Background' : 'All-Time MVP Background'}
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
           />
 
@@ -56,6 +58,9 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
                 alt={p.name}
                 className="w-[110%] max-w-none h-full object-contain object-bottom group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
+                decoding="async"
+                width={260}
+                height={325}
               />
             </div>
           ) : (

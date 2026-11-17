@@ -52,6 +52,8 @@ function NavyCard({ article }: NewsCardProps) {
       <div style={{ height: '260px', overflow: 'hidden', position: 'relative' }}>
         <img
           src={img} alt={article.title}
+          loading="lazy"
+          decoding="async"
           className="news-card-img"
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
           onError={e => { (e.currentTarget as HTMLImageElement).src = DEFAULT_NEWS_IMAGE; }}
@@ -163,6 +165,8 @@ function EmeraldCard({ article }: NewsCardProps) {
       <div style={{ height: '260px', overflow: 'hidden', position: 'relative' }}>
         <img
           src={img} alt={article.title}
+          loading="lazy"
+          decoding="async"
           className="news-card-img"
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
           onError={e => { (e.currentTarget as HTMLImageElement).src = DEFAULT_NEWS_IMAGE; }}
@@ -274,6 +278,8 @@ function CrimsonCard({ article }: NewsCardProps) {
       <div style={{ height: '260px', overflow: 'hidden', position: 'relative' }}>
         <img
           src={img} alt={article.title}
+          loading="lazy"
+          decoding="async"
           className="news-card-img"
           style={{
             width: '100%', height: '100%', objectFit: 'cover',

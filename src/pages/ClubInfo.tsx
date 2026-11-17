@@ -634,6 +634,10 @@ function RankCard({ item, index }: { item: ClubRank; index: number }) {
             <img
               src={item.image_url}
               alt={item.title}
+              loading="lazy"
+              decoding="async"
+              width={112}
+              height={112}
               className="w-full h-full object-cover"
               onError={() => setImgError(true)}
             />
@@ -715,6 +719,8 @@ function AchievementCard({ item }: { item: ClubAchievement }) {
             <img
               src={item.image_url}
               alt={item.title}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90"
               onError={() => setImgError(true)}
             />

@@ -86,7 +86,15 @@ export function PlayerCard({ player, onView }: PlayerCardProps) {
               hover ? 'border-primary/60 scale-105' : 'border-white/10'
             )}>
               {player.profileImageUrl ? (
-                <img src={player.profileImageUrl} alt={player.name} className="w-full h-full object-cover object-center" />
+                <img
+                  src={player.profileImageUrl}
+                  alt={player.name}
+                  loading="lazy"
+                  decoding="async"
+                  width={68}
+                  height={68}
+                  className="w-full h-full object-cover object-center"
+                />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-zinc-600 to-zinc-800 flex items-center justify-center">
                   <span className="text-white font-black text-2xl">{player.name.charAt(0)}</span>

@@ -469,7 +469,15 @@ export function PublicTournaments() {
                     >
                       <div className="w-16 h-16 rounded-2xl bg-muted/50 border border-border overflow-hidden mb-3 group-hover:scale-105 transition">
                         {reg.player?.profileImageUrl ? (
-                          <img src={reg.player.profileImageUrl} alt="" className="w-full h-full object-cover" />
+                          <img
+                            src={reg.player.profileImageUrl}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xl">⚽</div>
                         )}
@@ -715,7 +723,15 @@ export function PublicTournaments() {
                         <div className="flex items-center gap-2.5 flex-1 min-w-0">
                           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs overflow-hidden flex-shrink-0">
                             {m.player1?.profileImageUrl ? (
-                              <img src={m.player1.profileImageUrl} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={m.player1.profileImageUrl}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                              />
                             ) : '⚽'}
                           </div>
                           <span className="font-bold text-sm text-foreground truncate">
@@ -743,7 +759,15 @@ export function PublicTournaments() {
                           </span>
                           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs overflow-hidden flex-shrink-0">
                             {m.player2?.profileImageUrl ? (
-                              <img src={m.player2.profileImageUrl} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={m.player2.profileImageUrl}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                              />
                             ) : '⚽'}
                           </div>
                         </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useFootballStore } from '@/store/footballStore';
 import { PlayerCard, PlayerDetail } from '@/features/players';
-import { Input } from '@/shared/components';
+import { Button, Input } from '@/shared/components';
 import { fuzzyFilter } from '@/shared/lib/utils';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
@@ -10,7 +10,9 @@ export function Players() {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'rank' | 'name'>('rank');
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const PAGE_SIZE = 24;
 
   // Lazy load players and stats
   useEffect(() => {
@@ -48,6 +50,8 @@ export function Players() {
   }, [players, playerSeasonStats, sortBy]);
 
   const filtered = fuzzyFilter(sortedPlayers, search, ['name']);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginatedPlayers = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (selectedId) {
     return <PlayerDetail playerId={selectedId} onBack={() => setSelectedId(null)} />;
@@ -104,7 +108,7 @@ export function Players() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               value={search} 
-              onChange={e => setSearch(e.target.value)} 
+              onChange={e => { setSearch(e.target.value); setPage(1); }} 
               placeholder="Search players..." 
               className="pl-9 w-full sm:w-[220px]"
             />
@@ -114,7 +118,7 @@ export function Players() {
             <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <select
               value={sortBy}
-              onChange={e => setSortBy(e.target.value as 'rank' | 'name')}
+              onChange={e => { setSortBy(e.target.value as 'rank' | 'name'); setPage(1); }}
               className="text-xs bg-muted border border-border rounded-lg px-3 py-2 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-sm"
             >
               <option value="rank">Sort by Rank</option>
@@ -125,7 +129,7 @@ export function Players() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filtered.map(p => (
+        {paginatedPlayers.map(p => (
           <PlayerCard 
             key={p.id} 
             player={p} 
@@ -138,6 +142,36 @@ export function Players() {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-8 bg-card border border-border p-4 rounded-2xl shadow-sm">
+          <p className="text-[12px] text-muted-foreground font-medium">
+            Showing {(page - 1) * PAGE_SIZE + 1} to {Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} players
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo(0, 0); }}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <div className="flex items-center px-3 text-[12px] font-bold border border-border rounded-lg bg-muted/30">
+              Page {page} of {totalPages}
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo(0, 0); }}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

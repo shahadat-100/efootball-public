@@ -16,7 +16,7 @@ export function News() {
   const [hotOnly, setHotOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const PAGE_SIZE = 50;
+  const PAGE_SIZE = 24;
 
   useEffect(() => {
     const load = async () => {
