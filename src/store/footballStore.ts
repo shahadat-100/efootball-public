@@ -301,8 +301,6 @@ export const useFootballStore = create<FootballStore>()(
        * Transparency is 100% preserved. Saves to images/covers/ folder.
        */
       updatePlayerCoverImage: async (playerId: string, file: File) => {
-        // Always treat as PNG to preserve transparency
-        const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
         // Fit and compress to 4:5 WebP (max 1600 width, target < 150KB)
         const processedFile = await fitImageForGallery(file, {
           aspectRatio: 4 / 5,
