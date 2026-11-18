@@ -89,25 +89,7 @@ export function PlayerProfileCard({
           pointerEvents: 'none',
         }} />
 
-        {/* Top Header: Club Crest only (no text, no jersey badge) */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0,
-          padding: '20px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
-          zIndex: 25,
-        }}>
-          <img
-            src="/images/club-logo.jpg"
-            alt="Club Logo"
-            crossOrigin="anonymous"
-            style={{
-              width: 38, height: 38, borderRadius: 8,
-              objectFit: 'cover',
-              border: `1.5px solid ${accent}`,
-              boxShadow: `0 0 12px ${accentGlow}`,
-            }}
-          />
-        </div>
+
 
         {/* Left Side: Skewed Stat Badges & Details (Ref 5 style) */}
         <div style={{
