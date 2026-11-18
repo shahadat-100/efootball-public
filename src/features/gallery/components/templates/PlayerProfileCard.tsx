@@ -51,7 +51,10 @@ export function PlayerProfileCard({
   if (isMVP) {
     const accent = isMonthly ? '#FFD700' : '#EF4444';
     const accentGlow = isMonthly ? 'rgba(212,175,55,0.45)' : 'rgba(239,68,68,0.45)';
-    const headerLabel = isMonthly ? 'PLAYER OF THE MONTH' : 'PLAYER OF THE WEEK';
+
+    const mvpBgImage = isMonthly
+      ? '/images/gallery-bg/bg-mvp-month.jpg'
+      : '/images/gallery-bg/bg-mvp-week.png';
 
     return (
       <div
@@ -66,120 +69,44 @@ export function PlayerProfileCard({
           boxShadow: '0 30px 80px rgba(0,0,0,0.95)',
         }}
       >
-        {/* Dark charcoal grunge background with radial spotlight */}
+        {/* Background image from uploaded MVP artwork */}
+        <img
+          src={mvpBgImage}
+          alt=""
+          crossOrigin="anonymous"
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', zIndex: 1, pointerEvents: 'none',
+          }}
+        />
+
+        {/* Dark overlay to keep text readable */}
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
+          position: 'absolute', inset: 0, zIndex: 2,
           background: isMonthly
-            ? 'radial-gradient(ellipse at 75% 30%, rgba(212,175,55,0.2) 0%, rgba(15,15,20,0.96) 75%)'
-            : 'radial-gradient(ellipse at 75% 30%, rgba(225,29,72,0.25) 0%, rgba(15,15,20,0.96) 75%)',
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.5) 100%)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 100%)',
+          pointerEvents: 'none',
         }} />
 
-        {/* Dynamic diagonal slash graphic across the background (like Ref 5) */}
-        <div style={{
-          position: 'absolute', width: '160%', height: 70,
-          background: `linear-gradient(90deg, transparent, ${isMonthly ? 'rgba(212,175,55,0.18)' : 'rgba(239,68,68,0.2)'}, transparent)`,
-          transform: 'rotate(-26deg)', top: '48%', left: '-30%',
-          zIndex: 2, pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', width: '140%', height: 3,
-          background: isMonthly ? 'rgba(212,175,55,0.35)' : 'rgba(239,68,68,0.35)',
-          transform: 'rotate(-26deg)', top: '46%', left: '-20%',
-          zIndex: 2, pointerEvents: 'none',
-        }} />
-
-        {/* Top Header: Club Crest + League Info */}
+        {/* Top Header: Club Crest only (no text, no jersey badge) */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           padding: '20px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
           zIndex: 25,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img
-              src="/images/club-logo.jpg"
-              alt="Club Logo"
-              crossOrigin="anonymous"
-              style={{
-                width: 38, height: 38, borderRadius: 8,
-                objectFit: 'cover',
-                border: `1.5px solid ${accent}`,
-                boxShadow: `0 0 12px ${accentGlow}`,
-              }}
-            />
-            <div>
-              <div style={{
-                fontFamily: "'Oswald', sans-serif", fontSize: 13, fontWeight: 900,
-                color: '#fff', letterSpacing: 2, textTransform: 'uppercase', lineHeight: 1.2,
-              }}>
-                THE ENIGMATIC ELITE
-              </div>
-              <div style={{
-                fontFamily: "'Oswald', sans-serif", fontSize: 9, fontWeight: 700,
-                color: accent, letterSpacing: 2, textTransform: 'uppercase', fontStyle: 'italic',
-              }}>
-                OFFICIAL MVP AWARDS
-              </div>
-            </div>
-          </div>
-
-          {/* Jersey Badge */}
-          {player.jerseyNumber && (
-            <div style={{
-              background: 'rgba(6, 10, 18, 0.85)',
+          <img
+            src="/images/club-logo.jpg"
+            alt="Club Logo"
+            crossOrigin="anonymous"
+            style={{
+              width: 38, height: 38, borderRadius: 8,
+              objectFit: 'cover',
               border: `1.5px solid ${accent}`,
-              boxShadow: `0 4px 14px rgba(0,0,0,0.6), 0 0 10px ${accentGlow}`,
-              borderRadius: 10,
-              padding: '4px 14px',
-              display: 'flex', alignItems: 'baseline', gap: 2,
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: accent }}>#</span>
-              <span style={{
-                fontFamily: "'Oswald', sans-serif", fontSize: 22, fontWeight: 800,
-                color: '#fff', lineHeight: 1,
-              }}>
-                {player.jerseyNumber}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Behind Player Title: Script "Player of the Week" + Huge Distressed "MVP" */}
-        <div style={{
-          position: 'absolute', top: 68, left: 24, right: 24,
-          zIndex: 4, pointerEvents: 'none', userSelect: 'none',
-        }}>
-          <div style={{
-            fontFamily: "'Caveat', cursive",
-            fontSize: 34,
-            fontWeight: 700,
-            color: accent,
-            transform: 'rotate(-3deg)',
-            marginLeft: 8,
-            marginBottom: -16,
-            textShadow: '0 2px 12px rgba(0,0,0,0.9)',
-          }}>
-            {headerLabel}
-          </div>
-          <div style={{
-            fontFamily: "'Bebas Neue', 'Oswald', sans-serif",
-            fontSize: 185,
-            fontWeight: 400,
-            color: '#ffffff',
-            letterSpacing: 6,
-            lineHeight: 0.85,
-            textTransform: 'uppercase',
-            textShadow: `0 0 35px ${accentGlow}, 0 6px 25px rgba(0,0,0,0.95)`,
-          }}>
-            MVP
-          </div>
-          <div style={{
-            fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 700,
-            color: 'rgba(255,255,255,0.7)', letterSpacing: 3, textTransform: 'uppercase',
-            marginLeft: 8, marginTop: 4,
-          }}>
-            {subtitle}
-          </div>
+              boxShadow: `0 0 12px ${accentGlow}`,
+            }}
+          />
         </div>
 
         {/* Left Side: Skewed Stat Badges & Details (Ref 5 style) */}
