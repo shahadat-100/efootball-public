@@ -43,7 +43,7 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
         >
           {/* Card Template Background: Row 1 = POTM (White/Red), Row 2 = MVP (Golden Flame) */}
           <img
-            src={isMonthly ? '/assets/potm-bg.jpg' : '/assets/overall-bg.jpg'}
+            src={isMonthly ? '/assets/potm-bg.jpg?v=2' : '/assets/overall-bg.jpg'}
             alt={isMonthly ? 'Player of the Month Background' : 'All-Time MVP Background'}
             loading="lazy"
             decoding="async"
