@@ -311,17 +311,20 @@ export const MatchScoreSubmissionModal: React.FC<MatchScoreSubmissionModalProps>
             <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-black text-white">Submission Received!</h3>
-            <p className="text-white/70 text-xs mt-2 max-w-sm mx-auto">
-              {mode === 'score'
-                ? 'Your match score and screenshot have been recorded. Once verified or matched with opponent, the group standings will update!'
-                : 'Your Auto-Win walkover claim has been submitted to the admin dispute panel with your chat proof.'}
-            </p>
+            <h3 className="text-xl font-black text-white">রেজাল্ট সাবমিট হয়েছে! ✅</h3>
+            <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 max-w-sm mx-auto">
+              <p className="text-amber-300 text-sm font-bold leading-relaxed">
+                আপনার রেজাল্ট সফলভাবে সাবমিট হয়েছে।
+              </p>
+              <p className="text-amber-200/80 text-xs mt-2 leading-relaxed">
+                অ্যাডমিন অ্যাপ্রুভ করলে রেজাল্ট গ্রুপ স্ট্যান্ডিংসে যোগ হবে। অনুগ্রহ করে অপেক্ষা করুন।
+              </p>
+            </div>
             <button
               onClick={onClose}
               className="mt-6 py-2 px-6 rounded-xl bg-[#c89850] text-[#00265a] font-bold text-xs uppercase tracking-wider hover:bg-[#b58641] transition"
             >
-              Close
+              বন্ধ করুন
             </button>
           </div>
         ) : (
