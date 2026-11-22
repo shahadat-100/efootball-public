@@ -324,7 +324,7 @@ export const MatchScoreSubmissionModal: React.FC<MatchScoreSubmissionModalProps>
               onClick={onClose}
               className="mt-6 py-2 px-6 rounded-xl bg-[#c89850] text-[#00265a] font-bold text-xs uppercase tracking-wider hover:bg-[#b58641] transition"
             >
-              বন্ধ করুন
+              OK
             </button>
           </div>
         ) : (
