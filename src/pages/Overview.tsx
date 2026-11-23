@@ -298,8 +298,17 @@ export function Overview({ setTab }: OverviewProps) {
         </div>
       )}
 
-      {/* Hero — Player Highlight Carousel (replaces the old banner) */}
-      <PlayerHighlightHero players={players} playerSeasonStats={playerSeasonStats} />
+      {/* ═══ Full-Width Edge-to-Edge Player Highlight Hero ═══ */}
+      <div 
+        className="relative overflow-hidden mb-8"
+        style={{
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+        }}
+      >
+        <PlayerHighlightHero players={players} playerSeasonStats={playerSeasonStats} />
+      </div>
 
       {/* ═══ Full-Width Edge-to-Edge Player Marquee ═══ */}
       <div 

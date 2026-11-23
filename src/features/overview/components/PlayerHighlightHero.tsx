@@ -73,7 +73,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
   return (
     <section
-      className="relative mb-8 w-full aspect-[2/1] overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center"
+      className="relative w-full aspect-[2/1] overflow-hidden rounded-none shadow-none flex items-center justify-center"
       style={{ background: HERO_BACKGROUND }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
