@@ -47,7 +47,7 @@ function Cutout({ player, small }: { player: Player; small: boolean }) {
       alt={player.name}
       draggable={false}
       onError={() => setFailed(true)}
-      className={`relative z-10 h-[88%] w-auto max-w-full select-none object-contain object-bottom ${small ? 'pointer-events-none' : ''}`}
+      className={`relative z-10 h-[88%] w-auto max-w-[95%] select-none object-contain object-bottom ${small ? 'pointer-events-none' : ''}`}
     />
   );
 }
@@ -101,10 +101,10 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
   const positionFor = (offset: number) => {
     const base = { left: '50%', scale: 0.6, opacity: 0, blur: 3, zIndex: 5, pointerEvents: 'none' as const };
     if (offset === 0) return { ...base, left: '50%', scale: 1, opacity: 1, blur: 0, zIndex: 30, pointerEvents: 'auto' as const };
-    if (offset === -1) return { ...base, left: '18%', scale: 0.85, opacity: 0.55, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
-    if (offset === 1) return { ...base, left: '82%', scale: 0.85, opacity: 0.55, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
-    if (offset === -2) return { ...base, left: '-5%', scale: 0.7, opacity: 0.28, blur: 2, zIndex: 10, pointerEvents: 'auto' as const };
-    if (offset === 2) return { ...base, left: '105%', scale: 0.7, opacity: 0.28, blur: 2, zIndex: 10, pointerEvents: 'auto' as const };
+    if (offset === -1) return { ...base, left: '20%', scale: 0.8, opacity: 0.5, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
+    if (offset === 1) return { ...base, left: '80%', scale: 0.8, opacity: 0.5, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
+    if (offset === -2) return { ...base, left: '5%', scale: 0.65, opacity: 0.2, blur: 2, zIndex: 10, pointerEvents: 'auto' as const };
+    if (offset === 2) return { ...base, left: '95%', scale: 0.65, opacity: 0.2, blur: 2, zIndex: 10, pointerEvents: 'auto' as const };
     return base;
   };
 
@@ -156,7 +156,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
           return (
             <motion.div
               key={item.player.id}
-              className="absolute bottom-0 top-0 flex w-[42%] items-end justify-center"
+              className="absolute bottom-0 top-0 flex w-[42%] -translate-x-1/2 items-end justify-center"
               style={{ left: pos.left, zIndex: pos.zIndex, pointerEvents: pos.pointerEvents }}
               animate={{
                 scale: pos.scale,
