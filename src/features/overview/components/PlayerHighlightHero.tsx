@@ -17,9 +17,8 @@ interface HighlightItem {
 
 const SLIDE_MS = 2000;
 
-const POSTER_IMAGE = '/images/hero-player-bg.png?v=2';
-const HERO_BACKGROUND = 'radial-gradient(circle at 50% 20%, #2a2b33 0%, #17181d 45%, #0d0d10 100%)';
-const FADE_COLOR = '#0d0d10';
+const POSTER_IMAGE = '/images/hero-player-bg.jpg?v=3';
+const HERO_BACKGROUND = '#0d0d10';
 
 const isValidImageUrl = (url?: string | null): boolean => {
   if (!url || typeof url !== 'string') return false;
@@ -99,12 +98,12 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
       {/* ── 70% : Single Player Spotlight Stage ── */}
       <div className="relative h-full w-[70%] overflow-hidden z-10 flex items-center justify-center">
-        {/* The 1587x2245 poster, perfectly centered */}
+        {/* Full 70% area background cover */}
         <img
           src={POSTER_IMAGE}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-full sm:h-[110%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-95 select-none"
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center select-none"
         />
 
         {items.length === 0 && (
@@ -126,12 +125,12 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
             >
               {/* Ground shadow under the player */}
               <div
-                className="absolute bottom-[4%] left-1/2 h-[6%] w-[55%] -translate-x-1/2 rounded-full bg-black/70 blur-xl"
+                className="absolute bottom-[3%] left-1/2 h-[7%] w-[60%] -translate-x-1/2 rounded-full bg-black/60 blur-xl"
                 aria-hidden
               />
 
-              {/* Player cutout image container — h-[88%] guarantees plenty of headroom, head never gets cut off */}
-              <div className="relative z-10 h-[88%] w-auto max-w-[85%] flex items-end justify-center">
+              {/* Player cutout image container — head never gets cut off */}
+              <div className="relative z-10 h-[90%] w-auto max-w-[85%] flex items-end justify-center">
                 <img
                   src={current.player.profileImageUrl}
                   alt={current.player.name}
@@ -141,16 +140,13 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
                   onError={() => {
                     setFailedIds((prev) => new Set(prev).add(current.player.id));
                   }}
-                  className="h-full w-auto max-w-full object-contain object-bottom select-none"
+                  className="h-full w-auto max-w-full object-contain object-bottom select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
+                  style={{
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 84%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 84%, transparent 100%)',
+                  }}
                 />
               </div>
-
-              {/* Bottom fade — blends legs smoothly into bottom edge */}
-              <div
-                className="pointer-events-none absolute bottom-0 inset-x-0 h-[16%]"
-                style={{ background: `linear-gradient(to bottom, transparent, ${FADE_COLOR})` }}
-                aria-hidden
-              />
             </motion.div>
           )}
         </AnimatePresence>
