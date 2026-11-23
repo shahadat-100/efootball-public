@@ -15,7 +15,7 @@ interface HighlightItem {
   winRate: number | null;
 }
 
-const SLIDE_MS = 4500;
+const SLIDE_MS = 1500;
 
 const POSTER_IMAGE = '/images/hero-player-bg.png';
 const HERO_BACKGROUND = 'radial-gradient(circle at 50% 20%, #2a2b33 0%, #17181d 45%, #0d0d10 100%)';
@@ -122,7 +122,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
               initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.04 }}
-              transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: 'easeOut' }}
+              transition={{ duration: reduceMotion ? 0.15 : 0.3, ease: 'easeOut' }}
             >
               {/* Ground shadow under the player */}
               <div
@@ -130,18 +130,20 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
                 aria-hidden
               />
 
-              {/* Player cutout image */}
-              <img
-                src={current.player.profileImageUrl}
-                alt={current.player.name}
-                draggable={false}
-                loading="eager"
-                decoding="async"
-                onError={() => {
-                  setFailedIds((prev) => new Set(prev).add(current.player.id));
-                }}
-                className="relative z-10 h-[92%] w-auto max-w-[85%] object-contain object-bottom select-none"
-              />
+              {/* Player cutout image container — h-[88%] guarantees plenty of headroom, head never gets cut off */}
+              <div className="relative z-10 h-[88%] w-auto max-w-[85%] flex items-end justify-center">
+                <img
+                  src={current.player.profileImageUrl}
+                  alt={current.player.name}
+                  draggable={false}
+                  loading="eager"
+                  decoding="async"
+                  onError={() => {
+                    setFailedIds((prev) => new Set(prev).add(current.player.id));
+                  }}
+                  className="h-full w-auto max-w-full object-contain object-bottom select-none"
+                />
+              </div>
 
               {/* Bottom fade — blends legs smoothly into bottom edge */}
               <div
@@ -168,7 +170,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: reduceMotion ? 0.15 : 0.35, ease: 'easeOut' }}
             >
-              <h2 className="font-heading text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black uppercase leading-tight text-white truncate">
+              <h2 className="font-heading text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black uppercase leading-tight text-white line-clamp-3 break-words">
                 {current.player.name}
               </h2>
               <div className="mt-3 sm:mt-5 md:mt-7 grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-3 sm:gap-y-6">
