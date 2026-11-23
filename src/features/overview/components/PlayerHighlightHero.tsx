@@ -73,7 +73,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
   return (
     <section
-      className="relative mb-8 h-[320px] sm:h-[380px] md:h-[420px] lg:h-[460px] w-full overflow-hidden rounded-3xl shadow-2xl flex flex-row"
+      className="relative mb-8 h-[320px] sm:h-[380px] md:h-[440px] lg:h-[480px] w-full overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center"
       style={{ background: HERO_BACKGROUND }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -81,115 +81,58 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
       onBlurCapture={() => setPaused(false)}
       aria-label="Player highlight"
     >
-      {/* blurred, enlarged copy of the same poster as a backdrop */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url(${POSTER_IMAGE})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'blur(28px) brightness(0.45) saturate(1.2)',
-          transform: 'scale(1.15)',
-        }}
+      {/* Full 100% Background Artwork */}
+      <img
+        src={POSTER_IMAGE}
+        alt=""
         aria-hidden
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center select-none"
       />
-      {/* dark veil so the cutouts stay readable */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/10 to-[#0d0d10]" aria-hidden />
 
-      {/* ── 70% : Single Player Spotlight Stage ── */}
-      <div className="relative h-full w-[70%] overflow-hidden z-10 flex items-center justify-center">
-        {/* Full 70% area background cover */}
-        <img
-          src={POSTER_IMAGE}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center select-none"
-        />
-
-        {items.length === 0 && (
-          <p className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-[0.3em] text-white/30 z-10">
-            Loading players…
-          </p>
-        )}
-
-        {/* Exactly 1 Single Player at a time, perfectly centered in the gap of 'THE ELITE' */}
-        <AnimatePresence mode="wait">
-          {current && (
-            <motion.div
-              key={current.player.id}
-              className="absolute inset-0 flex items-end justify-center z-10 pointer-events-none select-none"
-              initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.04 }}
-              transition={{ duration: reduceMotion ? 0.15 : 0.3, ease: 'easeOut' }}
-            >
-              {/* Ground shadow under the player */}
-              <div
-                className="absolute bottom-[3%] left-1/2 h-[7%] w-[60%] -translate-x-1/2 rounded-full bg-black/60 blur-xl"
-                aria-hidden
-              />
-
-              {/* Player cutout image container — head never gets cut off */}
-              <div className="relative z-10 h-[90%] w-auto max-w-[85%] flex items-end justify-center">
-                <img
-                  src={current.player.profileImageUrl}
-                  alt={current.player.name}
-                  draggable={false}
-                  loading="eager"
-                  decoding="async"
-                  onError={() => {
-                    setFailedIds((prev) => new Set(prev).add(current.player.id));
-                  }}
-                  className="h-full w-auto max-w-full object-contain object-bottom select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)]"
-                  style={{
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 84%, transparent 100%)',
-                    maskImage: 'linear-gradient(to bottom, black 84%, transparent 100%)',
-                  }}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── 30% : Highlight Details Box ── */}
-      <aside className="relative flex w-[30%] h-full flex-col justify-center border-l border-white/10 bg-black/30 px-3 sm:px-5 lg:px-8 backdrop-blur-sm z-20">
-        <p className="mb-1 sm:mb-3 text-[8px] sm:text-[10px] font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-white/40">
-          Player Highlight
+      {items.length === 0 && (
+        <p className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-[0.3em] text-white/30 z-10">
+          Loading players…
         </p>
-        <AnimatePresence mode="wait">
-          {current && (
-            <motion.div
-              key={current.player.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: reduceMotion ? 0.15 : 0.35, ease: 'easeOut' }}
-            >
-              <h2 className="font-heading text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black uppercase leading-tight text-white line-clamp-3 break-words">
-                {current.player.name}
-              </h2>
-              <div className="mt-3 sm:mt-5 md:mt-7 grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-3 sm:gap-y-6">
-                {[
-                  { label: 'Wins', value: current.wins },
-                  { label: 'Goals', value: current.goals },
-                  { label: 'Matches', value: current.matches },
-                  { label: 'Win Rate', value: current.winRate === null ? '—' : `${current.winRate}%` },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <p className="font-heading text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white leading-none">
-                      {stat.value}
-                    </p>
-                    <p className="mt-1 text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.2em] text-white/40">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </aside>
+      )}
+
+      {/* Exactly 1 Single Player at a time, perfectly centered in the gap of 'THE ELITE' */}
+      <AnimatePresence mode="wait">
+        {current && (
+          <motion.div
+            key={current.player.id}
+            className="absolute inset-0 flex items-end justify-center z-10 pointer-events-none select-none"
+            initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.04 }}
+            transition={{ duration: reduceMotion ? 0.15 : 0.3, ease: 'easeOut' }}
+          >
+            {/* Ground shadow under the player */}
+            <div
+              className="absolute bottom-[2%] left-1/2 h-[8%] w-[50%] -translate-x-1/2 rounded-full bg-black/70 blur-xl"
+              aria-hidden
+            />
+
+            {/* Player cutout image container — larger size filling the height */}
+            <div className="relative z-10 h-[96%] sm:h-full w-auto max-w-[90%] sm:max-w-[75%] flex items-end justify-center">
+              <img
+                src={current.player.profileImageUrl}
+                alt={current.player.name}
+                draggable={false}
+                loading="eager"
+                decoding="async"
+                onError={() => {
+                  setFailedIds((prev) => new Set(prev).add(current.player.id));
+                }}
+                className="h-full w-auto max-w-full object-contain object-bottom select-none drop-shadow-[0_16px_32px_rgba(0,0,0,0.7)]"
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 86%, transparent 100%)',
+                  maskImage: 'linear-gradient(to bottom, black 86%, transparent 100%)',
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
