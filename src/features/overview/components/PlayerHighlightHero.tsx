@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Player, PlayerSeasonStat } from '@/features/players/types';
 
 interface PlayerHighlightHeroProps {
@@ -89,11 +88,6 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
     const timer = window.setTimeout(() => setActive((current) => (current + 1) % total), SLIDE_MS);
     return () => window.clearTimeout(timer);
   }, [active, paused, total]);
-
-  const go = (direction: number) => {
-    if (total === 0) return;
-    setActive((current) => (current + direction + total) % total);
-  };
 
   // Shortest signed offset so the wrap-around still slides smoothly.
   const relativeOffset = (index: number) => {
@@ -196,27 +190,6 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
         })}
 
         {/* controls */}
-        <div className="absolute bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3">
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="Previous player"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 transition hover:bg-primary hover:text-white"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="min-w-[52px] text-center font-mono text-xs tracking-widest text-white/60">
-            {total ? String(active + 1).padStart(2, '0') : '00'} / {String(total).padStart(2, '0')}
-          </span>
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="Next player"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 transition hover:bg-primary hover:text-white"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
       </div>
 
       {/* ── 30% : highlight box (desktop only) ── */}
