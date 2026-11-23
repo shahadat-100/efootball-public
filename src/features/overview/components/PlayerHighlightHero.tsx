@@ -73,7 +73,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
   return (
     <section
-      className="relative mb-8 h-[320px] sm:h-[380px] md:h-[440px] lg:h-[480px] w-full overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center"
+      className="relative mb-8 w-full aspect-[2/1] overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center"
       style={{ background: HERO_BACKGROUND }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -81,7 +81,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
       onBlurCapture={() => setPaused(false)}
       aria-label="Player highlight"
     >
-      {/* Full 100% Background Artwork */}
+      {/* Full 100% Background Artwork (matches 2:1 aspect ratio, so nothing gets cut off) */}
       <img
         src={POSTER_IMAGE}
         alt=""
@@ -106,14 +106,8 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
             exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.04 }}
             transition={{ duration: reduceMotion ? 0.15 : 0.3, ease: 'easeOut' }}
           >
-            {/* Ground shadow under the player */}
-            <div
-              className="absolute bottom-[2%] left-1/2 h-[8%] w-[50%] -translate-x-1/2 rounded-full bg-black/70 blur-xl"
-              aria-hidden
-            />
-
-            {/* Player cutout image container — larger size filling the height */}
-            <div className="relative z-10 h-[96%] sm:h-full w-auto max-w-[90%] sm:max-w-[75%] flex items-end justify-center">
+            {/* Player cutout image container — bigger size, moved down, NO shadows */}
+            <div className="relative z-10 h-[104%] sm:h-[110%] w-auto max-w-[85%] sm:max-w-[70%] flex items-end justify-center translate-y-[5%] sm:translate-y-[7%]">
               <img
                 src={current.player.profileImageUrl}
                 alt={current.player.name}
@@ -123,11 +117,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
                 onError={() => {
                   setFailedIds((prev) => new Set(prev).add(current.player.id));
                 }}
-                className="h-full w-auto max-w-full object-contain object-bottom select-none drop-shadow-[0_16px_32px_rgba(0,0,0,0.7)]"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to bottom, black 86%, transparent 100%)',
-                  maskImage: 'linear-gradient(to bottom, black 86%, transparent 100%)',
-                }}
+                className="h-full w-auto max-w-full object-contain object-bottom select-none"
               />
             </div>
           </motion.div>
