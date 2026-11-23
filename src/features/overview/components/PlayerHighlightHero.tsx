@@ -15,9 +15,9 @@ interface HighlightItem {
   winRate: number | null;
 }
 
-const SLIDE_MS = 1500;
+const SLIDE_MS = 2000;
 
-const POSTER_IMAGE = '/images/hero-player-bg.png';
+const POSTER_IMAGE = '/images/hero-player-bg.png?v=2';
 const HERO_BACKGROUND = 'radial-gradient(circle at 50% 20%, #2a2b33 0%, #17181d 45%, #0d0d10 100%)';
 const FADE_COLOR = '#0d0d10';
 
