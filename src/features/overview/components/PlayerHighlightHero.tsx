@@ -49,7 +49,7 @@ function Cutout({ player, small }: { player: Player; small: boolean }) {
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
-      className={`relative z-10 h-[94%] w-auto max-w-[95%] select-none object-contain object-bottom ${small ? 'pointer-events-none' : ''}`}
+      className={`relative z-10 h-[92%] w-auto max-w-full select-none object-contain object-bottom ${small ? 'pointer-events-none' : ''}`}
     />
   );
 }
@@ -106,11 +106,12 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
   const positionFor = (offset: number) => {
     const base = { left: '50%', scale: 0.6, opacity: 0, blur: 3, zIndex: 5, pointerEvents: 'none' as const };
+    // Middle player in exact center
     if (offset === 0) return { ...base, left: '50%', scale: 1, opacity: 1, blur: 0, zIndex: 30, pointerEvents: 'auto' as const };
-    if (offset === -1) return { ...base, left: '15%', scale: 0.75, opacity: 0.45, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
-    if (offset === 1) return { ...base, left: '85%', scale: 0.75, opacity: 0.45, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
-    if (offset === -2) return { ...base, left: '3%', scale: 0.6, opacity: 0.18, blur: 2, zIndex: 10, pointerEvents: 'auto' as const };
-    if (offset === 2) return { ...base, left: '97%', scale: 0.6, opacity: 0.18, blur: 2, zIndex: 10, pointerEvents: 'auto' as const };
+    // Left player: 1 on left
+    if (offset === -1) return { ...base, left: '16%', scale: 0.72, opacity: 0.45, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
+    // Right player: 1 on right
+    if (offset === 1) return { ...base, left: '84%', scale: 0.72, opacity: 0.45, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
     return base;
   };
 
@@ -143,12 +144,12 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
       {/* ── 70% : player carousel ── */}
       <div className="relative h-full w-full overflow-hidden lg:w-[70%]">
-        {/* the supplied poster, kept whole and sharp — no cropping */}
+        {/* The poster, centered with the middle player so 'THE' is on left, 'ELITE' is on right */}
         <img
           src={POSTER_IMAGE}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[150%] max-w-none w-auto -translate-x-1/2 -translate-y-1/2 object-contain opacity-90"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[160%] md:h-[175%] lg:h-[190%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-90 select-none"
         />
         {items.length === 0 && (
           <p className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-[0.3em] text-white/30">
@@ -158,15 +159,14 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
         {items.map((item, index) => {
           const offset = relativeOffset(index);
-          // Virtualization: only render active slide and 2 neighbors (±2)
-          // Prevents loading 200+ images simultaneously from Supabase, avoiding Cached Egress & memory crashes
-          if (Math.abs(offset) > 2) return null;
+          // Exactly 3 players: Middle (0), Left (-1), Right (1)
+          if (Math.abs(offset) > 1) return null;
 
           const pos = positionFor(offset);
           return (
             <motion.div
               key={item.player.id}
-              className="absolute bottom-0 top-0 flex w-[55%] -translate-x-1/2 items-end justify-center"
+              className="absolute bottom-0 top-0 flex w-[44%] sm:w-[40%] -translate-x-1/2 items-end justify-center"
               style={{ left: pos.left, zIndex: pos.zIndex, pointerEvents: pos.pointerEvents }}
               animate={{
                 scale: pos.scale,
