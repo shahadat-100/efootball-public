@@ -28,7 +28,7 @@ function sum(stats: PlayerSeasonStat[], key: keyof PlayerSeasonStat): number {
 
 function Cutout({ player, small }: { player: Player; small: boolean }) {
   const [failed, setFailed] = useState(false);
-  const src = player.profileImageUrl || player.coverImageUrl;
+  const src = player.coverImageUrl || player.profileImageUrl;
 
   if (!src || failed) {
     return (
@@ -46,6 +46,8 @@ function Cutout({ player, small }: { player: Player; small: boolean }) {
       src={src}
       alt={player.name}
       draggable={false}
+      loading="lazy"
+      decoding="async"
       onError={() => setFailed(true)}
       className={`relative z-10 h-[94%] w-auto max-w-[95%] select-none object-contain object-bottom ${small ? 'pointer-events-none' : ''}`}
     />
@@ -58,7 +60,11 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
   const reduceMotion = useReducedMotion();
 
   const items = useMemo<HighlightItem[]>(() => {
-    return [...players]
+    // Only include players who have photos/cutouts to keep the hero showcase clean and save egress
+    const playersWithPhoto = players.filter((p) => Boolean(p.coverImageUrl || p.profileImageUrl));
+    const sourceList = playersWithPhoto.length > 0 ? playersWithPhoto : players;
+
+    return [...sourceList]
       .sort((a, b) => (a.jerseyNumber ?? 999) - (b.jerseyNumber ?? 999) || a.name.localeCompare(b.name))
       .map((player) => {
         const stats = playerSeasonStats.filter((stat) => stat.playerId === player.id);
@@ -152,6 +158,10 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
         {items.map((item, index) => {
           const offset = relativeOffset(index);
+          // Virtualization: only render active slide and 2 neighbors (±2)
+          // Prevents loading 200+ images simultaneously from Supabase, avoiding Cached Egress & memory crashes
+          if (Math.abs(offset) > 2) return null;
+
           const pos = positionFor(offset);
           return (
             <motion.div
