@@ -19,6 +19,7 @@ const SLIDE_MS = 2000;
 
 const POSTER_IMAGE = '/images/hero-player-bg.jpg?v=3';
 const FALLBACK_PLAYER_IMAGE = '/images/player-fallback.png';
+const HERO_BACKGROUND = '#0d0d10';
 
 const isValidImageUrl = (url?: string | null): boolean => {
   if (!url || typeof url !== 'string') return false;
@@ -69,18 +70,18 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
   return (
     <section
-      className="relative w-full overflow-hidden rounded-none shadow-none flex items-center justify-center bg-[#150406]"
-      style={{ height: 'clamp(320px, 26vw, 460px)' }}
+      className="relative w-full aspect-[2/1] overflow-hidden rounded-none shadow-none flex items-center justify-center"
+      style={{ background: HERO_BACKGROUND }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
       aria-label="Player highlight"
     >
-      {/* ── Full 100% Background Artwork (Cinematic Ultra-Wide, no blur bars) ── */}
+      {/* Full 100% Background Artwork (matches 2:1 aspect ratio, so nothing gets cut off) */}
       <img
         src={POSTER_IMAGE}
-        alt="The Elite Banner"
+        alt=""
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center select-none"
       />
@@ -102,8 +103,8 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
             exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.04 }}
             transition={{ duration: reduceMotion ? 0.15 : 0.3, ease: 'easeOut' }}
           >
-            {/* Player cutout image container — scaled to fit widescreen cleanly */}
-            <div className="relative z-10 h-[102%] sm:h-[108%] w-auto max-w-[85%] sm:max-w-[70%] flex items-end justify-center translate-y-[4%] sm:translate-y-[6%]">
+            {/* Player cutout image container — bigger size, moved down, NO shadows */}
+            <div className="relative z-10 h-[104%] sm:h-[110%] w-auto max-w-[85%] sm:max-w-[70%] flex items-end justify-center translate-y-[5%] sm:translate-y-[7%]">
               <img
                 src={
                   isValidImageUrl(current.player.profileImageUrl) && !failedIds.has(current.player.id)
