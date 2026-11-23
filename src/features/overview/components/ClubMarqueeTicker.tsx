@@ -7,6 +7,8 @@ export function ClubMarqueeTicker() {
       <span className="text-red-500 font-bold text-sm">✦</span>
       <span className="tracking-[0.3em] font-black uppercase text-white/90">THE ENIGMATIC ELITE</span>
       <span className="text-red-500 font-bold text-sm">✦</span>
+      <span className="tracking-[0.3em] font-black uppercase text-white/90">IN MYSTERY WE REIGN</span>
+      <span className="text-red-500 font-bold text-sm">✦</span>
     </div>
   );
 
