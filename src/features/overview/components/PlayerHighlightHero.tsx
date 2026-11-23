@@ -25,34 +25,6 @@ function sum(stats: PlayerSeasonStat[], key: keyof PlayerSeasonStat): number {
   return stats.reduce((total, stat) => total + (Number(stat[key]) || 0), 0);
 }
 
-function Cutout({ player, small }: { player: Player; small: boolean }) {
-  const [failed, setFailed] = useState(false);
-  const src = player.profileImageUrl;
-
-  if (!src || failed) {
-    return (
-      <div
-        className="relative z-10 flex h-[86%] items-end justify-center font-heading text-[6rem] sm:text-[8rem] font-black leading-none text-white/10"
-        aria-hidden
-      >
-        {player.name?.charAt(0) ?? '?'}
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={src}
-      alt={player.name}
-      draggable={false}
-      loading="lazy"
-      decoding="async"
-      onError={() => setFailed(true)}
-      className={`relative z-10 ${small ? 'h-[75%] pointer-events-none' : 'h-[92%]'} w-auto max-w-full select-none object-contain object-bottom`}
-    />
-  );
-}
-
 export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighlightHeroProps) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -89,26 +61,6 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
     return () => window.clearTimeout(timer);
   }, [active, paused, total]);
 
-  // Shortest signed offset so the wrap-around still slides smoothly.
-  const relativeOffset = (index: number) => {
-    if (total === 0) return 0;
-    let offset = index - active;
-    if (offset > total / 2) offset -= total;
-    if (offset < -total / 2) offset += total;
-    return offset;
-  };
-
-  const positionFor = (offset: number) => {
-    const base = { left: '50%', scale: 0.6, opacity: 0, blur: 3, zIndex: 5, pointerEvents: 'none' as const };
-    // Middle player in exact center
-    if (offset === 0) return { ...base, left: '50%', scale: 1, opacity: 1, blur: 0, zIndex: 30, pointerEvents: 'auto' as const };
-    // Left player: 1 on left
-    if (offset === -1) return { ...base, left: '16%', scale: 0.72, opacity: 0.45, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
-    // Right player: 1 on right
-    if (offset === 1) return { ...base, left: '84%', scale: 0.72, opacity: 0.45, blur: 1, zIndex: 20, pointerEvents: 'auto' as const };
-    return base;
-  };
-
   const current = items[active];
 
   return (
@@ -136,61 +88,70 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
       {/* dark veil so the cutouts stay readable */}
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/10 to-[#0d0d10]" aria-hidden />
 
-      {/* ── 70% : player carousel ── */}
-      <div className="relative h-full w-[70%] overflow-hidden z-10">
-        {/* The 1587x2245 poster, centered directly with the middle player */}
+      {/* ── 70% : Single Player Spotlight Stage ── */}
+      <div className="relative h-full w-[70%] overflow-hidden z-10 flex items-center justify-center">
+        {/* The 1587x2245 poster, perfectly centered */}
         <img
           src={POSTER_IMAGE}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-full sm:h-[110%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-95 select-none"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-full sm:h-[110%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-95 select-none"
         />
+
         {items.length === 0 && (
-          <p className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-[0.3em] text-white/30">
+          <p className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-[0.3em] text-white/30 z-10">
             Loading players…
           </p>
         )}
 
-        {items.map((item, index) => {
-          const offset = relativeOffset(index);
-          // Exactly 3 players inside the 70% box: Middle (0), Left (-1), Right (1)
-          if (Math.abs(offset) > 1) return null;
-
-          const pos = positionFor(offset);
-          return (
+        {/* Exactly 1 Single Player at a time, perfectly centered in the gap of 'THE ELITE' */}
+        <AnimatePresence mode="wait">
+          {current && (
             <motion.div
-              key={item.player.id}
-              className="absolute bottom-0 top-0 flex w-[40%] -translate-x-1/2 items-end justify-center"
-              style={{ left: pos.left, zIndex: pos.zIndex, pointerEvents: pos.pointerEvents }}
-              animate={{
-                scale: pos.scale,
-                opacity: pos.opacity,
-                filter: reduceMotion ? 'blur(0px)' : `blur(${pos.blur}px)`,
-              }}
-              transition={{ duration: reduceMotion ? 0.2 : 0.75, ease: [0.22, 1, 0.36, 1] }}
-              onClick={() => offset !== 0 && setActive(index)}
-              role={offset === 0 ? undefined : 'button'}
-              aria-label={offset === 0 ? undefined : `Show ${item.player.name}`}
+              key={current.player.id}
+              className="absolute inset-0 flex items-end justify-center z-10 pointer-events-none select-none"
+              initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.04 }}
+              transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: 'easeOut' }}
             >
-              {/* ground shadow — behind the cutout */}
+              {/* Ground shadow under the player */}
               <div
-                className="absolute bottom-[4%] left-1/2 h-[6%] w-[60%] -translate-x-1/2 rounded-full bg-black/70 blur-xl"
-                style={{ opacity: reduceMotion ? 0.4 : pos.opacity }}
+                className="absolute bottom-[4%] left-1/2 h-[6%] w-[55%] -translate-x-1/2 rounded-full bg-black/70 blur-xl"
                 aria-hidden
               />
-              <Cutout player={item.player} small={offset !== 0} />
-              {/* bottom fade — attached to each cutout, blends into the fixed background */}
+
+              {/* Player cutout image */}
+              {current.player.profileImageUrl ? (
+                <img
+                  src={current.player.profileImageUrl}
+                  alt={current.player.name}
+                  draggable={false}
+                  loading="eager"
+                  decoding="async"
+                  className="relative z-10 h-[92%] w-auto max-w-[85%] object-contain object-bottom select-none"
+                />
+              ) : (
+                <div
+                  className="relative z-10 flex h-[86%] items-end justify-center font-heading text-[6rem] sm:text-[8rem] font-black leading-none text-white/10"
+                  aria-hidden
+                >
+                  {current.player.name?.charAt(0) ?? '?'}
+                </div>
+              )}
+
+              {/* Bottom fade — blends legs smoothly into bottom edge */}
               <div
-                className="pointer-events-none absolute bottom-0 left-0 right-0 h-[16%]"
-                style={{ background: `linear-gradient(to bottom, transparent, ${FADE_COLOR})`, opacity: pos.opacity }}
+                className="pointer-events-none absolute bottom-0 inset-x-0 h-[16%]"
+                style={{ background: `linear-gradient(to bottom, transparent, ${FADE_COLOR})` }}
                 aria-hidden
               />
             </motion.div>
-          );
-        })}
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* ── 30% : highlight box (always 30% side-by-side) ── */}
+      {/* ── 30% : Highlight Details Box ── */}
       <aside className="relative flex w-[30%] h-full flex-col justify-center border-l border-white/10 bg-black/30 px-3 sm:px-5 lg:px-8 backdrop-blur-sm z-20">
         <p className="mb-1 sm:mb-3 text-[8px] sm:text-[10px] font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-white/40">
           Player Highlight
