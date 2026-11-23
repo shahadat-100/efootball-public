@@ -20,6 +20,7 @@ import { DynamicTrivia } from '@/features/overview/components/DynamicTrivia';
 import { HallOfFameCarousel } from '@/features/overview/components/HallOfFameCarousel';
 import { TiltedPlayerMarquee } from '@/features/overview/components/TiltedPlayerMarquee';
 import { PlayerHighlightHero } from '@/features/overview/components/PlayerHighlightHero';
+import { ClubMarqueeTicker } from '@/features/overview/components/ClubMarqueeTicker';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -300,7 +301,7 @@ export function Overview({ setTab }: OverviewProps) {
 
       {/* ═══ Full-Width Edge-to-Edge Player Highlight Hero ═══ */}
       <div 
-        className="relative overflow-hidden mb-8"
+        className="relative overflow-hidden mb-0"
         style={{
           width: '100vw',
           marginLeft: 'calc(-50vw + 50%)',
@@ -308,6 +309,11 @@ export function Overview({ setTab }: OverviewProps) {
         }}
       >
         <PlayerHighlightHero players={players} playerSeasonStats={playerSeasonStats} />
+      </div>
+
+      {/* ═══ Full-Width Edge-to-Edge Club Marquee Ticker ═══ */}
+      <div className="mb-10">
+        <ClubMarqueeTicker />
       </div>
 
       {/* ═══ Full-Width Edge-to-Edge Player Marquee ═══ */}
