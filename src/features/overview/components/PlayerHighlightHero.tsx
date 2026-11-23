@@ -27,12 +27,12 @@ function sum(stats: PlayerSeasonStat[], key: keyof PlayerSeasonStat): number {
 
 function Cutout({ player, small }: { player: Player; small: boolean }) {
   const [failed, setFailed] = useState(false);
-  const src = player.coverImageUrl || player.profileImageUrl;
+  const src = player.profileImageUrl;
 
   if (!src || failed) {
     return (
       <div
-        className="relative z-10 flex h-[86%] items-end justify-center font-heading text-[8rem] font-black leading-none text-white/10"
+        className="relative z-10 flex h-[86%] items-end justify-center font-heading text-[6rem] sm:text-[8rem] font-black leading-none text-white/10"
         aria-hidden
       >
         {player.name?.charAt(0) ?? '?'}
@@ -48,7 +48,7 @@ function Cutout({ player, small }: { player: Player; small: boolean }) {
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
-      className={`relative z-10 h-[92%] w-auto max-w-full select-none object-contain object-bottom ${small ? 'pointer-events-none' : ''}`}
+      className={`relative z-10 ${small ? 'h-[75%] pointer-events-none' : 'h-[92%]'} w-auto max-w-full select-none object-contain object-bottom`}
     />
   );
 }
@@ -59,8 +59,8 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
   const reduceMotion = useReducedMotion();
 
   const items = useMemo<HighlightItem[]>(() => {
-    // Only include players who have photos/cutouts to keep the hero showcase clean and save egress
-    const playersWithPhoto = players.filter((p) => Boolean(p.coverImageUrl || p.profileImageUrl));
+    // Only include players who have profileImageUrl
+    const playersWithPhoto = players.filter((p) => Boolean(p.profileImageUrl));
     const sourceList = playersWithPhoto.length > 0 ? playersWithPhoto : players;
 
     return [...sourceList]
@@ -113,7 +113,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
   return (
     <section
-      className="relative mb-8 h-[300px] w-full overflow-hidden rounded-3xl shadow-2xl md:h-[380px] lg:h-[460px]"
+      className="relative mb-8 h-[320px] sm:h-[380px] md:h-[420px] lg:h-[460px] w-full overflow-hidden rounded-3xl shadow-2xl flex flex-row"
       style={{ background: HERO_BACKGROUND }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -137,13 +137,13 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/10 to-[#0d0d10]" aria-hidden />
 
       {/* ── 70% : player carousel ── */}
-      <div className="relative h-full w-full overflow-hidden lg:w-[70%]">
-        {/* The poster, centered with the middle player so 'THE' is on left, 'ELITE' is on right */}
+      <div className="relative h-full w-[70%] overflow-hidden z-10">
+        {/* The 1587x2245 poster, centered directly with the middle player */}
         <img
           src={POSTER_IMAGE}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[160%] md:h-[175%] lg:h-[190%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-90 select-none"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-full sm:h-[110%] w-auto max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-95 select-none"
         />
         {items.length === 0 && (
           <p className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-[0.3em] text-white/30">
@@ -153,14 +153,14 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
 
         {items.map((item, index) => {
           const offset = relativeOffset(index);
-          // Exactly 3 players: Middle (0), Left (-1), Right (1)
+          // Exactly 3 players inside the 70% box: Middle (0), Left (-1), Right (1)
           if (Math.abs(offset) > 1) return null;
 
           const pos = positionFor(offset);
           return (
             <motion.div
               key={item.player.id}
-              className="absolute bottom-0 top-0 flex w-[44%] sm:w-[40%] -translate-x-1/2 items-end justify-center"
+              className="absolute bottom-0 top-0 flex w-[40%] -translate-x-1/2 items-end justify-center"
               style={{ left: pos.left, zIndex: pos.zIndex, pointerEvents: pos.pointerEvents }}
               animate={{
                 scale: pos.scale,
@@ -174,7 +174,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
             >
               {/* ground shadow — behind the cutout */}
               <div
-                className="absolute bottom-[7%] left-1/2 h-[7%] w-[62%] -translate-x-1/2 rounded-full bg-black/60 blur-xl"
+                className="absolute bottom-[4%] left-1/2 h-[6%] w-[60%] -translate-x-1/2 rounded-full bg-black/70 blur-xl"
                 style={{ opacity: reduceMotion ? 0.4 : pos.opacity }}
                 aria-hidden
               />
@@ -188,13 +188,13 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
             </motion.div>
           );
         })}
-
-        {/* controls */}
       </div>
 
-      {/* ── 30% : highlight box (desktop only) ── */}
-      <aside className="absolute inset-y-0 right-0 hidden w-[30%] flex-col justify-center border-l border-white/10 bg-black/25 px-8 backdrop-blur-sm lg:flex">
-        <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/40">Player Highlight</p>
+      {/* ── 30% : highlight box (always 30% side-by-side) ── */}
+      <aside className="relative flex w-[30%] h-full flex-col justify-center border-l border-white/10 bg-black/30 px-3 sm:px-5 lg:px-8 backdrop-blur-sm z-20">
+        <p className="mb-1 sm:mb-3 text-[8px] sm:text-[10px] font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-white/40">
+          Player Highlight
+        </p>
         <AnimatePresence mode="wait">
           {current && (
             <motion.div
@@ -204,10 +204,10 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: reduceMotion ? 0.15 : 0.35, ease: 'easeOut' }}
             >
-              <h2 className="font-heading text-4xl font-black uppercase leading-none text-white xl:text-5xl">
+              <h2 className="font-heading text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black uppercase leading-tight text-white truncate">
                 {current.player.name}
               </h2>
-              <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-7">
+              <div className="mt-3 sm:mt-5 md:mt-7 grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-3 sm:gap-y-6">
                 {[
                   { label: 'Wins', value: current.wins },
                   { label: 'Goals', value: current.goals },
@@ -215,8 +215,12 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
                   { label: 'Win Rate', value: current.winRate === null ? '—' : `${current.winRate}%` },
                 ].map((stat) => (
                   <div key={stat.label}>
-                    <p className="font-heading text-3xl font-bold text-white xl:text-4xl">{stat.value}</p>
-                    <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/40">{stat.label}</p>
+                    <p className="font-heading text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white leading-none">
+                      {stat.value}
+                    </p>
+                    <p className="mt-1 text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.2em] text-white/40">
+                      {stat.label}
+                    </p>
                   </div>
                 ))}
               </div>
