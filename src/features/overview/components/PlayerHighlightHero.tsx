@@ -21,6 +21,13 @@ const POSTER_IMAGE = '/images/hero-player-bg.png';
 const HERO_BACKGROUND = 'radial-gradient(circle at 50% 20%, #2a2b33 0%, #17181d 45%, #0d0d10 100%)';
 const FADE_COLOR = '#0d0d10';
 
+const isValidImageUrl = (url?: string | null): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || trimmed.length < 5) return false;
+  return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/');
+};
+
 function sum(stats: PlayerSeasonStat[], key: keyof PlayerSeasonStat): number {
   return stats.reduce((total, stat) => total + (Number(stat[key]) || 0), 0);
 }
@@ -28,14 +35,16 @@ function sum(stats: PlayerSeasonStat[], key: keyof PlayerSeasonStat): number {
 export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighlightHeroProps) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
   const reduceMotion = useReducedMotion();
 
   const items = useMemo<HighlightItem[]>(() => {
-    // Only include players who have profileImageUrl
-    const playersWithPhoto = players.filter((p) => Boolean(p.profileImageUrl));
-    const sourceList = playersWithPhoto.length > 0 ? playersWithPhoto : players;
+    // STRICT: Only players who have a valid, working image URL
+    const playersWithPhoto = players.filter(
+      (p) => isValidImageUrl(p.profileImageUrl) && !failedIds.has(p.id)
+    );
 
-    return [...sourceList]
+    return playersWithPhoto
       .sort((a, b) => (a.jerseyNumber ?? 999) - (b.jerseyNumber ?? 999) || a.name.localeCompare(b.name))
       .map((player) => {
         const stats = playerSeasonStats.filter((stat) => stat.playerId === player.id);
@@ -51,7 +60,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
           winRate: played > 0 ? Math.round((wins / played) * 100) : null,
         };
       });
-  }, [players, playerSeasonStats]);
+  }, [players, playerSeasonStats, failedIds]);
 
   const total = items.length;
 
@@ -122,23 +131,17 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
               />
 
               {/* Player cutout image */}
-              {current.player.profileImageUrl ? (
-                <img
-                  src={current.player.profileImageUrl}
-                  alt={current.player.name}
-                  draggable={false}
-                  loading="eager"
-                  decoding="async"
-                  className="relative z-10 h-[92%] w-auto max-w-[85%] object-contain object-bottom select-none"
-                />
-              ) : (
-                <div
-                  className="relative z-10 flex h-[86%] items-end justify-center font-heading text-[6rem] sm:text-[8rem] font-black leading-none text-white/10"
-                  aria-hidden
-                >
-                  {current.player.name?.charAt(0) ?? '?'}
-                </div>
-              )}
+              <img
+                src={current.player.profileImageUrl}
+                alt={current.player.name}
+                draggable={false}
+                loading="eager"
+                decoding="async"
+                onError={() => {
+                  setFailedIds((prev) => new Set(prev).add(current.player.id));
+                }}
+                className="relative z-10 h-[92%] w-auto max-w-[85%] object-contain object-bottom select-none"
+              />
 
               {/* Bottom fade — blends legs smoothly into bottom edge */}
               <div
