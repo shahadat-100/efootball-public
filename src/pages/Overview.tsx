@@ -19,6 +19,7 @@ import { GoldenBootRace } from '@/features/overview/components/GoldenBootRace';
 import { DynamicTrivia } from '@/features/overview/components/DynamicTrivia';
 import { HallOfFameCarousel } from '@/features/overview/components/HallOfFameCarousel';
 import { TiltedPlayerMarquee } from '@/features/overview/components/TiltedPlayerMarquee';
+import { PlayerHighlightHero } from '@/features/overview/components/PlayerHighlightHero';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -297,14 +298,8 @@ export function Overview({ setTab }: OverviewProps) {
         </div>
       )}
 
-      {/* Hero Banner Section */}
-      <div className="relative w-full rounded-3xl overflow-hidden mb-8 shadow-2xl aspect-[3/1] group">
-        <img
-          src="/images/hero-banner.png"
-          alt="The Enigmatic Elite Banner"
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-        />
-      </div>
+      {/* Hero — Player Highlight Carousel (replaces the old banner) */}
+      <PlayerHighlightHero players={players} playerSeasonStats={playerSeasonStats} />
 
       {/* ═══ Full-Width Edge-to-Edge Player Marquee ═══ */}
       <div 
