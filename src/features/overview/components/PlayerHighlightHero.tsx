@@ -18,6 +18,7 @@ interface HighlightItem {
 const SLIDE_MS = 2000;
 
 const POSTER_IMAGE = '/images/hero-player-bg.jpg?v=3';
+const FALLBACK_PLAYER_IMAGE = '/images/player-fallback.png';
 const HERO_BACKGROUND = '#0d0d10';
 
 const isValidImageUrl = (url?: string | null): boolean => {
@@ -38,12 +39,8 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
   const reduceMotion = useReducedMotion();
 
   const items = useMemo<HighlightItem[]>(() => {
-    // STRICT: Only players who have a valid, working image URL
-    const playersWithPhoto = players.filter(
-      (p) => isValidImageUrl(p.profileImageUrl) && !failedIds.has(p.id)
-    );
-
-    return playersWithPhoto
+    return players
+      .slice()
       .sort((a, b) => (a.jerseyNumber ?? 999) - (b.jerseyNumber ?? 999) || a.name.localeCompare(b.name))
       .map((player) => {
         const stats = playerSeasonStats.filter((stat) => stat.playerId === player.id);
@@ -59,7 +56,7 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
           winRate: played > 0 ? Math.round((wins / played) * 100) : null,
         };
       });
-  }, [players, playerSeasonStats, failedIds]);
+  }, [players, playerSeasonStats]);
 
   const total = items.length;
 
@@ -109,13 +106,20 @@ export function PlayerHighlightHero({ players, playerSeasonStats }: PlayerHighli
             {/* Player cutout image container — bigger size, moved down, NO shadows */}
             <div className="relative z-10 h-[104%] sm:h-[110%] w-auto max-w-[85%] sm:max-w-[70%] flex items-end justify-center translate-y-[5%] sm:translate-y-[7%]">
               <img
-                src={current.player.profileImageUrl}
+                src={
+                  isValidImageUrl(current.player.profileImageUrl) && !failedIds.has(current.player.id)
+                    ? current.player.profileImageUrl!
+                    : FALLBACK_PLAYER_IMAGE
+                }
                 alt={current.player.name}
                 draggable={false}
                 loading="eager"
                 decoding="async"
-                onError={() => {
+                onError={(e) => {
                   setFailedIds((prev) => new Set(prev).add(current.player.id));
+                  if (e.currentTarget.src !== FALLBACK_PLAYER_IMAGE) {
+                    e.currentTarget.src = FALLBACK_PLAYER_IMAGE;
+                  }
                 }}
                 className="h-full w-auto max-w-full object-contain object-bottom select-none"
               />

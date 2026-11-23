@@ -7,6 +7,8 @@ interface TiltedPlayerMarqueeProps {
   overallTop10: { player: Player; points: number; rank: number }[];
 }
 
+const FALLBACK_PLAYER_IMAGE = '/images/player-fallback.png';
+
 export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
   monthlyTop10,
   overallTop10,
@@ -23,7 +25,7 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
     rowNum: number,
   ) => {
     const p = entry.player;
-    const imageSrc = p.coverImageUrl || p.profileImageUrl;
+    const imageSrc = p.coverImageUrl || p.profileImageUrl || FALLBACK_PLAYER_IMAGE;
     const isMonthly = rowNum === 1;
     const isFirst = entry.rank === 1;
 
