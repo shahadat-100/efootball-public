@@ -611,7 +611,10 @@ export function PublicTournaments() {
 
               {/* Bold Play Deadline & Live Countdown Banner */}
               {currentMatchdayDeadline && (
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-card via-card to-card border-2 border-[#c89850]/40 p-4 sm:p-5 shadow-xl shadow-black/20">
+                <div 
+                  translate="no" 
+                  className="notranslate relative overflow-hidden rounded-2xl bg-gradient-to-r from-card via-card to-card border-2 border-[#c89850]/40 p-4 sm:p-5 shadow-xl shadow-black/20"
+                >
                   {/* Subtle Background Glow */}
                   <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-[#c89850]/10 rounded-full blur-3xl pointer-events-none" />
 

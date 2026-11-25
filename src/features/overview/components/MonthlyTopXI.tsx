@@ -2,6 +2,11 @@ import { useMemo } from 'react';
 import { Player } from '@/features/players/types';
 import { MatchEntry } from '@/features/match-entries/types';
 import { PlayerMonthlyStat } from '@/store/footballStore';
+import {
+  findLatestMonthlyPeriod,
+  getAggregatedMonthlyPlayerStats,
+  MONTHS,
+} from '@/features/overview/utils/leaderboardUtils';
 
 interface MonthlyTopXIProps {
   players: Player[];
@@ -39,44 +44,39 @@ const FORMATION_POSITIONS = [
 ];
 
 export function MonthlyTopXI({ players, matchEntries, playerMonthlyStats = [] }: MonthlyTopXIProps) {
-  // Find the most recent month with actual data to display (fallback to matchEntries if needed for date, but ideally just current date)
-  const mostRecentEntry = matchEntries
-    .map(e => e.date ? new Date(e.date) : null)
-    .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
-    .sort((a, b) => b.getTime() - a.getTime())[0];
+  const latestMonth = useMemo(
+    () => findLatestMonthlyPeriod(playerMonthlyStats, matchEntries),
+    [playerMonthlyStats, matchEntries]
+  );
 
-  const targetDate = mostRecentEntry || new Date();
-  const currentMonth = targetDate.getMonth();
-  const currentYear = targetDate.getFullYear();
-  const monthName = targetDate.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+  const monthName = `${MONTHS[latestMonth.monthIndex]} ${latestMonth.year}`;
 
   const topXI = useMemo<PlayerPoints[]>(() => {
-    // We use playerMonthlyStats for the calculation to avoid pagination bugs.
-    const monthStats = playerMonthlyStats.filter(s => 
-      s.year === currentYear && s.monthIndex === currentMonth
+    const monthlyAgg = getAggregatedMonthlyPlayerStats(
+      players,
+      playerMonthlyStats,
+      matchEntries,
+      {
+        year: latestMonth.year,
+        monthIndex: latestMonth.monthIndex,
+      }
     );
 
-    const pointsList: PlayerPoints[] = monthStats.map(stat => {
-      const player = players.find(p => p.id === stat.playerId);
-      if (!player) return null;
-
-      // Calculate points (3 for win, 1 for draw, 2 for motm)
-      const points = (stat.wins * 3) + (stat.draws * 1) + (stat.motmCount * 2);
-
-      return {
-        player,
-        points,
-        matches: stat.appearances,
-        wins: stat.wins,
-        goals: stat.goals,
-        motm: stat.motmCount
-      };
-    }).filter(Boolean) as PlayerPoints[];
+    const pointsList: PlayerPoints[] = monthlyAgg
+      .filter(r => r.matches > 0)
+      .map(r => ({
+        player: r.player,
+        points: (r.wins * 3) + (r.draws * 1) + (r.motm * 2),
+        matches: r.matches,
+        wins: r.wins,
+        goals: r.gf,
+        motm: r.motm,
+      }));
 
     return pointsList
       .sort((a, b) => b.points - a.points || b.goals - a.goals)
       .slice(0, 11);
-  }, [players, playerMonthlyStats, currentMonth, currentYear]);
+  }, [players, playerMonthlyStats, matchEntries, latestMonth]);
 
   const isEmpty = topXI.length === 0;
 

@@ -1,9 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Player, PlayerSeasonStat, SeasonDb } from '@/features/players/types';
 import { MatchEntry } from '@/features/match-entries/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 import { Avatar } from '@/shared/components';
 import { cn } from '@/shared/lib/cn';
+import {
+  MONTHS,
+  findLatestWeeklyPeriod,
+  findLatestMonthlyPeriod,
+  getAggregatedWeeklyPlayerStats,
+  getAggregatedMonthlyPlayerStats,
+} from '@/features/overview/utils/leaderboardUtils';
 
 interface OverviewPointsLeaderboardProps {
   players: Player[];
@@ -30,16 +37,6 @@ interface RankedPlayer {
   motm: number;
 }
 
-const MONTHS = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December',
-];
-
-const today = new Date();
-const currentMonthIndex = today.getMonth();
-const currentYear = today.getFullYear();
-const currentDay = today.getDate();
-
 export function OverviewPointsLeaderboard({
   players,
   matchEntries,
@@ -49,76 +46,81 @@ export function OverviewPointsLeaderboard({
   playerWeeklyStats = [],
   limit = 8,
 }: OverviewPointsLeaderboardProps) {
+  // Find latest active weekly and monthly periods based on real data
+  const latestWeekly = useMemo(
+    () => findLatestWeeklyPeriod(playerWeeklyStats, matchEntries),
+    [playerWeeklyStats, matchEntries]
+  );
+  const latestMonthly = useMemo(
+    () => findLatestMonthlyPeriod(playerMonthlyStats, matchEntries),
+    [playerMonthlyStats, matchEntries]
+  );
+
+  const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState<number>(latestWeekly.week);
+  const [selectedWeeklyMonth, setSelectedWeeklyMonth] = useState<number>(latestWeekly.monthIndex);
+  const [selectedWeeklyYear, setSelectedWeeklyYear] = useState<number>(latestWeekly.year);
+
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
-  const [selectedMonthlyMonth, setSelectedMonthlyMonth]       = useState<number>(currentMonthIndex);
+  const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(latestMonthly.monthIndex);
+  const [selectedMonthlyYear, setSelectedMonthlyYear] = useState<number>(latestMonthly.year);
+
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
 
+  // Sync to latest active period if data loads asynchronously
+  useEffect(() => {
+    setSelectedWeeklyWeek(latestWeekly.week);
+    setSelectedWeeklyMonth(latestWeekly.monthIndex);
+    setSelectedWeeklyYear(latestWeekly.year);
+  }, [latestWeekly.year, latestWeekly.monthIndex, latestWeekly.week]);
+
+  useEffect(() => {
+    setSelectedMonthlyMonth(latestMonthly.monthIndex);
+    setSelectedMonthlyYear(latestMonthly.year);
+  }, [latestMonthly.year, latestMonthly.monthIndex]);
+
   const { weeklyRanking, monthlyRanking, overallRanking } = useMemo(() => {
-    let activeWeekName = 'Week 1';
-    if (currentDay >= 8  && currentDay <= 14) { activeWeekName = 'Week 2'; }
-    else if (currentDay >= 15 && currentDay <= 21) { activeWeekName = 'Week 3'; }
-    else if (currentDay >= 22) { activeWeekName = 'Week 4'; }
+    // 1. Weekly Ranking using robust aggregator across playerWeeklyStats and matchEntries
+    const weeklyAgg = getAggregatedWeeklyPlayerStats(
+      players,
+      playerWeeklyStats,
+      matchEntries,
+      {
+        year: selectedWeeklyYear,
+        monthIndex: selectedWeeklyMonth,
+        week: selectedWeeklyWeek,
+      }
+    );
 
-    const calcPoints = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
-      s.wins * 10 + s.draws * 5 - s.losses * 3 + s.goals - s.goalsConceded + s.motmCount * 4 + s.hattricks;
+    const weeklyList: RankedPlayer[] = weeklyAgg
+      .filter(r => r.matches > 0)
+      .sort((a, b) => b.points - a.points || b.wins - a.wins || b.gf - a.gf);
 
-    // Weekly from playerWeeklyStats
-    let activeWeekNumber = 1;
-    if (currentDay >= 8  && currentDay <= 14) activeWeekNumber = 2;
-    else if (currentDay >= 15 && currentDay <= 21) activeWeekNumber = 3;
-    else if (currentDay >= 22) activeWeekNumber = 4;
+    // 2. Monthly Ranking using robust aggregator across playerMonthlyStats and matchEntries
+    const monthlyAgg = getAggregatedMonthlyPlayerStats(
+      players,
+      playerMonthlyStats,
+      matchEntries,
+      {
+        year: selectedMonthlyYear,
+        monthIndex: selectedMonthlyMonth,
+        seasonId: selectedMonthlySeasonId,
+      }
+    );
 
-    const weeklyList: RankedPlayer[] = players.map(p => {
-      const stats = playerWeeklyStats.filter(s =>
-        s.playerId === p.id &&
-        s.year === currentYear &&
-        s.monthIndex === currentMonthIndex &&
-        s.week === activeWeekNumber
-      );
-      const wins = stats.reduce((t, s) => t + s.wins, 0);
-      const draws = stats.reduce((t, s) => t + s.draws, 0);
-      const losses = stats.reduce((t, s) => t + s.losses, 0);
-      const gf = stats.reduce((t, s) => t + s.goals, 0);
-      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
-      const cs = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
-      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
-      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
-      const matches = wins + draws + losses;
-      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points);
+    const monthlyList: RankedPlayer[] = monthlyAgg
+      .filter(r => r.matches > 0)
+      .sort((a, b) => b.points - a.points || b.wins - a.wins || b.gf - a.gf);
 
-    // Monthly from playerMonthlyStats
-    const monthlyList: RankedPlayer[] = players.map(p => {
-      const stats = playerMonthlyStats.filter(s =>
-        s.playerId === p.id &&
-        s.monthIndex === selectedMonthlyMonth &&
-        (selectedMonthlySeasonId !== null ? s.seasonId === selectedMonthlySeasonId : s.year === currentYear)
-      );
-      const wins = stats.reduce((t, s) => t + s.wins, 0);
-      const draws = stats.reduce((t, s) => t + s.draws, 0);
-      const losses = stats.reduce((t, s) => t + s.losses, 0);
-      const gf = stats.reduce((t, s) => t + s.goals, 0);
-      const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
-      const cs = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
-      const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
-      const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
-      const matches = wins + draws + losses;
-      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points);
-
+    // 3. Overall Ranking from playerSeasonStats
     const overallList: RankedPlayer[] = players.map(p => {
       const stats = playerSeasonStats.filter(s =>
         s.playerId === p.id &&
         (selectedOverallSeasonId === null || s.seasonId === selectedOverallSeasonId)
       );
-      const wins   = stats.reduce((t, s) => t + s.wins, 0);
-      const draws  = stats.reduce((t, s) => t + s.draws, 0);
-      const losses = stats.reduce((t, s) => t + s.losses, 0);
-      const gf     = stats.reduce((t, s) => t + s.goals, 0);
+      const wins   = stats.reduce((t, s) => t + (s.wins || 0), 0);
+      const draws  = stats.reduce((t, s) => t + (s.draws || 0), 0);
+      const losses = stats.reduce((t, s) => t + (s.losses || 0), 0);
+      const gf     = stats.reduce((t, s) => t + (s.goals || 0), 0);
       const gc     = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
       const cs     = stats.reduce((t, s) => t + (s.cleansheets || 0), 0);
       const ht     = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
@@ -127,15 +129,21 @@ export function OverviewPointsLeaderboard({
       const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
       const points  = wins * 10 + draws * 5 - losses * 3 + gf - gc + motm * 4 + ht;
       return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    }).sort((a, b) => b.points - a.points);
+    }).sort((a, b) => b.points - a.points || b.wins - a.wins || b.gf - a.gf);
 
     const monthlySeasonLabel = selectedMonthlySeasonId
       ? seasons.find(s => s.id === selectedMonthlySeasonId)?.name ?? ''
-      : currentYear.toString();
+      : selectedMonthlyYear.toString();
 
     return {
-      weeklyRanking:  { label: activeWeekName, list: weeklyList },
-      monthlyRanking: { label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`, list: monthlyList },
+      weeklyRanking: {
+        label: `Week ${selectedWeeklyWeek} · ${MONTHS[selectedWeeklyMonth]} ${selectedWeeklyYear}`,
+        list: weeklyList,
+      },
+      monthlyRanking: {
+        label: `${MONTHS[selectedMonthlyMonth]} · ${monthlySeasonLabel}`,
+        list: monthlyList,
+      },
       overallRanking: {
         label: selectedOverallSeasonId
           ? (seasons.find(s => s.id === selectedOverallSeasonId)?.name ?? 'Overall')
@@ -143,7 +151,21 @@ export function OverviewPointsLeaderboard({
         list: overallList,
       },
     };
-  }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedOverallSeasonId]);
+  }, [
+    players,
+    matchEntries,
+    playerSeasonStats,
+    playerMonthlyStats,
+    playerWeeklyStats,
+    seasons,
+    selectedWeeklyYear,
+    selectedWeeklyMonth,
+    selectedWeeklyWeek,
+    selectedMonthlySeasonId,
+    selectedMonthlyMonth,
+    selectedMonthlyYear,
+    selectedOverallSeasonId,
+  ]);
 
   /* ─── Render helpers ─────────────────────────────────────────── */
 
@@ -216,11 +238,27 @@ export function OverviewPointsLeaderboard({
 
       {/* ── Weekly ── */}
       <CardWrapper accentColor="#8b5cf6">
-        <div className="mb-4 border-b border-border pb-3 flex items-center justify-between relative z-10">
-          <h3 className="font-bold text-base text-foreground tracking-tight">Weekly Points</h3>
-          <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-600 border border-purple-500/20 shadow-sm">
-            {weeklyRanking.label}
-          </span>
+        <div className="mb-3 border-b border-border pb-3 relative z-10">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-bold text-base text-foreground tracking-tight">Weekly Points</h3>
+            <span className="text-[10px] text-muted-foreground font-medium">{weeklyRanking.label}</span>
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={selectedWeeklyMonth}
+              onChange={e => setSelectedWeeklyMonth(Number(e.target.value))}
+              className={selectCls + ' flex-1'}
+            >
+              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+            </select>
+            <select
+              value={selectedWeeklyWeek}
+              onChange={e => setSelectedWeeklyWeek(Number(e.target.value))}
+              className={selectCls + ' flex-1'}
+            >
+              {[1, 2, 3, 4].map(w => <option key={w} value={w}>Week {w}</option>)}
+            </select>
+          </div>
         </div>
         <div className="space-y-1 relative z-10">
           {weeklyRanking.list.length === 0 || weeklyRanking.list.every(r => r.points === 0 && r.matches === 0) ? (
@@ -244,7 +282,7 @@ export function OverviewPointsLeaderboard({
               onChange={e => setSelectedMonthlySeasonId(e.target.value === '' ? null : Number(e.target.value))}
               className={selectCls + ' flex-1'}
             >
-              <option value="">{currentYear} (Current)</option>
+              <option value="">{selectedMonthlyYear} (Latest)</option>
               {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <select

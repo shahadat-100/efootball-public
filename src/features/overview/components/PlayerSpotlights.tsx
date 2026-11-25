@@ -6,6 +6,12 @@ import { cn } from '@/shared/lib/cn';
 import { Star, Crown, Zap } from 'lucide-react';
 
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
+import {
+  MONTHS_SHORT,
+  findLatestWeeklyPeriod,
+  findLatestMonthlyPeriod,
+  calcPoints,
+} from '@/features/overview/utils/leaderboardUtils';
 
 interface PlayerSpotlightsProps {
   players: Player[];
@@ -14,7 +20,7 @@ interface PlayerSpotlightsProps {
   playerMonthlyStats?: PlayerMonthlyStat[];
 }
 
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS = MONTHS_SHORT;
 
 // Helper: Calculate points from season stats
 const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
@@ -24,15 +30,8 @@ const calcSeasonPoints = (stats: PlayerSeasonStat[]): number =>
 
 export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats = [], playerMonthlyStats = [] }: PlayerSpotlightsProps) {
   const { weekTop, monthTop, seasonTop } = useMemo(() => {
-    const today = new Date();
-    const currentMonthIndex = today.getMonth();
-    const currentYear = today.getFullYear();
-    const currentDay = today.getDate();
-
-    let activeWeekNumber = 1, weekLabel = 'Week 1';
-    if (currentDay >= 8 && currentDay <= 14) { activeWeekNumber = 2; weekLabel = 'Week 2'; }
-    else if (currentDay >= 15 && currentDay <= 21) { activeWeekNumber = 3; weekLabel = 'Week 3'; }
-    else if (currentDay >= 22) { activeWeekNumber = 4; weekLabel = 'Week 4'; }
+    const latestWeekly = findLatestWeeklyPeriod(playerWeeklyStats);
+    const latestMonthly = findLatestMonthlyPeriod(playerMonthlyStats);
 
     const weeklyMap = new Map<string, { pts: number; goals: number; motm: number }>();
     const monthlyMap = new Map<string, { pts: number; goals: number; motm: number }>();
@@ -44,15 +43,16 @@ export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats
       seasonMap.set(p.id, { pts: 0, goals: 0, motm: 0 });
     });
 
-    const calcPointsFromStats = (s: { wins: number; draws: number; losses: number; goals: number; goalsConceded: number; hattricks: number; motmCount: number }) =>
-      (s.wins * 10) + (s.draws * 5) - (s.losses * 3) + s.goals - s.goalsConceded + (s.motmCount * 4) + s.hattricks;
-
     // Week
     playerWeeklyStats.forEach(stat => {
-      if (stat.year === currentYear && stat.monthIndex === currentMonthIndex && stat.week === activeWeekNumber) {
+      if (
+        Number(stat.year) === latestWeekly.year &&
+        Number(stat.monthIndex) === latestWeekly.monthIndex &&
+        Number(stat.week) === latestWeekly.week
+      ) {
         if (weeklyMap.has(stat.playerId)) {
           const wm = weeklyMap.get(stat.playerId)!;
-          wm.pts += calcPointsFromStats(stat);
+          wm.pts += calcPoints(stat);
           wm.goals += stat.goals;
           wm.motm += stat.motmCount;
         }
@@ -61,10 +61,13 @@ export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats
 
     // Month
     playerMonthlyStats.forEach(stat => {
-      if (stat.year === currentYear && stat.monthIndex === currentMonthIndex) {
+      if (
+        Number(stat.year) === latestMonthly.year &&
+        Number(stat.monthIndex) === latestMonthly.monthIndex
+      ) {
         if (monthlyMap.has(stat.playerId)) {
           const mm = monthlyMap.get(stat.playerId)!;
-          mm.pts += calcPointsFromStats(stat);
+          mm.pts += calcPoints(stat);
           mm.goals += stat.goals;
           mm.motm += stat.motmCount;
         }
@@ -73,8 +76,6 @@ export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats
 
     // Season (Current Year based on playerSeasonStats or current year entries)
     players.forEach(p => {
-      // For season, we will use the current year's entries for live accurate stats since season id might be abstract.
-      // Or we can use playerSeasonStats. Let's combine this year's stats from playerSeasonStats.
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
       const totalPoints = calcSeasonPoints(stats);
       const totalGoals = stats.reduce((acc, s) => acc + (s.goals || 0), 0);
@@ -91,8 +92,8 @@ export function PlayerSpotlights({ players, playerSeasonStats, playerWeeklyStats
     };
 
     return {
-      weekTop: { data: getTop(weeklyMap), label: `${MONTHS[currentMonthIndex]} ${weekLabel}` },
-      monthTop: { data: getTop(monthlyMap), label: `${MONTHS[currentMonthIndex]} ${currentYear}` },
+      weekTop: { data: getTop(weeklyMap), label: `${MONTHS[latestWeekly.monthIndex]} Week ${latestWeekly.week}` },
+      monthTop: { data: getTop(monthlyMap), label: `${MONTHS[latestMonthly.monthIndex]} ${latestMonthly.year}` },
       seasonTop: { data: getTop(seasonMap), label: `Overall Season` },
     };
   }, [players, playerWeeklyStats, playerMonthlyStats, playerSeasonStats]);

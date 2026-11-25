@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Player, PlayerSeasonStat, SeasonDb } from '@/features/players/types';
 import { MatchEntry } from '@/features/match-entries/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
@@ -9,6 +9,14 @@ import {
   Search, Play, ChevronLeft, ChevronRight,
   TrendingUp, Eye, EyeOff, Radio, Crown
 } from 'lucide-react';
+import {
+  MONTHS,
+  MONTHS_SHORT,
+  findLatestWeeklyPeriod,
+  findLatestMonthlyPeriod,
+  getAggregatedWeeklyPlayerStats,
+  getAggregatedMonthlyPlayerStats,
+} from '@/features/overview/utils/leaderboardUtils';
 
 interface GoalsLeaderboardProps {
   players: Player[];
@@ -44,8 +52,6 @@ interface ReplayPeriod {
   label: string;
 }
 
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const TAUNTS = [
   "Beat me if you can! ⚔️",
   "Catch me at the top! ⚡",
@@ -61,11 +67,6 @@ const CHASER_TAUNTS = [
   "Don't get too comfortable! 😤"
 ];
 
-const today = new Date();
-const currentMonthIndex = today.getMonth();
-const currentYear = today.getFullYear();
-const currentDay = today.getDate();
-
 type ViewMode = 'weekly' | 'monthly' | 'overall';
 type SortField = 'default' | 'matches' | 'wins' | 'draws' | 'losses' | 'winRate' | 'gc' | 'cs' | 'ht' | 'motm' | 'goals';
 type SortDir = 'asc' | 'desc';
@@ -76,26 +77,46 @@ export function GoalsLeaderboard({
   playerMonthlyStats = [], playerWeeklyStats = [], onPlayerClick,
 }: GoalsLeaderboardProps) {
 
+  const latestWeekly = useMemo(
+    () => findLatestWeeklyPeriod(playerWeeklyStats, matchEntries),
+    [playerWeeklyStats, matchEntries]
+  );
+  const latestMonthly = useMemo(
+    () => findLatestMonthlyPeriod(playerMonthlyStats, matchEntries),
+    [playerMonthlyStats, matchEntries]
+  );
+
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [selectedMonthlySeasonId, setSelectedMonthlySeasonId] = useState<number | null>(null);
-  const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(currentMonthIndex);
+  const [selectedMonthlyMonth, setSelectedMonthlyMonth] = useState<number>(latestMonthly.monthIndex);
+  const [selectedMonthlyYear, setSelectedMonthlyYear] = useState<number>(latestMonthly.year);
+
   const [selectedOverallSeasonId, setSelectedOverallSeasonId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortField>('default');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+
   const [selectedWeeklySeasonId, setSelectedWeeklySeasonId] = useState<number | null>(null);
-  const [selectedWeeklyMonth, setSelectedWeeklyMonth] = useState<number>(currentMonthIndex);
-  const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState<number>(() => {
-    if (currentDay >= 8 && currentDay <= 14) return 2;
-    if (currentDay >= 15 && currentDay <= 21) return 3;
-    if (currentDay >= 22) return 4;
-    return 1;
-  });
+  const [selectedWeeklyMonth, setSelectedWeeklyMonth] = useState<number>(latestWeekly.monthIndex);
+  const [selectedWeeklyWeek, setSelectedWeeklyWeek] = useState<number>(latestWeekly.week);
+  const [selectedWeeklyYear, setSelectedWeeklyYear] = useState<number>(latestWeekly.year);
 
   const [showInactive, setShowInactive] = useState(true);
   const [replayMode, setReplayMode] = useState(false);
   const [replayPeriodIndex, setReplayPeriodIndex] = useState(0);
+
+  // Auto-sync initial state to latest active data when it loads
+  useEffect(() => {
+    setSelectedWeeklyWeek(latestWeekly.week);
+    setSelectedWeeklyMonth(latestWeekly.monthIndex);
+    setSelectedWeeklyYear(latestWeekly.year);
+  }, [latestWeekly.year, latestWeekly.monthIndex, latestWeekly.week]);
+
+  useEffect(() => {
+    setSelectedMonthlyMonth(latestMonthly.monthIndex);
+    setSelectedMonthlyYear(latestMonthly.year);
+  }, [latestMonthly.year, latestMonthly.monthIndex]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -127,7 +148,7 @@ export function GoalsLeaderboard({
     const recentIds = new Set(matchEntries.filter(e => e.date && new Date(e.date) >= thirtyDaysAgo).map(e => e.playerId));
 
     const buildRanked = (raw: RankedPlayer[], prevRanked: { id: string; rank: number }[]): RankedPlayer[] => {
-      const active = raw.filter(r => !r.isInactive).sort((a, b) => b.goals - a.goals);
+      const active = raw.filter(r => !r.isInactive).sort((a, b) => b.goals - a.goals || b.wins - a.wins);
       const inactive = raw.filter(r => r.isInactive);
       return [
         ...active.map((r, i) => {
@@ -138,57 +159,79 @@ export function GoalsLeaderboard({
       ];
     };
 
-    // Weekly
+    // Weekly previous period calculation
     const prevWeek = selectedWeeklyWeek > 1 ? selectedWeeklyWeek - 1 : null;
     const prevWeeklyMap = new Map<string, number>();
     if (prevWeek !== null) {
-      players.forEach(p => {
-        const s = playerWeeklyStats.filter(s =>
-          s.playerId === p.id && s.monthIndex === selectedWeeklyMonth && s.week === prevWeek &&
-          (selectedWeeklySeasonId !== null ? s.seasonId === selectedWeeklySeasonId : s.year === currentYear)
-        );
-        prevWeeklyMap.set(p.id, s.reduce((t, x) => t + x.goals, 0));
+      const prevAgg = getAggregatedWeeklyPlayerStats(players, playerWeeklyStats, matchEntries, {
+        year: selectedWeeklyYear,
+        monthIndex: selectedWeeklyMonth,
+        week: prevWeek,
+        seasonId: selectedWeeklySeasonId,
       });
+      prevAgg.forEach(r => prevWeeklyMap.set(r.player.id, r.gf));
     }
     const prevWeeklyRanked = [...prevWeeklyMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id,rank:i+1}));
 
-    const weeklyRaw: RankedPlayer[] = players.map(p => {
-      const s = playerWeeklyStats.filter(x =>
-        x.playerId === p.id && x.monthIndex === selectedWeeklyMonth && x.week === selectedWeeklyWeek &&
-        (selectedWeeklySeasonId !== null ? x.seasonId === selectedWeeklySeasonId : x.year === currentYear)
-      );
-      const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
-      const goals=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
-      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
-      const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
-      return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
+    // Weekly current calculation
+    const weeklyAgg = getAggregatedWeeklyPlayerStats(players, playerWeeklyStats, matchEntries, {
+      year: selectedWeeklyYear,
+      monthIndex: selectedWeeklyMonth,
+      week: selectedWeeklyWeek,
+      seasonId: selectedWeeklySeasonId,
     });
+    const weeklyRaw: RankedPlayer[] = weeklyAgg.map(r => ({
+      player: r.player,
+      goals: r.gf,
+      matches: r.matches,
+      wins: r.wins,
+      draws: r.draws,
+      losses: r.losses,
+      winRate: r.winRate,
+      gc: r.gc,
+      cs: r.cs,
+      ht: r.ht,
+      motm: r.motm,
+      form: getForm(r.player.id),
+      rankShift: null,
+      isInactive: r.matches === 0,
+    }));
 
-    // Monthly
+    // Monthly previous period calculation
     const prevMonth = selectedMonthlyMonth > 0 ? selectedMonthlyMonth - 1 : null;
     const prevMonthlyMap = new Map<string, number>();
     if (prevMonth !== null) {
-      players.forEach(p => {
-        const s = playerMonthlyStats.filter(x =>
-          x.playerId === p.id && x.monthIndex === prevMonth &&
-          (selectedMonthlySeasonId !== null ? x.seasonId === selectedMonthlySeasonId : x.year === currentYear)
-        );
-        prevMonthlyMap.set(p.id, s.reduce((t, x) => t + x.goals, 0));
+      const prevAgg = getAggregatedMonthlyPlayerStats(players, playerMonthlyStats, matchEntries, {
+        year: selectedMonthlyYear,
+        monthIndex: prevMonth,
+        seasonId: selectedMonthlySeasonId,
       });
+      prevAgg.forEach(r => prevMonthlyMap.set(r.player.id, r.gf));
     }
     const prevMonthlyRanked = [...prevMonthlyMap.entries()].sort((a,b)=>b[1]-a[1]).map(([id],i)=>({id,rank:i+1}));
 
-    const monthlyRaw: RankedPlayer[] = players.map(p => {
-      const s = playerMonthlyStats.filter(x =>
-        x.playerId === p.id && x.monthIndex === selectedMonthlyMonth &&
-        (selectedMonthlySeasonId !== null ? x.seasonId === selectedMonthlySeasonId : x.year === currentYear)
-      );
-      const wins=s.reduce((t,x)=>t+x.wins,0),draws=s.reduce((t,x)=>t+x.draws,0),losses=s.reduce((t,x)=>t+x.losses,0);
-      const goals=s.reduce((t,x)=>t+x.goals,0),gc=s.reduce((t,x)=>t+(x.goalsConceded||0),0);
-      const cs=s.reduce((t,x)=>t+(x.cleansheets||0),0),ht=s.reduce((t,x)=>t+(x.hattricks||0),0),motm=s.reduce((t,x)=>t+(x.motmCount||0),0);
-      const matches=wins+draws+losses,winRate=matches>0?Math.round((wins/matches)*100):0;
-      return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
+    // Monthly current calculation
+    const monthlyAgg = getAggregatedMonthlyPlayerStats(players, playerMonthlyStats, matchEntries, {
+      year: selectedMonthlyYear,
+      monthIndex: selectedMonthlyMonth,
+      seasonId: selectedMonthlySeasonId,
     });
+    const monthlyRaw: RankedPlayer[] = monthlyAgg.map(r => ({
+      player: r.player,
+      goals: r.gf,
+      matches: r.matches,
+      wins: r.wins,
+      draws: r.draws,
+      losses: r.losses,
+      winRate: r.winRate,
+      gc: r.gc,
+      cs: r.cs,
+      ht: r.ht,
+      motm: r.motm,
+      form: getForm(r.player.id),
+      rankShift: null,
+      isInactive: r.matches === 0,
+    }));
 
     // Overall
     const seasonIds = seasons.map(s => s.id);
@@ -217,8 +260,8 @@ export function GoalsLeaderboard({
       return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:!recentIds.has(p.id)};
     });
 
-    const mlabel = `${MONTHS[selectedMonthlyMonth]} · ${selectedMonthlySeasonId?seasons.find(s=>s.id===selectedMonthlySeasonId)?.name??'':currentYear}`;
-    const wlabel = `Week ${selectedWeeklyWeek} · ${MONTHS[selectedWeeklyMonth]} · ${selectedWeeklySeasonId?seasons.find(s=>s.id===selectedWeeklySeasonId)?.name??'':currentYear}`;
+    const mlabel = `${MONTHS[selectedMonthlyMonth]} · ${selectedMonthlySeasonId?seasons.find(s=>s.id===selectedMonthlySeasonId)?.name??'':selectedMonthlyYear}`;
+    const wlabel = `Week ${selectedWeeklyWeek} · ${MONTHS[selectedWeeklyMonth]} · ${selectedWeeklySeasonId?seasons.find(s=>s.id===selectedWeeklySeasonId)?.name??'':selectedWeeklyYear}`;
     const olabel = selectedOverallSeasonId?(seasons.find(s=>s.id===selectedOverallSeasonId)?.name??'Overall'):'All Time';
 
     return {
@@ -227,7 +270,22 @@ export function GoalsLeaderboard({
       overallRanking: { label: olabel, list: buildRanked(overallRaw, prevSeasonId!==null?prevOverallRanked:[]) },
       availablePeriods,
     };
-  }, [players, matchEntries, playerSeasonStats, playerMonthlyStats, playerWeeklyStats, seasons, selectedMonthlySeasonId, selectedMonthlyMonth, selectedWeeklySeasonId, selectedWeeklyMonth, selectedWeeklyWeek, selectedOverallSeasonId]);
+  }, [
+    players,
+    matchEntries,
+    playerSeasonStats,
+    playerMonthlyStats,
+    playerWeeklyStats,
+    seasons,
+    selectedMonthlySeasonId,
+    selectedMonthlyMonth,
+    selectedMonthlyYear,
+    selectedWeeklySeasonId,
+    selectedWeeklyMonth,
+    selectedWeeklyWeek,
+    selectedWeeklyYear,
+    selectedOverallSeasonId,
+  ]);
 
   const replayRanking = useMemo(() => {
     if (!replayMode || availablePeriods.length === 0) return null;
@@ -246,7 +304,8 @@ export function GoalsLeaderboard({
       return {player:p,goals,matches,wins,draws,losses,winRate,gc,cs,ht,motm,form:getForm(p.id),rankShift:null,isInactive:matches===0};
     });
     const active = list.filter(r=>!r.isInactive).sort((a,b)=>b.goals-a.goals);
-    const isLive = period.year === currentYear && period.monthIndex === currentMonthIndex;
+    const now = new Date();
+    const isLive = period.year === now.getFullYear() && period.monthIndex === now.getMonth();
     return { label: `${period.label}${isLive?' · 🔴 LIVE':' · Replay'}`, list: [...active,...list.filter(r=>r.isInactive)], isLive };
   }, [replayMode, replayPeriodIndex, availablePeriods, players, playerMonthlyStats, matchEntries]);
 
@@ -332,7 +391,7 @@ export function GoalsLeaderboard({
         {!replayMode && viewMode==='weekly' && (
           <div className="flex items-center gap-2">
             <select value={selectedWeeklySeasonId??''} onChange={e=>{setSelectedWeeklySeasonId(e.target.value===''?null:Number(e.target.value));setPage(1);}} className={selectCls}>
-              <option value="">{currentYear} (Current)</option>
+              <option value="">{selectedWeeklyYear} (Latest)</option>
               {seasons.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <select value={selectedWeeklyMonth} onChange={e=>{setSelectedWeeklyMonth(Number(e.target.value));setPage(1);}} className={selectCls}>
@@ -347,7 +406,7 @@ export function GoalsLeaderboard({
         {!replayMode && viewMode==='monthly' && (
           <div className="flex items-center gap-2">
             <select value={selectedMonthlySeasonId??''} onChange={e=>{setSelectedMonthlySeasonId(e.target.value===''?null:Number(e.target.value));setPage(1);}} className={selectCls}>
-              <option value="">{currentYear} (Current)</option>
+              <option value="">{selectedMonthlyYear} (Latest)</option>
               {seasons.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             <select value={selectedMonthlyMonth} onChange={e=>{setSelectedMonthlyMonth(Number(e.target.value));setPage(1);}} className={selectCls}>
