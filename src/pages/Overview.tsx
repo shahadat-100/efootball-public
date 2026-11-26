@@ -288,7 +288,7 @@ export function Overview({ setTab }: OverviewProps) {
 
       {/* ═══ Full-Width Edge-to-Edge Player Carousel Marquee ═══ */}
       <div 
-        className="relative overflow-hidden mb-12"
+        className="relative overflow-hidden mb-12 bg-[#090a0f]"
         style={{
           width: '100vw',
           marginLeft: 'calc(-50vw + 50%)',

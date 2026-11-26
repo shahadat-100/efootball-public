@@ -112,7 +112,7 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
   }
 
   return (
-    <div className="relative w-full overflow-hidden py-8 sm:py-12 bg-[#090a0f] border-b border-white/10 roster-marquee-fade">
+    <div className="relative w-full overflow-hidden py-8 sm:py-12 bg-[#090a0f] border-b border-white/10">
       {/* Straight dynamic showcase */}
       <div className="flex flex-col gap-8 sm:gap-10">
         {/* Row 1: Top 10 Monthly — Scroll Left */}

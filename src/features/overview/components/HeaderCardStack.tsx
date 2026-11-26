@@ -237,7 +237,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
         statValue: `${topMonthScorer.goals} GOALS`,
         statLabel: `${curMonthName} Top Scorer`,
         accentColor: '#f43f5e',
-        bgImage: '/images/gallery-bg/bg-mvp-month.jpg',
+        bgImage: '/images/hero-player-bg.png',
         badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
       });
     }
@@ -423,7 +423,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease, filter 0.35s ease',
                 transformStyle: 'preserve-3d',
               }}
-              className="absolute inset-0 cursor-pointer rounded-2xl overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85)] bg-[#0d0e14] group"
+              className="absolute inset-0 cursor-pointer rounded-none overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85)] bg-[#0d0e14] group"
             >
               {/* Card Template Background Image */}
               <img
@@ -438,21 +438,8 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
               {/* Dark Vignette Overlay for Crisp Readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/30 pointer-events-none" />
 
-              {/* Top Header Badge */}
-              <div className="absolute top-3.5 inset-x-3.5 z-20 flex items-center justify-between pointer-events-none">
-                <div
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border backdrop-blur-md text-[10px] sm:text-[11px] font-black uppercase tracking-wider ${card.badgeBg}`}
-                >
-                  {card.tagIcon}
-                  <span>{card.tag}</span>
-                </div>
-                <span className="text-[10px] font-mono font-bold text-white/50 bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm border border-white/10">
-                  {offset === 0 ? 'ACTIVE' : `#${offset + 1}`}
-                </span>
-              </div>
-
               {/* Player Photo Cutout in Center */}
-              <div className="absolute inset-x-0 bottom-14 h-[72%] z-10 pointer-events-none flex items-end justify-center overflow-hidden">
+              <div className="absolute inset-x-0 bottom-10 h-[78%] z-10 pointer-events-none flex items-end justify-center overflow-hidden">
                 <img
                   src={imageSrc}
                   alt={card.player.name}
@@ -463,25 +450,20 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 />
               </div>
 
-              {/* Bottom Info Bar */}
-              <div className="absolute bottom-0 inset-x-0 p-3.5 z-20 bg-gradient-to-t from-black via-black/95 to-transparent pt-6 flex flex-col items-start">
-                <span className="text-[10px] uppercase tracking-widest font-mono text-white/60 leading-none">
-                  {card.subtitle}
-                </span>
-                <div className="flex items-baseline justify-between w-full mt-1">
-                  <h4 className="font-heading text-lg sm:text-xl font-black text-white uppercase tracking-tight truncate max-w-[65%] drop-shadow-md">
-                    {card.player.name}
-                  </h4>
-                  <div
-                    className="font-mono text-xs sm:text-sm font-black px-2 py-0.5 rounded-lg border backdrop-blur-sm"
-                    style={{
-                      color: card.accentColor,
-                      borderColor: `${card.accentColor}60`,
-                      backgroundColor: `${card.accentColor}18`,
-                    }}
-                  >
-                    {card.statValue}
-                  </div>
+              {/* Bottom: Player Name Only */}
+              <div className="absolute bottom-0 inset-x-0 p-3.5 z-20 bg-gradient-to-t from-black via-black/90 to-transparent pt-5 flex items-baseline justify-between">
+                <h4 className="font-heading text-lg sm:text-xl font-black text-white uppercase tracking-tight truncate max-w-[70%]">
+                  {card.player.name}
+                </h4>
+                <div
+                  className="font-mono text-xs sm:text-sm font-black px-2 py-0.5 rounded-lg border backdrop-blur-sm"
+                  style={{
+                    color: card.accentColor,
+                    borderColor: `${card.accentColor}60`,
+                    backgroundColor: `${card.accentColor}18`,
+                  }}
+                >
+                  {card.statValue}
                 </div>
               </div>
             </div>

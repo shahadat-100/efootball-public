@@ -576,8 +576,7 @@
 }
 
 .roster-marquee-fade {
-  mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
+  /* Removed mask-image to prevent white background leak and text clipping */
 }
 
 /* ═══ PORTFOLIO ZIGZAG MARQUEE TAPES (Straddling Section Border) ═══ */
