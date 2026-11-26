@@ -533,11 +533,12 @@ export const useFootballStore = create<FootballStore>()(
       },
       fetchNews: async () => {
         if (get().news.length > 0) return;
-        // Fix: project only needed columns and cap at 200 most-recent articles
+        // Fix: project only needed columns, put NULL dates last, and tiebreak by created_at desc
         const { data, error } = await supabase
           .from('news')
           .select('id, title, content, author, category, hot, date, image, created_at')
-          .order('date', { ascending: false })
+          .order('date', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false, nullsFirst: false })
           .limit(200);
         if (data) set({ news: data as NewsArticle[] });
         if (error) console.error('Error fetching news:', error);

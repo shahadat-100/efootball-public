@@ -12,7 +12,15 @@ interface LatestNewsCardsProps {
 export function LatestNewsCards({ news, limit = 3, onViewAll }: LatestNewsCardsProps) {
   const latestNews = useMemo(() => {
     return [...news]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .sort((a, b) => {
+        const timeA = a.date ? new Date(a.date).getTime() : 0;
+        const timeB = b.date ? new Date(b.date).getTime() : 0;
+        const dateDiff = (isNaN(timeB) ? 0 : timeB) - (isNaN(timeA) ? 0 : timeA);
+        if (dateDiff !== 0) return dateDiff;
+        const createdA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const createdB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return (isNaN(createdB) ? 0 : createdB) - (isNaN(createdA) ? 0 : createdA);
+      })
       .slice(0, limit);
   }, [news, limit]);
 
