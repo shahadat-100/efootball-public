@@ -357,9 +357,9 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
   return (
     <div className="relative flex flex-col items-center select-none" style={{ perspective: '1400px' }}>
       
-      {/* ═══ 3D CoverFlow / Card Stack Container ═══ */}
+      {/* ═══ 3D CoverFlow / Card Stack Container (Compact Mobile Height) ═══ */}
       <div
-        className="relative w-[210px] sm:w-[245px] md:w-[270px] h-[330px] sm:h-[375px] md:h-[410px]"
+        className="relative w-[185px] sm:w-[235px] md:w-[265px] h-[270px] sm:h-[350px] md:h-[395px]"
         style={{ transformStyle: 'preserve-3d' }}
       >
         {cards.map((card, i) => {
@@ -400,46 +400,46 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
           } else if (slot === 1) {
             // Right 1 (Immediate Right)
             zIndex = 30;
-            opacity = 0.92;
+            opacity = 0.95;
             if (isHoveredThis) {
               transformStyle = 'translate3d(clamp(85px, 16vw, 160px), -16px, 65px) rotateY(-10deg) scale(0.98)';
-              filter = 'brightness(0.95)';
+              filter = 'brightness(1) contrast(1.05)';
             } else {
               transformStyle = 'translate3d(clamp(75px, 14vw, 140px), 0, -25px) rotateY(-22deg) scale(0.88)';
-              filter = 'brightness(0.75)';
+              filter = 'brightness(0.85) contrast(1.02)';
             }
           } else if (slot === -1) {
             // Left 1 (Immediate Left)
             zIndex = 30;
-            opacity = 0.92;
+            opacity = 0.95;
             if (isHoveredThis) {
               transformStyle = 'translate3d(clamp(-160px, -16vw, -85px), -16px, 65px) rotateY(10deg) scale(0.98)';
-              filter = 'brightness(0.95)';
+              filter = 'brightness(1) contrast(1.05)';
             } else {
               transformStyle = 'translate3d(clamp(-140px, -14vw, -75px), 0, -25px) rotateY(22deg) scale(0.88)';
-              filter = 'brightness(0.75)';
+              filter = 'brightness(0.85) contrast(1.02)';
             }
           } else if (slot === 2) {
             // Right 2 (Far Right — visible on sm+ screens)
             zIndex = 20;
-            opacity = 0.6;
+            opacity = 0.65;
             if (isHoveredThis) {
               transformStyle = 'translate3d(clamp(150px, 26vw, 265px), -12px, 30px) rotateY(-16deg) scale(0.86)';
-              filter = 'brightness(0.8)';
+              filter = 'brightness(0.85)';
             } else {
               transformStyle = 'translate3d(clamp(135px, 23vw, 235px), 0, -75px) rotateY(-34deg) scale(0.76)';
-              filter = 'brightness(0.5)';
+              filter = 'brightness(0.6)';
             }
           } else if (slot === -2) {
             // Left 2 (Far Left — visible on sm+ screens)
             zIndex = 20;
-            opacity = 0.6;
+            opacity = 0.65;
             if (isHoveredThis) {
               transformStyle = 'translate3d(clamp(-265px, -26vw, -150px), -12px, 30px) rotateY(16deg) scale(0.86)';
               filter = 'brightness(0.8)';
             } else {
               transformStyle = 'translate3d(clamp(-235px, -23vw, -135px), 0, -75px) rotateY(34deg) scale(0.76)';
-              filter = 'brightness(0.5)';
+              filter = 'brightness(0.6)';
             }
           } else {
             // Deep in back stack (hidden)
@@ -475,10 +475,10 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 transformStyle: 'preserve-3d',
                 pointerEvents: isVisible ? 'auto' : 'none',
               }}
-              className={`absolute inset-0 cursor-pointer rounded-none overflow-hidden border bg-[#0d0e14] group select-none transition-shadow ${
+              className={`absolute inset-0 cursor-pointer rounded-none overflow-hidden bg-[#0d0e14] group select-none transition-all duration-300 ${
                 isCenter
-                  ? 'border-white/35 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_25px_rgba(188,1,0,0.3)]'
-                  : 'border-white/15 shadow-[0_15px_35px_rgba(0,0,0,0.85)]'
+                  ? 'border-[1.5px] border-white/60 shadow-[0_25px_60px_rgba(0,0,0,0.98),0_0_35px_rgba(188,1,0,0.4),0_0_15px_rgba(255,255,255,0.15)] ring-1 ring-white/20'
+                  : 'border border-white/30 shadow-[-8px_16px_35px_rgba(0,0,0,0.92),8px_16px_35px_rgba(0,0,0,0.92)] hover:border-white/50'
               }`}
             >
               {/* Card Template Background Image */}
