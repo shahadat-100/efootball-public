@@ -436,14 +436,14 @@ export const useFootballStore = create<FootballStore>()(
         // Fix: lazy-load guard — only fetch once per session
         if (!force && get().matchEntriesLoaded) return;
         
-        // Fetch the 500 most recent match entries, top 20 match entries by goals,
+        // Fetch the 2500 most recent match entries, top 20 match entries by goals,
         // and top winning match entries to ensure club records (Most Goals & Biggest Victory) are 100% accurate.
         const [recentRes, topGoalsRes, winRes] = await Promise.all([
           supabase
             .from('match_entries')
             .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
             .order('date', { ascending: false, nullsFirst: false })
-            .limit(500),
+            .limit(2500),
           supabase
             .from('match_entries')
             .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
@@ -475,7 +475,7 @@ export const useFootballStore = create<FootballStore>()(
             matchEntries: mergedEntries, 
             recentMatchEntriesCount: recentRes.data.length,
             matchEntriesLoaded: true,
-            matchEntriesHasMore: recentRes.data.length === 500
+            matchEntriesHasMore: recentRes.data.length === 2500
           });
         }
         
@@ -509,7 +509,7 @@ export const useFootballStore = create<FootballStore>()(
       loadMoreMatchEntries: async () => {
         const currentEntries = get().matchEntries;
         const offset = get().recentMatchEntriesCount || currentEntries.length;
-        const limit = 500;
+        const limit = 2500;
         
         const { data, error } = await supabase
           .from('match_entries')
