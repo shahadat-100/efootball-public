@@ -112,15 +112,15 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
   }
 
   return (
-    <div className="relative w-full overflow-hidden py-10 sm:py-14 roster-marquee-fade">
-      {/* Sleek angled dynamic showcase (slight tilt) */}
-      <div className="transform -rotate-[2deg] sm:-rotate-[2.5deg] scale-[1.04] origin-center flex flex-col gap-8 sm:gap-10">
+    <div className="relative w-full overflow-hidden py-8 sm:py-12 bg-[#090a0f] border-b border-white/10 roster-marquee-fade">
+      {/* Straight dynamic showcase */}
+      <div className="flex flex-col gap-8 sm:gap-10">
         {/* Row 1: Top 10 Monthly — Scroll Left */}
         {monthlyTop10.length > 0 && (
           <div>
-            <div className="px-6 sm:px-12 pb-2.5">
-              <span className="font-sans text-[11px] uppercase tracking-[0.22em] text-white/50 font-medium flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+            <div className="px-6 sm:px-12 pb-3">
+              <span className="font-sans text-[11px] uppercase tracking-[0.22em] text-white/75 font-semibold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 Monthly Top 10 · Points Ranking
               </span>
             </div>
@@ -135,9 +135,9 @@ export const TiltedPlayerMarquee: React.FC<TiltedPlayerMarqueeProps> = ({
         {/* Row 2: Top 10 Overall — Scroll Right */}
         {overallTop10.length > 0 && (
           <div>
-            <div className="px-6 sm:px-12 pb-2.5">
-              <span className="font-sans text-[11px] uppercase tracking-[0.22em] text-white/50 font-medium flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+            <div className="px-6 sm:px-12 pb-3">
+              <span className="font-sans text-[11px] uppercase tracking-[0.22em] text-amber-400/90 font-semibold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
                 Overall Top 10 · All-Time Ranking
               </span>
             </div>

@@ -19,8 +19,8 @@ import { GoldenBootRace } from '@/features/overview/components/GoldenBootRace';
 import { DynamicTrivia } from '@/features/overview/components/DynamicTrivia';
 import { HallOfFameCarousel } from '@/features/overview/components/HallOfFameCarousel';
 import { TiltedPlayerMarquee } from '@/features/overview/components/TiltedPlayerMarquee';
-import { PlayerHighlightHero } from '@/features/overview/components/PlayerHighlightHero';
-import { ClubMarqueeTicker } from '@/features/overview/components/ClubMarqueeTicker';
+import { OverviewHeroHeader } from '@/features/overview/components/OverviewHeroHeader';
+import { DualZigzagRibbons } from '@/features/overview/components/DualZigzagRibbons';
 
 import { Target, Trophy, XCircle, Users, Activity, Medal, Cake, PartyPopper } from 'lucide-react';
 import { Avatar } from '@/shared/components';
@@ -133,7 +133,7 @@ export function Overview({ setTab }: OverviewProps) {
     const curMonth = now.getMonth();
     const curYear = now.getFullYear();
 
-    const ranked = players.map(p => {
+    let ranked = players.map(p => {
       const stats = playerMonthlyStats.filter(s =>
         s.playerId === p.id && s.monthIndex === curMonth && s.year === curYear
       );
@@ -149,11 +149,43 @@ export function Overview({ setTab }: OverviewProps) {
       return { player: p, points, matches };
     }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points).slice(0, 10);
 
+    // If current month has no matches yet, fall back to the most recent month with stats
+    if (ranked.length === 0 && playerMonthlyStats.length > 0) {
+      const sortedStats = [...playerMonthlyStats].sort((a, b) => (b.year * 12 + b.monthIndex) - (a.year * 12 + a.monthIndex));
+      if (sortedStats.length > 0) {
+        const latestM = sortedStats[0].monthIndex;
+        const latestY = sortedStats[0].year;
+        ranked = players.map(p => {
+          const stats = playerMonthlyStats.filter(s => s.playerId === p.id && s.monthIndex === latestM && s.year === latestY);
+          const wins = stats.reduce((t, s) => t + s.wins, 0);
+          const draws = stats.reduce((t, s) => t + s.draws, 0);
+          const losses = stats.reduce((t, s) => t + s.losses, 0);
+          const gf = stats.reduce((t, s) => t + s.goals, 0);
+          const gc = stats.reduce((t, s) => t + (s.goalsConceded || 0), 0);
+          const ht = stats.reduce((t, s) => t + (s.hattricks || 0), 0);
+          const motm = stats.reduce((t, s) => t + (s.motmCount || 0), 0);
+          const matches = wins + draws + losses;
+          const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
+          return { player: p, points, matches };
+        }).filter(r => r.matches > 0).sort((a, b) => b.points - a.points).slice(0, 10);
+      }
+    }
+
+    // Ultimate fallback if monthly stats are empty: top active players
+    if (ranked.length === 0 && players.length > 0) {
+      ranked = players.slice(0, 10).map((p) => {
+        const stats = playerSeasonStats.filter(s => s.playerId === p.id);
+        const wins = stats.reduce((t, s) => t + s.wins, 0);
+        const gf = stats.reduce((t, s) => t + s.goals, 0);
+        return { player: p, points: gf * 5 + wins * 10, matches: stats.length || 1 };
+      }).sort((a, b) => b.points - a.points);
+    }
+
     return ranked.map((r, i) => ({ player: r.player, points: r.points, rank: i + 1 }));
-  }, [players, playerMonthlyStats]);
+  }, [players, playerMonthlyStats, playerSeasonStats]);
 
   const overallTop10 = useMemo(() => {
-    const ranked = players.map(p => {
+    let ranked = players.map(p => {
       const stats = playerSeasonStats.filter(s => s.playerId === p.id);
       const wins = stats.reduce((t, s) => t + s.wins, 0);
       const draws = stats.reduce((t, s) => t + s.draws, 0);
@@ -166,6 +198,10 @@ export function Overview({ setTab }: OverviewProps) {
       const points = calcPoints({ wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm });
       return { player: p, points, matches };
     }).sort((a, b) => b.points - a.points).slice(0, 10);
+
+    if (ranked.length === 0 && players.length > 0) {
+      ranked = players.slice(0, 10).map((p, i) => ({ player: p, points: (10 - i) * 15, matches: 1 }));
+    }
 
     return ranked.map((r, i) => ({ player: r.player, points: r.points, rank: i + 1 }));
   }, [players, playerSeasonStats]);
@@ -238,6 +274,32 @@ export function Overview({ setTab }: OverviewProps) {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 
+      {/* ═══ Full-Width Edge-to-Edge Overview Hero Header ═══ */}
+      <OverviewHeroHeader
+        setTab={setTab}
+        players={players}
+        playerSeasonStats={playerSeasonStats}
+        playerWeeklyStats={playerWeeklyStats}
+        playerMonthlyStats={playerMonthlyStats}
+        overallTop10={overallTop10}
+        monthlyTop10={monthlyTop10}
+      />
+
+      {/* ═══ DUAL ZIGZAG RIBBONS: STRADDLED DIRECTLY ON THE BORDER BETWEEN HEADER & CAROUSEL (SAME AS TAPE!) ═══ */}
+      <DualZigzagRibbons overallTop10={overallTop10} monthlyTop10={monthlyTop10} />
+
+      {/* ═══ Full-Width Edge-to-Edge Player Carousel Marquee ═══ */}
+      <div 
+        className="relative overflow-hidden mb-12"
+        style={{
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+        }}
+      >
+        <TiltedPlayerMarquee monthlyTop10={monthlyTop10} overallTop10={overallTop10} />
+      </div>
+
       {birthdayPlayers.length > 0 && (
         <div className="relative overflow-hidden rounded-3xl mb-8 border border-border bg-gradient-to-r from-card via-muted/40 to-card shadow-lg">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -298,35 +360,6 @@ export function Overview({ setTab }: OverviewProps) {
           </div>
         </div>
       )}
-
-      {/* ═══ Full-Width Edge-to-Edge Player Highlight Hero ═══ */}
-      <div 
-        className="relative overflow-hidden mb-0"
-        style={{
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
-        }}
-      >
-        <PlayerHighlightHero players={players} playerSeasonStats={playerSeasonStats} />
-      </div>
-
-      {/* ═══ Full-Width Edge-to-Edge Club Marquee Ticker ═══ */}
-      <div className="mb-10">
-        <ClubMarqueeTicker />
-      </div>
-
-      {/* ═══ Full-Width Edge-to-Edge Player Marquee ═══ */}
-      <div 
-        className="relative overflow-hidden mb-12"
-        style={{
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
-        }}
-      >
-        <TiltedPlayerMarquee monthlyTop10={monthlyTop10} overallTop10={overallTop10} />
-      </div>
 
       {/* Stat Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-10 stagger-children">

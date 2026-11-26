@@ -579,3 +579,171 @@
   mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
 }
+
+/* ═══ PORTFOLIO ZIGZAG MARQUEE TAPES (Straddling Section Border) ═══ */
+.marquee-zigzag-stage {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  height: clamp(115px, 13vw, 150px);
+  margin-top: clamp(-55px, -6.5vw, -72px);
+  margin-bottom: clamp(-55px, -6.5vw, -72px);
+  z-index: 30;
+  pointer-events: none;
+  overflow: visible;
+  user-select: none;
+}
+
+.marquee-zigzag-tape {
+  position: absolute;
+  left: -8vw;
+  width: 116vw;
+  overflow: hidden;
+  white-space: nowrap;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.85);
+  display: flex;
+  transform-origin: center center;
+}
+
+.marquee-zigzag-tape--red {
+  top: 18%;
+  background-color: #bc0100;
+  color: #ffffff;
+  border-top: 2.5px solid #ffffff;
+  border-bottom: 2.5px solid #ffffff;
+  transform: rotate(-1.9deg);
+  z-index: 2;
+}
+
+.marquee-zigzag-tape--black {
+  bottom: 18%;
+  background-color: #111216;
+  color: #ff3333;
+  border-top: 2.5px solid #bc0100;
+  border-bottom: 2.5px solid #bc0100;
+  transform: rotate(1.6deg);
+  z-index: 3;
+}
+
+.animate-zigzag-left {
+  display: inline-flex;
+  will-change: transform;
+  animation: marquee-zigzag-scroll-left 34s linear infinite;
+}
+
+.animate-zigzag-right {
+  display: inline-flex;
+  will-change: transform;
+  animation: marquee-zigzag-scroll-right 38s linear infinite;
+}
+
+@keyframes marquee-zigzag-scroll-left {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes marquee-zigzag-scroll-right {
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.marquee-zigzag-run {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.marquee-zigzag-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.marquee-zigzag-star {
+  margin-left: 1rem;
+  font-size: 0.75em;
+  opacity: 0.85;
+  transform: translateY(-0.06em);
+}
+
+
+/* ═══ FOOTBALL STADIUM HEADLINE ANIMATION ═══ */
+.football-stadium-title {
+  font-family: 'Bebas Neue', 'Oswald', sans-serif;
+  letter-spacing: 0.02em;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+@keyframes stadium-floodlight-sweep {
+  0% {
+    background-position: -250% 0;
+  }
+  100% {
+    background-position: 250% 0;
+  }
+}
+
+.stadium-floodlight-text {
+  background: linear-gradient(
+    110deg,
+    #ffffff 0%,
+    #ffffff 35%,
+    #ff6b6b 48%,
+    #ffffff 60%,
+    #ffffff 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: stadium-floodlight-sweep 5s ease-in-out infinite;
+}
+
+.stadium-accent-text {
+  background: linear-gradient(
+    110deg,
+    #bc0100 0%,
+    #ff1a1a 32%,
+    #ffffff 50%,
+    #ff1a1a 68%,
+    #bc0100 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: stadium-floodlight-sweep 5s ease-in-out infinite 0.6s;
+  filter: drop-shadow(0 0 35px rgba(188, 1, 0, 0.75));
+}
+
+@keyframes kickoff-impact {
+  0% {
+    transform: scale(0.9) translateY(28px);
+    opacity: 0;
+    filter: blur(12px);
+  }
+  65% {
+    transform: scale(1.02) translateY(-3px);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.kickoff-strike-1 {
+  animation: kickoff-impact 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.kickoff-strike-2 {
+  animation: kickoff-impact 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.16s forwards;
+  opacity: 0;
+}
+
+
+
