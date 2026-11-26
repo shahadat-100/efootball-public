@@ -236,7 +236,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
         statValue: `${topMonthScorer.goals} GOALS`,
         statLabel: `${curMonthName} Top Scorer`,
         accentColor: '#f43f5e',
-        bgImage: '/images/hero-player-bg.png',
+        bgImage: '/images/gallery-bg/bg-top-scorer-month.jpg',
         badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
       });
     }
