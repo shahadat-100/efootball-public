@@ -65,8 +65,9 @@ export interface MonthlyPeriod {
 
 /**
  * Finds the latest weekly period with active matches or stats.
- * If the current calendar week has data, uses it.
- * Otherwise falls back to the most recent week in DB that has active data.
+ * Checks matchEntries FIRST (freshest), then playerWeeklyStats view.
+ * If the current calendar week has data, uses it. Otherwise falls back to
+ * the most recent week that has active data.
  */
 export function findLatestWeeklyPeriod(
   playerWeeklyStats: PlayerWeeklyStat[] = [],
@@ -77,15 +78,7 @@ export function findLatestWeeklyPeriod(
   const currentMonthIndex = today.getMonth();
   const currentWeek = getWeekNumber(today);
 
-  // Check if current calendar week has any active data
-  const hasCurrentWeeklyStats = playerWeeklyStats.some(
-    s =>
-      Number(s.year) === currentYear &&
-      Number(s.monthIndex) === currentMonthIndex &&
-      Number(s.week) === currentWeek &&
-      (s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0)
-  );
-
+  // Check matchEntries first (freshest source)
   const hasCurrentEntries = matchEntries.some(e => {
     if (!e.date) return false;
     const d = new Date(e.date);
@@ -97,7 +90,16 @@ export function findLatestWeeklyPeriod(
     );
   });
 
-  if (hasCurrentWeeklyStats || hasCurrentEntries) {
+  // Also check DB view stats
+  const hasCurrentWeeklyStats = playerWeeklyStats.some(
+    s =>
+      Number(s.year) === currentYear &&
+      Number(s.monthIndex) === currentMonthIndex &&
+      Number(s.week) === currentWeek &&
+      (s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0)
+  );
+
+  if (hasCurrentEntries || hasCurrentWeeklyStats) {
     return {
       year: currentYear,
       monthIndex: currentMonthIndex,
@@ -106,7 +108,26 @@ export function findLatestWeeklyPeriod(
     };
   }
 
-  // Find the newest period in playerWeeklyStats with data
+  // Find the newest period from matchEntries first
+  const validEntries = matchEntries
+    .map(e => (e.date ? new Date(e.date) : null))
+    .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
+    .sort((a, b) => b.getTime() - a.getTime());
+
+  if (validEntries.length > 0) {
+    const latestDate = validEntries[0];
+    const y = latestDate.getFullYear();
+    const m = latestDate.getMonth();
+    const w = getWeekNumber(latestDate);
+    return {
+      year: y,
+      monthIndex: m,
+      week: w,
+      label: `Week ${w} · ${MONTHS[m]} ${y}`,
+    };
+  }
+
+  // Last resort: check playerWeeklyStats view
   const activeWeeklyStats = playerWeeklyStats
     .filter(s => (s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0))
     .slice()
@@ -126,25 +147,6 @@ export function findLatestWeeklyPeriod(
     };
   }
 
-  // Check matchEntries if playerWeeklyStats is empty
-  const validEntries = matchEntries
-    .map(e => (e.date ? new Date(e.date) : null))
-    .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
-    .sort((a, b) => b.getTime() - a.getTime());
-
-  if (validEntries.length > 0) {
-    const latestDate = validEntries[0];
-    const y = latestDate.getFullYear();
-    const m = latestDate.getMonth();
-    const w = getWeekNumber(latestDate);
-    return {
-      year: y,
-      monthIndex: m,
-      week: w,
-      label: `Week ${w} · ${MONTHS[m]} ${y}`,
-    };
-  }
-
   return {
     year: currentYear,
     monthIndex: currentMonthIndex,
@@ -155,6 +157,7 @@ export function findLatestWeeklyPeriod(
 
 /**
  * Finds the latest monthly period with active matches or stats.
+ * Checks matchEntries FIRST (freshest), then playerMonthlyStats view.
  */
 export function findLatestMonthlyPeriod(
   playerMonthlyStats: PlayerMonthlyStat[] = [],
@@ -164,6 +167,14 @@ export function findLatestMonthlyPeriod(
   const currentYear = today.getFullYear();
   const currentMonthIndex = today.getMonth();
 
+  // Check matchEntries first (freshest source)
+  const hasCurrentEntries = matchEntries.some(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    return !isNaN(d.getTime()) && d.getFullYear() === currentYear && d.getMonth() === currentMonthIndex;
+  });
+
+  // Also check DB view stats
   const hasCurrentMonthlyStats = playerMonthlyStats.some(
     s =>
       Number(s.year) === currentYear &&
@@ -171,13 +182,7 @@ export function findLatestMonthlyPeriod(
       (s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0)
   );
 
-  const hasCurrentEntries = matchEntries.some(e => {
-    if (!e.date) return false;
-    const d = new Date(e.date);
-    return !isNaN(d.getTime()) && d.getFullYear() === currentYear && d.getMonth() === currentMonthIndex;
-  });
-
-  if (hasCurrentMonthlyStats || hasCurrentEntries) {
+  if (hasCurrentEntries || hasCurrentMonthlyStats) {
     return {
       year: currentYear,
       monthIndex: currentMonthIndex,
@@ -185,6 +190,24 @@ export function findLatestMonthlyPeriod(
     };
   }
 
+  // Find the newest period from matchEntries first
+  const validEntries = matchEntries
+    .map(e => (e.date ? new Date(e.date) : null))
+    .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
+    .sort((a, b) => b.getTime() - a.getTime());
+
+  if (validEntries.length > 0) {
+    const latestDate = validEntries[0];
+    const y = latestDate.getFullYear();
+    const m = latestDate.getMonth();
+    return {
+      year: y,
+      monthIndex: m,
+      label: `${MONTHS[m]} ${y}`,
+    };
+  }
+
+  // Last resort: check playerMonthlyStats view
   const activeMonthlyStats = playerMonthlyStats
     .filter(s => (s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0))
     .slice()
@@ -199,22 +222,6 @@ export function findLatestMonthlyPeriod(
       year: Number(latest.year),
       monthIndex: Number(latest.monthIndex),
       label: `${MONTHS[latest.monthIndex]} ${latest.year}`,
-    };
-  }
-
-  const validEntries = matchEntries
-    .map(e => (e.date ? new Date(e.date) : null))
-    .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
-    .sort((a, b) => b.getTime() - a.getTime());
-
-  if (validEntries.length > 0) {
-    const latestDate = validEntries[0];
-    const y = latestDate.getFullYear();
-    const m = latestDate.getMonth();
-    return {
-      year: y,
-      monthIndex: m,
-      label: `${MONTHS[m]} ${y}`,
     };
   }
 
@@ -241,7 +248,12 @@ export interface AggregatedPlayerStat {
 }
 
 /**
- * Aggregates weekly stats across playerWeeklyStats and fallback matchEntries consistently for all players.
+ * Aggregates weekly stats for all players.
+ * Smart per-player hybrid:
+ * - Uses DB view (playerWeeklyStats) when it has complete data (>= matchEntries count),
+ *   which handles >500 matches/month while keeping Supabase egress minimal.
+ * - Uses matchEntries if it has MORE entries for that player in the period
+ *   (e.g. if match_entries.date was NULL and the SQL view missed those rows).
  */
 export function getAggregatedWeeklyPlayerStats(
   players: Player[],
@@ -249,6 +261,16 @@ export function getAggregatedWeeklyPlayerStats(
   matchEntries: MatchEntry[],
   period: { year: number; monthIndex: number; week: number; seasonId?: number | null }
 ): AggregatedPlayerStat[] {
+  const entriesInPeriod = matchEntries.filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    if (isNaN(d.getTime())) return false;
+    return d.getFullYear() === period.year &&
+      d.getMonth() === period.monthIndex &&
+      getWeekNumber(d) === period.week &&
+      (period.seasonId != null ? e.seasonId === period.seasonId : true);
+  });
+
   const statsInPeriod = playerWeeklyStats.filter(s =>
     Number(s.year) === period.year &&
     Number(s.monthIndex) === period.monthIndex &&
@@ -256,54 +278,39 @@ export function getAggregatedWeeklyPlayerStats(
     (period.seasonId != null ? s.seasonId === period.seasonId : true)
   );
 
-  const hasDbStats = statsInPeriod.some(
-    s => s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0
-  );
-
-  if (hasDbStats) {
-    return players.map(p => {
-      const s = statsInPeriod.filter(x => x.playerId === p.id);
-      const wins = s.reduce((t, x) => t + (x.wins || 0), 0);
-      const draws = s.reduce((t, x) => t + (x.draws || 0), 0);
-      const losses = s.reduce((t, x) => t + (x.losses || 0), 0);
-      const gf = s.reduce((t, x) => t + (x.goals || 0), 0);
-      const gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
-      const cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0);
-      const ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
-      const motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
-      const matches =
-        s.reduce((t, x) => t + (x.appearances || (x.wins + x.draws + x.losses) || 0), 0) ||
-        (wins + draws + losses);
-      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      const points = calcPoints({
-        wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm,
-      });
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    });
-  }
-
-  // Fallback to matchEntries
-  const entriesInPeriod = matchEntries.filter(e => {
-    if (!e.date) return false;
-    const d = new Date(e.date);
-    if (isNaN(d.getTime())) return false;
-    const yearMatch = d.getFullYear() === period.year;
-    const monthMatch = d.getMonth() === period.monthIndex;
-    const weekMatch = getWeekNumber(d) === period.week;
-    const seasonMatch = period.seasonId != null ? e.seasonId === period.seasonId : true;
-    return yearMatch && monthMatch && weekMatch && seasonMatch;
-  });
-
   return players.map(p => {
     const pEntries = entriesInPeriod.filter(e => e.playerId === p.id);
-    const wins = pEntries.filter(e => e.result === 'win').length;
-    const draws = pEntries.filter(e => e.result === 'draw').length;
-    const losses = pEntries.filter(e => e.result === 'loss').length;
-    const gf = pEntries.reduce((t, e) => t + (e.goals || 0), 0);
-    const gc = pEntries.reduce((t, e) => t + (e.goalsConceded || 0), 0);
-    const cs = pEntries.filter(e => e.cleanSheet).length;
-    const ht = pEntries.reduce((t, e) => t + (e.hattricks || 0), 0);
-    const motm = pEntries.filter(e => e.motm).length;
+    const s = statsInPeriod.filter(x => x.playerId === p.id);
+
+    const dbWins = s.reduce((t, x) => t + (x.wins || 0), 0);
+    const dbDraws = s.reduce((t, x) => t + (x.draws || 0), 0);
+    const dbLosses = s.reduce((t, x) => t + (x.losses || 0), 0);
+    const dbMatches =
+      s.reduce((t, x) => t + (x.appearances || (x.wins + x.draws + x.losses) || 0), 0) ||
+      (dbWins + dbDraws + dbLosses);
+
+    let wins: number, draws: number, losses: number, gf: number, gc: number, cs: number, ht: number, motm: number;
+
+    if (pEntries.length > dbMatches) {
+      wins = pEntries.filter(e => e.result === 'win').length;
+      draws = pEntries.filter(e => e.result === 'draw').length;
+      losses = pEntries.filter(e => e.result === 'loss').length;
+      gf = pEntries.reduce((t, e) => t + (e.goals || 0), 0);
+      gc = pEntries.reduce((t, e) => t + (e.goalsConceded || 0), 0);
+      cs = pEntries.filter(e => e.cleanSheet).length;
+      ht = pEntries.reduce((t, e) => t + (e.hattricks || 0), 0);
+      motm = pEntries.filter(e => e.motm).length;
+    } else {
+      wins = dbWins;
+      draws = dbDraws;
+      losses = dbLosses;
+      gf = s.reduce((t, x) => t + (x.goals || 0), 0);
+      gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
+      cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0);
+      ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
+      motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
+    }
+
     const matches = wins + draws + losses;
     const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
     const points = calcPoints({
@@ -314,7 +321,12 @@ export function getAggregatedWeeklyPlayerStats(
 }
 
 /**
- * Aggregates monthly stats across playerMonthlyStats and fallback matchEntries consistently for all players.
+ * Aggregates monthly stats for all players.
+ * Smart per-player hybrid:
+ * - Uses DB view (playerMonthlyStats) when it has complete data (>= matchEntries count),
+ *   which handles >500 matches/month while keeping Supabase egress minimal.
+ * - Uses matchEntries if it has MORE entries for that player in the period
+ *   (e.g. if match_entries.date was NULL and the SQL view missed those rows).
  */
 export function getAggregatedMonthlyPlayerStats(
   players: Player[],
@@ -322,59 +334,54 @@ export function getAggregatedMonthlyPlayerStats(
   matchEntries: MatchEntry[],
   period: { year: number; monthIndex: number; seasonId?: number | null }
 ): AggregatedPlayerStat[] {
+  const entriesInPeriod = matchEntries.filter(e => {
+    if (!e.date) return false;
+    const d = new Date(e.date);
+    if (isNaN(d.getTime())) return false;
+    return d.getFullYear() === period.year &&
+      d.getMonth() === period.monthIndex &&
+      (period.seasonId != null ? e.seasonId === period.seasonId : true);
+  });
+
   const statsInPeriod = playerMonthlyStats.filter(s =>
     Number(s.year) === period.year &&
     Number(s.monthIndex) === period.monthIndex &&
     (period.seasonId != null ? s.seasonId === period.seasonId : true)
   );
 
-  const hasDbStats = statsInPeriod.some(
-    s => s.appearances > 0 || (s.wins + s.draws + s.losses) > 0 || s.goals > 0
-  );
-
-  if (hasDbStats) {
-    return players.map(p => {
-      const s = statsInPeriod.filter(x => x.playerId === p.id);
-      const wins = s.reduce((t, x) => t + (x.wins || 0), 0);
-      const draws = s.reduce((t, x) => t + (x.draws || 0), 0);
-      const losses = s.reduce((t, x) => t + (x.losses || 0), 0);
-      const gf = s.reduce((t, x) => t + (x.goals || 0), 0);
-      const gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
-      const cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0);
-      const ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
-      const motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
-      const matches =
-        s.reduce((t, x) => t + (x.appearances || (x.wins + x.draws + x.losses) || 0), 0) ||
-        (wins + draws + losses);
-      const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-      const points = calcPoints({
-        wins, draws, losses, goals: gf, goalsConceded: gc, hattricks: ht, motmCount: motm,
-      });
-      return { player: p, points, matches, wins, draws, losses, winRate, gf, gc, cs, ht, motm };
-    });
-  }
-
-  // Fallback to matchEntries
-  const entriesInPeriod = matchEntries.filter(e => {
-    if (!e.date) return false;
-    const d = new Date(e.date);
-    if (isNaN(d.getTime())) return false;
-    const yearMatch = d.getFullYear() === period.year;
-    const monthMatch = d.getMonth() === period.monthIndex;
-    const seasonMatch = period.seasonId != null ? e.seasonId === period.seasonId : true;
-    return yearMatch && monthMatch && seasonMatch;
-  });
-
   return players.map(p => {
     const pEntries = entriesInPeriod.filter(e => e.playerId === p.id);
-    const wins = pEntries.filter(e => e.result === 'win').length;
-    const draws = pEntries.filter(e => e.result === 'draw').length;
-    const losses = pEntries.filter(e => e.result === 'loss').length;
-    const gf = pEntries.reduce((t, e) => t + (e.goals || 0), 0);
-    const gc = pEntries.reduce((t, e) => t + (e.goalsConceded || 0), 0);
-    const cs = pEntries.filter(e => e.cleanSheet).length;
-    const ht = pEntries.reduce((t, e) => t + (e.hattricks || 0), 0);
-    const motm = pEntries.filter(e => e.motm).length;
+    const s = statsInPeriod.filter(x => x.playerId === p.id);
+
+    const dbWins = s.reduce((t, x) => t + (x.wins || 0), 0);
+    const dbDraws = s.reduce((t, x) => t + (x.draws || 0), 0);
+    const dbLosses = s.reduce((t, x) => t + (x.losses || 0), 0);
+    const dbMatches =
+      s.reduce((t, x) => t + (x.appearances || (x.wins + x.draws + x.losses) || 0), 0) ||
+      (dbWins + dbDraws + dbLosses);
+
+    let wins: number, draws: number, losses: number, gf: number, gc: number, cs: number, ht: number, motm: number;
+
+    if (pEntries.length > dbMatches) {
+      wins = pEntries.filter(e => e.result === 'win').length;
+      draws = pEntries.filter(e => e.result === 'draw').length;
+      losses = pEntries.filter(e => e.result === 'loss').length;
+      gf = pEntries.reduce((t, e) => t + (e.goals || 0), 0);
+      gc = pEntries.reduce((t, e) => t + (e.goalsConceded || 0), 0);
+      cs = pEntries.filter(e => e.cleanSheet).length;
+      ht = pEntries.reduce((t, e) => t + (e.hattricks || 0), 0);
+      motm = pEntries.filter(e => e.motm).length;
+    } else {
+      wins = dbWins;
+      draws = dbDraws;
+      losses = dbLosses;
+      gf = s.reduce((t, x) => t + (x.goals || 0), 0);
+      gc = s.reduce((t, x) => t + (x.goalsConceded || 0), 0);
+      cs = s.reduce((t, x) => t + (x.cleansheets || 0), 0);
+      ht = s.reduce((t, x) => t + (x.hattricks || 0), 0);
+      motm = s.reduce((t, x) => t + (x.motmCount || 0), 0);
+    }
+
     const matches = wins + draws + losses;
     const winRate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
     const points = calcPoints({

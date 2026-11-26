@@ -442,7 +442,7 @@ export const useFootballStore = create<FootballStore>()(
           supabase
             .from('match_entries')
             .select('id, playerid, matchid, goals, goalsconceded, result, hattricks, cleansheet, motm, date, time, notes, season_id, matches(date, time)')
-            .order('date', { ascending: false })
+            .order('date', { ascending: false, nullsFirst: false })
             .limit(500),
           supabase
             .from('match_entries')
@@ -596,8 +596,9 @@ export const useFootballStore = create<FootballStore>()(
         const { data, error } = await supabase
           .from('player_monthly_stats')
           .select('*')
-          .order('year', { ascending: false })
-          .order('month_index', { ascending: false })
+          .not('year', 'is', null)
+          .order('year', { ascending: false, nullsFirst: false })
+          .order('month_index', { ascending: false, nullsFirst: false })
           .limit(50000);
         if (error) {
           console.error('Error fetching player monthly stats:', error);
@@ -631,9 +632,10 @@ export const useFootballStore = create<FootballStore>()(
         const { data, error } = await supabase
           .from('player_weekly_stats')
           .select('*')
-          .order('year', { ascending: false })
-          .order('month_index', { ascending: false })
-          .order('week', { ascending: false })
+          .not('year', 'is', null)
+          .order('year', { ascending: false, nullsFirst: false })
+          .order('month_index', { ascending: false, nullsFirst: false })
+          .order('week', { ascending: false, nullsFirst: false })
           .limit(50000);
         if (error) {
           console.error('Error fetching player weekly stats:', error);
