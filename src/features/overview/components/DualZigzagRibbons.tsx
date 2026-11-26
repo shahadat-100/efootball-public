@@ -58,17 +58,20 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
       className="marquee-zigzag-stage select-none"
       aria-label="Club ticker tape"
     >
-      {/* Tape 1: Crimson Red Tape with White Border Lines (Angled -3deg, scrolls left) */}
-      <div className="marquee-zigzag-tape marquee-zigzag-tape--red py-3 sm:py-3.5 font-black uppercase text-lg sm:text-2xl md:text-3xl tracking-wider">
+      {/* Tape 1: Crimson Red Tape with White Border Lines (Angled -1.9deg, scrolls left) */}
+      <div className="marquee-zigzag-tape marquee-zigzag-tape--red py-2.5 sm:py-3.5 font-black uppercase text-lg sm:text-2xl md:text-3xl tracking-wider">
         <div className="animate-zigzag-left">
           {/* Run 1 */}
           <span className="marquee-zigzag-run">
             {tape1Items.map((item, idx) => (
               <span key={`t1-a-${idx}`} className="marquee-zigzag-item">
                 <span>{item}</span>
-                <span className="marquee-zigzag-star text-base sm:text-xl" aria-hidden="true">
-                  ⚽
-                </span>
+                <img
+                  src="/images/club-logo.jpg"
+                  alt=""
+                  aria-hidden
+                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-white/95 shadow-[0_2px_8px_rgba(0,0,0,0.5)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                />
               </span>
             ))}
           </span>
@@ -77,26 +80,32 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
             {tape1Items.map((item, idx) => (
               <span key={`t1-b-${idx}`} className="marquee-zigzag-item">
                 <span>{item}</span>
-                <span className="marquee-zigzag-star text-base sm:text-xl" aria-hidden="true">
-                  ⚽
-                </span>
+                <img
+                  src="/images/club-logo.jpg"
+                  alt=""
+                  aria-hidden
+                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-white/95 shadow-[0_2px_8px_rgba(0,0,0,0.5)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                />
               </span>
             ))}
           </span>
         </div>
       </div>
 
-      {/* Tape 2: Jet Black Tape with Crimson Red Border Lines (Angled +2.8deg, scrolls right) */}
-      <div className="marquee-zigzag-tape marquee-zigzag-tape--black py-3 sm:py-3.5 font-black uppercase text-lg sm:text-2xl md:text-3xl tracking-wider">
+      {/* Tape 2: Jet Black Tape with Crimson Red Border Lines (Angled +1.6deg, scrolls right) */}
+      <div className="marquee-zigzag-tape marquee-zigzag-tape--black py-2.5 sm:py-3.5 font-black uppercase text-lg sm:text-2xl md:text-3xl tracking-wider">
         <div className="animate-zigzag-right">
           {/* Run 1 */}
           <span className="marquee-zigzag-run">
             {tape2Items.map((item, idx) => (
               <span key={`t2-a-${idx}`} className="marquee-zigzag-item">
                 <span>{item}</span>
-                <span className="marquee-zigzag-star text-base sm:text-xl" aria-hidden="true">
-                  ⚽
-                </span>
+                <img
+                  src="/images/club-logo.jpg"
+                  alt=""
+                  aria-hidden
+                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-amber-400/90 shadow-[0_2px_12px_rgba(0,0,0,0.9)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                />
               </span>
             ))}
           </span>
@@ -105,9 +114,12 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
             {tape2Items.map((item, idx) => (
               <span key={`t2-b-${idx}`} className="marquee-zigzag-item">
                 <span>{item}</span>
-                <span className="marquee-zigzag-star text-base sm:text-xl" aria-hidden="true">
-                  ⚽
-                </span>
+                <img
+                  src="/images/club-logo.jpg"
+                  alt=""
+                  aria-hidden
+                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-amber-400/90 shadow-[0_2px_12px_rgba(0,0,0,0.9)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                />
               </span>
             ))}
           </span>
