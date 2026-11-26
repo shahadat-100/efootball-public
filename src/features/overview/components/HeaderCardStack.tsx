@@ -376,44 +376,30 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
         {cards.map((card, i) => {
           // Calculate relative position from activeIndex
           const offset = (i - activeIndex + totalCards) % totalCards;
-          if (offset > 3) return null; // Only render top 4 cards for optimal performance
+          if (offset > 1) return null; // Only render active + next card
 
           const isTop = offset === 0;
-          const isSecond = offset === 1;
-          const isThird = offset === 2;
 
-          // Book shelf pull-out & 3D stack transforms
+          // Tinder-style: only active card visible, next card hidden behind
           let transformStyle = '';
-          let zIndex = 30 - offset * 5;
+          let zIndex = 30 - offset * 10;
           let opacity = 1;
           let filter = 'none';
 
           if (isTop) {
             if (isSwiping) {
-              transformStyle = 'translateX(90px) rotate(14deg) scale(0.92) translateZ(-50px)';
+              transformStyle = 'translateX(120px) rotate(16deg) scale(0.9)';
               opacity = 0;
             } else if (isHovered) {
-              // BOOK SHELF PULL OUT: Smoothly lifts forward in 3D perspective!
-              transformStyle = 'translateZ(50px) translateY(-14px) scale(1.04) rotate(0deg)';
+              transformStyle = 'translateZ(30px) translateY(-8px) scale(1.02)';
             } else {
-              transformStyle = 'translateZ(0px) translateY(0px) scale(1) rotate(0deg)';
+              transformStyle = 'translateZ(0px) scale(1)';
             }
-          } else if (isSecond) {
-            transformStyle = isHovered
-              ? 'translateY(16px) translateX(12px) scale(0.94) rotate(-3.5deg)'
-              : 'translateY(10px) translateX(6px) scale(0.95) rotate(-3deg)';
-            opacity = 0.88;
-            filter = 'brightness(0.85)';
-          } else if (isThird) {
-            transformStyle = isHovered
-              ? 'translateY(28px) translateX(-12px) scale(0.88) rotate(3.5deg)'
-              : 'translateY(20px) translateX(-6px) scale(0.90) rotate(2.5deg)';
-            opacity = 0.65;
-            filter = 'brightness(0.7)';
           } else {
-            transformStyle = 'translateY(28px) scale(0.85) rotate(-1deg)';
-            opacity = 0.45;
-            filter = 'brightness(0.55)';
+            // Hidden behind — ready to appear when top card swipes away
+            transformStyle = 'scale(0.97)';
+            opacity = 0;
+            filter = 'brightness(0.8)';
           }
 
           const imageSrc =
@@ -518,13 +504,6 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
           />
         ))}
       </div>
-
-      {/* Mini Hint */}
-      <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest mt-2 flex items-center gap-1">
-        <span>Click card to cycle</span>
-        <span>·</span>
-        <span>Hover to pull out</span>
-      </p>
 
     </div>
   );
