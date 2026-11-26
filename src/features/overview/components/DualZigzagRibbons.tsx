@@ -59,7 +59,7 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
       aria-label="Club ticker tape"
     >
       {/* Tape 1: Crimson Red Tape with White Border Lines (Angled -1.9deg, scrolls left) */}
-      <div className="marquee-zigzag-tape marquee-zigzag-tape--red py-2.5 sm:py-3.5 font-black uppercase text-lg sm:text-2xl md:text-3xl tracking-wider">
+      <div className="marquee-zigzag-tape marquee-zigzag-tape--red py-1.5 sm:py-2.5 font-black uppercase text-sm sm:text-lg md:text-xl tracking-wider">
         <div className="animate-zigzag-left">
           {/* Run 1 */}
           <span className="marquee-zigzag-run">
@@ -70,7 +70,7 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
                   src="/images/club-logo.jpg"
                   alt=""
                   aria-hidden
-                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-white/95 shadow-[0_2px_8px_rgba(0,0,0,0.5)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full object-cover border-[1.5px] border-white/95 shadow-[0_2px_6px_rgba(0,0,0,0.5)] ml-3 sm:ml-4 inline-block shrink-0 select-none pointer-events-none"
                 />
               </span>
             ))}
@@ -84,7 +84,7 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
                   src="/images/club-logo.jpg"
                   alt=""
                   aria-hidden
-                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-white/95 shadow-[0_2px_8px_rgba(0,0,0,0.5)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full object-cover border-[1.5px] border-white/95 shadow-[0_2px_6px_rgba(0,0,0,0.5)] ml-3 sm:ml-4 inline-block shrink-0 select-none pointer-events-none"
                 />
               </span>
             ))}
@@ -93,7 +93,7 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
       </div>
 
       {/* Tape 2: Jet Black Tape with Crimson Red Border Lines (Angled +1.6deg, scrolls right) */}
-      <div className="marquee-zigzag-tape marquee-zigzag-tape--black py-2.5 sm:py-3.5 font-black uppercase text-lg sm:text-2xl md:text-3xl tracking-wider">
+      <div className="marquee-zigzag-tape marquee-zigzag-tape--black py-1.5 sm:py-2.5 font-black uppercase text-sm sm:text-lg md:text-xl tracking-wider">
         <div className="animate-zigzag-right">
           {/* Run 1 */}
           <span className="marquee-zigzag-run">
@@ -104,7 +104,7 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
                   src="/images/club-logo.jpg"
                   alt=""
                   aria-hidden
-                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-amber-400/90 shadow-[0_2px_12px_rgba(0,0,0,0.9)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full object-cover border-[1.5px] border-amber-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.9)] ml-3 sm:ml-4 inline-block shrink-0 select-none pointer-events-none"
                 />
               </span>
             ))}
@@ -118,7 +118,7 @@ export const DualZigzagRibbons: React.FC<DualZigzagRibbonsProps> = ({
                   src="/images/club-logo.jpg"
                   alt=""
                   aria-hidden
-                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-amber-400/90 shadow-[0_2px_12px_rgba(0,0,0,0.9)] ml-4 sm:ml-5 inline-block shrink-0 select-none pointer-events-none"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full object-cover border-[1.5px] border-amber-400/90 shadow-[0_2px_8px_rgba(0,0,0,0.9)] ml-3 sm:ml-4 inline-block shrink-0 select-none pointer-events-none"
                 />
               </span>
             ))}

@@ -384,62 +384,52 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
           let transformStyle = '';
           let zIndex = 0;
           let opacity = 0;
-          let filter = 'none';
 
           if (slot === 0) {
             // Center Card (Active)
             zIndex = 40;
             opacity = 1;
-            filter = 'none';
             if (isHoveredThis) {
               // Portfolio book pull-out effect: pulls up, forward and slightly scales
-              transformStyle = 'translate3d(0, -22px, 95px) rotateY(0deg) scale(1.08)';
+              transformStyle = 'translate3d(0, -22px, 95px) rotateY(0deg) scale(1.07)';
             } else {
               transformStyle = 'translate3d(0, 0, 45px) rotateY(0deg) scale(1)';
             }
           } else if (slot === 1) {
             // Right 1 (Immediate Right)
             zIndex = 30;
-            opacity = 0.95;
+            opacity = 0.96;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(85px, 16vw, 160px), -16px, 65px) rotateY(-10deg) scale(0.98)';
-              filter = 'brightness(1) contrast(1.05)';
+              transformStyle = 'translate3d(clamp(100px, 17vw, 165px), -16px, 70px) rotateY(-8deg) scale(0.98)';
             } else {
-              transformStyle = 'translate3d(clamp(75px, 14vw, 140px), 0, -25px) rotateY(-22deg) scale(0.88)';
-              filter = 'brightness(0.85) contrast(1.02)';
+              transformStyle = 'translate3d(clamp(90px, 15vw, 150px), 0, -25px) rotateY(-18deg) scale(0.9)';
             }
           } else if (slot === -1) {
             // Left 1 (Immediate Left)
             zIndex = 30;
-            opacity = 0.95;
+            opacity = 0.96;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(-160px, -16vw, -85px), -16px, 65px) rotateY(10deg) scale(0.98)';
-              filter = 'brightness(1) contrast(1.05)';
+              transformStyle = 'translate3d(clamp(-165px, -17vw, -100px), -16px, 70px) rotateY(8deg) scale(0.98)';
             } else {
-              transformStyle = 'translate3d(clamp(-140px, -14vw, -75px), 0, -25px) rotateY(22deg) scale(0.88)';
-              filter = 'brightness(0.85) contrast(1.02)';
+              transformStyle = 'translate3d(clamp(-150px, -15vw, -90px), 0, -25px) rotateY(18deg) scale(0.9)';
             }
           } else if (slot === 2) {
             // Right 2 (Far Right — visible on sm+ screens)
             zIndex = 20;
             opacity = 0.65;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(150px, 26vw, 265px), -12px, 30px) rotateY(-16deg) scale(0.86)';
-              filter = 'brightness(0.85)';
+              transformStyle = 'translate3d(clamp(180px, 29vw, 290px), -12px, 35px) rotateY(-14deg) scale(0.86)';
             } else {
-              transformStyle = 'translate3d(clamp(135px, 23vw, 235px), 0, -75px) rotateY(-34deg) scale(0.76)';
-              filter = 'brightness(0.6)';
+              transformStyle = 'translate3d(clamp(165px, 27vw, 270px), 0, -75px) rotateY(-28deg) scale(0.78)';
             }
           } else if (slot === -2) {
             // Left 2 (Far Left — visible on sm+ screens)
             zIndex = 20;
             opacity = 0.65;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(-265px, -26vw, -150px), -12px, 30px) rotateY(16deg) scale(0.86)';
-              filter = 'brightness(0.8)';
+              transformStyle = 'translate3d(clamp(-290px, -29vw, -180px), -12px, 35px) rotateY(14deg) scale(0.86)';
             } else {
-              transformStyle = 'translate3d(clamp(-235px, -23vw, -135px), 0, -75px) rotateY(34deg) scale(0.76)';
-              filter = 'brightness(0.6)';
+              transformStyle = 'translate3d(clamp(-270px, -27vw, -165px), 0, -75px) rotateY(28deg) scale(0.78)';
             }
           } else {
             // Deep in back stack (hidden)
@@ -451,6 +441,13 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
           const imageSrc =
             card.player.coverImageUrl || card.player.profileImageUrl || FALLBACK_PLAYER_IMAGE;
 
+          // Pure GPU overlay opacity for side cards (replaces laggy CSS filters)
+          const dimOpacity = isCenter
+            ? 0
+            : slot === 1 || slot === -1
+            ? (isHoveredThis ? 0.05 : 0.2)
+            : 0.45;
+
           return (
             <div
               key={card.id}
@@ -459,10 +456,10 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
               onClick={(e) => {
                 e.stopPropagation();
                 if (isCenter) {
-                  // Center card clicked -> cycle to next card
+                  // Center card clicked -> cycle to next card smoothly
                   setActiveIndex((prev) => (prev + 1) % totalCards);
                 } else {
-                  // Any side card clicked -> bring that card directly to front
+                  // Any side card clicked -> bring that card directly to front smoothly
                   setActiveIndex(i);
                 }
               }}
@@ -470,12 +467,14 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 transform: transformStyle,
                 zIndex,
                 opacity,
-                filter,
-                transition: 'transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease',
+                transition: 'transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s ease, box-shadow 0.38s ease',
                 transformStyle: 'preserve-3d',
+                willChange: 'transform, opacity',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
                 pointerEvents: isVisible ? 'auto' : 'none',
               }}
-              className={`absolute inset-0 cursor-pointer rounded-none overflow-hidden bg-[#0d0e14] group select-none transition-all duration-300 ${
+              className={`absolute inset-0 cursor-pointer rounded-none overflow-hidden bg-[#0d0e14] group select-none ${
                 isCenter
                   ? 'border-[1.5px] border-white/60 shadow-[0_25px_60px_rgba(0,0,0,0.98),0_0_35px_rgba(188,1,0,0.4),0_0_15px_rgba(255,255,255,0.15)] ring-1 ring-white/20'
                   : 'border border-white/30 shadow-[-8px_16px_35px_rgba(0,0,0,0.92),8px_16px_35px_rgba(0,0,0,0.92)] hover:border-white/50'
@@ -493,6 +492,12 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
 
               {/* Dark Vignette Overlay for Crisp Readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/30 pointer-events-none" />
+
+              {/* GPU-Accelerated Dynamic Depth Tint (replaces laggy filter:brightness) */}
+              <div
+                className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300 z-[12]"
+                style={{ opacity: dimOpacity }}
+              />
 
               {/* Player Photo Cutout in Center */}
               <div className="absolute inset-x-0 bottom-10 h-[78%] z-10 pointer-events-none flex items-end justify-center overflow-hidden">

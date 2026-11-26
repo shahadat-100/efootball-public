@@ -91,8 +91,8 @@ export const OverviewHeroHeader: React.FC<OverviewHeroHeaderProps> = ({
             </div>
           </div>
 
-          {/* ══ Right 5/12: 3D Interactive Card Stack (Tinder Style / Pull-Out Deck) ══ */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+          {/* ══ Right 5/12: 3D Interactive Card Stack (Brought inward with breathing room) ══ */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-center lg:pr-4 xl:pr-8">
             <HeaderCardStack
               players={players}
               playerSeasonStats={playerSeasonStats}

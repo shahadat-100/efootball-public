@@ -585,9 +585,9 @@
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
-  height: clamp(115px, 13vw, 150px);
-  margin-top: clamp(-55px, -6.5vw, -72px);
-  margin-bottom: clamp(-55px, -6.5vw, -72px);
+  height: clamp(80px, 9vw, 110px);
+  margin-top: clamp(-40px, -4.5vw, -55px);
+  margin-bottom: clamp(-40px, -4.5vw, -55px);
   z-index: 30;
   pointer-events: none;
   overflow: visible;
