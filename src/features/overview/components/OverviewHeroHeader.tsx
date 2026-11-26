@@ -63,7 +63,7 @@ export const OverviewHeroHeader: React.FC<OverviewHeroHeaderProps> = ({
               className="football-stadium-title text-5xl sm:text-7xl md:text-8xl xl:text-[8.5rem] tracking-wide mb-2 cursor-pointer select-none transition-transform active:scale-[0.99] max-w-full break-normal"
               title="Click or hover to trigger kickoff surge"
             >
-              <span className="block stadium-floodlight-text kickoff-strike-1 drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] truncate max-w-full">
+              <span className="block stadium-floodlight-text kickoff-strike-1">
                 THE ENIGMATIC
               </span>
               <span className="block stadium-accent-text kickoff-strike-2 -mt-2 sm:-mt-4 lg:-mt-5">
