@@ -352,11 +352,6 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
 
   const totalCards = cards.length;
 
-  const nextCard = () => {
-    if (totalCards <= 1) return;
-    setActiveIndex((prev) => (prev + 1) % totalCards);
-  };
-
   if (totalCards === 0) return null;
 
   return (
@@ -364,82 +359,93 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
       
       {/* ═══ 3D CoverFlow / Card Stack Container ═══ */}
       <div
-        className="relative w-[240px] sm:w-[270px] md:w-[290px] h-[350px] sm:h-[390px] md:h-[420px]"
+        className="relative w-[210px] sm:w-[245px] md:w-[270px] h-[330px] sm:h-[375px] md:h-[410px]"
         style={{ transformStyle: 'preserve-3d' }}
       >
         {cards.map((card, i) => {
-          // Calculate relative position from activeIndex in range [-half, +half]
-          let diff = i - activeIndex;
-          if (diff > totalCards / 2) diff -= totalCards;
-          if (diff < -totalCards / 2) diff += totalCards;
+          // Precise slot assignment relative to activeIndex
+          let slot: number | null = null;
+          if (i === activeIndex) {
+            slot = 0;
+          } else if (i === (activeIndex + 1) % totalCards) {
+            slot = 1;
+          } else if (i === (activeIndex - 1 + totalCards) % totalCards) {
+            slot = -1;
+          } else if (totalCards >= 4 && i === (activeIndex + 2) % totalCards) {
+            slot = 2;
+          } else if (totalCards >= 5 && i === (activeIndex - 2 + totalCards) % totalCards) {
+            slot = -2;
+          }
 
-          const isCenter = diff === 0;
+          const isCenter = slot === 0;
           const isHoveredThis = hoveredIndex === i;
-          const isVisible = Math.abs(diff) <= 2;
+          const isVisible = slot !== null;
 
           let transformStyle = '';
-          let zIndex = 30 - Math.abs(diff) * 10;
-          let opacity = 1;
+          let zIndex = 0;
+          let opacity = 0;
           let filter = 'none';
 
-          if (!isVisible) {
-            transformStyle = 'translate3d(0, 0, -120px) scale(0.6)';
-            opacity = 0;
-            zIndex = 0;
-          } else if (isCenter) {
-            zIndex = 35;
-            if (isHoveredThis) {
-              // Portfolio book pull-out effect: moves forward and up, scales up
-              transformStyle = 'translate3d(0, -18px, 90px) rotateY(0deg) scale(1.08)';
-            } else {
-              transformStyle = 'translate3d(0, 0, 30px) rotateY(0deg) scale(1.02)';
-            }
+          if (slot === 0) {
+            // Center Card (Active)
+            zIndex = 40;
             opacity = 1;
             filter = 'none';
-          } else if (diff === 1) {
-            // Right 1 (immediately behind center to the right)
-            zIndex = 25;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(65px, 9vw, 105px), -12px, 60px) rotateY(-12deg) scale(0.96)';
-              filter = 'brightness(0.9)';
+              // Portfolio book pull-out effect: pulls up, forward and slightly scales
+              transformStyle = 'translate3d(0, -22px, 95px) rotateY(0deg) scale(1.08)';
             } else {
-              transformStyle = 'translate3d(clamp(50px, 7.5vw, 85px), 0, -25px) rotateY(-24deg) scale(0.88)';
-              filter = 'brightness(0.7)';
+              transformStyle = 'translate3d(0, 0, 45px) rotateY(0deg) scale(1)';
             }
-            opacity = 0.88;
-          } else if (diff === -1) {
-            // Left 1 (immediately behind center to the left)
-            zIndex = 25;
+          } else if (slot === 1) {
+            // Right 1 (Immediate Right)
+            zIndex = 30;
+            opacity = 0.92;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(-105px, -9vw, -65px), -12px, 60px) rotateY(12deg) scale(0.96)';
-              filter = 'brightness(0.9)';
+              transformStyle = 'translate3d(clamp(85px, 16vw, 160px), -16px, 65px) rotateY(-10deg) scale(0.98)';
+              filter = 'brightness(0.95)';
             } else {
-              transformStyle = 'translate3d(clamp(-85px, -7.5vw, -50px), 0, -25px) rotateY(24deg) scale(0.88)';
-              filter = 'brightness(0.7)';
-            }
-            opacity = 0.88;
-          } else if (diff === 2) {
-            // Right 2 (further behind)
-            zIndex = 15;
-            if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(115px, 15vw, 160px), -8px, 20px) rotateY(-20deg) scale(0.84)';
+              transformStyle = 'translate3d(clamp(75px, 14vw, 140px), 0, -25px) rotateY(-22deg) scale(0.88)';
               filter = 'brightness(0.75)';
-            } else {
-              transformStyle = 'translate3d(clamp(95px, 13vw, 140px), 0, -70px) rotateY(-36deg) scale(0.76)';
-              filter = 'brightness(0.45)';
             }
-            opacity = 0.55;
-          } else if (diff === -2) {
-            // Left 2 (further behind)
-            zIndex = 15;
+          } else if (slot === -1) {
+            // Left 1 (Immediate Left)
+            zIndex = 30;
+            opacity = 0.92;
             if (isHoveredThis) {
-              transformStyle = 'translate3d(clamp(-160px, -15vw, -115px), -8px, 20px) rotateY(20deg) scale(0.84)';
-              filter = 'brightness(0.75)';
+              transformStyle = 'translate3d(clamp(-160px, -16vw, -85px), -16px, 65px) rotateY(10deg) scale(0.98)';
+              filter = 'brightness(0.95)';
             } else {
-              transformStyle = 'translate3d(clamp(-140px, -13vw, -95px), 0, -70px) rotateY(36deg) scale(0.76)';
-              filter = 'brightness(0.45)';
+              transformStyle = 'translate3d(clamp(-140px, -14vw, -75px), 0, -25px) rotateY(22deg) scale(0.88)';
+              filter = 'brightness(0.75)';
             }
-            opacity = 0.55;
+          } else if (slot === 2) {
+            // Right 2 (Far Right — visible on sm+ screens)
+            zIndex = 20;
+            opacity = 0.6;
+            if (isHoveredThis) {
+              transformStyle = 'translate3d(clamp(150px, 26vw, 265px), -12px, 30px) rotateY(-16deg) scale(0.86)';
+              filter = 'brightness(0.8)';
+            } else {
+              transformStyle = 'translate3d(clamp(135px, 23vw, 235px), 0, -75px) rotateY(-34deg) scale(0.76)';
+              filter = 'brightness(0.5)';
+            }
+          } else if (slot === -2) {
+            // Left 2 (Far Left — visible on sm+ screens)
+            zIndex = 20;
+            opacity = 0.6;
+            if (isHoveredThis) {
+              transformStyle = 'translate3d(clamp(-265px, -26vw, -150px), -12px, 30px) rotateY(16deg) scale(0.86)';
+              filter = 'brightness(0.8)';
+            } else {
+              transformStyle = 'translate3d(clamp(-235px, -23vw, -135px), 0, -75px) rotateY(34deg) scale(0.76)';
+              filter = 'brightness(0.5)';
+            }
+          } else {
+            // Deep in back stack (hidden)
+            zIndex = 0;
+            opacity = 0;
+            transformStyle = 'translate3d(0, 0, -140px) scale(0.5)';
           }
 
           const imageSrc =
@@ -450,10 +456,13 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
               key={card.id}
               onMouseEnter={() => setHoveredIndex(i)}
               onMouseLeave={() => setHoveredIndex(null)}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (isCenter) {
-                  nextCard();
+                  // Center card clicked -> cycle to next card
+                  setActiveIndex((prev) => (prev + 1) % totalCards);
                 } else {
+                  // Any side card clicked -> bring that card directly to front
                   setActiveIndex(i);
                 }
               }}
@@ -462,11 +471,15 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 zIndex,
                 opacity,
                 filter,
-                transition: 'transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, filter 0.35s ease',
+                transition: 'transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease',
                 transformStyle: 'preserve-3d',
                 pointerEvents: isVisible ? 'auto' : 'none',
               }}
-              className="absolute inset-0 cursor-pointer rounded-none overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85)] bg-[#0d0e14] group"
+              className={`absolute inset-0 cursor-pointer rounded-none overflow-hidden border bg-[#0d0e14] group select-none transition-shadow ${
+                isCenter
+                  ? 'border-white/35 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_25px_rgba(188,1,0,0.3)]'
+                  : 'border-white/15 shadow-[0_15px_35px_rgba(0,0,0,0.85)]'
+              }`}
             >
               {/* Card Template Background Image */}
               <img
@@ -494,7 +507,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
               </div>
 
               {/* Bottom: Player Name & Stat Value */}
-              <div className="absolute bottom-0 inset-x-0 p-3.5 z-20 bg-gradient-to-t from-black via-black/90 to-transparent pt-5 flex items-baseline justify-between">
+              <div className="absolute bottom-0 inset-x-0 p-3.5 z-20 bg-gradient-to-t from-black via-black/90 to-transparent pt-5 flex items-baseline justify-between pointer-events-none">
                 <h4 className="font-heading text-lg sm:text-xl font-black text-white uppercase tracking-tight truncate max-w-[70%]">
                   {card.player.name}
                 </h4>
