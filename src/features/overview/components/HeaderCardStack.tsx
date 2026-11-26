@@ -40,8 +40,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
   onPlayerClick: _onPlayerClick,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // ── 1. Calculate All Card Stack Items ──
   const cards = useMemo<CardStackItem[]>(() => {
@@ -354,52 +353,93 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
   const totalCards = cards.length;
 
   const nextCard = () => {
-    if (totalCards <= 1 || isSwiping) return;
-    setIsSwiping(true);
-    setTimeout(() => {
-      setActiveIndex((prev) => (prev + 1) % totalCards);
-      setIsSwiping(false);
-    }, 250);
+    if (totalCards <= 1) return;
+    setActiveIndex((prev) => (prev + 1) % totalCards);
   };
 
   if (totalCards === 0) return null;
 
   return (
-    <div className="relative flex flex-col items-center select-none" style={{ perspective: '1200px' }}>
+    <div className="relative flex flex-col items-center select-none" style={{ perspective: '1400px' }}>
       
-      {/* ═══ 3D Card Stack Container ═══ */}
+      {/* ═══ 3D CoverFlow / Card Stack Container ═══ */}
       <div
-        className="relative w-[270px] sm:w-[300px] h-[380px] sm:h-[420px]"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        className="relative w-[240px] sm:w-[270px] md:w-[290px] h-[350px] sm:h-[390px] md:h-[420px]"
+        style={{ transformStyle: 'preserve-3d' }}
       >
         {cards.map((card, i) => {
-          // Calculate relative position from activeIndex
-          const offset = (i - activeIndex + totalCards) % totalCards;
-          if (offset > 1) return null; // Only render active + next card
+          // Calculate relative position from activeIndex in range [-half, +half]
+          let diff = i - activeIndex;
+          if (diff > totalCards / 2) diff -= totalCards;
+          if (diff < -totalCards / 2) diff += totalCards;
 
-          const isTop = offset === 0;
+          const isCenter = diff === 0;
+          const isHoveredThis = hoveredIndex === i;
+          const isVisible = Math.abs(diff) <= 2;
 
-          // Tinder-style: only active card visible, next card hidden behind
           let transformStyle = '';
-          let zIndex = 30 - offset * 10;
+          let zIndex = 30 - Math.abs(diff) * 10;
           let opacity = 1;
           let filter = 'none';
 
-          if (isTop) {
-            if (isSwiping) {
-              transformStyle = 'translateX(120px) rotate(16deg) scale(0.9)';
-              opacity = 0;
-            } else if (isHovered) {
-              transformStyle = 'translateZ(30px) translateY(-8px) scale(1.02)';
-            } else {
-              transformStyle = 'translateZ(0px) scale(1)';
-            }
-          } else {
-            // Hidden behind — ready to appear when top card swipes away
-            transformStyle = 'scale(0.97)';
+          if (!isVisible) {
+            transformStyle = 'translate3d(0, 0, -120px) scale(0.6)';
             opacity = 0;
-            filter = 'brightness(0.8)';
+            zIndex = 0;
+          } else if (isCenter) {
+            zIndex = 35;
+            if (isHoveredThis) {
+              // Portfolio book pull-out effect: moves forward and up, scales up
+              transformStyle = 'translate3d(0, -18px, 90px) rotateY(0deg) scale(1.08)';
+            } else {
+              transformStyle = 'translate3d(0, 0, 30px) rotateY(0deg) scale(1.02)';
+            }
+            opacity = 1;
+            filter = 'none';
+          } else if (diff === 1) {
+            // Right 1 (immediately behind center to the right)
+            zIndex = 25;
+            if (isHoveredThis) {
+              transformStyle = 'translate3d(clamp(65px, 9vw, 105px), -12px, 60px) rotateY(-12deg) scale(0.96)';
+              filter = 'brightness(0.9)';
+            } else {
+              transformStyle = 'translate3d(clamp(50px, 7.5vw, 85px), 0, -25px) rotateY(-24deg) scale(0.88)';
+              filter = 'brightness(0.7)';
+            }
+            opacity = 0.88;
+          } else if (diff === -1) {
+            // Left 1 (immediately behind center to the left)
+            zIndex = 25;
+            if (isHoveredThis) {
+              transformStyle = 'translate3d(clamp(-105px, -9vw, -65px), -12px, 60px) rotateY(12deg) scale(0.96)';
+              filter = 'brightness(0.9)';
+            } else {
+              transformStyle = 'translate3d(clamp(-85px, -7.5vw, -50px), 0, -25px) rotateY(24deg) scale(0.88)';
+              filter = 'brightness(0.7)';
+            }
+            opacity = 0.88;
+          } else if (diff === 2) {
+            // Right 2 (further behind)
+            zIndex = 15;
+            if (isHoveredThis) {
+              transformStyle = 'translate3d(clamp(115px, 15vw, 160px), -8px, 20px) rotateY(-20deg) scale(0.84)';
+              filter = 'brightness(0.75)';
+            } else {
+              transformStyle = 'translate3d(clamp(95px, 13vw, 140px), 0, -70px) rotateY(-36deg) scale(0.76)';
+              filter = 'brightness(0.45)';
+            }
+            opacity = 0.55;
+          } else if (diff === -2) {
+            // Left 2 (further behind)
+            zIndex = 15;
+            if (isHoveredThis) {
+              transformStyle = 'translate3d(clamp(-160px, -15vw, -115px), -8px, 20px) rotateY(20deg) scale(0.84)';
+              filter = 'brightness(0.75)';
+            } else {
+              transformStyle = 'translate3d(clamp(-140px, -13vw, -95px), 0, -70px) rotateY(36deg) scale(0.76)';
+              filter = 'brightness(0.45)';
+            }
+            opacity = 0.55;
           }
 
           const imageSrc =
@@ -408,8 +448,10 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
           return (
             <div
               key={card.id}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => {
-                if (isTop) {
+                if (isCenter) {
                   nextCard();
                 } else {
                   setActiveIndex(i);
@@ -420,8 +462,9 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 zIndex,
                 opacity,
                 filter,
-                transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease, filter 0.35s ease',
+                transition: 'transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, filter 0.35s ease',
                 transformStyle: 'preserve-3d',
+                pointerEvents: isVisible ? 'auto' : 'none',
               }}
               className="absolute inset-0 cursor-pointer rounded-none overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85)] bg-[#0d0e14] group"
             >
@@ -450,13 +493,13 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
                 />
               </div>
 
-              {/* Bottom: Player Name Only */}
+              {/* Bottom: Player Name & Stat Value */}
               <div className="absolute bottom-0 inset-x-0 p-3.5 z-20 bg-gradient-to-t from-black via-black/90 to-transparent pt-5 flex items-baseline justify-between">
                 <h4 className="font-heading text-lg sm:text-xl font-black text-white uppercase tracking-tight truncate max-w-[70%]">
                   {card.player.name}
                 </h4>
                 <div
-                  className="font-mono text-xs sm:text-sm font-black px-2 py-0.5 rounded-lg border backdrop-blur-sm"
+                  className="font-mono text-xs sm:text-sm font-black px-2 py-0.5 rounded-none border backdrop-blur-sm"
                   style={{
                     color: card.accentColor,
                     borderColor: `${card.accentColor}60`,
@@ -478,7 +521,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
             key={idx}
             onClick={() => setActiveIndex(idx)}
             aria-label={`Go to card ${idx + 1}`}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
+            className={`h-1.5 transition-all duration-300 rounded-none ${
               idx === activeIndex
                 ? 'w-6 bg-[#bc0100] shadow-[0_0_8px_rgba(188,1,0,0.8)]'
                 : 'w-1.5 bg-white/30 hover:bg-white/60'
