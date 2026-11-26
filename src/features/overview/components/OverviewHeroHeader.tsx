@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
@@ -10,8 +10,6 @@ interface OverviewHeroHeaderProps {
   playerSeasonStats?: PlayerSeasonStat[];
   playerWeeklyStats?: PlayerWeeklyStat[];
   playerMonthlyStats?: PlayerMonthlyStat[];
-  overallTop10?: { player: Player; points: number; rank: number }[];
-  monthlyTop10?: { player: Player; points: number; rank: number }[];
 }
 
 export const OverviewHeroHeader: React.FC<OverviewHeroHeaderProps> = ({
@@ -20,8 +18,6 @@ export const OverviewHeroHeader: React.FC<OverviewHeroHeaderProps> = ({
   playerSeasonStats = [],
   playerWeeklyStats = [],
   playerMonthlyStats = [],
-  overallTop10 = [],
-  monthlyTop10 = [],
 }) => {
   const [animKey, setAnimKey] = useState(0);
 

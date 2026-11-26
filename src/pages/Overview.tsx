@@ -281,8 +281,6 @@ export function Overview({ setTab }: OverviewProps) {
         playerSeasonStats={playerSeasonStats}
         playerWeeklyStats={playerWeeklyStats}
         playerMonthlyStats={playerMonthlyStats}
-        overallTop10={overallTop10}
-        monthlyTop10={monthlyTop10}
       />
 
       {/* ═══ DUAL ZIGZAG RIBBONS: STRADDLED DIRECTLY ON THE BORDER BETWEEN HEADER & CAROUSEL (SAME AS TAPE!) ═══ */}

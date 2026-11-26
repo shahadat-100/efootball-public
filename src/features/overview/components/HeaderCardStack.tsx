@@ -3,8 +3,6 @@ import { Player, PlayerSeasonStat } from '@/features/players/types';
 import { PlayerMonthlyStat, PlayerWeeklyStat } from '@/store/footballStore';
 import {
   findLatestWeeklyPeriod,
-  findLatestMonthlyPeriod,
-  calcPoints,
   MONTHS_SHORT,
 } from '@/features/overview/utils/leaderboardUtils';
 import { Cake, Crown, Zap, Flame, Trophy, Sparkles } from 'lucide-react';
@@ -39,7 +37,7 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
   playerSeasonStats,
   playerWeeklyStats = [],
   playerMonthlyStats = [],
-  onPlayerClick,
+  onPlayerClick: _onPlayerClick,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -294,11 +292,12 @@ export const HeaderCardStack: React.FC<HeaderCardStackProps> = ({
           id: 'elite-default-star',
           name: 'THE ENIGMATIC ELITE',
           jerseyNumber: 10,
-          position: 'FWD',
-          status: 'active',
-          matchesPlayed: 0,
-          goals: 0,
-          assists: 0,
+          playerRoles: ['Forward'],
+          customTags: [],
+          customStringTags: [],
+          createdAt: new Date().toISOString(),
+          seasons: [],
+          email: 'elite@club.com',
           profileImageUrl: FALLBACK_PLAYER_IMAGE,
         };
 
